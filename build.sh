@@ -7,7 +7,7 @@
 set -x
 
 timestamp=$(date +%Y%m%d%H%M%S)
-cd sectionsUtilityTool
+#cd sectionsUtilityTool
 cd target
 warFilename=$(ls *.war | head -1)
 targetFilename=$(basename ${warFilename} .war)
