@@ -338,21 +338,28 @@ $(document).on('click', '#uniqnameOtherTrigger', function (e) {
         var termIdInt = parseInt(termId);
         var filteredData = _.where(data, {enrollment_term_id:termIdInt});
         var render = '<div class="coursePanelOther well"><ul class="container-fluid courseList">';
-        $.each(filteredData, function() {
-          var course_code = this.course_code;
-          render = render + '<li class="course"><p><strong>' + this.course_code + '</strong></p><ul class="sectionList">';
-          $.each(this.sections, function() {
-              render = render + '<li class="section row otherSection" data-sectionid="' + this.id + '">' +
-                '<div class="col-md-5 sectionName"><input type="checkbox" class="otherSectionSelection courseOtherPanelChild" id="otherSectionSelection' + course_code + this.id + '">' +
-                ' <label for="otherSectionSelection' +  course_code + this.id + '" class="courseOtherPanelChild">' + this.name + '</label>' + 
-                '<span class="coursePanelChild">' + this.name +'</span></div><div class="col-md-7">'+ 
-                '<span class="coursePanelChild"> Originally from ' + course_code + ' (' + uniqnameOther +')</span>' + 
-                ' <a href="" class="coursePanelChild removeSection">Remove?</a></div></li>';
+        if (filteredData.length) {
+          $.each(filteredData, function() {
+            var course_code = this.course_code;
+            render = render + '<li class="course"><p><strong>' + this.course_code + '</strong></p><ul class="sectionList">';
+            $.each(this.sections, function() {
+                render = render + '<li class="section row otherSection" data-sectionid="' + this.id + '">' +
+                  '<div class="col-md-5 sectionName"><input type="checkbox" class="otherSectionSelection courseOtherPanelChild" id="otherSectionSelection' + course_code + this.id + '">' +
+                  ' <label for="otherSectionSelection' +  course_code + this.id + '" class="courseOtherPanelChild">' + this.name + '</label>' + 
+                  '<span class="coursePanelChild">' + this.name +'</span></div><div class="col-md-7">'+ 
+                  '<span class="coursePanelChild"> Originally from ' + course_code + ' (' + uniqnameOther +')</span>' + 
+                  ' <a href="" class="coursePanelChild removeSection">Remove?</a></div></li>';
+            });
+            render = render + '</ul></li>';
           });
-          render = render + '</ul></li>';
-        });
-        render = render + '</ul></div>';
-        $('#otherInstructorInnerPayload').append(render);
+          render = render + '</ul></div>';
+          $('#otherInstructorInnerPayload').html(render);
+          $('#useOtherSections').show();
+        } else {
+          $('#otherInstructorInnerPayload').html('<br><div class="alert alert-warning">No courses for this instructor in this term</div>');
+          $('#useOtherSections').hide();
+
+        }
       }
     }).fail(function() {
       alert('Could not get courses for ' + uniqnameOther);
