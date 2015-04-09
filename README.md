@@ -20,13 +20,6 @@ then in JAVA_OPTS add the
   1. testUser parameter is not allowed in Prod and this is controlled by above property with value called <code>use.test.url=false</code>
   2. We will enable the cosign for authentication the user so we will get remote user info through that.
 
-## Notes
-
-If <code>use.test.url</code> is true, users will be able to execute the tool as if authenticated as the user specified in the URL parameter <code>?testUser=uniqname</code>. In Production this variable is  false. Based on this property property testUser is not allowed in Production.
-
-ldap is used for authorizing the user and he needs to be part of particular Mcommunity group to be authorized to use the tool.
-
-
 6.Enable application level logging using the log4j.properties files. Put this file in tomcat/lib directory and add the content between the 
  
 ```
@@ -39,6 +32,15 @@ log4j.appender.A1.layout.ConversionPattern=%d [%t] %-5p %c - %m%n
 #log4j.logger.edu.umich=INFO
 log4j.logger.edu.umich=DEBUG 
 ```
+
+## Notes
+
+If <code>use.test.url</code> is true, users will be able to execute the tool as if authenticated as the user specified in the URL parameter <code>?testUser=uniqname</code>. In Production this variable is  false. Based on this property property testUser is not allowed in Production.
+
+ldap is used for authorizing the user and he needs to be part of particular Mcommunity group to be authorized to use the tool.
+
+
+
 
 
  
