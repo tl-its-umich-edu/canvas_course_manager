@@ -237,14 +237,6 @@ $(document).on('click', '#unCrossList', function (e) {
 });  
   
 
-
-$('body').on('keydown','#uniqname', function(event) {
-  if (event.keyCode == 13) {
-    $('#uniqnameTrigger').click();
-  }
-});
-
-
 // see what the enrollements are in a course (used to prevent orphaning a course that is active)  
 $(document).on('click', '.getEnrollements', function (e) {
   //var uniqname = $.trim($('#uniqname').val());
@@ -313,8 +305,19 @@ $(document).on('click', '.cancelCourseNameChange', function (e) {
 
 // if user hits enter while uniqname field has focus, send a click trigger to the button
 $('body').off('keydown').on('keydown','#uniqname', function(event) {
+  var letterOnly = /^[a-zA-Z]+$/;  
   if (event.keyCode == 13) {
     $('#uniqnameTrigger').click();
+  }
+  else {
+    if(event.key.match(letterOnly)) {  
+      $('#uniqname').closest('div').removeClass('has-error');
+      $('#uniqnameValidMessage').fadeOut('fast');
+    }
+    else {
+     $('#uniqname').closest('div').addClass('has-error');
+     $('#uniqnameValidMessage').fadeIn('fast');
+    }
   }
 });
 

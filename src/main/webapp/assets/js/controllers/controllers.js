@@ -4,7 +4,7 @@
 var sectionsApp = angular.module('sectionsApp', ['sectionsFilters','ui.sortable']);
 
 sectionsApp.run(function ($rootScope) {
-  $rootScope.user = $.trim($('#uniqname').val());
+  $rootScope.user = $.trim($('#uniqname').val().toLowerCase());
 });
 
 
@@ -42,7 +42,7 @@ sectionsApp.controller('termsController', ['Courses', '$rootScope', '$scope', '$
 sectionsApp.controller('coursesController', ['Courses', 'Sections', '$rootScope', '$scope', function (Courses, Sections, $rootScope, $scope) {
 
  $scope.getCoursesForUniqname = function () {
-    var uniqname = $.trim($('#uniqname').val());
+    var uniqname = $.trim($('#uniqname').val().toLowerCase());
     $scope.uniqname = uniqname;
     var mini='/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher&_='+ generateCurrentTimestamp();
     var url = '/sectionsUtilityTool'+mini;
