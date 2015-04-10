@@ -162,6 +162,7 @@ $(document).on('click', '.setSections', function (e) {
     $('#listOfSectionsToCrossList').append( '<li id=\"xListSection' + $(this).attr('data-sectionid') + '\">' + $(this).find('div.sectionName span').text() + '</li>');
   });
   $('#postXList').click(function(){
+    $('#postXList, #postXListCancel').hide();
     var xListPosts = doXListPosts(posts);
     $.when.apply($, xListPosts).done(function() {
       if(xListPostStatus.successes.length === posts.length ){
@@ -170,9 +171,7 @@ $(document).on('click', '.setSections', function (e) {
       else {
         $('#xListConfirmMessage').text(xListPostStatus.failures.length + ' error(s). ');
       }
-      $('#postXListDone').show();
-      $('#postXList').hide();
-      $('#xListConfirm').show();
+      $('#postXListDone, #xListConfirm').show();
       $('.activeCourse').removeClass('activeCourse');
       $(thisCourseContainer).find('.setSections').fadeOut().delay(5000).hide();
     });
