@@ -101,7 +101,7 @@ var utilPopWindow = function(url, name){
 /*used by modal (other instructor field) */
 var validateUniqname = function (value) {
   var value = $.trim(value)
-  var letterOnly = /^[a-zA-Z]+$/;  
+  var letterOnly = /^[a-z]+$/i;  
   if(value.match(letterOnly) && value !=='') {  
     return true;
   } else {
@@ -316,7 +316,7 @@ $(document).on('click', '.cancelCourseNameChange', function (e) {
 
 // if user hits enter while uniqname field has focus, send a click trigger to the button
 $('body').off('keydown').on('keydown','#uniqname', function(event) {
-  var letterOnly = /^[a-zA-Z]+$/;  
+  var letterOnly = /^[a-z]+$/i;  
   if (event.keyCode == 13) {
     $('#uniqnameTrigger').click();
   }
@@ -373,7 +373,7 @@ $(document).on('click', '#uniqnameOtherTrigger', function (e) {
         alert('Could not get courses for ' + uniqnameOther);
     });
   } else {
-        alert('uniqnames need to be alpha characters only');
+        alert('Uniqnames need to be alphabetic characters only.');
   }
 });
 
