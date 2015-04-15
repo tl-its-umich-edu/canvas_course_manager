@@ -6,6 +6,15 @@
     <link rel="stylesheet" href="assets/css/custom_style.css">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Help for Sections Manager</title>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js">
+     <script>
+            $(document).ready(function(){
+                var url = document.URL;
+                var ts = new Date().toLocaleString();
+                $("#includedContent").load("build.txt");
+                $("#url").append(url);
+            });
+        </script>
   </head>
   <body class="container-fluid" style="padding-top:20px;">
   	<h1>Help for Sections Utility</h1>
@@ -18,5 +27,16 @@
 	  <p>
 	      <strong>Available test users for xlisting:</strong> instx, instz (has courses in default term)
 	  </p>
+	  
+	  <div id="buildContainer" class="alert alert-info">
+            <div id="buildPretext">
+                Build: 
+            </div>
+            <div id="includedContent">
+            </div>
+        </div>
+        <div>
+            <span class="muted">Current url: </span> <code id="url"></code>
+        </div>
   </body>
 </html>
