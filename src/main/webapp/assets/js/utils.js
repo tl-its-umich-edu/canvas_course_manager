@@ -385,7 +385,11 @@ $(document).on('click', '.openOtherInstructorModal', function (e) {
 $(document).on('click', '.removeSection', function (e) {
   e.preventDefault();
   $(this).closest('li').fadeOut( 'slow', function() {
+    var sectionsLeft = $(this).closest('ul').find('li').length - 1;
+    var origsections = parseInt($(this).closest('ul').attr('data-orig-sect-number'));
+    if(sectionsLeft === origsections) {
+      $(this).closest('.course').find('.setSections').fadeOut();
+    }
     $(this).remove();
   });
-
 });
