@@ -10,39 +10,23 @@
     <script type="text/javascript">
 	$('document').ready(
 			function() {
-				$appInfo = $('#appInfo');
-
+				$buildInfo = $('#buildInfo');
 				displayContentOrError = function(response, status, xhr) {
 					if (status == 'error') {
 						var errorMessage = 'Unable to display due to error. ('
 								+ xhr.status + ' ' + xhr.statusText + ')';
-						$appInfo.html(errorMessage);
+						$buildInfo.html(errorMessage);
 					}
-
-					$appInfo.show();
+					$buildInfo.show();
 				}
-
-				$appInfo.load('build.txt', displayContentOrError);
+				$buildInfo.load('build.txt', displayContentOrError);
 			});
 </script>
   </head>
   <body class="container-fluid" style="padding-top:20px;">
   	<h1>Help for Sections Utility</h1>
-	  <p><span class="label label-danger">All of this content needs to be replaced with usage documentation when functionality is finished</span></p>
-	  <p>Version, revision, etc</p>
-	  <p>Contact info, bug reporting</p>
-	  <p>
-	      <strong>Available test users:</strong> amanjo, csev, jxiaapl, pbogart, pfbodary, raquelng, sileo, trohlck
-	  </p>
-	  <p>
-	      <strong>Available test users for xlisting:</strong> instx, instz (has courses in default term)
-	  </p>
+	  <p><a href="https://umichprod.service-now.com/kb_view.do?sysparm_article=KB0020309">ServiceLink knowledge base article</a></p>
 	  
-	  <p> Build version: JENKINS_JOB_NAME | BUILD_NUMBER | GIT_REPO | GIT_COMMIT | GIT_BRANCH | BUILD_ID </p>
-	  <div id="buildContainer" class="alert alert-info">
-	         <div id="buildPretext">	
-                Build Version: <span id="appInfo"></span>
-            </div>
-        </div>
+	   <div id="buildPretext">Build Version: <span id="buildInfo"></span></div>
   </body>
 </html>
