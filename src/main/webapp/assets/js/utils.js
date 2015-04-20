@@ -125,12 +125,12 @@ var doXListPosts = function(posts){
       $.post(xListUrl, function(data) {
         var section = data.id;
         xListPostStatus.successes.push(data);
-        $('#xListSection' +  section).append(' <span class=\"label label-success\">Success</span>');
+        $('#xListSection' +  section).find('.xListStatus').html(' <span class=\"label label-success\">Success</span>');
       })
       .fail(function(data) {
         var section = data.id;
         xListPostStatus.failures.push(data);
-        $('#xListSection' +  section).append(' <span class=\"label label-failure\">Failure</span>');
+        $('#xListSection' +  section).find('.xListStatus').html(' <span class=\"label label-failure\">Failure</span>');
       })
     );
   }
@@ -170,7 +170,8 @@ $(document).on('click', '.setSections', function (e) {
   $('#xListConfirm').attr('href',server + '/courses/' + thisCourse + '/settings#tab-sections');
   $sections.each(function( ) {
     posts.push('/api/v1/sections/' + $(this).attr('data-sectionid') + '/crosslist/' + thisCourse);
-    $('#listOfSectionsToCrossList').append( '<li id=\"xListSection' + $(this).attr('data-sectionid') + '\">' + $(this).find('div.sectionName span').text() + '</li>');
+    $('#listOfSectionsToCrossList').append( '<li id=\"xListSection' + $(this).attr('data-sectionid') + '\">' + 
+      '<span class=\"xListStatus\"></span> ' + $(this).find('div.sectionName span').text() + '</li>');
   });
   $('#postXList').click(function(){
     $('#postXList, #postXListCancel').hide();
