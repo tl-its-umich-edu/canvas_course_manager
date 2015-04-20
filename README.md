@@ -36,7 +36,7 @@ log4j.logger.edu.umich=DEBUG
     If using Jenkins to build the application, the following script placed in the "Execute Shell" part of the "Pre Steps" section would do the job:
     
     
- ``` Shell Scripting
+ ``` 
     cd src/main/webapp
     if [ -f "build.txt" ]; then
       echo "build.txt found."
@@ -48,7 +48,6 @@ log4j.logger.edu.umich=DEBUG
     touch build.txt
 
     echo "$JOB_NAME | Build: $BUILD_NUMBER | $GIT_URL | $GIT_COMMIT | $GIT_BRANCH | $BUILD_ID" >> build.txt
-    
  ```
 
 ## Notes
