@@ -1,1 +1,1 @@
-This is a page with out build info
+This is build.txt.  See README.txt for information about a build script to fill in this file.

@@ -6,10 +6,21 @@
     <link rel="stylesheet" href="assets/css/custom_style.css">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Help for Sections Manager</title>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script type="text/javascript">
 	$('document').ready(function() {
-		 $("#buildInfo").load("build.txt");
+		$buildInfo=$('#buildInfo');
+		
+		displayContentOrError = function(response, status, xhr) {
+			if (status == 'error') {
+				var errorMessage = 'Unable to display due to error. ('
+						+ xhr.status + ' ' + xhr.statusText + ')';
+				$buildInfo.html(errorMessage);
+			}
+
+			$buildInfo.show();
+		}
+		$buildInfo.load('build.txt',displayContentOrError);
 			});
 </script>
   </head>
@@ -17,7 +28,7 @@
   	<h1>Help for Sections Utility</h1>
 	  <p><a href="https://umichprod.service-now.com/kb_view.do?sysparm_article=KB0020309">ServiceLink knowledge base article</a></p>
 	  
-	   <div id="buildPretext">Build Version:<span id="buildInfo"></span></div>
+	   <div id="versionDiv">Build Version:<span id="buildInfo"></span></div>
 	    
   </body>
 </html>
