@@ -33,11 +33,11 @@ log4j.appender.A1.layout.ConversionPattern=%d [%t] %-5p %c - %m%n
 log4j.logger.edu.umich=DEBUG 
 ```
 7.  For Adding Build information to the Project Release candidate populate src/main/webapps/build.txt with information about the current build (GIT commit, build time, etc.).
-    If using Jenkins to build the application, the following script placed in the "Execute Shell" part of the "Pre Steps" section would do
-    the job:
+    If using Jenkins to build the application, the following script placed in the "Execute Shell" part of the "Pre Steps" section would do the job:
     
-    <code>cd src/main/webapp</code>
-    ``` Shell Scripting
+    
+ ``` Shell Scripting
+    cd src/main/webapp
     if [ -f "build.txt" ]; then
       echo "build.txt found."
       rm build.txt
@@ -48,7 +48,8 @@ log4j.logger.edu.umich=DEBUG
     touch build.txt
 
     echo "$JOB_NAME | Build: $BUILD_NUMBER | $GIT_URL | $GIT_COMMIT | $GIT_BRANCH | $BUILD_ID" >> build.txt
-     ```
+    
+ ```
 
 ## Notes
 
