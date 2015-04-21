@@ -59,9 +59,8 @@
               <div class="form-group">
                 <label for="uniqname" class="sr-only">Enter uniqname</label>
                 <input type="text"  ng-model="uniqname" id="uniqname" class="form-control"  placeholder="uniqname" autofocus>
-
               </div>
-              <button id="uniqnameTrigger" type="button" ng-click="getCoursesForUniqname()" class="btn btn-primary">Look up courses <span ng-show="uniqname">for</span> {{uniqname}}</button>
+              <button id="uniqnameTrigger" type="button" ng-click="getCoursesForUniqname()" class="btn btn-primary">Look up courses <span ng-show="uniqname">for</span> {{uniqname}}</button> <span id="uniqnameValidMessage" class="alert alert-danger" style="display:none; padding:5px">Alpha chars only, please.</span>
               <div class="spinner" ng-show="loading">&nbsp;&nbsp;&nbsp;&nbsp;</div>
 
 
@@ -105,7 +104,8 @@
                             </div>
                         </div>
                         <!--//removed  ng-model="item.sections" below //-->
-                        <ul ui-sortable="sortableOptions" class="sectionList" id="course{{item.id}}" ng-show="item.sections.length">
+                        <ul ui-sortable="sortableOptions" class="sectionList" id="course{{item.id}}" ng-show="item.sections.length" data-orig-sect-number=
+                        {{item.sections.length}}>
                             <li ng-repeat="section in item.sections | orderBy:'name'" class="row section" data-sectionid="{{section.id}}">
                                 <div class="col-md-5 sectionName">
                                     <span>{{section.name}}</span>
@@ -156,16 +156,16 @@
                     <div class="modal-body" id="xListInner">
                     </div>    
                     <div class="modal-footer">
-                        <a id="xListConfirm" target="_blank" class="btn btn-link"  href="" style="display:none">
-                            <span id="xListConfirmMessage"></span> Confirm?
+                        <a id="xListConfirm" target="_blank" class="btn btn-link pull-left"  href="" style="display:none">
+                            <span id="xListConfirmMessage"></span> Confirm in Canvas?
                         </a>
                         <button type="button" class="btn btn-primary" id="postXList">
                             Crosslist
                         </button>
                         <button type="button" class="btn btn-primary" data-dismiss="modal"  id="postXListDone">
-                            Done
+                            Finished?
                         </button> 
-                        <button type="button" class="btn btn-link"  data-dismiss="modal">
+                        <button type="button" class="btn btn-link"  data-dismiss="modal" id="postXListCancel">
                             Cancel
                         </button>
                     </div>
