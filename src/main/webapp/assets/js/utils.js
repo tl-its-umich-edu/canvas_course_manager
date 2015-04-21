@@ -145,7 +145,7 @@ var doXListPosts = function(posts){
 
 //open help doc in new window
 $('#helpLink').click(function(){
-  utilPopWindow('https://umichprod.service-now.com/kb_view.do?sysparm_article=KB0020309', 'help');
+	utilPopWindow('help.html', 'help');
 });
 
 //handler for the Update Course button

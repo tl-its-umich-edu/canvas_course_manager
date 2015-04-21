@@ -38,6 +38,11 @@
     <error-code>403</error-code>
     <location>/error.html</location>
 </error-page>
+
+   <servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>/build.txt</url-pattern>
+	</servlet-mapping>
 	
 	
 	
