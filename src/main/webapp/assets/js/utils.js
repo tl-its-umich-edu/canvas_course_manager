@@ -403,6 +403,73 @@ $(document).on('click', '.openOtherInstructorModal', function (e) {
     }).modal('toggle', e);
 });
 
+
+
+// open a modal where user can search for courses with no instructor and select them
+$(document).on('click', '#courseStringTrigger', function (e) {
+  e.preventDefault();
+  var courseString = $.trim($('#courseString').val());
+  var termId = $.trim($('#canvasTermId').text());
+  
+  var mini='/manager/api/v1/accounts/1/courses?search_term=' + courseString + '&per_page=200';
+  var url = '/sectionsUtilityTool'+mini;
+  $.ajax({
+    type: 'GET',
+    url: url
+    }).done(function( data ) {
+
+/*
+
+      if(data.errors) {
+        $('<span class="alert alert-danger" style="display:none" id="uniqnameOtherError">' + data.errors + '</span>').insertAfter('#uniqnameOtherTrigger');
+        $('#uniqnameOtherError').fadeIn().delay(3000).fadeOut();
+      }
+      else {
+        var termIdInt = parseInt(termId);
+        var filteredData = _.where(data, {enrollment_term_id:termIdInt});
+        var render = '<div class="coursePanelOther well"><ul class="container-fluid courseList">';
+        if (filteredData.length) {
+          $.each(filteredData, function() {
+            var course_code = this.course_code;
+            render = render + '<li class="course"><p><strong>' + this.course_code + '</strong></p><ul class="sectionList">';
+            $.each(this.sections, function() {
+                render = render + '<li class="section row otherSection" data-sectionid="' + this.id + '">' +
+                  '<div class="col-md-5 sectionName"><input type="checkbox" class="otherSectionSelection courseOtherPanelChild" id="otherSectionSelection' + course_code + this.id + '">' +
+                  ' <label for="otherSectionSelection' +  course_code + this.id + '" class="courseOtherPanelChild">' + this.name + '</label>' + 
+                  '<span class="coursePanelChild">' + this.name +'</span></div><div class="col-md-7">'+ 
+                  '<span class="coursePanelChild"> Originally from ' + course_code + ' (' + uniqnameOther +')</span>' + 
+                  ' <a href="" class="coursePanelChild removeSection">Remove?</a></div></li>';
+            });
+            render = render + '</ul></li>';
+          });
+          $('#otherInstructorInnerPayload').append(render);
+        } else {
+          $('#otherInstructorInnerPayload').html('<br><div class="alert alert-warning">No courses for this instructor in this term</div>');
+          $('#useOtherSections').hide();
+        }
+      }
+      */
+    }).fail(function() {
+      alert('Could not get courses for ' + courseString);
+  });
+});
+
+// user selects to open modal to pick sections from courses with NO instructor
+$(document).on('click', '.openNoInstructorModal', function (e) { 
+  $('#noInstructorInnerPayload').empty();
+  $('#courseString').val('');
+  $('#courseStringTriggerPrefix').text('Look up courses');
+  $('li.course').removeClass('otherSectionsTarget');
+  $(this).closest('li').addClass('otherSectionsTarget');
+  $('#noInstructorModal').on('shown.bs.modal', function (event) {
+      $(event.relatedTarget.originalEvent.explicitOriginalTarget).closest('li').addClass('otherSectionsTarget');
+    }).on('hidden.bs.modal', function () {
+        $('li.course').removeClass('otherSectionsTarget');
+    }).modal('toggle', e);
+});
+
+
+
 // user has added some sections from the other instructor list but may want to remove them
 $(document).on('click', '.removeSection', function (e) {
   e.preventDefault();

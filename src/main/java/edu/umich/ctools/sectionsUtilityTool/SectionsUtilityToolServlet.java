@@ -46,6 +46,7 @@ public class SectionsUtilityToolServlet extends HttpServlet {
 	private static final String CANVAS_API_GETCOURSE_BY_UNIQNAME = "canvas.api.getcourse.by.uniqname.regex";
 	private static final String CANVAS_API_ENROLLMENT = "canvas.api.enrollment.regex";
 	private static final String CANVAS_API_TERMS = "canvas.api.terms.regex";
+	private static final String CANVAS_API_SEARCH_COURSES = "canvas.api.search.courses";
 	private static final String DELETE = "DELETE";
 	private static final String POST = "POST";
 	private static final String GET = "GET";
@@ -215,6 +216,7 @@ public class SectionsUtilityToolServlet extends HttpServlet {
 			put(CANVAS_API_TERMS, "for terms");put(CANVAS_API_CROSSLIST, "for crosslist");put(CANVAS_API_RENAME_COURSE, "for rename a course");put(CANVAS_API_GETCOURSE_BY_UNIQNAME, "for getting courses by uniqname");
 			put(CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS, "for getting courses by uniqname not including sections");put(CANVAS_API_ENROLLMENT, "for enrollment");put(CANVAS_API_GETCOURSE_INFO, "for getting course info");put(CANVAS_API_DECROSSLIST,"for decrosslist");
 			put(CANVAS_API_GETSECTION_INFO, "for getting section info");put(CANVAS_API_GETSECTION_PER_COURSE, "for getting section info for a given course");put(CANVAS_API_GETALLSECTIONS_PER_COURSE, "for getting all sections info for a given course");
+			put(CANVAS_API_SEARCH_COURSES, "for searching courses");
 		}};
 		boolean isMatch=false;
 		Set<String> apiListRegex = apiListRegexWithDebugMsg.keySet();

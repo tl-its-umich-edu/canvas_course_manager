@@ -99,6 +99,7 @@
                                     <button class="btn btn-default btn-xs getCourseInfo" data-courseid="{{item.id}}" data-toggle="modal" data-target="#courseInfoModal" title="Get Course Info"><span class="sr-only">Get Course Info</span><i class="glyphicon glyphicon-info-sign"></i></button>
                                     <button ng-show="item.sections.length" class="btn btn-warning btn-xs setSections" data-courseid="{{item.id}}" data-toggle="modal" data-target="#xListModal">Update Course</button>
                                     <button ng-show="item.sectionsShown" class="btn btn-primary btn-xs openOtherInstructorModal" id="openOtherInstructorModal{{item.id}}" data-courseid="{{item.id}}"  data-target="#otherInstructorModal" title="Add other sections"><span class="sr-only">Add other sections</span><i class="glyphicon glyphicon-share-alt"></i></button>
+                                    <button ng-show="item.sectionsShown" class="btn btn-primary btn-xs openNoInstructorModal" id="openNoInstructorModal{{item.id}}" data-courseid="{{item.id}}"  data-target="#noInstructorModal" title="Add other sections from courses with no instructors"><span class="sr-only">Add other sections from courses with no instructors</span><i class="glyphicon glyphicon-search"></i></button>
 
                                 </div>
                             </div>
@@ -282,5 +283,47 @@
                 </div>
             </div>
         </div>
+        <!-- noInstructor Modal -->
+        <div class="modal fade" id="noInstructorModal" tabindex="-1" role="dialog" aria-labelledby="noInstructorLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span aria-hidden="true">&times;</span>
+                            <span class="sr-only">Close</span>
+                        </button>
+                        <h3 class="modal-title" id="noInstructorLabel">Search for courses ({{currentTerm.currentTermName}})<span id="canvasTermId" style="display:none">{{currentTerm.currentTermCanvasId}}</span></h3>
+                    </div>
+                    <div class="modal-body noInstructorInner" id="noInstructorInner">
+                        <div class="form-inline">
+                            <div class="form-group">
+                                <label for="courseString" class="sr-only">Enter course</label>
+                                <input type="text"  ng-model="courseString" id="courseString" class="form-control"  placeholder="course info" style="width:200px">
+                            </div>
+                            <button id="courseStringTrigger" type="button" class="btn btn-primary">
+                                <span id="courseStringTriggerPrefix">Look up courses</span>
+                                <span ng-show="courseString">for</span> {{courseString}}</button>
+                            <div class="otherSpinner" ng-show="loading">&nbsp;&nbsp;&nbsp;&nbsp;</div>
+                        </div>
+                        <div id="noInstructorInnerPayload"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="useNoInstructorSections" type="button" class="btn btn-primary">
+                            Use selected
+                        </button>
+
+                        <button type="button" class="btn btn-link"  data-dismiss="modal">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
     </body>
 </html>
