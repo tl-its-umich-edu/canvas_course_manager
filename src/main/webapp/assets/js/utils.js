@@ -240,7 +240,9 @@ $(document).on('click', '#unCrossList', function (e) {
       $('#unCrossList').hide();
       $('#unCrossListDone').show();
       $('#unCrossListInner').html('Uncrosslisting of <strong>' + data.name + '</strong> was successful');
-      thisSectionEl.fadeOut('slow');
+      thisSectionEl.fadeOut('slow', function() {
+        thisSectionEl.remove();
+      });
     }).fail(function(jqXHR) {
       $('#unCrossListInner').text('There was an error!'  + ' (' + jqXHR.status + ' ' + jqXHR.statusText + ')'); 
     });
