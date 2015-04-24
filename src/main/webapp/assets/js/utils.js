@@ -57,7 +57,7 @@ var getTermArray = function(coursesData) {
 // easier to manage
 var generateCurrentTimestamp = function(){
   return new Date().getTime();
-}
+};
 
 
 // use moment to craft a user friendly message about last recorded activity
@@ -418,11 +418,9 @@ $(document).on('click', '#courseStringTrigger', function (e) {
     url: url
     }).done(function( data ) {
 
-/*
-
       if(data.errors) {
-        $('<span class="alert alert-danger" style="display:none" id="uniqnameOtherError">' + data.errors + '</span>').insertAfter('#uniqnameOtherTrigger');
-        $('#uniqnameOtherError').fadeIn().delay(3000).fadeOut();
+        $('<span class="alert alert-danger" style="display:none" id="courseStringError">There was an error, sorry!</span>').insertAfter('#courseStringTrigger');
+        $('#courseStringError').fadeIn().delay(3000).fadeOut();
       }
       else {
         var termIdInt = parseInt(termId);
@@ -430,29 +428,54 @@ $(document).on('click', '#courseStringTrigger', function (e) {
         var render = '<div class="coursePanelOther well"><ul class="container-fluid courseList">';
         if (filteredData.length) {
           $.each(filteredData, function() {
-            var course_code = this.course_code;
-            render = render + '<li class="course"><p><strong>' + this.course_code + '</strong></p><ul class="sectionList">';
-            $.each(this.sections, function() {
-                render = render + '<li class="section row otherSection" data-sectionid="' + this.id + '">' +
-                  '<div class="col-md-5 sectionName"><input type="checkbox" class="otherSectionSelection courseOtherPanelChild" id="otherSectionSelection' + course_code + this.id + '">' +
-                  ' <label for="otherSectionSelection' +  course_code + this.id + '" class="courseOtherPanelChild">' + this.name + '</label>' + 
-                  '<span class="coursePanelChild">' + this.name +'</span></div><div class="col-md-7">'+ 
-                  '<span class="coursePanelChild"> Originally from ' + course_code + ' (' + uniqnameOther +')</span>' + 
-                  ' <a href="" class="coursePanelChild removeSection">Remove?</a></div></li>';
-            });
-            render = render + '</ul></li>';
+            render = render + '<li class="course" data-course-id="' + this.id + '"><p><strong>' + this.course_code + '</strong><button type="button" class="getSectionsNoInstructor pull-right btn btn-default btn-xs" data-id="' + this.id + '">Get Sections</button></p></li>';
           });
-          $('#otherInstructorInnerPayload').append(render);
+          $('#noInstructorInnerPayload').append(render);
         } else {
-          $('#otherInstructorInnerPayload').html('<br><div class="alert alert-warning">No courses for this instructor in this term</div>');
-          $('#useOtherSections').hide();
+          $('#noInstructorInnerPayload').html('<br><div class="alert alert-warning">No courses found for this search term in this term</div>');
+          $('#useNoInstructorSections').hide();
         }
       }
-      */
+      
     }).fail(function() {
       alert('Could not get courses for ' + courseString);
   });
 });
+
+$(document).on('click', '.getSectionsNoInstructor', function (e) { 
+  e.preventDefault();
+  var thisCourseId = $(this).attr('data-id');
+  var thisCourseTitle =$(this).closest('li').find('strong').text();
+
+  var url = '/sectionsUtilityTool/manager/api/v1/courses/' + thisCourseId + '/sections?per_page=100';
+  $.ajax({
+    type: 'GET',
+    url: url
+    }).done(function( data ) {
+      if (data.length){
+        var render = '<ul class="sectionList">';
+        $.each(data, function() {
+            render = render + '<li class="section row otherSection" data-sectionid="' + this.id + '">' +
+              '<div class="col-md-5 sectionName"><input type="checkbox" class="otherSectionSelection courseOtherPanelChild" id="otherSectionSelection' + this.id + '">' +
+              ' <label for="otherSectionSelection' + this.id + '" class="courseOtherPanelChild">' + this.name + '</label>' + 
+              '<span class="coursePanelChild">' + this.name +'</span></div><div class="col-md-7">'+ 
+              '<span class="coursePanelChild"> Originally from ' + thisCourseTitle + '</span>' + 
+              ' <a href="" class="coursePanelChild removeSection">Remove?</a></div></li>';
+        });
+        render = render + '</ul>';
+      $('.coursePanelOther').find('li[data-course-id="' + thisCourseId + '"]').append(render);
+
+      } else {
+        alert('Sorry, something happened getting the sections of this course.');
+      }  
+  });      
+});  
+$(document).on('click', '#useNoInstructorSections', function () {
+  $('#noInstructorModal').find('.otherSectionSelection:checked').closest('li').appendTo('.otherSectionsTarget ul.sectionList');
+  $('.otherSectionsTarget').find('.setSections').show();
+  $('#noInstructorModal').modal('hide');
+});
+
 
 // user selects to open modal to pick sections from courses with NO instructor
 $(document).on('click', '.openNoInstructorModal', function (e) { 
