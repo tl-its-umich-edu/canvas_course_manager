@@ -46,7 +46,7 @@ public class SectionsUtilityToolServlet extends HttpServlet {
 	private static final String CANVAS_API_GETCOURSE_BY_UNIQNAME = "canvas.api.getcourse.by.uniqname.regex";
 	private static final String CANVAS_API_ENROLLMENT = "canvas.api.enrollment.regex";
 	private static final String CANVAS_API_TERMS = "canvas.api.terms.regex";
-	private static final String CANVAS_API_SEARCH_COURSES = "canvas.api.search.courses";
+	private static final String CANVAS_API_SEARCH_COURSES = "canvas.api.search.courses.regex";
 	private static final String DELETE = "DELETE";
 	private static final String POST = "POST";
 	private static final String GET = "GET";
