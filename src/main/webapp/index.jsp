@@ -1,4 +1,8 @@
 <!DOCTYPE html>
+<%
+String canvas_url =(String)request.getAttribute("canvas_url"); 
+String kb_article =(String)request.getAttribute("kb_article"); 
+%> 
 <html lang="en" ng-app="sectionsApp">
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -7,6 +11,9 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <link rel="stylesheet" href="assets/vendor/jquery/jquery-ui-1.11.2/jquery-ui.min.css">
         <title>Sections Manager</title>
+        <script type="text/javascript">
+        var canvas_url='<%=canvas_url%>';
+        </script>
     </head>
     <body ng-controller="coursesController" ng-cloak>
       <div class="alert alert-danger debugPanel" id="debugPanel"></div>
