@@ -3,6 +3,10 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
 	version="2.4">
   <display-name>SectionsUtilityTool</display-name>
+  <welcome-file-list>
+  <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+  
   
 	
 	
@@ -24,10 +28,11 @@
 		<url-pattern>/manager/*</url-pattern>
 	</servlet-mapping>
 	
-	<servlet-mapping>
-	    <servlet-name>default</servlet-name>
-	    <url-pattern>*.html</url-pattern>
-  </servlet-mapping>
+    <servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>*.html</url-pattern>
+   </servlet-mapping>
+  
   <servlet-mapping>
 		<servlet-name>default</servlet-name>
 		<url-pattern>/assets/*</url-pattern>
