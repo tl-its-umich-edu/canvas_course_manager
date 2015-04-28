@@ -57,7 +57,7 @@ var getTermArray = function(coursesData) {
 // easier to manage
 var generateCurrentTimestamp = function(){
   return new Date().getTime();
-}
+};
 
 
 // use moment to craft a user friendly message about last recorded activity
@@ -404,6 +404,96 @@ $(document).on('click', '.openOtherInstructorModal', function (e) {
         $('li.course').removeClass('otherSectionsTarget');
     }).modal('toggle', e);
 });
+
+
+
+// open a modal where user can search for courses with no instructor and select them
+$(document).on('click', '#courseStringTrigger', function (e) {
+  e.preventDefault();
+  var courseString = $.trim($('#courseString').val());
+  var termId = $.trim($('#canvasTermId').text());
+  
+  var mini='/manager/api/v1/accounts/1/courses?search_term=' + courseString + '&per_page=200';
+  var url = '/sectionsUtilityTool'+mini;
+  $.ajax({
+    type: 'GET',
+    url: url
+    }).done(function( data ) {
+
+      if(data.errors) {
+        $('<span class="alert alert-danger" style="display:none" id="courseStringError">There was an error, sorry!</span>').insertAfter('#courseStringTrigger');
+        $('#courseStringError').fadeIn().delay(3000).fadeOut();
+      }
+      else {
+        var termIdInt = parseInt(termId);
+        var filteredData = _.where(data, {enrollment_term_id:termIdInt});
+        var render = '<div class="coursePanelOther well"><ul class="container-fluid courseList">';
+        if (filteredData.length) {
+          $.each(filteredData, function() {
+            render = render + '<li class="course" data-course-id="' + this.id + '"><p><strong>' + this.course_code + '</strong><button type="button" class="getSectionsNoInstructor pull-right btn btn-default btn-xs" data-id="' + this.id + '">Get Sections</button></p></li>';
+          });
+          $('#noInstructorInnerPayload').append(render);
+        } else {
+          $('#noInstructorInnerPayload').html('<br><div class="alert alert-warning">No courses found for this search term in this term</div>');
+          $('#useNoInstructorSections').hide();
+        }
+      }
+      
+    }).fail(function() {
+      alert('Could not get courses for ' + courseString);
+  });
+});
+
+$(document).on('click', '.getSectionsNoInstructor', function (e) { 
+  e.preventDefault();
+  var thisCourseId = $(this).attr('data-id');
+  var thisCourseTitle =$(this).closest('li').find('strong').text();
+
+  var url = '/sectionsUtilityTool/manager/api/v1/courses/' + thisCourseId + '/sections?per_page=100';
+  $.ajax({
+    type: 'GET',
+    url: url
+    }).done(function( data ) {
+      if (data.length){
+        var render = '<ul class="sectionList">';
+        $.each(data, function() {
+            render = render + '<li class="section row otherSection" data-sectionid="' + this.id + '">' +
+              '<div class="col-md-5 sectionName"><input type="checkbox" class="otherSectionSelection courseOtherPanelChild" id="otherSectionSelection' + this.id + '">' +
+              ' <label for="otherSectionSelection' + this.id + '" class="courseOtherPanelChild">' + this.name + '</label>' + 
+              '<span class="coursePanelChild">' + this.name +'</span></div><div class="col-md-7">'+ 
+              '<span class="coursePanelChild"> Originally from ' + thisCourseTitle + '</span>' + 
+              ' <a href="" class="coursePanelChild removeSection">Remove?</a></div></li>';
+        });
+        render = render + '</ul>';
+      $('.coursePanelOther').find('li[data-course-id="' + thisCourseId + '"]').append(render);
+
+      } else {
+        alert('Sorry, something happened getting the sections of this course.');
+      }  
+  });      
+});  
+$(document).on('click', '#useNoInstructorSections', function () {
+  $('#noInstructorModal').find('.otherSectionSelection:checked').closest('li').appendTo('.otherSectionsTarget ul.sectionList');
+  $('.otherSectionsTarget').find('.setSections').show();
+  $('#noInstructorModal').modal('hide');
+});
+
+
+// user selects to open modal to pick sections from courses with NO instructor
+$(document).on('click', '.openNoInstructorModal', function (e) { 
+  $('#noInstructorInnerPayload').empty();
+  $('#courseString').val('');
+  $('#courseStringTriggerPrefix').text('Look up courses');
+  $('li.course').removeClass('otherSectionsTarget');
+  $(this).closest('li').addClass('otherSectionsTarget');
+  $('#noInstructorModal').on('shown.bs.modal', function (event) {
+      $(event.relatedTarget.originalEvent.explicitOriginalTarget).closest('li').addClass('otherSectionsTarget');
+    }).on('hidden.bs.modal', function () {
+        $('li.course').removeClass('otherSectionsTarget');
+    }).modal('toggle', e);
+});
+
+
 
 // user has added some sections from the other instructor list but may want to remove them
 $(document).on('click', '.removeSection', function (e) {
