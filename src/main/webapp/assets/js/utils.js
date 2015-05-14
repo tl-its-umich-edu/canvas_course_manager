@@ -11,6 +11,17 @@ $.ajaxSetup({
   cache: false
 });
 
+    
+$(document).ajaxStart(function(){
+  $(".spinner").show();
+  $(".spinner2").show();
+});
+$(document).ajaxStop(function(){
+  $(".spinner").hide();
+  $(".spinner2").hide();
+});
+
+
 // generic error report
 var errorDisplay = function (url, status, errorMessage) {
   switch(status) {
@@ -36,7 +47,7 @@ var getCurrentTerm = function(termData) {
       }
     }
   });
-  return currentTerm;  
+  return currentTerm;
 };
 
 // parse the courses feed and return a term array of unique items
@@ -336,6 +347,7 @@ $('body').off('keydown').on('keydown','#uniqname', function(event) {
 
 // open a modal where the other instructor's courses are looked up, selected
 $(document).on('click', '#uniqnameOtherTrigger', function (e) {
+  $('#useOtherSections').show();
   e.preventDefault();
   var uniqnameOther = $.trim($('#uniqnameOther').val());
   if(validateUniqname(uniqnameOther)){
@@ -393,6 +405,7 @@ $(document).on('click', '#useOtherSections', function () {
 
 // user selects to open modal to pick sections from some other instructor
 $(document).on('click', '.openOtherInstructorModal', function (e) { 
+  $('#useOtherSections').show();
   $('#otherInstructorInnerPayload').empty();
   $('#uniqnameOther').val('');
   $('#uniqnameOtherTrigger').text('Look up courses');
@@ -409,6 +422,7 @@ $(document).on('click', '.openOtherInstructorModal', function (e) {
 
 // open a modal where user can search for courses with no instructor and select them
 $(document).on('click', '#courseStringTrigger', function (e) {
+  $('#useNoInstructorSections').show();
   e.preventDefault();
   var courseString = $.trim($('#courseString').val());
   var termId = $.trim($('#canvasTermId').text());
@@ -481,6 +495,7 @@ $(document).on('click', '#useNoInstructorSections', function () {
 
 // user selects to open modal to pick sections from courses with NO instructor
 $(document).on('click', '.openNoInstructorModal', function (e) { 
+  $('#useNoInstructorSections').show();
   $('#noInstructorInnerPayload').empty();
   $('#courseString').val('');
   $('#courseStringTriggerPrefix').text('Look up courses');

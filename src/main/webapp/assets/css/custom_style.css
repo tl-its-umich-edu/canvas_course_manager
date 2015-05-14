@@ -104,6 +104,15 @@ li.activeCourse button.setSections {
     height: 30px;
     width: 30px;
 }
+.spinner2{
+    background: url("../images/spinner-xs.gif") no-repeat scroll 0 0 transparent;
+    display: inline-block;
+    height: 30px;
+    width: 30px;
+    line-height: 1.42857;
+    margin-bottom: 1px;
+    vertical-align: middle;
+}
 .reportContainer {
     position:absolute;
     width:50%;
