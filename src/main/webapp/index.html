@@ -270,7 +270,7 @@
                                 <div class="spinner2" style="display:none"></div>
                             </div>
                         </div>
-                        <div id="otherInstructorInnerPayload"></div>
+                        <div id="otherInstructorInnerPayload container"></div>
                     </div>
                     <div class="modal-footer">
                         <button id="useOtherSections" type="button" class="btn btn-primary">
@@ -299,10 +299,9 @@
                         <div class="form-inline">
                             <div class="form-group">
                                 <label for="courseString" class="sr-only">Enter course</label>
-                                <input type="text"  ng-model="courseString" id="courseString" class="form-control"  placeholder="course info" style="width:200px">
+                                <input type="text" id="courseString" class="form-control"  placeholder="course info" style="width:200px">
                                 <button id="courseStringTrigger" type="button" class="btn btn-primary">
-                                    <span id="courseStringTriggerPrefix">Look up courses</span>
-                                    <span ng-show="courseString">for</span> {{courseString}}
+                                    <span id="courseStringTriggerPrefix">Search courses</span>
                                 </button>
                                 <div class="spinner2" style="display:none"></div>
                             </div>

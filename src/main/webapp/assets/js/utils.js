@@ -168,6 +168,7 @@ $(document).on('click', '.setSections', function (e) {
   e.preventDefault();
   $('#debugPanel').empty();
   var thisCourse = $(this).attr('data-courseid');
+  $('#postXList').attr('course-id', thisCourse)
 
   var thisCourseContainer = $(this).closest('li.course');
   var thisCourseTitle = thisCourseContainer.find('a.courseLink').text();
@@ -180,27 +181,38 @@ $(document).on('click', '.setSections', function (e) {
 
   $('#xListConfirm').attr('href',server + '/courses/' + thisCourse + '/settings#tab-sections');
   $sections.each(function( ) {
-    posts.push('/api/v1/sections/' + $(this).attr('data-sectionid') + '/crosslist/' + thisCourse);
-    $('#listOfSectionsToCrossList').append( '<li id=\"xListSection' + $(this).attr('data-sectionid') + '\">' + 
+    $('#listOfSectionsToCrossList').append( '<li data-sectionid=\"' + $(this).attr('data-sectionid') + '\" ' + 'id=\"xListSection' + $(this).attr('data-sectionid') + '\">' + 
       '<span class=\"xListStatus\"></span> ' + $(this).find('div.sectionName span').text() + '</li>');
   });
-  $('#postXList').click(function(){
-    $('#postXList, #postXListCancel').hide();
-    var xListPosts = doXListPosts(posts);
-    $.when.apply($, xListPosts).done(function() {
-      if(xListPostStatus.successes.length === posts.length ){
-        $('#xListConfirmMessage').text(posts.length + ' sections crosslisted. ');
-      }
-      else {
-        $('#xListConfirmMessage').text(xListPostStatus.failures.length + ' error(s). ');
-      }
-      $('#postXListDone, #xListConfirm').show();
-      $('.activeCourse').removeClass('activeCourse');
-      $(thisCourseContainer).find('.setSections').fadeOut().delay(5000).hide();
-    });
-  });  
   return null;
 });
+
+//handle the  button in modal that triggers the crosslist posts
+$(document).on('click', '#postXList', function (e) {
+  var thisCourse = $('#postXList').attr('course-id')
+  $('#postXList, #postXListCancel').hide();
+
+  var thisCourseContainer = $('li.course[data-course-id="' + thisCourse + '"]');
+  
+  var $sectionsInModal = $('#listOfSectionsToCrossList').find('li');
+  var posts = [];
+  $sectionsInModal.each(function( ) {
+    posts.push('/api/v1/sections/' + $(this).attr('data-sectionid') + '/crosslist/' + thisCourse);
+  });
+
+  var xListPosts = doXListPosts(posts);
+  $.when.apply($, xListPosts).done(function() {
+    if(xListPostStatus.successes.length === posts.length ){
+      $('#xListConfirmMessage').text(posts.length + ' sections crosslisted. ');
+    }
+    else {
+      $('#xListConfirmMessage').text(xListPostStatus.failures.length + ' error(s). ');
+    }
+    $('#postXListDone, #xListConfirm').show();
+    $('.activeCourse').removeClass('activeCourse');
+    $(thisCourseContainer).find('.setSections').fadeOut().delay(5000).hide();
+  });
+});  
 
 // see if there is any activity in the course (used to prevent orphaning a course that is active)  
 $(document).on('click', '.getCourseInfo', function (e) {
@@ -270,6 +282,7 @@ $(document).on('click', '.getEnrollements', function (e) {
   $('#courseGetEnrollmentsLabel').empty();
   $('#courseGetEnrollmentsInner').empty();
   $('#courseGetEnrollmentsLabel').text('Enrollments for ' + thisCourseTitle);
+
   $.get('manager/api/v1/courses/' + thisCourse +  '/enrollments', function(data) {
       if(!data.length) {
         $('#courseGetEnrollmentsInner').text('No humans detected!');
@@ -423,6 +436,7 @@ $(document).on('click', '.openOtherInstructorModal', function (e) {
 // open a modal where user can search for courses with no instructor and select them
 $(document).on('click', '#courseStringTrigger', function (e) {
   $('#useNoInstructorSections').show();
+  $('#noInstructorInnerPayload').empty();
   e.preventDefault();
   var courseString = $.trim($('#courseString').val());
   var termId = $.trim($('#canvasTermId').text());
@@ -444,7 +458,12 @@ $(document).on('click', '#courseStringTrigger', function (e) {
         var render = '<div class="coursePanelOther well"><ul class="container-fluid courseList">';
         if (filteredData.length) {
           $.each(filteredData, function() {
-            render = render + '<li class="course" data-course-id="' + this.id + '"><p><strong>' + this.course_code + '</strong><button type="button" class="getSectionsNoInstructor pull-right btn btn-default btn-xs" data-id="' + this.id + '">Get Sections</button></p></li>';
+            render = render + '<li class="clearfix course" data-course-id="' + this.id + '">' +
+            '<div class="pull-left"><strong>' + this.course_code + '</strong></div>' +
+            '<div class="btn-group pull-right">' + 
+            '<button type="button" class="getSectionsNoInstructor btn btn-default btn-xs" data-id="' + this.id + '">Get Sections</button>' + 
+            '<button title="Get Enrollments" data-target="#courseGetEnrollmentsModal" data-toggle="modal" data-courseid="' + this.id + '" class="btn btn-default btn-xs instructorsOnly getEnrollements"><span class="sr-only">Get Enrollments</span>' +
+            '<i class="glyphicon glyphicon-user"></i></button></div><div class="clearfix"></div></li>'
           });
           $('#noInstructorInnerPayload').append(render);
         } else {
@@ -498,13 +517,15 @@ $(document).on('click', '.openNoInstructorModal', function (e) {
   $('#useNoInstructorSections').show();
   $('#noInstructorInnerPayload').empty();
   $('#courseString').val('');
-  $('#courseStringTriggerPrefix').text('Look up courses');
+  $('#courseStringTriggerPrefix').text('Search courses');
   $('li.course').removeClass('otherSectionsTarget');
   $(this).closest('li').addClass('otherSectionsTarget');
   $('#noInstructorModal').on('shown.bs.modal', function (event) {
       $(event.relatedTarget.originalEvent.explicitOriginalTarget).closest('li').addClass('otherSectionsTarget');
     }).on('hidden.bs.modal', function () {
         $('li.course').removeClass('otherSectionsTarget');
+        $('#courseStringTriggerPrefix').text('');
+        $('#courseString').val('')
     }).modal('toggle', e);
 });
 
