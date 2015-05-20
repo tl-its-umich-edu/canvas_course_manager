@@ -168,6 +168,7 @@ $(document).on('click', '.setSections', function (e) {
   e.preventDefault();
   $('#debugPanel').empty();
   var thisCourse = $(this).attr('data-courseid');
+  $('#postXList').attr('course-id', thisCourse)
 
   var thisCourseContainer = $(this).closest('li.course');
   var thisCourseTitle = thisCourseContainer.find('a.courseLink').text();
@@ -180,27 +181,38 @@ $(document).on('click', '.setSections', function (e) {
 
   $('#xListConfirm').attr('href',server + '/courses/' + thisCourse + '/settings#tab-sections');
   $sections.each(function( ) {
-    posts.push('/api/v1/sections/' + $(this).attr('data-sectionid') + '/crosslist/' + thisCourse);
-    $('#listOfSectionsToCrossList').append( '<li id=\"xListSection' + $(this).attr('data-sectionid') + '\">' + 
+    $('#listOfSectionsToCrossList').append( '<li data-sectionid=\"' + $(this).attr('data-sectionid') + '\" ' + 'id=\"xListSection' + $(this).attr('data-sectionid') + '\">' + 
       '<span class=\"xListStatus\"></span> ' + $(this).find('div.sectionName span').text() + '</li>');
   });
-  $('#postXList').click(function(){
-    $('#postXList, #postXListCancel').hide();
-    var xListPosts = doXListPosts(posts);
-    $.when.apply($, xListPosts).done(function() {
-      if(xListPostStatus.successes.length === posts.length ){
-        $('#xListConfirmMessage').text(posts.length + ' sections crosslisted. ');
-      }
-      else {
-        $('#xListConfirmMessage').text(xListPostStatus.failures.length + ' error(s). ');
-      }
-      $('#postXListDone, #xListConfirm').show();
-      $('.activeCourse').removeClass('activeCourse');
-      $(thisCourseContainer).find('.setSections').fadeOut().delay(5000).hide();
-    });
-  });  
   return null;
 });
+
+//handle the  button in modal that triggers the crosslist posts
+$(document).on('click', '#postXList', function (e) {
+  var thisCourse = $('#postXList').attr('course-id')
+  $('#postXList, #postXListCancel').hide();
+
+  var thisCourseContainer = $('li.course[data-course-id="' + thisCourse + '"]');
+  
+  var $sectionsInModal = $('#listOfSectionsToCrossList').find('li');
+  var posts = [];
+  $sectionsInModal.each(function( ) {
+    posts.push('/api/v1/sections/' + $(this).attr('data-sectionid') + '/crosslist/' + thisCourse);
+  });
+
+  var xListPosts = doXListPosts(posts);
+  $.when.apply($, xListPosts).done(function() {
+    if(xListPostStatus.successes.length === posts.length ){
+      $('#xListConfirmMessage').text(posts.length + ' sections crosslisted. ');
+    }
+    else {
+      $('#xListConfirmMessage').text(xListPostStatus.failures.length + ' error(s). ');
+    }
+    $('#postXListDone, #xListConfirm').show();
+    $('.activeCourse').removeClass('activeCourse');
+    $(thisCourseContainer).find('.setSections').fadeOut().delay(5000).hide();
+  });
+});  
 
 // see if there is any activity in the course (used to prevent orphaning a course that is active)  
 $(document).on('click', '.getCourseInfo', function (e) {
