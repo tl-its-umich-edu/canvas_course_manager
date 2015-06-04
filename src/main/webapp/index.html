@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="assets/css/custom_style.css">
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <link rel="stylesheet" href="assets/vendor/jquery/jquery-ui-1.11.2/jquery-ui.min.css">
-        <title>Sections Manager</title>
+        <title>Canvas Support</title>
     </head>
     <body ng-controller="coursesController" ng-cloak>
       <div class="alert alert-danger debugPanel" id="debugPanel"></div>
@@ -20,7 +20,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <h1 class="navbar-brand collapse-nav">Sections Manager <small id="serverInfo">{{server}}</small></h1>
+                    <h1 class="navbar-brand collapse-nav">Canvas Support <small id="serverInfo">{{server}}</small></h1>
                 </div>
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -34,6 +34,19 @@
             </div>
             <!-- /.container-fluid -->
         </nav>
+
+
+
+<div role="tabpanel" style="margin-top:60px">
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#sections" aria-controls="sections" role="tab" data-toggle="tab">Manage Sections</a></li>
+    <li role="presentation"><a href="#friends" aria-controls="friends" role="tab" data-toggle="tab">Friend Accounts</a></li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="sections">
         <div class="alert alert-success reportContainer" id="successContainer" role="alert" style="display:none">
           <div class="msg"></div>
         </div>
@@ -123,6 +136,23 @@
                 </ul>
             </div>
         </div>
+
+
+
+    </div>
+    <div role="tabpanel" class="tab-pane" id="friends" style="padding:25px 10px">
+    <div class="form-group form-inline form-group">
+    <label for="friendEmailAddress" class="sr-only">Email address</label>
+    <input type="email" class="form-control" id="friendEmailAddress" placeholder="Enter email"> <a class="btn btn-primary">Add to course</a>
+  </div>
+
+    </div>
+  </div>
+</div>
+
+
+
+
         <script src="assets/vendor/jquery/jquery-1.11.0.min.js"></script>
         <script src="assets/vendor/jquery/jquery-ui-1.11.2/jquery-ui.min.js"></script>
         <script src="assets/vendor/angular/angular.min.js">
