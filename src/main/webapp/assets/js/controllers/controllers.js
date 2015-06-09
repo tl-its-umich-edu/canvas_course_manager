@@ -1,15 +1,8 @@
 'use strict';
 /* global $,  angular, getTermArray, _, getCurrentTerm, errorDisplay */
 
-var sectionsApp = angular.module('sectionsApp', ['sectionsFilters','ui.sortable']);
-
-sectionsApp.run(function ($rootScope) {
-  $rootScope.user = $.trim($('#uniqname').val().toLowerCase());
-});
-
-
 /* TERMS CONTROLLER */
-sectionsApp.controller('termsController', ['Courses', '$rootScope', '$scope', '$http', function (Courses, $rootScope, $scope, $http) {
+canvasSupportApp.controller('termsController', ['Courses', '$rootScope', '$scope', '$http', function (Courses, $rootScope, $scope, $http) {
   //void the currently selected term
   $scope.selectedTerm = null;
   //reset term scope
@@ -39,7 +32,7 @@ sectionsApp.controller('termsController', ['Courses', '$rootScope', '$scope', '$
 
 
 //COURSES CONTROLLER
-sectionsApp.controller('coursesController', ['Courses', 'Sections', '$rootScope', '$scope', function (Courses, Sections, $rootScope, $scope) {
+canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootScope', '$scope', function (Courses, Sections, $rootScope, $scope) {
 
  $scope.getCoursesForUniqname = function () {
     var uniqname = $.trim($('#uniqname').val().toLowerCase());
@@ -143,10 +136,23 @@ sectionsApp.controller('coursesController', ['Courses', 'Sections', '$rootScope'
         //deal with this
       }
     });
-};
-
-
-
+  };
 }]);
 
 
+
+/* FRIEND PANEL CONTROLLER */
+canvasSupportApp.controller('friendController', ['Friend', '$scope', '$http', function (Friend, $scope) {
+  $scope.lookUpFriendClick = function (friendId) {
+    var friendId = $('#friendEmailAddress').val();
+    Friend.lookUpFriend(friendId).then(function (data) {
+      if (data.data.length) {
+        // here we add the person to the scope and then use another factory to add them to the site
+        $scope.friend = data.data[0];
+      } else {
+        // not an existing user - present interface to add
+        $scope.newUser = true;
+      }
+    });
+  };
+}]);

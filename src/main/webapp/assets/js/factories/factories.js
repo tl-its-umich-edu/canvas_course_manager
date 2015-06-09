@@ -1,8 +1,8 @@
 'use strict';
-/* global  sectionsApp, errorDisplay, generateCurrentTimestamp  */
+/* global  canvasSupportApp, errorDisplay, generateCurrentTimestamp  */
 
 //COURSES FACTORY - does the request for the courses controller
-sectionsApp.factory('Courses', function ($http) {
+canvasSupportApp.factory('Courses', function ($http) {
   return {
     getCourses: function (url) {
       return $http.get(url, {cache: false}).then(
@@ -20,7 +20,7 @@ sectionsApp.factory('Courses', function ($http) {
   };
 });
 //SECTIONS FACTORY - does the request for the sections controller
-sectionsApp.factory('Sections', function ($http) {
+canvasSupportApp.factory('Sections', function ($http) {
   return {
     getSectionsForCourseId: function (courseId) {
       var url = '/sectionsUtilityTool/manager/api/v1/courses/' + courseId + '/sections?per_page=100&_='+ generateCurrentTimestamp();
@@ -36,3 +36,20 @@ sectionsApp.factory('Sections', function ($http) {
   };
 });
 
+//FRIEND LOOKU FACTORY - does the request for the friend controller
+canvasSupportApp.factory('Friend', function ($http) {
+  return {
+    lookUpFriend: function (friendId) {
+      var url = '/sectionsUtilityTool/manager/api/v1/accounts/self/users?search_term=' + friendId;
+      return $http.get(url, {cache: false}).then(
+        function success(result) {
+          return result;
+        },
+        function error(result) {
+          
+        }
+      );
+
+    }
+  };
+});
