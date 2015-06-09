@@ -4,7 +4,8 @@
     <label for="friendEmailAddress" class="sr-only">Email address</label>
     <input type="text" class="form-control" id="friendEmailAddress" placeholder="Enter email" ng-model="friendEmailAddress">
     <button type="button" class="btn btn-primary" ng-click="lookUpFriendClick()">Add to course {{friendEmailAddress}}</button>
-		<span class="alert  alert-success" ng-show="friend.name">Added {{friend.name}} to the site.</span>
+    <div class="spinner" ng-show="loading">&nbsp;&nbsp;&nbsp;&nbsp;</div>
+		<div class="alert  alert-success alert-inline" ng-show="friend.name">Added {{friend.name}} to the site.</div>
   </div>
 	<div ng-show="newUser">
 		<h4>User not found</h4>

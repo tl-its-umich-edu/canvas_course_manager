@@ -144,6 +144,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
 /* FRIEND PANEL CONTROLLER */
 canvasSupportApp.controller('friendController', ['Friend', '$scope', '$http', function (Friend, $scope) {
   $scope.lookUpFriendClick = function (friendId) {
+    $scope.loading = true;
     var friendId = $('#friendEmailAddress').val();
     Friend.lookUpFriend(friendId).then(function (data) {
       if (data.data.length) {
@@ -153,6 +154,7 @@ canvasSupportApp.controller('friendController', ['Friend', '$scope', '$http', fu
         // not an existing user - present interface to add
         $scope.newUser = true;
       }
+      $scope.loading = false;
     });
   };
 }]);
