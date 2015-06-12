@@ -166,6 +166,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$http', '
       if (data.data.length ===1 && data.data[0].name) {
         // here we add the person to the scope and then use another factory to add them to the site
         $scope.friend = data.data[0];
+        $scope.user = true;
         //$scope.friendEmailAddress = '';
       } else {
         // not an existing user - present interface to add
@@ -174,6 +175,14 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$http', '
       $scope.loading = false;
     });
   };
+  $scope.checkAll = function(){
+    $scope.oneChecked = false;
+    for(var e in $scope.course.sections) {
+      if ($scope.course.sections[e].isChecked) {
+        $scope.oneChecked = true;
+      }
+    }
+  }
   $scope.voidFriendScope = function () {
     $scope.course = {};
   }
@@ -188,6 +197,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$http', '
         $scope.$apply(function () {
           $scope.loading2 = false;
           $scope.done = true;
+          $scope.user = true;
           //$scope.friendEmailAddress ='';
           //$scope.friendNameFirst = '';
           //$scope.friendNameLast = '';

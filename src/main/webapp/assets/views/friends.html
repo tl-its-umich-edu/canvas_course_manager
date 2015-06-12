@@ -23,7 +23,7 @@
                             <li ng-repeat="section in course.sections | orderBy:'name'" class="row section" data-sectionid="{{section.id}}">
                                 <div class="col-md-5 sectionName">
                                     <input type="checkbox" id="{{section.id}}"
-                                    	ng-model="section.isChecked">
+                                    	ng-model="section.isChecked" ng-change="checkAll()">
                                     <label for="{{section.id}}">{{section.name}}</label>
                                 </div>
                                 <div class="col-md-7">
@@ -43,7 +43,9 @@
             </div>
             <div class="form-group form-inline form-group" ng-show="!newUser">
               <hr>
-              <h4> Step 2: Specify User </h4>
+              <h4> Step 2: Specify User {{oneChecked}}
+              </h4>
+
               <label for="friendEmailAddress" class="sr-only">Email address</label>
               <input type="text" class="form-control" id="friendEmailAddress" placeholder="Enter email" ng-model="friendEmailAddress">
               <button type="button" class="btn btn-primary" ng-click="lookUpFriendClick()">Check <strong>{{friendEmailAddress}}</strong> user</button>
@@ -67,9 +69,15 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button id="" type="button" class="btn btn-primary">
-              Add user
+            <span ng-show="!user">You need to have a valid user.</span> <span ng-show="!oneChecked">You need to select at least one section.</span>
+            <button id="" type="button" class="btn btn-primary" ng-show="user && oneChecked">
+              Add user 
             </button>
+            <button id="" type="button" class="btn btn-primary" disabled="disabled" ng-show="!user || !oneChecked"
+            >
+              Add user 
+            </button>
+
             <button type="button" class="btn btn-link" data-dismiss="modal" ng-click="voidFriendScope()">
               Close
             </button>
