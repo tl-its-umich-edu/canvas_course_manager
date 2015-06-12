@@ -6,6 +6,7 @@
       <link rel="stylesheet" href="assets/css/custom_style.css">
       <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
       <link rel="stylesheet" href="assets/vendor/jquery/jquery-ui-1.11.2/jquery-ui.min.css">
+      <link rel="stylesheet" href="assets/vendor/animate/animate.css">
       <title>Canvas Support</title>
   </head>
   <body>
@@ -36,8 +37,8 @@
     <div role="tabpanel" style="margin-top:60px">
       <!-- Nav tabs -->
       <ul class="nav nav-tabs" role="tablist">
-          <li role="presentation" class="active"><a href="#sections" aria-controls="sections" role="tab" data-toggle="tab">Manage Sections</a></li>
-          <li role="presentation"><a href="#friends" aria-controls="friends" role="tab" data-toggle="tab">Friend Accounts</a></li>
+          <li role="presentation" class="active"><a href="#sections" aria-controls="sections" role="tab" data-toggle="tab">Sections & Friend Accounts</a></li>
+          <li role="presentation"><a href="#friends" aria-controls="friends" role="tab" data-toggle="tab">Other Things</a></li>
       </ul>
       <!-- Tab panes -->
       <div class="tab-content">
@@ -45,7 +46,7 @@
           <div ng-include src="'assets/views/courses.html'"></div>
         </div>
         <div role="tabpanel" class="tab-pane" id="friends" style="">
-          <div ng-include src="'assets/views/friends.html'"></div>
+          
         </div>
       </div>
     </div>
@@ -55,6 +56,10 @@
     <script src="assets/vendor/angular/angular.min.js">
     </script>
     <script src="assets/vendor/angular/sortable.js"></script>
+
+    <script src="assets/vendor/angular/angular-animate.min.js">
+    </script>
+
     <script src="assets/vendor/bootstrap/bootstrap.min.js">
     </script>
     <script src="assets/vendor/moment/moment.min.js">
@@ -71,7 +76,10 @@
     <script src="assets/js/factories/factories.js">
     </script>
     <script src="assets/js/filters/filters.js">
-      </script>
+    </script>
+    <script src="assets/js/services/services.js">
+    </script>
+
 
     <!-- XList Modal -->
     <div class="modal fade" id="xListModal" tabindex="-1" role="dialog" aria-labelledby="xListLabel" aria-hidden="true">
@@ -239,6 +247,13 @@
             </button>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- add user Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserLabel" aria-hidden="true" ng-controller="addUserController" ng-cloak>
+      <div class="modal-dialog modal-lg">
+        <div ng-include src="'assets/views/friends.html'"></div>
       </div>
     </div>
 

@@ -45,11 +45,23 @@ canvasSupportApp.factory('Friend', function ($http) {
         function success(result) {
           return result;
         },
-        function error(result) {
+        function error() {
           
         }
       );
-
+    },
+    newFriend: function (friendEmailAddress,friendNameFirst, friendNameLast) {
+      var url = '/sectionsUtilityTool/manager/api/v1/accounts/1/users?user[name]=' + friendNameFirst + ' ' + friendNameLast + '&user[short_name]=' + friendNameFirst + '&user[sortable_name]=' +  friendNameLast + ', ' +  friendNameFirst + '&pseudonym[unique_id]=' + friendEmailAddress;
+      console.log(url);
+      return $http.get(url, {cache: false}).then(
+        function success(result) {
+          return result;
+        },
+        function error() {
+          
+        }
+      );
     }
+  
   };
 });
