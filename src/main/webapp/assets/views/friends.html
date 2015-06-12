@@ -43,12 +43,12 @@
             </div>
             <div class="form-group form-inline form-group" ng-show="!newUser">
               <hr>
-              <h4> Step 2: Specify User {{oneChecked}}
+              <h4> Step 2: Specify User
               </h4>
 
               <label for="friendEmailAddress" class="sr-only">Email address</label>
               <input type="text" class="form-control" id="friendEmailAddress" placeholder="Enter email" ng-model="friendEmailAddress">
-              <button type="button" class="btn btn-primary" ng-click="lookUpFriendClick()">Check <strong>{{friendEmailAddress}}</strong> user</button>
+              <button id="friendEmailAddressButton" type="button" class="btn btn-primary" ng-click="lookUpFriendClick()">Check <strong>{{friendEmailAddress}}</strong> user</button>
               <div class="spinner" ng-show="loading">&nbsp;&nbsp;&nbsp;&nbsp;</div>
               <div id="addedFriendSuccess" class="alert  alert-success alert-inline" ng-show="friend.name">{{friendEmailAddress}} ({{friend.name}}) exists and can be added to selected sections.</div>
             </div>

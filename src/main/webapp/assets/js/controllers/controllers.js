@@ -184,7 +184,16 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$http', '
     }
   }
   $scope.voidFriendScope = function () {
-    $scope.course = {};
+   for(var e in $scope.course.sections) {
+      $scope.course.sections[e].isChecked = false;
+    }
+
+    $('#friendEmailAddress').val('');
+    $('#friendEmailAddressButton').text('Check');
+    $scope.oneChecked = false;
+    $scope.user = false;
+    $scope.newUser = false;
+    $scope.friend = {};
   }
   $scope.createFriendClick = function () {
     var friendEmailAddress = $scope.friendEmailAddress;
