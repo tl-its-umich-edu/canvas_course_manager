@@ -61,7 +61,7 @@
                                 <div class="btn-group pull-right">
                                     <a href="" class="btn btn-default btn-xs" ng-hide="item.sectionsShown" href="#" ng-click="getSections(item.id)">Get all sections <span class="sr-only"> for {{item.name}}</a> 
 
-                                    <a href="" class="btn btn-default btn-xs" ng-show="item.sectionsShown" href="#" ng-click="addUserModal(item.id)" data-toggle="modal"  data-target="#addUserModal" ><i class="glyphicon glyphicon-plus"></i><span class="sr-only"> Add user</a> 
+                                    <a href="" data-toggle="modal"  data-target="#addUserModal" class="btn btn-default btn-xs" ng-show="item.sectionsShown" href="#" ng-click="addUserModal(item.id)"><i class="glyphicon glyphicon-plus"></i><span class="sr-only"> Add user</a> 
                                     
                                     <button class="btn btn-default btn-xs getEnrollements" data-courseid="{{item.id}}" data-toggle="modal" data-target="#courseGetEnrollmentsModal" title="Get Enrollments"><span class="sr-only">Get Enrollments</span><i class="glyphicon glyphicon-user"></i></button>
                                     <button class="btn btn-default btn-xs getCourseInfo" data-courseid="{{item.id}}" data-toggle="modal" data-target="#courseInfoModal" title="Get Course Info"><span class="sr-only">Get Course Info</span><i class="glyphicon glyphicon-info-sign"></i></button>

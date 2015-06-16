@@ -156,7 +156,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$http', '
   
   $scope.$on('courseSetChanged', function(event, sectionSet) {
       $scope.course = sectionSet[0];
-  });  
+  });
 
   $scope.lookUpFriendClick = function (friendId) {
     $scope.friend = {};
@@ -182,19 +182,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$http', '
         $scope.oneChecked = true;
       }
     }
-  }
-  $scope.voidFriendScope = function () {
-   for(var e in $scope.course.sections) {
-      $scope.course.sections[e].isChecked = false;
-    }
-
-    $('#friendEmailAddress').val('');
-    $('#friendEmailAddressButton').text('Check');
-    $scope.oneChecked = false;
-    $scope.user = false;
-    $scope.newUser = false;
-    $scope.friend = {};
-  }
+  };
   $scope.createFriendClick = function () {
     var friendEmailAddress = $scope.friendEmailAddress;
     var friendNameFirst = $scope.friendNameFirst;

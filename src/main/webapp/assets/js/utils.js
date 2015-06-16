@@ -432,6 +432,24 @@ $(document).on('click', '.openOtherInstructorModal', function (e) {
 });
 
 
+//cleaning up scope of adding friend panel
+$(document).on('hidden.bs.modal', '#addUserModal', function(){
+    var appElement = $('#addUserModal');
+  var $scope = angular.element(appElement).scope();
+  $scope.$apply(function() {
+   for(var e in $scope.course.sections) {
+      $scope.course.sections[e].isChecked = false;
+    }
+    $('#friendEmailAddress').val('');
+    $('#friendEmailAddressButton').text('Check');
+    $scope.oneChecked = false;
+    $scope.user = false;
+    $scope.newUser = false;
+    $scope.friend = {};
+
+
+  });
+});;
 
 // open a modal where user can search for courses with no instructor and select them
 $(document).on('click', '#courseStringTrigger', function (e) {
