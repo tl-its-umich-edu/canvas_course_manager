@@ -10,8 +10,7 @@
 }
 
 .contentWrapper {
-    margin-top: 55px;
-    padding:10px;
+    padding:25px 10px;
 }
 
 #content {
@@ -53,13 +52,19 @@ ul {
 li.activeCourse button.setSections {
     display:inline !important;
 }
-.sectionList {
+.sectionList, .sectionListAddFriend {
     min-height: 25px;
 }
 .sectionList li:hover {
     cursor:move;
     cursor: -webkit-grab; 
     cursor: -moz-grab;
+}
+.sectionListAddFriend li:hover {
+    cursor:default;
+    cursor: default; 
+    cursor: default;
+
 }
 .sectionList li.grabbing {
     background-color:#eee;
@@ -137,6 +142,32 @@ li.activeCourse button.setSections {
 .otherInstructorInner {
     max-height: calc(100vh - 210px) !important;
     overflow-y: auto !important;
+}
+#courseGetEnrollmentsModal {
+    z-index: 2000
+}
+
+.alert-inline {
+    display:inline-block;font-size: 14px;font-weight: 400;
+    line-height: 1.42857;
+    margin-bottom: 0;
+    padding: 6px 12px;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.alert-inline.ng-enter {
+    -webkit-animation:slideInRight 2s both ease, fadeIn 1s both ease 2s;
+    -moz-animation:slideInRight 2s both ease, fadeIn 1s both ease 2s;
+    animation:slideInRight 2s both ease, fadeIn 1s both ease 2s; 
+}
+
+/* leave animation */
+.alert-inline.ng-leave            { 
+    -webkit-animation:slideOutLeft 2s both ease 1s, fadeOut 1s both ease;
+    -moz-animation:slideOutLeft 2s both ease 1s, fadeOut 1s both ease;
+    animation:slideOutLeft 2s both ease 1s, fadeOut 1s both ease;   
 }
 
 [ng-cloak] {

@@ -1,15 +1,8 @@
 'use strict';
-/* global $,  angular, getTermArray, _, getCurrentTerm, errorDisplay */
-
-var sectionsApp = angular.module('sectionsApp', ['sectionsFilters','ui.sortable']);
-
-sectionsApp.run(function ($rootScope) {
-  $rootScope.user = $.trim($('#uniqname').val().toLowerCase());
-});
-
+/* global $, canvasSupportApp, getTermArray, _, getCurrentTerm, errorDisplay */
 
 /* TERMS CONTROLLER */
-sectionsApp.controller('termsController', ['Courses', '$rootScope', '$scope', '$http', function (Courses, $rootScope, $scope, $http) {
+canvasSupportApp.controller('termsController', ['Courses', '$rootScope', '$scope', '$http', function (Courses, $rootScope, $scope, $http) {
   //void the currently selected term
   $scope.selectedTerm = null;
   //reset term scope
@@ -39,7 +32,7 @@ sectionsApp.controller('termsController', ['Courses', '$rootScope', '$scope', '$
 
 
 //COURSES CONTROLLER
-sectionsApp.controller('coursesController', ['Courses', 'Sections', '$rootScope', '$scope', function (Courses, Sections, $rootScope, $scope) {
+canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootScope', '$scope', 'SectionSet', function (Courses, Sections, $rootScope, $scope, SectionSet) {
 
  $scope.getCoursesForUniqname = function () {
     var uniqname = $.trim($('#uniqname').val().toLowerCase());
@@ -143,10 +136,70 @@ sectionsApp.controller('coursesController', ['Courses', 'Sections', '$rootScope'
         //deal with this
       }
     });
-};
+  };
+  $scope.addUserModal = function(courseId){
+        var course = $scope.courses.indexOf(_.findWhere($scope.courses, {id: courseId}));
+        SectionSet.setSectionSet($scope.courses[course]);
+    };
 
 
-
+  $scope.addUserModal = function(courseId){
+    var course = $scope.courses.indexOf(_.findWhere($scope.courses, {id: courseId}));
+    SectionSet.setSectionSet($scope.courses[course]);
+  };
 }]);
 
 
+
+/* FRIEND PANEL CONTROLLER */
+canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$http', 'SectionSet', function (Friend, $scope, $http, SectionSet) {
+  
+  $scope.$on('courseSetChanged', function(event, sectionSet) {
+      $scope.course = sectionSet[0];
+  });
+
+  $scope.lookUpFriendClick = function (friendId) {
+    $scope.friend = {};
+    $scope.loading = true;
+    var friendId = $('#friendEmailAddress').val();
+    Friend.lookUpFriend(friendId).then(function (data) {
+      if (data.data.length ===1 && data.data[0].name) {
+        // here we add the person to the scope and then use another factory to add them to the site
+        $scope.friend = data.data[0];
+        $scope.user = true;
+        //$scope.friendEmailAddress = '';
+      } else {
+        // not an existing user - present interface to add
+        $scope.newUser = true;
+      }
+      $scope.loading = false;
+    });
+  };
+  $scope.checkAll = function(){
+    $scope.oneChecked = false;
+    for(var e in $scope.course.sections) {
+      if ($scope.course.sections[e].isChecked) {
+        $scope.oneChecked = true;
+      }
+    }
+  };
+  $scope.createFriendClick = function () {
+    var friendEmailAddress = $scope.friendEmailAddress;
+    var friendNameFirst = $scope.friendNameFirst;
+    var friendNameLast = $scope.friendNameLast;
+    $scope.done = false;
+    $scope.loading2 = true;
+    
+      setTimeout(function() {
+        $scope.$apply(function () {
+          $scope.loading2 = false;
+          $scope.done = true;
+          $scope.user = true;
+          //$scope.friendEmailAddress ='';
+          //$scope.friendNameFirst = '';
+          //$scope.friendNameLast = '';
+          //$scope.newUser = false;
+        });
+      }, 5 * 1000);
+  };
+}]);

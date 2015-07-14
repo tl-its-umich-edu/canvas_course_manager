@@ -1,0 +1,85 @@
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+              <span aria-hidden="true">&times;</span>
+              <span class="sr-only">Close</span>
+            </button>
+            <h3 class="modal-title" id="addUserLabel">Add a user to selected sections of {{course.course_code}}</span></h3>
+          </div>
+          <div class="modal-body addUserInner" id="addUserInner">
+            <h4> Step 1: Select Sections</h4>
+            <div class="coursePanel well">
+                <ul class="container-fluid courseList">
+                    <li data-course-id="{{course.id}}">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <strong>{{course.course_code}}</a></strong>
+                            </div>
+                            <div class="col-md-4">
+                            </div>
+                        </div>
+                        <!--//removed  ng-model="item.sections" below //-->
+                        <ul class="sectionListAddFriend" id="course{{course.id}}">
+                            <li ng-repeat="section in course.sections | orderBy:'name'" class="row section" data-sectionid="{{section.id}}">
+                                <div class="col-md-5 sectionName">
+                                    <input type="checkbox" id="{{section.id}}"
+                                    	ng-model="section.isChecked" ng-change="checkAll()">
+                                    <label for="{{section.id}}">{{section.name}}</label>
+                                </div>
+                                <div class="col-md-7">
+                                	<div class="btn-group pull-right">
+	                                	<select ng-show="section.isChecked">
+		                                	<option value="TeacherEnrollment">Teacher</option>
+																			<option value="StudentEnrollment">Student</option>
+																			<option value="TaEnrollment">TA</option>
+																			<option value="ObserverEnrollment">Observer</option>
+																			<option value="DesignerEnrollment">Designer</option>
+																		</select>
+                                </div>        
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div class="form-group form-inline form-group" ng-show="!newUser">
+              <hr>
+              <h4> Step 2: Specify User
+              </h4>
+
+              <label for="friendEmailAddress" class="sr-only">Email address</label>
+              <input type="text" class="form-control" id="friendEmailAddress" placeholder="Enter email" ng-model="friendEmailAddress">
+              <button id="friendEmailAddressButton" type="button" class="btn btn-primary" ng-click="lookUpFriendClick()">Check <strong>{{friendEmailAddress}}</strong> user</button>
+              <div class="spinner" ng-show="loading">&nbsp;&nbsp;&nbsp;&nbsp;</div>
+              <div id="addedFriendSuccess" class="alert  alert-success alert-inline" ng-show="friend.name">{{friendEmailAddress}} ({{friend.name}}) exists and can be added to selected sections.</div>
+            </div>
+            <div ng-show="newUser">
+              <h4> Step 2: Add User </h4>
+              <p>The specified user has no account - use the form below to create.</p>
+              <div class="form-group form-inline form-group">
+                  <label for="friendEmailAddress2" class="sr-only">Enter email</label>
+                  <input type="text" class="form-control" id="friendEmailAddress2" placeholder="Enter email" ng-model="friendEmailAddress">
+                  <label for="friendNameFirst" class="sr-only">First name</label>
+                  <input type="text" class="form-control" id="friendNameFirst" placeholder="First name" ng-model="friendNameFirst">
+                  <label for="friendNameLast" class="sr-only">Last name</label>
+                  <input type="text" class="form-control" id="friendNameLast" placeholder="Last name" ng-model="friendNameLast">
+                  <button type="button" class="btn btn-primary" ng-click="createFriendClick()">Create User</button>
+                  <div class="spinner" ng-show="loading2">&nbsp;&nbsp;&nbsp;&nbsp;</div>
+                  <div class="alert  alert-success alert-inline" ng-show="done">User created</div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <span ng-show="!user">You need to have a valid user.</span> <span ng-show="!oneChecked">You need to select at least one section.</span>
+            <button id="" type="button" class="btn btn-primary" ng-show="user && oneChecked">
+              Add user 
+            </button>
+            <button id="" type="button" class="btn btn-primary" disabled="disabled" ng-show="!user || !oneChecked"
+            >
+              Add user 
+            </button>
+
+            <button type="button" class="btn btn-link" data-dismiss="modal">
+              Close
+            </button>
+          </div>
+        </div>
