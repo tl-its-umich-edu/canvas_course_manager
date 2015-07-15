@@ -6,7 +6,8 @@
 2. Copy to tomcat/webapp
 3. Add the property file on linux box <code>sectionsToolPropsSecure.properties</code>,   
 then in JAVA_OPTS add the  
-<code>-DsectionsToolPropsPathSecure=file:/file-path/sectionsToolPropsSecure.properties</code>
+<code>-DsectionsToolPropsPathSecure=file:/file-path/sectionsToolPropsSecure.properties</code><br/>
+<code>-DsectionsToolFriendPropsPathSecure=file:/file-path/sectionsToolFriend.properties</code>
 4. Add the following 5 properties to sectionsToolPropsSecure.properties: 
 
     <code>canvas.admin.token=canvas token  
@@ -14,13 +15,24 @@ then in JAVA_OPTS add the
     use.test.url=true  
     ldap.server.url=ldap server e.g. ldap://ldap.itd.umich.edu:389/dc=umich,dc=edu  
     mcomm.group=group that can use this tool e.g. its-canvas-sections</code>
+5. Add the following 8 properties to sectionsToolFriend.properties: 
 
-5. Run this in local  
+	<code>
+	ctools.friend.url= friend URL either QA or PROD    
+	ctools.friend.contactemail=ctools contact email for QA or help desk for prod       
+	ctools.friend.referrer=Friend referrer url                            
+	ctools.friend.ksfilename=Key store file name	
+	ctools.friend.kspassword=Key store password		
+	ctools.friend.friendemail=/file-path/friendEmail.template	
+	ctools.friend.requesteremail=/file-path/requesterEmail.template
+	ctools.friend.host=URL or IP address to mail server host
+    </code>
+6. Run this in local  
 <code>http://localhost:port/sectionsUtilityTool/?testUser=uniquename</code>
   1. testUser parameter is not allowed in Prod and this is controlled by above property with value called <code>use.test.url=false</code>
   2. We will enable the cosign for authentication the user so we will get remote user info through that.
 
-6.Enable application level logging using the log4j.properties files. Put this file in tomcat/lib directory and add the content between the 
+7. Enable application level logging using the log4j.properties files. Put this file in tomcat/lib directory and add the content between the 
  
 ```
 log4j.rootLogger=INFO, A1
@@ -32,7 +44,7 @@ log4j.appender.A1.layout.ConversionPattern=%d [%t] %-5p %c - %m%n
 #log4j.logger.edu.umich=INFO
 log4j.logger.edu.umich=DEBUG 
 ```
-7.  For Adding Build information to the Project Release candidate populate src/main/webapps/build.txt with information about the current build (GIT commit, build time, etc.).
+8. For Adding Build information to the Project Release candidate populate src/main/webapps/build.txt with information about the current build (GIT commit, build time, etc.).
     If using Jenkins to build the application, the following script placed in the "Execute Shell" part of the "Pre Steps" section would do the job:
     
     
