@@ -5,4 +5,5 @@ ctools.friend.ksfilename=
 ctools.friend.kspassword=
 ctools.friend.friendemail=
 ctools.friend.requesteremail=
-ctools.friend.host=
+ctools.friend.mailhost=
+ctools.friend.subjectline=

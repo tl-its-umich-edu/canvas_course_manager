@@ -1,5 +1,6 @@
 package edu.umich.ctools.sectionsUtilityTool;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.ArrayList;
@@ -46,16 +47,13 @@ import org.apache.xmlrpc.client.XmlRpcSun15HttpTransportFactory;
 
 import edu.umich.its.lti.utils.PropertiesUtilities;
 
-//TODO - Email Templates
-
 public class Friend 
 {
 
 	private static Log M_log = LogFactory.getLog(Friend.class);
 
-	//Currently it uses xmlrpc for communication
-	public static XmlRpcClient Xclient;
-
+	private static boolean sslInitialized = false;
+	
 	protected static String friendUrl = null;
 	protected static String contactEmail = null;
 	protected static String emailMessage = null;
@@ -64,22 +62,37 @@ public class Friend
 	protected static String ksPwd = null;
 	protected static String friendEmailFile = null;
 	protected static String requesterEmailFile = null;
+	protected static String mailHost = null;
+	protected static String subjectLine = null;
+	protected static Properties appExtSecurePropertiesFile=null;
 
-	public final String KEYSTORETYPE_PKCS12 = "pkcs12";
-
-	public final String TRUSTSTORETYPE_JKS = "jks";
-
-	private static boolean sslInitialized = false;
+	protected static final String KEYSTORETYPE_PKCS12 = "pkcs12";
+	protected static final String TRUSTSTORETYPE_JKS = "jks";
 	
+	protected static final String DO_ACCOUNT_EXIST_WS = "doAccountsExist";
+	protected static final String SEND_INVITES_WS = "sendInvites";
+	
+	protected static final String INSTRUCTOR_NAME_TAG = "<instructor>";
+	protected static final String CONTACT_EMAIL_TAG = "<contactEmail>";
+
 	protected static final String FRIEND_PROPERTY_FILE_PATH_SECURE = "sectionsToolFriendPropsPathSecure";
 	
-	protected static Properties appExtSecurePropertiesFile=null;
-	
-
-	public void init()
-	{
-		M_log.info(this +".init()");
+	public Friend() throws MalformedURLException {
+		super();
 		
+		setProperties();
+		
+		Xclient = new XmlRpcClient();
+		XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
+		config.setServerURL(new URL(friendUrl));
+		Xclient.setTransportFactory(new XmlRpcSun15HttpTransportFactory(Xclient));
+		Xclient.setConfig(config);
+	}
+
+	private XmlRpcClient Xclient;
+
+	public void setProperties()
+	{
 		String propertiesFilePathSecure = System.getProperty(FRIEND_PROPERTY_FILE_PATH_SECURE);
 		M_log.info("props: " + propertiesFilePathSecure);
 		if (!propertiesFilePathSecure.isEmpty()) {
@@ -93,6 +106,8 @@ public class Friend
 				ksPwd = appExtSecurePropertiesFile.getProperty("ctools.friend.kspassword");
 				friendEmailFile = appExtSecurePropertiesFile.getProperty("ctools.friend.friendemail");
 				requesterEmailFile = appExtSecurePropertiesFile.getProperty("ctools.friend.requesteremail");
+				mailHost = appExtSecurePropertiesFile.getProperty("ctools.friend.mailhost");
+				subjectLine = appExtSecurePropertiesFile.getProperty("ctools.friend.subjectline");
 				
 				M_log.debug("friendUrl: " + friendUrl);
 				M_log.debug("contactEmail: " + contactEmail);
@@ -100,19 +115,20 @@ public class Friend
 				M_log.debug("ksFileName: " + ksFileName);
 				M_log.debug("ksPwd: " + ksPwd);
 			}else {
-				M_log.error("Failed to load secure application properties from sectionsToolPropsSecure.properties for SectionsTool");
+				M_log.error("Failed to load secure application properties from sectionsToolFriend.properties for SectionsTool");
 			}
 			
 		}else {
-			M_log.error("File path for (sectionsToolPropsPathSecure.properties) is not provided");
+			M_log.error("File path for (sectionsToolFriend.properties) is not provided");
 		}
 
+		//Setting up properties for keyStore
 		Properties systemProps = System.getProperties();
 		String keyStoreType = (String) systemProps.get("javax.net.ssl.keyStoreType");
 		String trustStoreType = (String) systemProps.get("javax.net.ssl.trustStoreType");
 		if (keyStoreType != null && !KEYSTORETYPE_PKCS12.equals(keyStoreType)) // existing keyStoreType 
 		{
-			M_log.error(this + " init: existing settings of SSL keyStoreType mismatch: " + keyStoreType );
+			M_log.error(this + " setProperties: existing settings of SSL keyStoreType mismatch: " + keyStoreType );
 			sslInitialized = false;
 		}
 		else if (trustStoreType != null  && !TRUSTSTORETYPE_JKS.equals(trustStoreType)) // existing trustStoreType
@@ -189,17 +205,14 @@ public class Friend
 	 * 1 = friend account exists 
 	 *
 	 */
-	public static int checkAccountExist(String email) {
+	public CheckAccountExistsResponse checkAccountExist(String email) {
+		M_log.debug("Friend checkAccountExists() called");
+		CheckAccountExistsResponse response = CheckAccountExistsResponse.FRIEND_ACCOUNT_DOES_NOT_EXIST;
 		int rv = 0;	// default to be "no friend account"
 		try {
-			Xclient = new XmlRpcClient();
-			XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
-			config.setServerURL(new URL(friendUrl));
-			Xclient.setTransportFactory(new XmlRpcSun15HttpTransportFactory(Xclient));
-			Xclient.setConfig(config);
 			
 			Object[] params = new Object[]{new String[] {email}};
-			Object[] results = (Object[]) Xclient.execute("doAccountsExist", params);
+			Object[] results = (Object[]) Xclient.execute(DO_ACCOUNT_EXIST_WS, params);
 			// though the friend XML-RPC service supports batch call mode, 
 			// due to the ctools event model ( one "user added event" per user), 
 			// we will pass only one email address to the doAccountsExit call for now
@@ -211,14 +224,34 @@ public class Friend
 		}
 		catch (Exception e) {
 			M_log.warn("Friend checkAccountExist(): email address " + email + " " + e.getMessage());
-			e.printStackTrace();
 		}
-		return rv;
+		if(rv == -1){
+			response = CheckAccountExistsResponse.INVALID_EMAIL;
+		}
+		if(rv == 0){
+			response = CheckAccountExistsResponse.FRIEND_ACCOUNT_DOES_NOT_EXIST;
+		}
+		if(rv == 1){
+			response = CheckAccountExistsResponse.FRIEND_ACCOUNT_ALREADY_EXISTS;
+		}
+		return response;
 	}
 
 	public static String readFile(String path, Charset encoding) throws IOException{
 		byte[] encoded = Files.readAllBytes(Paths.get(path));
 		return new String(encoded, encoding);
+	}
+	
+	public static String replacePlaceHolders(String message, HashMap<String,String> map){
+		
+		Iterator<String> keySetIterator = map.keySet().iterator();
+		
+		while(keySetIterator.hasNext()){ 
+			String key = keySetIterator.next(); 
+			message = message.replace(key, map.get(key)); 
+		}
+		
+		return message;
 	}
 	
 	
@@ -237,24 +270,25 @@ public class Friend
 
 	//accountEmail == userToBeInvited
 	//currentUserEmail == instructorEmail
-	public static int doSendInvite(String accountEmail, 
+	public CreateAccountResponse doSendInvite(String accountEmail, 
 			String currentUserEmail, 
 			String instructorName) {
-		int rv = 0; // default to 
+		M_log.debug("Friend doSendInvite() called");
+		CreateAccountResponse response = CreateAccountResponse.RUNTIME_PROBLEM;
+		int rv = 0; // default to be "runtime error"
 		
 		try {
-			emailMessage = Friend.readFile(friendEmailFile, StandardCharsets.UTF_8);
-			emailMessage = emailMessage.replace("<instructor>", instructorName);
-			emailMessage = emailMessage.replace("<contactEmail>", contactEmail);
 			
-			Xclient = new XmlRpcClient();
-			XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
-			config.setServerURL(new URL(friendUrl));
-			Xclient.setTransportFactory(new XmlRpcSun15HttpTransportFactory(Xclient));
-			Xclient.setConfig(config);
+			HashMap<String, String> map = new HashMap<String,String>();
+			
+			map.put(INSTRUCTOR_NAME_TAG, instructorName);
+			map.put(CONTACT_EMAIL_TAG, contactEmail);
+			
+			emailMessage = Friend.readFile(friendEmailFile, StandardCharsets.UTF_8);
+			emailMessage = replacePlaceHolders(emailMessage, map);
 			
 			Object[] params = new Object[]{contactEmail, referrerUrl, emailMessage, new String[]{accountEmail}, currentUserEmail};
-			Object[] results = (Object[]) Xclient.execute("sendInvites", params);
+			Object[] results = (Object[]) Xclient.execute(SEND_INVITES_WS, params);
 			// though the friend XML-RPC service supports batch call mode, 
 			// due to the ctools event model ( one "user added event" per user), 
 			// we will pass only one email address to the "sendInvites" call for now
@@ -267,35 +301,47 @@ public class Friend
 		catch (Exception e) {
 			M_log.warn("Friend doSendInvite(): email address=" + accountEmail + " " + e.getMessage());
 		}
-
-		return rv;
+		if(rv == -1){
+			response = CreateAccountResponse.INVALID_EMAIL;
+		}
+		if(rv == 0){
+			response = CreateAccountResponse.RUNTIME_PROBLEM;
+		}
+		if(rv == 1){
+			response = CreateAccountResponse.INVITATION_SUCCESSFULLY_SENT;
+		}
+		return response;
 	}    
 
 	public static void notifyCurrentUser(String instructorName, String instructorEmail, String inviteEmail){
 
+		M_log.debug("Friend notifyCurrentUser() called");
 		String to = instructorEmail;
 		String from = contactEmail;
-		String subjectLine = "Friend Accounts Integration Email";
-		//This will need to be changed to properties
-		String host = "deluxe.dsc.umich.edu";
+		String host = mailHost;
 
-		System.out.println("Setting up props");
+		M_log.info("Setting up mailProps");
+		
 		Properties properties = System.getProperties();
 		properties.put("mail.smtp.auth", "false");
 		properties.put("mail.smtp.starttls.enable", "true"); //Put below to false, if no https is needed
 		properties.put("mail.smtp.host", host);
 		properties.put("mail.debug", "true");
 
-		System.out.println("Initiating Session");
+		M_log.debug("Initiating Session for sendMail");
 		Session session = Session.getInstance(properties);
 
 		try{
 			
-			emailMessage = Friend.readFile(requesterEmailFile, StandardCharsets.UTF_8);
-			emailMessage = emailMessage.replace("<instructor>", instructorName);
-			emailMessage = emailMessage.replace("<friend>", inviteEmail);
+			HashMap<String, String> map = new HashMap<String,String>();
 			
-			System.out.println("Setting up message");
+			map.put("<instructor>", instructorName);
+			map.put("<friend>", inviteEmail);
+			
+			emailMessage = Friend.readFile(requesterEmailFile, StandardCharsets.UTF_8);
+			emailMessage = replacePlaceHolders(emailMessage, map);
+						
+			M_log.debug("Setting up message for sendMail");
 			MimeMessage message = new MimeMessage(session);
 			message.setFrom(new InternetAddress(from));
 			message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
@@ -303,14 +349,13 @@ public class Friend
 			
 			message.setText(emailMessage);
 
-			System.out.println("Sending message");
+			M_log.info("Sending message");
 			Transport.send(message);
 
-			System.out.println("Message sent to " + instructorName);
+			M_log.info("Message sent to " + instructorName);
 
 		}catch (Exception e){
-			System.out.println("quasiNotifyCurrentUser exception:");
-			e.printStackTrace();
+			M_log.error("notifyCurrentUser exception: " + e.getMessage());
 		}
 	}
 	
