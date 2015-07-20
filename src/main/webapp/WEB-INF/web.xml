@@ -23,7 +23,16 @@
 		<servlet-name>SectionsServlet</servlet-name>
 		<url-pattern>/manager/*</url-pattern>
 	</servlet-mapping>
-	
+
+	<servlet>
+		<servlet-name>FriendServlet</servlet-name>
+		<servlet-class>edu.umich.ctools.sectionsUtilityTool.FriendServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>FriendServlet</servlet-name>
+		<url-pattern>/friend/*</url-pattern>
+	</servlet-mapping>
+
 	<servlet-mapping>
 	    <servlet-name>default</servlet-name>
 	    <url-pattern>*.html</url-pattern>

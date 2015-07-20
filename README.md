@@ -6,7 +6,10 @@
 2. Copy to tomcat/webapp
 3. Add the property file on linux box <code>sectionsToolPropsSecure.properties</code>,   
 then in JAVA_OPTS add the  
-<code>-DsectionsToolPropsPathSecure=file:/file-path/sectionsToolPropsSecure.properties</code>
+<code>-DsectionsToolPropsPathSecure=file:/file-path/sectionsToolPropsSecure.properties</code><br/>
+<code>-DsectionsToolFriendPropsPathSecure=file:/file-path/sectionsToolFriend.properties</code><br/>
+<code>-DsectionsToolFriendPropsPathSecure=file:/file-path/sectionsToolFriendSecure.properties</code><br/>
+
 4. Add the following 5 properties to sectionsToolPropsSecure.properties: 
 
     <code>canvas.admin.token=canvas token  
@@ -14,15 +17,31 @@ then in JAVA_OPTS add the
     use.test.url=true  
     ldap.server.url=ldap server e.g. ldap://ldap.itd.umich.edu:389/dc=umich,dc=edu  
     mcomm.group=group that can use this tool e.g. its-canvas-sections</code>
+5. Add the following 7 properties to sectionsToolFriend.properties:<br/> 
+<code>
+ctools.friend.url= friend URL either QA or PROD<br/>
+ctools.friend.contactemail= ctools contact email for QA or help desk for prod<br/>
+ctools.friend.referrer= Friend referrer url<br/>
+ctools.friend.ksfilename= Key store file name<br/>
+ctools.friend.friendemail= /file-path/friendEmail.template<br/>
+ctools.friend.requesteremail= /file-path/requesterEmail.template<br/>
+ctools.friend.mailhost= URL or IP address to mail server hostne<br/>
+ctools.friend.subjectline= Subject line pertaining to confirmation email delivered to instructor<br/>
+</code>    
 
-5. Run this in local  
-<code>http://localhost:port/sectionsUtilityTool/?testUser=uniquename</code>
-  1. testUser parameter is not allowed in Prod and this is controlled by above property with value called <code>use.test.url=false</code>
-  2. We will enable the cosign for authentication the user so we will get remote user info through that.
+6. Add the following 8 properties to sectionsToolFriendSecure.properties:<br/> 
+<code>
+ctools.friend.ksfilename= Key store file name<br/>
+ctools.friend.kspassword= Password for accessing keystore file<br/>
+</code>  
 
-6.Enable application level logging using the log4j.properties files. Put this file in tomcat/lib directory and add the content between the 
+7. Run this in local  
+<code>http://localhost:port/sectionsUtilityTool/?testUser=uniquename</code><br/>i. testUser parameter is not allowed in Prod and this is controlled by above property with value called <code>use.test.url=false</code><br/>
+ii. We will enable the cosign for authentication the user so we will get remote user info through that.<br/>
+
+8. Enable application level logging using the log4j.properties files. Put this file in tomcat/lib directory and add the content between the 
  
-```
+	```
 log4j.rootLogger=INFO, A1
 log4j.appender.A1=org.apache.log4j.ConsoleAppender
 log4j.appender.A1.layout=org.apache.log4j.PatternLayout
@@ -32,11 +51,12 @@ log4j.appender.A1.layout.ConversionPattern=%d [%t] %-5p %c - %m%n
 #log4j.logger.edu.umich=INFO
 log4j.logger.edu.umich=DEBUG 
 ```
-7.  For Adding Build information to the Project Release candidate populate src/main/webapps/build.txt with information about the current build (GIT commit, build time, etc.).
+
+9. For Adding Build information to the Project Release candidate populate src/main/webapps/build.txt with information about the current build (GIT commit, build time, etc.).
     If using Jenkins to build the application, the following script placed in the "Execute Shell" part of the "Pre Steps" section would do the job:
     
     
- ``` 
+	 ``` 
     cd src/main/webapp
     if [ -f "build.txt" ]; then
       echo "build.txt found."
