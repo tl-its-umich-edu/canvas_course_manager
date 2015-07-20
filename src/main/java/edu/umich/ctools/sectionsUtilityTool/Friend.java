@@ -65,6 +65,7 @@ public class Friend
 	protected static String mailHost = null;
 	protected static String subjectLine = null;
 	protected static Properties appExtSecurePropertiesFile=null;
+	protected static Properties appExtFriendSecurePropertiesFile=null;
 
 	protected static final String KEYSTORETYPE_PKCS12 = "pkcs12";
 	protected static final String TRUSTSTORETYPE_JKS = "jks";
@@ -75,7 +76,13 @@ public class Friend
 	protected static final String INSTRUCTOR_NAME_TAG = "<instructor>";
 	protected static final String CONTACT_EMAIL_TAG = "<contactEmail>";
 
+	protected static final String FRIEND_PROPERTY_FILE_PATH = "sectionsToolFriendPropsPath";
 	protected static final String FRIEND_PROPERTY_FILE_PATH_SECURE = "sectionsToolFriendPropsPathSecure";
+	
+	protected static final String MAIL_SMTP_AUTH = "mail.smtp.auth";
+	protected static final String MAIL_SMTP_STARTTLS = "mail.smtp.starttls.enable";
+	protected static final String MAIL_SMTP_HOST = "mail.smtp.host";
+	protected static final String MAIL_DEBUG = "mail.debug";
 	
 	public Friend() throws MalformedURLException {
 		super();
@@ -93,8 +100,8 @@ public class Friend
 
 	public void setProperties()
 	{
-		String propertiesFilePathSecure = System.getProperty(FRIEND_PROPERTY_FILE_PATH_SECURE);
-		M_log.info("props: " + propertiesFilePathSecure);
+		String propertiesFilePathSecure = System.getProperty(FRIEND_PROPERTY_FILE_PATH);
+		M_log.info("friend props: " + propertiesFilePathSecure);
 		if (!propertiesFilePathSecure.isEmpty()) {
 			appExtSecurePropertiesFile=PropertiesUtilities.getPropertiesObjectFromURL(propertiesFilePathSecure);
 			if(appExtSecurePropertiesFile!=null) {
@@ -102,8 +109,8 @@ public class Friend
 				friendUrl = appExtSecurePropertiesFile.getProperty("ctools.friend.url");
 				contactEmail = appExtSecurePropertiesFile.getProperty("ctools.friend.contactemail");
 				referrerUrl = appExtSecurePropertiesFile.getProperty("ctools.friend.referrer");
-				ksFileName = appExtSecurePropertiesFile.getProperty("ctools.friend.ksfilename");
-				ksPwd = appExtSecurePropertiesFile.getProperty("ctools.friend.kspassword");
+				//ksFileName = appExtSecurePropertiesFile.getProperty("ctools.friend.ksfilename");
+				//ksPwd = appExtSecurePropertiesFile.getProperty("ctools.friend.kspassword");
 				friendEmailFile = appExtSecurePropertiesFile.getProperty("ctools.friend.friendemail");
 				requesterEmailFile = appExtSecurePropertiesFile.getProperty("ctools.friend.requesteremail");
 				mailHost = appExtSecurePropertiesFile.getProperty("ctools.friend.mailhost");
@@ -112,14 +119,32 @@ public class Friend
 				M_log.debug("friendUrl: " + friendUrl);
 				M_log.debug("contactEmail: " + contactEmail);
 				M_log.debug("referrerUrl: " + referrerUrl);
-				M_log.debug("ksFileName: " + ksFileName);
-				M_log.debug("ksPwd: " + ksPwd);
+				//M_log.debug("ksFileName: " + ksFileName);
+				//M_log.debug("ksPwd: " + ksPwd);
 			}else {
-				M_log.error("Failed to load secure application properties from sectionsToolFriend.properties for SectionsTool");
+				M_log.error("Failed to load Friend application properties from sectionsToolFriend.properties for SectionsTool");
 			}
 			
 		}else {
 			M_log.error("File path for (sectionsToolFriend.properties) is not provided");
+		}
+		
+		String propertiesFriendFilePathSecure = System.getProperty(FRIEND_PROPERTY_FILE_PATH_SECURE);
+		M_log.info("friend secure props: " + propertiesFriendFilePathSecure);
+		if (!propertiesFriendFilePathSecure.isEmpty()) {
+			appExtFriendSecurePropertiesFile=PropertiesUtilities.getPropertiesObjectFromURL(propertiesFriendFilePathSecure);
+			if(appExtFriendSecurePropertiesFile!=null) {
+				ksFileName = appExtFriendSecurePropertiesFile.getProperty("ctools.friend.ksfilename");
+				ksPwd = appExtFriendSecurePropertiesFile.getProperty("ctools.friend.kspassword");
+				
+				M_log.debug("ksFileName: " + ksFileName);
+				M_log.debug("ksPwd: " + ksPwd);
+			}else {
+				M_log.error("Failed to load secure Friend application properties from sectionsToolFriend.properties for SectionsTool");
+			}
+			
+		}else {
+			M_log.error("File path for (sectionsToolFriendSecure.properties) is not provided");
 		}
 
 		//Setting up properties for keyStore
@@ -323,10 +348,10 @@ public class Friend
 		M_log.info("Setting up mailProps");
 		
 		Properties properties = System.getProperties();
-		properties.put("mail.smtp.auth", "false");
-		properties.put("mail.smtp.starttls.enable", "true"); //Put below to false, if no https is needed
-		properties.put("mail.smtp.host", host);
-		properties.put("mail.debug", "true");
+		properties.put(MAIL_SMTP_AUTH, "false");
+		properties.put(MAIL_SMTP_STARTTLS, "true"); //Put below to false, if no https is needed
+		properties.put(MAIL_SMTP_HOST, host);
+		properties.put(MAIL_DEBUG, "true");
 
 		M_log.debug("Initiating Session for sendMail");
 		Session session = Session.getInstance(properties);
