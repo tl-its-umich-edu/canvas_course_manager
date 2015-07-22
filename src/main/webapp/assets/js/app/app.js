@@ -5,5 +5,7 @@ var canvasSupportApp = angular.module('canvasSupportApp', ['sectionsFilters','ui
 
 canvasSupportApp.run(function ($rootScope) {
 	//for any init values needed
+	$rootScope.server = "";
+	$rootScope.user = {};
 });
 

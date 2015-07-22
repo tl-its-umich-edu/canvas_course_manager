@@ -169,6 +169,8 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', 'SectionSe
     var friendId = $('#friendEmailAddress').val();
     Friend.lookUpCanvasFriend(friendId).then(function (data) {
       if (data.data.length ===1 && data.data[0].name) {
+        // TODO: check Friend account correlate
+        // and if there is one, call this done, if not, create it
         $scope.friend = data.data[0];
         $scope.user = true;
       } else {
@@ -196,6 +198,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', 'SectionSe
         Friend.createCanvasFriend(friendEmailAddress,friendNameFirst, friendNameLast).then(function (data) {
           if (data.data.length ===1 && data.data[0].name) {
             // here we add the person to the scope and then use another factory to add them to the site
+            console.log('canvas user ' + friendEmailAddress + ' created');
             $scope.friend = data.data[0];
             $scope.user = true;
             //$scope.friendEmailAddress = '';

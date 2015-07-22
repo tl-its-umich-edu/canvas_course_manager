@@ -53,14 +53,18 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
     createCanvasFriend: function (friendEmailAddress,friendNameFirst, friendNameLast) {
       var url = '/sectionsUtilityTool/manager/api/v1/accounts/1/users?' +
         'user[name]=' + friendNameFirst + ' ' + friendNameLast +
+        'pseudonym[uniqueID]=' + friendEmailAddress.replace('@','#') +
         '&user[short_name]=' + friendNameFirst +
         '&user[sortable_name]=' +  friendNameLast + ', ' +  friendNameFirst +
-        '&user[login_id]=' + friendEmailAddress +
-        '&user[email]=' + friendEmailAddress;
-      //console.log('canvas url=' + url);
+        'pseudonym[SIS_user_id]=' + friendEmailAddress +
+        'pseudonym[set_confirmation]=false' +
+        'communication_channel[type]=email' +
+        'communication_channel[address]=' + friendEmailAddress +
+        'communication_channel[skip_confirmation]=false';
+      console.log('canvas url=' + url);
       
-      /*
-      return $http.get(url, {cache: false}).then(
+      
+      return $http.post(url).then(
         function success(result) {
           return result;
         },
@@ -68,7 +72,7 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
           // TODO: report error
         }
       );
-      */
+      
     },
     doFriendAccount: function (friendEmailAddress) {
       // url will be internal to the servlet - get this from Kyle
