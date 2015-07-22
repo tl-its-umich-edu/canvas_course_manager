@@ -23,7 +23,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <h1 class="navbar-brand collapse-nav">Canvas Support <small id="serverInfo">{{server}}</small></h1>
+                <h1 class="navbar-brand collapse-nav">Canvas Support <small id="serverInfo" ng-show="server">{{server}}</small> <small ng-show="user.uniqname">(for {{user.uniqname}})</small></h1>
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">

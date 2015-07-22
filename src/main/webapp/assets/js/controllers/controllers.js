@@ -1,5 +1,5 @@
 'use strict';
-/* global $, canvasSupportApp, getTermArray, _, getCurrentTerm, errorDisplay */
+/* global $, canvasSupportApp, getTermArray, _, getCurrentTerm, errorDisplay, validateUniqname, generateCurrentTimestamp */
 
 /* TERMS CONTROLLER */
 canvasSupportApp.controller('termsController', ['Courses', '$rootScope', '$scope', '$http', function (Courses, $rootScope, $scope, $http) {
@@ -80,6 +80,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
             $scope.errorLookup = false;
             $scope.loading = false;
             $rootScope.server = result.data[0].calendar.ics.split('/feed')[0];
+            $rootScope.user.uniqname = uniqname;
           }
         }
       });
@@ -137,11 +138,6 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
       }
     });
   };
-  $scope.addUserModal = function(courseId){
-        var course = $scope.courses.indexOf(_.findWhere($scope.courses, {id: courseId}));
-        SectionSet.setSectionSet($scope.courses[course]);
-    };
-
 
   $scope.addUserModal = function(courseId){
     var course = $scope.courses.indexOf(_.findWhere($scope.courses, {id: courseId}));
@@ -152,29 +148,12 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
 
 
 /* FRIEND PANEL CONTROLLER */
-canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$http', 'SectionSet', function (Friend, $scope, $http, SectionSet) {
+canvasSupportApp.controller('addUserController', ['Friend', '$scope', 'SectionSet', function (Friend, $scope, SectionSet) {
   
   $scope.$on('courseSetChanged', function(event, sectionSet) {
       $scope.course = sectionSet[0];
   });
 
-  $scope.lookUpFriendClick = function (friendId) {
-    $scope.friend = {};
-    $scope.loading = true;
-    var friendId = $('#friendEmailAddress').val();
-    Friend.lookUpFriend(friendId).then(function (data) {
-      if (data.data.length ===1 && data.data[0].name) {
-        // here we add the person to the scope and then use another factory to add them to the site
-        $scope.friend = data.data[0];
-        $scope.user = true;
-        //$scope.friendEmailAddress = '';
-      } else {
-        // not an existing user - present interface to add
-        $scope.newUser = true;
-      }
-      $scope.loading = false;
-    });
-  };
   $scope.checkAll = function(){
     $scope.oneChecked = false;
     for(var e in $scope.course.sections) {
@@ -183,23 +162,57 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$http', '
       }
     }
   };
+
+  $scope.lookUpCanvasFriendClick = function () {
+    $scope.friend = {};
+    $scope.loading = true;
+    var friendId = $('#friendEmailAddress').val();
+    Friend.lookUpCanvasFriend(friendId).then(function (data) {
+      if (data.data.length ===1 && data.data[0].name) {
+        $scope.friend = data.data[0];
+        $scope.user = true;
+      } else {
+        // not an existing user - present interface to add
+        // TODO: need to see if there is a Friend account correlate
+        $scope.newUser = true;
+      }
+      $scope.loading = false;
+    });
+  };
   $scope.createFriendClick = function () {
-    var friendEmailAddress = $scope.friendEmailAddress;
-    var friendNameFirst = $scope.friendNameFirst;
-    var friendNameLast = $scope.friendNameLast;
+    var friendEmailAddress = $('#friendEmailAddress2').val(); //$scope.friendEmailAddress;
+    var friendNameFirst = $('#friendNameFirst').val(); // $scope.friendNameFirst;
+    var friendNameLast = $('#friendNameLast').val();//$scope.friendNameLast;
+    
     $scope.done = false;
     $scope.loading2 = true;
     
-      setTimeout(function() {
-        $scope.$apply(function () {
-          $scope.loading2 = false;
-          $scope.done = true;
-          $scope.user = true;
-          //$scope.friendEmailAddress ='';
-          //$scope.friendNameFirst = '';
-          //$scope.friendNameLast = '';
-          //$scope.newUser = false;
+    
+    Friend.doFriendAccount(friendEmailAddress).then(function (data) {
+      if (data.data.message === 'true') {
+        // here we add the person to the scope and then use another factory to create 
+        // Canvas correlate
+        
+        Friend.createCanvasFriend(friendEmailAddress,friendNameFirst, friendNameLast).then(function (data) {
+          if (data.data.length ===1 && data.data[0].name) {
+            // here we add the person to the scope and then use another factory to add them to the site
+            $scope.friend = data.data[0];
+            $scope.user = true;
+            //$scope.friendEmailAddress = '';
+          } else {
+            // TODO: report error
+          }
+          $scope.loading = false;
         });
-      }, 5 * 1000);
+        $scope.friend = friendEmailAddress;
+        $scope.user = true;
+        $scope.done = true;
+      } else {
+        // TODO: report error
+      }
+      $scope.loading2 = false;
+    });
+    /*
+  */
   };
 }]);

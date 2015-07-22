@@ -36,12 +36,48 @@ canvasSupportApp.factory('Sections', function ($http) {
   };
 });
 
-//FRIEND LOOKU FACTORY - does the request for the friend controller
-canvasSupportApp.factory('Friend', function ($http) {
+//FRIEND LOOKUP FACTORY - does the requests for the friend controller
+canvasSupportApp.factory('Friend', function ($http, $rootScope) {
   return {
-    lookUpFriend: function (friendId) {
+    lookUpCanvasFriend: function (friendId) {
       var url = '/sectionsUtilityTool/manager/api/v1/accounts/self/users?search_term=' + friendId;
       return $http.get(url, {cache: false}).then(
+        function success(result) {
+          return result;
+        },
+        function error() {
+          // TODO: report error
+        }
+      );
+    },
+    createCanvasFriend: function (friendEmailAddress,friendNameFirst, friendNameLast) {
+      var url = '/sectionsUtilityTool/manager/api/v1/accounts/1/users?' +
+        'user[name]=' + friendNameFirst + ' ' + friendNameLast +
+        '&user[short_name]=' + friendNameFirst +
+        '&user[sortable_name]=' +  friendNameLast + ', ' +  friendNameFirst +
+        '&user[login_id]=' + friendEmailAddress +
+        '&user[email]=' + friendEmailAddress;
+      //console.log('canvas url=' + url);
+      
+      /*
+      return $http.get(url, {cache: false}).then(
+        function success(result) {
+          return result;
+        },
+        function error() {
+          // TODO: report error
+        }
+      );
+      */
+    },
+    doFriendAccount: function (friendEmailAddress) {
+      // url will be internal to the servlet - get this from Kyle
+      var url = '/sectionsUtilityTool/friend/friendCreate?id=' + friendEmailAddress +
+       '&inst_email=' + 'gsilver' + '@umich.edu' +
+       '&inst_first_name=Inst' +
+       '&inst_last_name=X';
+      //console.log('friend url=' + url);
+      return $http.post(url, {cache: false}).then(
         function success(result) {
           return result;
         },
@@ -50,18 +86,5 @@ canvasSupportApp.factory('Friend', function ($http) {
         }
       );
     },
-    newFriend: function (friendEmailAddress,friendNameFirst, friendNameLast) {
-      var url = '/sectionsUtilityTool/manager/api/v1/accounts/1/users?user[name]=' + friendNameFirst + ' ' + friendNameLast + '&user[short_name]=' + friendNameFirst + '&user[sortable_name]=' +  friendNameLast + ', ' +  friendNameFirst + '&pseudonym[unique_id]=' + friendEmailAddress;
-      console.log(url);
-      return $http.get(url, {cache: false}).then(
-        function success(result) {
-          return result;
-        },
-        function error() {
-          
-        }
-      );
-    }
-  
   };
 });

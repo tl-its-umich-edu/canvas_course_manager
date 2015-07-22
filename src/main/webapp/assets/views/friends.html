@@ -29,8 +29,8 @@
                                 <div class="col-md-7">
                                 	<div class="btn-group pull-right">
 	                                	<select ng-show="section.isChecked">
-		                                	<option value="TeacherEnrollment">Teacher</option>
-																			<option value="StudentEnrollment">Student</option>
+		                                	<option value="StudentEnrollment">Student</option>
+                                      <option value="TeacherEnrollment">Teacher</option>
 																			<option value="TaEnrollment">TA</option>
 																			<option value="ObserverEnrollment">Observer</option>
 																			<option value="DesignerEnrollment">Designer</option>
@@ -48,7 +48,7 @@
 
               <label for="friendEmailAddress" class="sr-only">Email address</label>
               <input type="text" class="form-control" id="friendEmailAddress" placeholder="Enter email" ng-model="friendEmailAddress">
-              <button id="friendEmailAddressButton" type="button" class="btn btn-primary" ng-click="lookUpFriendClick()">Check <strong>{{friendEmailAddress}}</strong> user</button>
+              <button id="friendEmailAddressButton" type="button" class="btn btn-primary" ng-click="lookUpCanvasFriendClick()">Check <strong>{{friendEmailAddress}}</strong> user</button>
               <div class="spinner" ng-show="loading">&nbsp;&nbsp;&nbsp;&nbsp;</div>
               <div id="addedFriendSuccess" class="alert  alert-success alert-inline" ng-show="friend.name">{{friendEmailAddress}} ({{friend.name}}) exists and can be added to selected sections.</div>
             </div>
