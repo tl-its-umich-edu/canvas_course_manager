@@ -148,7 +148,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
 
 
 /* FRIEND PANEL CONTROLLER */
-canvasSupportApp.controller('addUserController', ['Friend', '$scope', 'SectionSet', function (Friend, $scope, SectionSet) {
+canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScope', 'SectionSet', function (Friend, $scope, $rootScope, SectionSet) {
   
   $scope.$on('courseSetChanged', function(event, sectionSet) {
       $scope.course = sectionSet[0];
@@ -182,40 +182,44 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', 'SectionSe
     });
   };
   $scope.createFriendClick = function () {
-    var friendEmailAddress = $('#friendEmailAddress2').val(); //$scope.friendEmailAddress;
-    var friendNameFirst = $('#friendNameFirst').val(); // $scope.friendNameFirst;
-    var friendNameLast = $('#friendNameLast').val();//$scope.friendNameLast;
-    
+
+    var friendEmailAddress = $('#friendEmailAddress2').val();
+    var friendNameFirst = $('#friendNameFirst').val();
+    var friendNameLast = $('#friendNameLast').val();
+
+    var requestorEmail = $rootScope.user.uniqname + '@umich.edu';
     $scope.done = false;
     $scope.loading2 = true;
-    
-    
-    Friend.doFriendAccount(friendEmailAddress).then(function (data) {
-      if (data.data.message === 'true') {
-        // here we add the person to the scope and then use another factory to create 
-        // Canvas correlate
+
+    Friend.doFriendAccount(friendEmailAddress, requestorEmail).then(function (data) {
+      //TODO: at some point the servlet will return message values
+      //of 'created, exists, error, invalid' with a detailedMessage with the details
+      //and we will need to change the string detecting below
+      if (data.data.message === 'true' || data.data.detailedMessage.indexOf('already exist') !== -1) {
+        $scope.user_data_friend = data.data;
+        $scope.newUserFound=true;
+        $scope.friendDone=true;
         
         Friend.createCanvasFriend(friendEmailAddress,friendNameFirst, friendNameLast).then(function (data) {
-          if (data.data.length ===1 && data.data[0].name) {
-            // here we add the person to the scope and then use another factory to add them to the site
-            console.log('canvas user ' + friendEmailAddress + ' created');
-            $scope.friend = data.data[0];
+          if (data.data.name) {
+            // here we add the person to the scope and then use another factory to add them to the sites
+            $scope.newUser=false;
+            $scope.newUserFound=true;
             $scope.user = true;
-            //$scope.friendEmailAddress = '';
+            $scope.user_data = data.data;
+            $scope.canvasDone=true;
           } else {
             // TODO: report error
           }
-          $scope.loading = false;
+          $scope.loading2 = false;
         });
+        
         $scope.friend = friendEmailAddress;
         $scope.user = true;
         $scope.done = true;
       } else {
         // TODO: report error
       }
-      $scope.loading2 = false;
     });
-    /*
-  */
   };
 }]);

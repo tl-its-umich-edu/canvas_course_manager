@@ -40,7 +40,7 @@ canvasSupportApp.factory('Sections', function ($http) {
 canvasSupportApp.factory('Friend', function ($http, $rootScope) {
   return {
     lookUpCanvasFriend: function (friendId) {
-      var url = '/sectionsUtilityTool/manager/api/v1/accounts/self/users?search_term=' + friendId;
+      var url = '/sectionsUtilityTool/manager/api/v1/accounts/self/users?search_term=' + friendId + '&_='+ generateCurrentTimestamp();
       return $http.get(url, {cache: false}).then(
         function success(result) {
           return result;
@@ -50,19 +50,17 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
         }
       );
     },
+
     createCanvasFriend: function (friendEmailAddress,friendNameFirst, friendNameLast) {
-      var url = '/sectionsUtilityTool/manager/api/v1/accounts/1/users?' +
-        'user[name]=' + friendNameFirst + ' ' + friendNameLast +
-        'pseudonym[uniqueID]=' + friendEmailAddress.replace('@','#') +
-        '&user[short_name]=' + friendNameFirst +
-        '&user[sortable_name]=' +  friendNameLast + ', ' +  friendNameFirst +
-        'pseudonym[SIS_user_id]=' + friendEmailAddress +
-        'pseudonym[set_confirmation]=false' +
-        'communication_channel[type]=email' +
-        'communication_channel[address]=' + friendEmailAddress +
-        'communication_channel[skip_confirmation]=false';
-      console.log('canvas url=' + url);
-      
+      var url = '/sectionsUtilityTool/manager/api/v1/accounts/1/users?account_id=1' +
+        '&user[name]=' + friendNameFirst + ' ' + friendNameLast +
+        //'&user[sortable_name]=' +  friendNameLast + ',' +  friendNameFirst +
+        '&pseudonym[unique_id]=' + friendEmailAddress.replace('@','%2B') +
+        '&pseudonym[sis_user_id]=' + friendEmailAddress +
+        '&pseudonym[send_confirmation]=false' +
+        '&communication_channel[type]=email' +
+        '&communication_channel[address]=' + friendEmailAddress +
+        '&communication_channel[skip_confirmation]=false';
       
       return $http.post(url).then(
         function success(result) {
@@ -74,19 +72,18 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
       );
       
     },
-    doFriendAccount: function (friendEmailAddress) {
-      // url will be internal to the servlet - get this from Kyle
+    doFriendAccount: function (friendEmailAddress, requestorEmail) {
       var url = '/sectionsUtilityTool/friend/friendCreate?id=' + friendEmailAddress +
-       '&inst_email=' + 'gsilver' + '@umich.edu' +
-       '&inst_first_name=Inst' +
-       '&inst_last_name=X';
-      //console.log('friend url=' + url);
+       '&inst_email=' + requestorEmail +
+       // need the first name and last name, right now just using the email
+       '&inst_first_name=' + requestorEmail +
+       '&inst_last_name= ';
       return $http.post(url, {cache: false}).then(
         function success(result) {
           return result;
         },
         function error() {
-          
+          //TODO: report error
         }
       );
     },

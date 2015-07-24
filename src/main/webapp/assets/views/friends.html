@@ -41,7 +41,7 @@
                     </li>
                 </ul>
             </div>
-            <div class="form-group form-inline form-group" ng-show="!newUser">
+            <div class="form-group form-inline form-group" ng-show="!newUser && !newUserFound">
               <hr>
               <h4> Step 2: Specify User
               </h4>
@@ -52,7 +52,7 @@
               <div class="spinner" ng-show="loading">&nbsp;&nbsp;&nbsp;&nbsp;</div>
               <div id="addedFriendSuccess" class="alert  alert-success alert-inline" ng-show="friend.name">{{friendEmailAddress}} ({{friend.name}}) exists and can be added to selected sections.</div>
             </div>
-            <div ng-show="newUser">
+            <div ng-show="newUser && !newUserFound">
               <h4> Step 2: Add User </h4>
               <p>The specified user has no account - use the form below to create.</p>
               <div class="form-group form-inline form-group">
@@ -67,6 +67,12 @@
                   <div class="alert  alert-success alert-inline" ng-show="done">User created</div>
               </div>
             </div>
+            <div  class="alert alert-success" ng-show="newUserFound">
+              <p ng-show="friendDone">{{user_data_friend.detailedMessage}}. </p>
+              <p ng-show="canvasDone">
+                User <strong>{{user_data.name}}  ({{user_data.sis_user_id}})</strong> created in Canvas. 
+              </p>
+            </div>  
           </div>
           <div class="modal-footer">
             <span ng-show="!user">You need to have a valid user.</span> <span ng-show="!oneChecked">You need to select at least one section.</span>
