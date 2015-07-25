@@ -446,8 +446,8 @@ $(document).on('hidden.bs.modal', '#addUserModal', function(){
     $scope.user = false;
     $scope.newUser = false;
     $scope.friend = {};
-
-
+    $scope.addSuccess= false;
+    $scope.failedValidation = false;
   });
 });;
 

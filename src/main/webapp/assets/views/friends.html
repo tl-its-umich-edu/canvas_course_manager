@@ -43,17 +43,17 @@
             </div>
             <div class="form-group form-inline form-group" ng-show="!newUser && !newUserFound">
               <hr>
-              <h4> Step 2: Specify User
+              <h4> Step 2: Specify User <small ng-show="failedValidation">Please specify a valid NON UMICH email address</small>
               </h4>
 
               <label for="friendEmailAddress" class="sr-only">Email address</label>
               <input type="text" class="form-control" id="friendEmailAddress" placeholder="Enter email" ng-model="friendEmailAddress">
-              <button id="friendEmailAddressButton" type="button" class="btn btn-primary" ng-click="lookUpCanvasFriendClick()">Check <strong>{{friendEmailAddress}}</strong> user</button>
+              <button id="friendEmailAddressButton" type="button" class="btn btn-primary" ng-click="lookUpCanvasFriendClick()">Check user</button>
               <div class="spinner" ng-show="loading">&nbsp;&nbsp;&nbsp;&nbsp;</div>
-              <div id="addedFriendSuccess" class="alert  alert-success alert-inline" ng-show="friend.name">{{friendEmailAddress}} ({{friend.name}}) exists and can be added to selected sections.</div>
+              <div id="addedFriendSuccess" class="alert  alert-success alert-inline" ng-show="friend.name">{{friendEmailAddress}} exists and can be added to sections.</div>
             </div>
             <div ng-show="newUser && !newUserFound">
-              <h4> Step 2: Add User </h4>
+              <h4> Step 2: Add User <small ng-show="failedValidation">Please specify a valid NON UMICH email address</small></h4>
               <p>The specified user has no account - use the form below to create.</p>
               <div class="form-group form-inline form-group">
                   <label for="friendEmailAddress2" class="sr-only">Enter email</label>
@@ -75,12 +75,12 @@
             </div>  
           </div>
           <div class="modal-footer">
-            <span ng-show="!user">You need to have a valid user.</span> <span ng-show="!oneChecked">You need to select at least one section.</span>
-            <span ng-show="addSuccess" class="alert alert-success alert-inline">User successfully added to sections</span>
-            <button id="" type="button" class="btn btn-primary" ng-click="addUserToSectionsClick()" ng-show="user && oneChecked">
+            <span ng-show="!userAvailable">You need to have a valid user.</span> <span ng-show="!oneChecked">You need to select at least one section.</span>
+            <span ng-show="addSuccess" class="alert alert-success alert-inline">User added to section(s)<em id="successFullSections"></em></span>
+            <button id="" type="button" class="btn btn-primary" ng-click="addUserToSectionsClick()" ng-show="userAvailable && oneChecked">
               Add user 
             </button>
-            <button id="" type="button" class="btn btn-primary" disabled="disabled" ng-show="!user || !oneChecked"
+            <button id="" type="button" class="btn btn-primary" disabled="disabled" ng-show="!userAvailable || !oneChecked"
             >
               Add user 
             </button>

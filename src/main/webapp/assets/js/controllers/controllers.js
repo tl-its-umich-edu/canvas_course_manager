@@ -153,7 +153,6 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
   $scope.$on('courseSetChanged', function(event, sectionSet) {
       $scope.course = sectionSet[0];
   });
-
   $scope.checkAll = function(){
     $scope.oneChecked = false;
     for(var e in $scope.course.sections) {
@@ -166,71 +165,90 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
   $scope.lookUpCanvasFriendClick = function () {
     $scope.friend = {};
     $scope.loading = true;
-    var friendId = $('#friendEmailAddress').val();
-    Friend.lookUpCanvasFriend(friendId).then(function (data) {
-      if (data.data.length ===1 && data.data[0].name) {
-        // TODO: check Friend account correlate
-        // and if there is one, call this done, if not, create it
-        $scope.friend = data.data[0];
-        $scope.user = true;
-      } else {
-        // not an existing user - present interface to add
-        // TODO: need to see if there is a Friend account correlate
-        $scope.newUser = true;
-      }
+    var friendId = $.trim($('#friendEmailAddress').val());
+    
+    if(friendId.indexOf('@') !==-1 && friendId.indexOf('@umich.edu') ===-1){
+      $scope.failedValidation = false;
+      Friend.lookUpCanvasFriend(friendId).then(function (data) {
+        if (data.data.length ===1 && data.data[0].name) {
+          // TODO: check Friend account correlate
+          // and if there is one, call this done, if not, create it
+          $scope.friend = data.data[0];
+          $scope.userAvailable = true;
+        } else {
+          // not an existing user - present interface to add
+          // TODO: need to see if there is a Friend account correlate
+          $scope.newUser = true;
+        }
+        $scope.loading = false;
+      });
+    }
+    else {
       $scope.loading = false;
-    });
+      $scope.failedValidation = true;
+    }
+
   };
   $scope.createFriendClick = function () {
 
-    var friendEmailAddress = $('#friendEmailAddress2').val();
+    var friendEmailAddress = $.trim($('#friendEmailAddress2').val());
     var friendNameFirst = $('#friendNameFirst').val();
     var friendNameLast = $('#friendNameLast').val();
 
-    var requestorEmail = $rootScope.user.uniqname + '@umich.edu';
-    $scope.done = false;
-    $scope.loading2 = true;
-    $scope.addSuccess = false;
+    if(friendEmailAddress.indexOf('@') !==-1 && friendEmailAddress.indexOf('@umich.edu') ===-1){
+      $scope.failedValidation = false;
+      var requestorEmail = $rootScope.user.uniqname + '@umich.edu';
+      $scope.done = false;
+      $scope.loading2 = true;
+      $scope.addSuccess = false;
 
-    Friend.doFriendAccount(friendEmailAddress, requestorEmail).then(function (data) {
-      //TODO: at some point the servlet will return message values
-      //of 'created, exists, error, invalid' with a detailedMessage with the details
-      //and we will need to change the string detecting below
-      if (data.data.message === 'true' || data.data.detailedMessage.indexOf('already exist') !== -1) {
-        $scope.user_data_friend = data.data;
-        $scope.newUserFound=true;
-        $scope.friendDone=true;
-        
-        Friend.createCanvasFriend(friendEmailAddress,friendNameFirst, friendNameLast).then(function (data) {
-          if (data.data.name) {
-            // here we add the person to the scope and then use another factory to add them to the sites
-            $scope.newUser=false;
-            $scope.newUserFound=true;
-            $scope.user = true;
-            $scope.user_data = data.data;
-            $scope.canvasDone=true;
-            $scope.friend.sis_user_id = friendEmailAddress;
-          } else {
-            // TODO: report error
-          }
-          $scope.loading2 = false;
-        });
-        
-        //$scope.friend = friendEmailAddress;
-        $scope.user = true;
-        $scope.done = true;
-      } else {
-        // TODO: report error
-      }
-    });
+      Friend.doFriendAccount(friendEmailAddress, requestorEmail).then(function (data) {
+        //TODO: at some point the servlet will return message values
+        //of 'created, exists, error, invalid' with a detailedMessage with the details
+        //and we will need to change the string detecting below
+        if (data.data.message === 'true' || data.data.detailedMessage.indexOf('already exist') !== -1) {
+          $scope.user_data_friend = data.data;
+          $scope.newUserFound=true;
+          $scope.friendDone=true;
+          
+          Friend.createCanvasFriend(friendEmailAddress,friendNameFirst, friendNameLast).then(function (data) {
+            if (data.data.name) {
+              // here we add the person to the scope and then use another factory to add them to the sites
+              $scope.newUser=false;
+              $scope.newUserFound=true;
+              $scope.userAvaliable = true;
+              $scope.user_data = data.data;
+              $scope.canvasDone=true;
+              $scope.friend.sis_user_id = friendEmailAddress;
+            } else {
+              // TODO: report error
+            }
+            $scope.loading2 = false;
+          });
+          
+          //$scope.friend = friendEmailAddress;
+          $scope.userAvailable = true;
+          $scope.done = true;
+        } else {
+          // TODO: report error
+        }
+      });
+    }
+    else {
+      $scope.loading = false;
+      $scope.failedValidation = true;
+    }
+
+
   };
 
   $scope.addUserToSectionsClick = function () {
     for(var e in $scope.course.sections) {
       if ($scope.course.sections[e].isChecked) {
-        var sectionid = $scope.course.sections[e].id;
-        var thisSectionRole = $('li[data-sectionid="'+sectionid+'"]').find('select').val();
-        var url = '/sectionsUtilityTool/manager/api/v1/sections/' + $scope.course.sections[e].id + '/enrollments?enrollment[user_id]=' + $scope.friend.id + '&enrollment[type]=' + thisSectionRole;
+        var sectionId = $scope.course.sections[e].id;
+        var sectionName = $scope.course.sections[e].name;
+        var thisSectionRole = $('li[data-sectionid="'+sectionId+'"]').find('select').val();
+        var url = '/sectionsUtilityTool/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + $scope.friend.id + '&enrollment[type]=' + thisSectionRole;
 
         Friend.addFriendToSection(url).then(function (data) {
           if (data.errors) {
@@ -238,7 +256,8 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
           } else {
             if(data.data.course_id) {
               $scope.addSuccess = true;
-              $scope.friend ={};
+              var successFullSections = $('#successFullSections').text();
+              $('#successFullSections').text(successFullSections  + ' ' + sectionName);
             }
           }
         });
