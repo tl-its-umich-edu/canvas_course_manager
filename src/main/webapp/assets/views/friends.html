@@ -67,7 +67,7 @@
                   <div class="alert  alert-success alert-inline" ng-show="done">User created</div>
               </div>
             </div>
-            <div  class="alert alert-success" ng-show="newUserFound">
+            <div  class="alert alert-success" ng-show="newUserFound" >
               <p ng-show="friendDone">{{user_data_friend.detailedMessage}}. </p>
               <p ng-show="canvasDone">
                 User <strong>{{user_data.name}}  ({{user_data.sis_user_id}})</strong> created in Canvas. 
@@ -76,7 +76,8 @@
           </div>
           <div class="modal-footer">
             <span ng-show="!user">You need to have a valid user.</span> <span ng-show="!oneChecked">You need to select at least one section.</span>
-            <button id="" type="button" class="btn btn-primary" ng-show="user && oneChecked">
+            <span ng-show="addSuccess" class="alert alert-success alert-inline">User successfully added to sections</span>
+            <button id="" type="button" class="btn btn-primary" ng-click="addUserToSectionsClick()" ng-show="user && oneChecked">
               Add user 
             </button>
             <button id="" type="button" class="btn btn-primary" disabled="disabled" ng-show="!user || !oneChecked"

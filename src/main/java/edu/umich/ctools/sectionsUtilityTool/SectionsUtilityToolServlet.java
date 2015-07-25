@@ -49,6 +49,8 @@ public class SectionsUtilityToolServlet extends HttpServlet {
 	private static final String CANVAS_API_SEARCH_COURSES = "canvas.api.search.courses.regex";
 	private static final String CANVAS_API_SEARCH_USER = "canvas.api.search.user.regex";
 	private static final String CANVAS_API_CREATE_USER = "canvas.api.create.user.regex";
+	private static final String CANVAS_API_ADD_USER = "canvas.api.add.user.regex";
+
 	private static final String DELETE = "DELETE";
 	private static final String POST = "POST";
 	private static final String GET = "GET";
@@ -221,6 +223,7 @@ public class SectionsUtilityToolServlet extends HttpServlet {
 			put(CANVAS_API_SEARCH_COURSES, "for searching courses");
 			put(CANVAS_API_SEARCH_USER, "for searching for users");
 			put(CANVAS_API_CREATE_USER, "for creating a user");
+			put(CANVAS_API_ADD_USER, "for adding a user to a section");
 		}};
 		boolean isMatch=false;
 		Set<String> apiListRegex = apiListRegexWithDebugMsg.keySet();

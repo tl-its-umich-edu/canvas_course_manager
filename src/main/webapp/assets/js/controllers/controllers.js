@@ -190,6 +190,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     var requestorEmail = $rootScope.user.uniqname + '@umich.edu';
     $scope.done = false;
     $scope.loading2 = true;
+    $scope.addSuccess = false;
 
     Friend.doFriendAccount(friendEmailAddress, requestorEmail).then(function (data) {
       //TODO: at some point the servlet will return message values
@@ -208,13 +209,14 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
             $scope.user = true;
             $scope.user_data = data.data;
             $scope.canvasDone=true;
+            $scope.friend.sis_user_id = friendEmailAddress;
           } else {
             // TODO: report error
           }
           $scope.loading2 = false;
         });
         
-        $scope.friend = friendEmailAddress;
+        //$scope.friend = friendEmailAddress;
         $scope.user = true;
         $scope.done = true;
       } else {
@@ -222,4 +224,26 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
       }
     });
   };
+
+  $scope.addUserToSectionsClick = function () {
+    for(var e in $scope.course.sections) {
+      if ($scope.course.sections[e].isChecked) {
+        var sectionid = $scope.course.sections[e].id;
+        var thisSectionRole = $('li[data-sectionid="'+sectionid+'"]').find('select').val();
+        var url = '/sectionsUtilityTool/manager/api/v1/sections/' + $scope.course.sections[e].id + '/enrollments?enrollment[user_id]=' + $scope.friend.id + '&enrollment[type]=' + thisSectionRole;
+
+        Friend.addFriendToSection(url).then(function (data) {
+          if (data.errors) {
+            // TODO: report error
+          } else {
+            if(data.data.course_id) {
+              $scope.addSuccess = true;
+              $scope.friend ={};
+            }
+          }
+        });
+      }
+    }
+  };
+
 }]);

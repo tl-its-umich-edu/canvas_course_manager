@@ -70,7 +70,6 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
           // TODO: report error
         }
       );
-      
     },
     doFriendAccount: function (friendEmailAddress, requestorEmail) {
       var url = '/sectionsUtilityTool/friend/friendCreate?id=' + friendEmailAddress +
@@ -87,5 +86,20 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
         }
       );
     },
+
+    addFriendToSection: function (url) {
+      return $http.post(url).then(
+        function success(result) {
+          return result;
+        },
+        function error() {
+          // TODO: report error
+        }
+      );
+    },
+
+
+
+
   };
 });
