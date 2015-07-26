@@ -207,7 +207,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
         //of 'created, exists, error, invalid' with a detailedMessage with the details
         //and we will need to change the string detecting below
         if (data.data.message === 'true' || data.data.detailedMessage.indexOf('already exist') !== -1) {
-          $scope.user_data_friend = data.data;
+          $scope.friend_account = data.data;
           $scope.newUserFound=true;
           $scope.friendDone=true;
           
@@ -217,9 +217,9 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
               $scope.newUser=false;
               $scope.newUserFound=true;
               $scope.userAvaliable = true;
-              $scope.user_data = data.data;
+              $scope.friend = data.data;//xxx
               $scope.canvasDone=true;
-              $scope.friend.sis_user_id = friendEmailAddress;
+              //$scope.friend.sis_user_id = friendEmailAddress;
             } else {
               // TODO: report error
             }
