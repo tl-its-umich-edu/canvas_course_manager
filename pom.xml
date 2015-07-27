@@ -4,7 +4,7 @@
 	<groupId>edu.umich.ctools</groupId>
 	<artifactId>sectionsUtilityTool</artifactId>
 	<packaging>war</packaging>
-	<version>1.4-SNAPSHOT</version>
+	<version>2.0.0</version>
 	<name>sectionsUtilityTool</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>
