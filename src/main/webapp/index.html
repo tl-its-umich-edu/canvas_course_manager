@@ -23,7 +23,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <h1 class="navbar-brand collapse-nav">Canvas Support <small id="serverInfo" ng-show="server">{{server}}</small> <small ng-show="user.uniqname">(for {{user.uniqname}})</small></h1>
+                <h1 class="navbar-brand collapse-nav">Canvas Support <small id="serverInfo" ng-show="server">{{server}}</small> <small ng-show="user.uniqname" style="display:none">(for {{user.uniqname}})</small></h1>
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -36,22 +36,7 @@
             <!-- /.navbar-collapse -->
         </div>
     </nav>
-    <div role="tabpanel" style="margin-top:60px">
-      <!-- Nav tabs -->
-      <ul class="nav nav-tabs" role="tablist">
-          <li role="presentation" class="active"><a href="#sections" aria-controls="sections" role="tab" data-toggle="tab">Sections & Friend Accounts</a></li>
-          <li role="presentation"><a href="#friends" aria-controls="friends" role="tab" data-toggle="tab">Other Things</a></li>
-      </ul>
-      <!-- Tab panes -->
-      <div class="tab-content">
-        <div role="tabpanel" class="tab-pane active" id="sections">
-          <div ng-include src="'assets/views/courses.html'"></div>
-        </div>
-        <div role="tabpanel" class="tab-pane" id="friends" style="">
-          
-        </div>
-      </div>
-    </div>
+    <div ng-include src="'assets/views/courses.html'" style="margin-top:60px"></div>
 
     <script src="assets/vendor/jquery/jquery-1.11.0.min.js"></script>
     <script src="assets/vendor/jquery/jquery-ui-1.11.2/jquery-ui.min.js"></script>
@@ -189,7 +174,7 @@
               <span aria-hidden="true">&times;</span>
               <span class="sr-only">Close</span>
             </button>
-            <h3 class="modal-title" id="otherInstructorLabel">Select sections from other instructors ({{currentTerm.currentTermName}})<span id="canvasTermId" style="display:none">{{currentTerm.currentTermCanvasId}}</span></h3>
+            <h3 class="modal-title" id="otherInstructorLabel">Select sections from other instructors  for term <span id="canvasTermId" style='display:none'>{{currentTerm.currentTermCanvasId}}</span> <span class="canvasTermNameforjQuery"></span><span class="canvasTermIdforjQuery" style="display:none"></span></h3>
           </div>
           <div class="modal-body otherInstructorInner" id="otherInstructorInner">
             <div class="form-inline">
@@ -201,7 +186,7 @@
                 <div class="spinner2" style="display:none"></div>
               </div>
             </div>
-            <div id="otherInstructorInnerPayload container"></div>
+            <div id="otherInstructorInnerPayload"></div>
           </div>
           <div class="modal-footer">
             <button id="useOtherSections" type="button" class="btn btn-primary">
@@ -223,7 +208,7 @@
               <span aria-hidden="true">&times;</span>
               <span class="sr-only">Close</span>
             </button>
-            <h3 class="modal-title" id="noInstructorLabel">Search for courses ({{currentTerm.currentTermName}})<span id="canvasTermId" style="display:none">{{currentTerm.currentTermCanvasId}}</span></h3>
+            <h3 class="modal-title" id="noInstructorLabel">Search for courses for term <span id="canvasTermId" style="display:none">{{currentTerm.currentTermCanvasId}}</span><span class="canvasTermNameforjQuery"></span><span class="canvasTermIdforjQuery" style="display:none"></span></h3>
           </div>
           <div class="modal-body noInstructorInner" id="noInstructorInner">
             <div class="form-inline">

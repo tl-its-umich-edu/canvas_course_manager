@@ -26,6 +26,8 @@ canvasSupportApp.controller('termsController', ['Courses', '$rootScope', '$scope
     $scope.$parent.currentTerm.currentTermName = termName;
     $scope.$parent.currentTerm.currentTermId = termId;
     $scope.$parent.currentTerm.currentTermCanvasId = termCanvasId;
+    $('.canvasTermIdforjQuery').text(termCanvasId);
+    $('.canvasTermNameforjQuery').text(termName);
   };
 
 }]);
