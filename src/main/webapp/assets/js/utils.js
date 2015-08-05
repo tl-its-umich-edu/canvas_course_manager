@@ -364,7 +364,7 @@ $(document).on('click', '#uniqnameOtherTrigger', function (e) {
   e.preventDefault();
   var uniqnameOther = $.trim($('#uniqnameOther').val());
   if(validateUniqname(uniqnameOther)){
-    var termId = $.trim($('#canvasTermId').text());
+    var termId = $.trim($('.canvasTermIdforjQuery').first().text());
     var mini='/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqnameOther+ '&include=sections&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher';
     var url = '/sectionsUtilityTool'+mini;
     $.ajax({
@@ -393,7 +393,7 @@ $(document).on('click', '#uniqnameOtherTrigger', function (e) {
               });
               render = render + '</ul></li>';
             });
-            $('#otherInstructorInnerPayload').append(render);
+            $('#otherInstructorInnerPayload').html(render);
           } else {
             $('#otherInstructorInnerPayload').html('<br><div class="alert alert-warning">No courses for this instructor in this term</div>');
             $('#useOtherSections').hide();
@@ -417,7 +417,7 @@ $(document).on('click', '#useOtherSections', function () {
 });
 
 // user selects to open modal to pick sections from some other instructor
-$(document).on('click', '.openOtherInstructorModal', function (e) { 
+$(document).on('click', '.openOtherInstructorModal', function (e) {
   $('#useOtherSections').show();
   $('#otherInstructorInnerPayload').empty();
   $('#uniqnameOther').val('');
@@ -457,7 +457,7 @@ $(document).on('click', '#courseStringTrigger', function (e) {
   $('#noInstructorInnerPayload').empty();
   e.preventDefault();
   var courseString = $.trim($('#courseString').val());
-  var termId = $.trim($('#canvasTermId').text());
+  var termId = $.trim($('.canvasTermIdforjQuery').first().text());
   
   var mini='/manager/api/v1/accounts/1/courses?search_term=' + courseString + '&per_page=200';
   var url = '/sectionsUtilityTool'+mini;
