@@ -245,12 +245,16 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
   };
 
   $scope.addUserToSectionsClick = function () {
+    var checkedSections = $('.addUserInner input:checked').length;
+    var sectNumber = 0;
+    $('#successFullSections').empty();
     for(var e in $scope.course.sections) {
       if ($scope.course.sections[e].isChecked) {
+        sectNumber = sectNumber + 1;
         var sectionId = $scope.course.sections[e].id;
         var sectionName = $scope.course.sections[e].name;
         var thisSectionRole = $('li[data-sectionid="'+sectionId+'"]').find('select').val();
-        var url = '/sectionsUtilityTool/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + $scope.friend.id + '&enrollment[type]=' + thisSectionRole;
+        var url = '/sectionsUtilityTool/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + $scope.friend.id + '&enrollment[enrollment_state]=active&enrollment[type]=' + thisSectionRole;
 
         Friend.addFriendToSection(url).then(function (data) {
           if (data.errors) {
@@ -258,11 +262,19 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
           } else {
             if(data.data.course_id) {
               $scope.addSuccess = true;
-              var successFullSections = $('#successFullSections').text();
-              $('#successFullSections').text(successFullSections  + ' ' + sectionName);
+              if (checkedSections === sectNumber){
+                $scope.newUser = false;
+                $scope.newUserFound = false;
+                $scope.none = false;
+                $scope.userAvailable  = false;
+                $scope.friendEmailAddress ='';
+                $scope.friend = {};
+              }
             }
           }
         });
+      
+        $('#successFullSections').append(' <span class="label label-success">' + sectionName + '</span>');
       }
     }
   };
