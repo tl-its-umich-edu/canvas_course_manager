@@ -85,7 +85,9 @@ public class FriendServlet extends HttpServlet {
 					friendInstructorLastName == null){
 				response.setStatus(400);
 				json = Json.createObjectBuilder()
-						.add("message", "request error: required parameters for request not specified")
+						.add("message", "requestError")
+						.add("detailedMessage", "request error: required parameters for request not specified")
+						.add("FriendURL", Friend.friendUrl)
 						.build();
 			}
 			else{
@@ -145,7 +147,7 @@ public class FriendServlet extends HttpServlet {
 			//If friend email is invalid, send message for invalid email in json response.
 			M_log.warn(" friendCreate: invalid email address " + friendValues.get(INVITE_EMAIL));
 			detailedMessage = "Account " + friendValues.get(INVITE_EMAIL) + " is not a valid email address";
-			json = buildResponseObject("false", detailedMessage);
+			json = buildResponseObject("invalid", detailedMessage);
 			break;
 		case FRIEND_ACCOUNT_DOES_NOT_EXIST:
 			//If friend has valid email but does not have a friend account, attempt to create one.
@@ -157,13 +159,13 @@ public class FriendServlet extends HttpServlet {
 		case FRIEND_ACCOUNT_ALREADY_EXISTS:
 			//If friend already has friend account, send so back in json response
 			detailedMessage = "Account " + friendValues.get(INVITE_EMAIL) + " already exist";
-			json = buildResponseObject("false", detailedMessage);
+			json = buildResponseObject("exists", detailedMessage);
 			break;
 		default:
 			//Default is that nothing be done and send back json response.
 			M_log.warn(" friendCreate: invalid email address " + friendValues.get(INVITE_EMAIL));
 			detailedMessage = "Friend Account NOT created for " + friendValues.get(INVITE_EMAIL);
-			json = buildResponseObject("false", detailedMessage);
+			json = buildResponseObject("error", detailedMessage);
 			break;
 		}
 		return json;
@@ -178,7 +180,7 @@ public class FriendServlet extends HttpServlet {
 			//If friend account is successful, send json response back saying so
 			M_log.info(" friendCreate: successfully created account for  " + friendValues.get(INVITE_EMAIL));
 			detailedMessage = "Friend Account created for " + friendValues.get(INVITE_EMAIL);
-			json = buildResponseObject("true", detailedMessage);
+			json = buildResponseObject("created", detailedMessage);
 
 			//Step 3: send notification to instructor indicating that a friend account has been created.
 			Friend.notifyCurrentUser(friendValues.get(INSTRUCTOR_NAME), friendValues.get(INSTRUCTOR_EMAIL), friendValues.get(INVITE_EMAIL));
@@ -187,19 +189,19 @@ public class FriendServlet extends HttpServlet {
 			//If attempt to create friend account fails, then send so in response
 			M_log.warn(" friendCreate: invalid email address " + friendValues.get(INVITE_EMAIL));
 			detailedMessage = "Friend Account NOT created for " + friendValues.get(INVITE_EMAIL);
-			json = buildResponseObject("false", detailedMessage);
+			json = buildResponseObject("invalid", detailedMessage);
 			break;
 		case RUNTIME_PROBLEM:
 			//Default is that nothing be done and send back json response.
 			M_log.warn(" friendCreate: runtime error when attempting to create account for " + friendValues.get(INVITE_EMAIL));
 			detailedMessage = "Friend Account NOT created for " + friendValues.get(INVITE_EMAIL) + " due to runtime error";
-			json = buildResponseObject("false", detailedMessage);
+			json = buildResponseObject("error", detailedMessage);
 			break;
 		default:
 			//Default is that nothing be done and send back json response.
 			M_log.warn(" friendCreate: runtime error when attempting to create account for " + friendValues.get(INVITE_EMAIL));
 			detailedMessage = "Friend Account NOT created for " + friendValues.get(INVITE_EMAIL) + " due to runtime error";
-			json = buildResponseObject("false", detailedMessage);
+			json = buildResponseObject("error", detailedMessage);
 			break;
 		}		
 		return json;

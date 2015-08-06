@@ -208,7 +208,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
         //TODO: at some point the servlet will return message values
         //of 'created, exists, error, invalid' with a detailedMessage with the details
         //and we will need to change the string detecting below
-        if (data.data.message === 'true' || data.data.detailedMessage.indexOf('already exist') !== -1) {
+        if (data.data.message === 'created' || data.data.message === 'exists') {
           $scope.friend_account = data.data;
           $scope.newUserFound=true;
           $scope.friendDone=true;
