@@ -232,12 +232,15 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
           $scope.userAvailable = true;
           $scope.done = true;
         } else {
+          $scope.loading2 = false;
+          $scope.friend_account = data.data;
+          $scope.newUserFail=true;
           // TODO: report error
         }
       });
     }
     else {
-      $scope.loading = false;
+      $scope.loading2 = false;
       $scope.failedValidation = true;
     }
 
