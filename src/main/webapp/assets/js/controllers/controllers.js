@@ -41,7 +41,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
     $scope.uniqname = uniqname;
     var mini='/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher&_='+ generateCurrentTimestamp();
     var url = '/sectionsUtilityTool'+mini;
-    $scope.loading = true;
+    $scope.loadingLookUpCourses = true;
     if (validateUniqname(uniqname)) {
       Courses.getCourses(url).then(function (result) {
         if (result.data.errors) {
@@ -61,7 +61,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
           $scope.success = false;
           $scope.error = true;
           $scope.instructions = false;
-          $scope.loading = false;
+          $scope.loadingLookUpCourses = false;
         }
         else {
           if(result.errors){
@@ -69,7 +69,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
             $scope.success = false;
             $scope.error = true;
             $scope.instructions = false;
-            $scope.loading = false;
+            $scope.loadingLookUpCourses = false;
           }
           else {
             // all is well - add the courses to the scope, extract the terms represented in course data
@@ -80,7 +80,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
             $scope.success = true;
             $scope.instructions = true;
             $scope.errorLookup = false;
-            $scope.loading = false;
+            $scope.loadingLookUpCourses = false;
             $rootScope.server = result.data[0].calendar.ics.split('/feed')[0];
             $rootScope.user.uniqname = uniqname;
           }
@@ -88,7 +88,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
       });
     }
     else {
-      $scope.loading = false;
+      $scope.loadingLookUpCourses = false;
       $('#uniqnameValidMessage').show();
     }
   };
@@ -166,7 +166,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
 
   $scope.lookUpCanvasFriendClick = function () {
     $scope.friend = {};
-    $scope.loading = true;
+    $scope.loadingLookupFriend = true;
     var friendId = $.trim($('#friendEmailAddress').val());
     
     if(friendId.indexOf('@') !==-1 && friendId.indexOf('@umich.edu') ===-1){
@@ -182,11 +182,11 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
           // TODO: need to see if there is a Friend account correlate
           $scope.newUser = true;
         }
-        $scope.loading = false;
+        $scope.loadingLookupFriend = false;
       });
     }
     else {
-      $scope.loading = false;
+      $scope.loadingLookupFriend = false;
       $scope.failedValidation = true;
     }
 
@@ -201,7 +201,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
       $scope.failedValidation = false;
       var requestorEmail = $rootScope.user.uniqname + '@umich.edu';
       $scope.done = false;
-      $scope.loading2 = true;
+      $scope.loadingCreateUser = true;
       $scope.addSuccess = false;
 
       Friend.doFriendAccount(friendEmailAddress, requestorEmail).then(function (data) {
@@ -225,14 +225,14 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
             } else {
               // TODO: report error
             }
-            $scope.loading2 = false;
+            $scope.loadingCreateUser = false;
           });
           
           //$scope.friend = friendEmailAddress;
           $scope.userAvailable = true;
           $scope.done = true;
         } else {
-          $scope.loading2 = false;
+          $scope.loadingCreateUser = false;
           $scope.friend_account = data.data;
           $scope.newUserFail=true;
           // TODO: report error
@@ -240,7 +240,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
       });
     }
     else {
-      $scope.loading2 = false;
+      $scope.loadingCreateUser = false;
       $scope.failedValidation = true;
     }
 
