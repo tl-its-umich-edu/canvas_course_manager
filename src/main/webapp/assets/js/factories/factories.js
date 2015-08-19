@@ -57,10 +57,11 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
         //'&user[sortable_name]=' +  friendNameLast + ',' +  friendNameFirst +
         '&pseudonym[unique_id]=' + friendEmailAddress.replace('@','%2B') +
         '&pseudonym[sis_user_id]=' + friendEmailAddress +
-        '&pseudonym[send_confirmation]=false' +
+        '&pseudonym[send_confirmation]=true' +
         '&communication_channel[type]=email' +
         '&communication_channel[address]=' + friendEmailAddress +
-        '&communication_channel[skip_confirmation]=false';
+        '&communication_channel[skip_confirmation]=true' +
+        '&force_validations=false';
       
       return $http.post(url).then(
         function success(result) {
