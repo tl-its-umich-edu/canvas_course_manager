@@ -49,7 +49,7 @@
               <label for="friendEmailAddress" class="sr-only">Email address</label>
               <input type="text" class="form-control" id="friendEmailAddress" placeholder="Enter email" ng-model="friendEmailAddress">
               <button id="friendEmailAddressButton" type="button" class="btn btn-primary" ng-click="lookUpCanvasFriendClick()">Check user</button>
-              <div class="spinner" ng-show="loading">&nbsp;&nbsp;&nbsp;&nbsp;</div>
+              <div class="spinner" ng-show="loadingLookupFriend">&nbsp;&nbsp;&nbsp;&nbsp;</div>
               <div id="addedFriendSuccess" class="alert  alert-success alert-inline" ng-show="friend.name">{{friendEmailAddress}} exists and can be added to sections.</div>
             </div>
             <div ng-show="newUser && !newUserFound">
@@ -63,10 +63,14 @@
                   <label for="friendNameLast" class="sr-only">Last name</label>
                   <input type="text" class="form-control" id="friendNameLast" placeholder="Last name" ng-model="friendNameLast">
                   <button type="button" class="btn btn-primary" ng-click="createFriendClick()">Create User</button>
-                  <div class="spinner" ng-show="loading2">&nbsp;&nbsp;&nbsp;&nbsp;</div>
+                  <div class="spinner" ng-show="loadingCreateUser">&nbsp;&nbsp;&nbsp;&nbsp;</div>
                   <div class="alert  alert-success alert-inline" ng-show="done">User created</div>
               </div>
             </div>
+            <div  class="alert alert-danger" ng-show="newUserFail" >
+              {{friend_account.detailedMessage}}.
+            </div>  
+
             <div  class="alert alert-success" ng-show="newUserFound" >
               <p ng-show="friendDone">{{friend_account.detailedMessage}}. </p>
               <p ng-show="canvasDone">

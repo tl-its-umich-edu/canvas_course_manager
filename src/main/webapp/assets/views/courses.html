@@ -26,7 +26,7 @@
                 <input type="text"  ng-model="uniqname" id="uniqname" class="form-control"  placeholder="uniqname" autofocus>
               </div>
               <button id="uniqnameTrigger" type="button" ng-click="getCoursesForUniqname()" class="btn btn-primary">Look up courses <span ng-show="uniqname">for</span> {{uniqname}}</button> <span id="uniqnameValidMessage" class="alert alert-danger" style="display:none; padding:5px">Alpha chars only, please.</span>
-              <div class="spinner" ng-show="loading">&nbsp;&nbsp;&nbsp;&nbsp;</div>
+              <div class="spinner" ng-show="loadingLookUpCourses">&nbsp;&nbsp;&nbsp;&nbsp;</div>
 
 
               
