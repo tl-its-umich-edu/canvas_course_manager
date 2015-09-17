@@ -26,11 +26,12 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.velocity.Template;
+import org.apache.velocity.context.Context;
+import org.apache.velocity.tools.view.VelocityViewServlet;
+import org.apache.velocity.tools.view.ViewToolContext;
 
-
-
-
-public class SectionsUtilityToolServlet extends HttpServlet {
+public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	private static Log M_log = LogFactory.getLog(SectionsUtilityToolServlet.class);
 	private static final long serialVersionUID = 7284813350014385613L;
@@ -58,25 +59,43 @@ public class SectionsUtilityToolServlet extends HttpServlet {
 	private String canvasToken;
 	private String canvasURL;
 	ResourceBundle props = ResourceBundle.getBundle("sectiontool");
-
+	
+	//either canvas or esb 
+	//TODO: this needs to be turned into a property
+	private final String CALL_TYPE = "canvas";
 	
 	public void init() throws ServletException {
 		M_log.debug(" Servlet init(): Called");
 	}
 	
-	protected void doGet(HttpServletRequest request,HttpServletResponse response){
+	public void fillContext(Context context, HttpServletRequest request) {
+		ViewToolContext vtc = (ViewToolContext)context;
+		vtc.put("variable", "happiness");
+		M_log.info("fillContext() called");
+		
+	}
+	
+	public void doGet(HttpServletRequest request,HttpServletResponse response){
 		M_log.debug("doGet: Called");
 		try {
-			canvasRestApiCall(request, response);
+			if(request.getServletPath().equals("/manager")){
+				canvasRestApiCall(request, response, CALL_TYPE);
+			}
+			else{
+				M_log.info("NOT MANAGER");
+				doRequest(request, response);
+				//doRequest will call fillContext()
+			}
 		}catch(Exception e) {
 			M_log.error("GET request has some exceptions",e);
 		}
 	}
 	
-	protected void doPost(HttpServletRequest request,HttpServletResponse response){
+	public void doPost(HttpServletRequest request,HttpServletResponse response){
 		M_log.debug("doPOST: Called");
 		try {
-			canvasRestApiCall(request, response);
+			//Is this an LTI Call or a browser call?
+			canvasRestApiCall(request, response, CALL_TYPE);
 		}catch(Exception e) {
 			M_log.error("POST request has some exceptions",e);
 		}
@@ -85,7 +104,7 @@ public class SectionsUtilityToolServlet extends HttpServlet {
 	protected void doPut(HttpServletRequest request,HttpServletResponse response){
 		M_log.debug("doPut: Called");
 		try {
-			canvasRestApiCall(request, response);
+			canvasRestApiCall(request, response, CALL_TYPE);
 		}catch(Exception e) {
 			M_log.error("PUT request has some exceptions",e);
 		}
@@ -93,18 +112,18 @@ public class SectionsUtilityToolServlet extends HttpServlet {
 	protected void doDelete(HttpServletRequest request,HttpServletResponse response) {
 		M_log.debug("doDelete: Called");
 		try {
-			canvasRestApiCall(request, response);
+			canvasRestApiCall(request, response, CALL_TYPE);
 		}catch(Exception e) {
 			M_log.error("DELETE request has some exceptions",e);
 		}
 	}
-	
+		
    /*
     * This method is handling all the different Api request like PUT, POST etc to canvas.
     * We are using canvas admin token stored in the properties file to handle the request. 
     */
 	private void canvasRestApiCall(HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
+			HttpServletResponse response, String callType) throws IOException {
 		request.setCharacterEncoding("UTF-8");
 		M_log.debug("canvasRestApiCall(): called");
 		PrintWriter out = response.getWriter();
@@ -123,8 +142,12 @@ public class SectionsUtilityToolServlet extends HttpServlet {
 			return;
 		}
 		if(isAllowedApiRequest(request)) {
-			apiConnectionLogic(request,response);
-
+			if(callType.equals("canvas")){
+				apiConnectionLogic(request,response);
+			}
+			else{
+				esbRestApiCall(request,response);
+			}
 		}else {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			out = response.getWriter();
@@ -133,6 +156,13 @@ public class SectionsUtilityToolServlet extends HttpServlet {
 		}
 
 	}
+	
+	private void esbRestApiCall(HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
+		M_log.debug("esbRestApiCall() called");
+		//Stub: to be implemented later when ESB to canvas call is ready
+	}	
+	
 	/*
 	 * This function has logic that execute client(i.e., browser) request and get results from the canvas  
 	 * using Apache Http client library
@@ -237,10 +267,5 @@ public class SectionsUtilityToolServlet extends HttpServlet {
 		}
 		return isMatch;
 	}
-
-	
-	
-    
-
 
 }
