@@ -19,6 +19,26 @@ canvasSupportApp.factory('Courses', function ($http) {
     }
   };
 });
+
+//COURSE FACTORY - does the request for the single course controller
+canvasSupportApp.factory('Course', function ($http) {
+  return {
+    getCourse: function (url) {
+      return $http.get(url, {cache: false}).then(
+        function success(result) {
+          //forward the data - let the controller deal with it
+          return result; 
+        },
+        function error(result) {
+          errorDisplay(url, result.status, 'Unable to get courses');
+          result.errors.failure = true;    
+          return result;
+        }
+      );
+    }
+  };
+});
+
 //SECTIONS FACTORY - does the request for the sections controller
 canvasSupportApp.factory('Sections', function ($http) {
   return {
@@ -35,6 +55,8 @@ canvasSupportApp.factory('Sections', function ($http) {
     }
   };
 });
+
+
 
 //FRIEND LOOKUP FACTORY - does the requests for the friend controller
 canvasSupportApp.factory('Friend', function ($http, $rootScope) {
