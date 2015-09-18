@@ -39,7 +39,15 @@
   </servlet-mapping>
   <servlet-mapping>
 		<servlet-name>default</servlet-name>
-		<url-pattern>/assets/*</url-pattern>
+		<url-pattern>/assets-lti/*</url-pattern>
+</servlet-mapping>
+<servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>/assets-sc/*</url-pattern>
+</servlet-mapping>
+<servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>/vendor/*</url-pattern>
 </servlet-mapping>
 	
 	<error-page>
