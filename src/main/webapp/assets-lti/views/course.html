@@ -1,0 +1,67 @@
+<div class="contentWrapper" ng-controller="courseController" ng-cloak>
+    <h3>Launched from course</h3>
+    <div class="alert alert-success reportContainer" id="successContainer" role="alert" style="display:none">
+        <div class="msg"></div>
+    </div>
+    <div class="alert alert-danger alert-dismissible reportContainer" id="errorContainer" role="alert" style="display:none">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <div class="msg"></div>
+    </div>
+    <div class="container-fluid">
+        <div class="coursePanel well nograb">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-8 col-lg-8 col-sm-8 col-xs-8">
+                        <h4>{{course.course_code}} <small ng-show="course.addingUser">First select sections, then specify user</small></h4>
+                    </div>
+                    <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4" style="text-align:right;">
+                        <button ng-show="loadingOtherCourses" class="btn btn-link spinner"></button>  
+                        <button ng-disabled="course.addingUser" ng-hide="courses" class="btn btn-default" ng-click="getCoursesForTerm()">Add sections</button>
+                        <button ng-show="course.dirty" class="btn btn-default" ng-click="getCoursesForTerm()">Save new sections</button>
+                        <button ng-show="course.addingSections" class="btn btn-default" ng-click="cancelAddSections()">Cancel add sections</button>                        
+                        <button ng-disabled="course.addingSections" class="btn btn-default" ng-click="addUsers()">Add users</button>
+                    </div>
+                </div>
+            </div>    
+            <ul class="container-fluid sectionList">
+                <li class="row" ng-repeat="section in course.sections" id="{{section.id}}" data-parent-id="{{section.course_id}}"
+                >
+                    <div class="col-md-8 col-lg-8 col-sm-8 col-xs-8"><span ng-show="course.addingUser"><input type="checkbox" id="check{{section.id}}" ng-model="section.selected" ng-click="sectionSelectedQuery()"> <label for ="check{{section.id}}">{{section.name}}</label></span><span ng-show="!course.addingUser">{{section.name}}</span></div>
+                    <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4">
+                        <a href="" ng-if="section.course_id !== course.id" ng-click="returnToCourse(section, $index)">Put back</a>
+                    </div>
+                </li>
+            </ul>
+
+            <div ng-show="course.sectionSelected" class="form-inline container-fluid">
+                <div class="form-group">
+                    <label class="sr-only" for="emailAddress">Email address</label>
+                    <input class="form-control" type="text" id="emailAddress" placeholder="email address"> <button class="btn btn-default">Add user</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="coursePanel well nograb" ng-show="courses">
+            <h4 style="padding:0 20px">Your Other Courses <small> (get their sections and then select which ones you want added to this course) </small></h4>
+            <ul class="container-fluid courseList">
+                <li ng-repeat="course in courses" class="course">
+                    <div class="row">
+                        <div class="col-md-8 col-lg-8 col-sm-8 col-xs-8">
+                            {{course.course_code}}
+                        </div>
+                        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4">
+                            <a href="" ng-click="getSections(course.id)" ng-hide="course.sectionsShown">Get sections</a>
+                        </div>
+                    </div>
+                        
+                    <ul class="container-fluid sectionList">
+                        <li class="row" ng-repeat="section in course.sections" id="{{section.id}}" data-parent="{{section.course_id}}" data-parent="{{course.id}}">
+                            <div class="col-md-8 col-lg-8 col-sm-8 col-xs-8">{{section.name}}</div>
+                            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4"><a ng-hide="section.moved" href="" ng-click="appendToCourse(section, $parent.$index, $index)">Add to course</a></div>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

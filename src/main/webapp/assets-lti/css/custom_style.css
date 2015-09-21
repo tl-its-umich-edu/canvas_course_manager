@@ -46,19 +46,25 @@ ul {
 .coursePanel  li.course, .coursePanelOther  li.course  {
     background:#ffe;
 }
-.coursePanel  li.course button.setSections {
-    display:none;
-}
-li.activeCourse button.setSections {
-    display:inline !important;
-}
 .sectionList, .sectionListAddFriend {
     min-height: 25px;
+}
+.moveSections::before {
+    content:"Drop sections here";
+}
+.moveSections {
+    outline:1px dotted #ccc;
+    margin-top:5px;
+    padding:5px;
 }
 .sectionList li:hover {
     cursor:move;
     cursor: -webkit-grab; 
     cursor: -moz-grab;
+}
+.nograb .sectionList li:hover {
+    background:#eee;
+    cursor:auto;
 }
 .sectionListAddFriend li:hover {
     cursor:default;

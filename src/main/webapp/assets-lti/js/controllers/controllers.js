@@ -1,5 +1,5 @@
 'use strict';
-/* global $, canvasSupportApp, getTermArray, _, getCurrentTerm, errorDisplay, validateUniqname, generateCurrentTimestamp */
+/* global $, canvasSupportApp, getTermArray, _, getCurrentTerm, errorDisplay, generateCurrentTimestamp, angular */
 
 /* TERMS CONTROLLER */
 canvasSupportApp.controller('termsController', ['Courses', '$rootScope', '$scope', '$http', function (Courses, $rootScope, $scope, $http) {
@@ -11,6 +11,10 @@ canvasSupportApp.controller('termsController', ['Courses', '$rootScope', '$scope
   $http.get(termsUrl).success(function (data) {
     if(data.enrollment_terms){
       $scope.terms = data.enrollment_terms;
+
+      /*TODO: there has to be a better way of getting
+      the current term*/
+
       $scope.$parent.currentTerm =  getCurrentTerm(data.enrollment_terms);
     }
     else {
@@ -34,72 +38,88 @@ canvasSupportApp.controller('termsController', ['Courses', '$rootScope', '$scope
 
 
 //COURSES CONTROLLER
-canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootScope', '$scope', 'SectionSet', function (Courses, Sections, $rootScope, $scope, SectionSet) {
+canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootScope', '$scope', '$timeout', 'SectionSet', function (Courses, Sections, $rootScope, $scope, $timeout, SectionSet) {
 
- $scope.getCoursesForUniqname = function () {
-    var uniqname = $.trim($('#uniqname').val().toLowerCase());
-    $scope.uniqname = uniqname;
+    var uniqname = 'instx';
+    $scope.uniqname = 'instx';
+    
     var mini='/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher&_='+ generateCurrentTimestamp();
     var url = '/sectionsUtilityTool'+mini;
+    
     $scope.loadingLookUpCourses = true;
-    if (validateUniqname(uniqname)) {
-      Courses.getCourses(url).then(function (result) {
-        if (result.data.errors) {
-          // the call to CAPI has returned a json with an error node
-          if(uniqname) {
-            // if the uniqname field had a value, report the problem (bad uniqname)
-            $scope.errorMessage = result.data.errors + ' ' + uniqname;
-            $scope.errorLookup = true;
-          }
-          else {
-            // if the uniqname field had no value ask for it
-            $scope.errorMessage = 'Please supply a uniqname at left.';
-            $scope.instructions = false;
-            $scope.errorLookup = false;
-          }
-          // various error flags in the scope  that do things in the UI
+
+    Courses.getCourses(url).then(function (result) {
+
+      if (result.data.errors) {
+        // the call to CAPI has returned a json with an error node
+        // various error flags in the scope  that do things in the UI
+        $scope.success = false;
+        $scope.error = true;
+        $scope.instructions = false;
+        $scope.loadingLookUpCourses = false;
+      }
+      else {
+        if(result.errors){
+          // catch all error
           $scope.success = false;
           $scope.error = true;
           $scope.instructions = false;
           $scope.loadingLookUpCourses = false;
         }
         else {
-          if(result.errors){
-            // catch all error
-            $scope.success = false;
-            $scope.error = true;
-            $scope.instructions = false;
-            $scope.loadingLookUpCourses = false;
-          }
-          else {
-            // all is well - add the courses to the scope, extract the terms represented in course data
-            // change scope flags and get the root server from the courses feed (!)
-            $scope.courses = result.data;
-            $scope.termArray = getTermArray(result.data);
-            $scope.error = false;
-            $scope.success = true;
-            $scope.instructions = true;
-            $scope.errorLookup = false;
-            $scope.loadingLookUpCourses = false;
-            $rootScope.server = result.data[0].calendar.ics.split('/feed')[0];
-            $rootScope.user.uniqname = uniqname;
-          }
+          // all is well - add the courses to the scope, extract the terms represented in course data
+          // change scope flags and get the root server from the courses feed (!)
+
+          //TODO: the flags in the model that are doing UI things should be collected in an object - also 
+          //there is some duplication - and some of them are not 
+          //needed anymore since the uinqname is a given
+
+          $scope.courses = result.data;
+          $scope.termArray = getTermArray(result.data);
+          $scope.error = false;
+          $scope.success = true;
+          $scope.instructions = true;
+          $scope.errorLookup = false;
+          $scope.loadingLookUpCourses = false;
+          $scope.courses.mode ='moveSections';
+          $rootScope.server = result.data[0].calendar.ics.split('/feed')[0];
+          $rootScope.user.uniqname = uniqname;
         }
-      });
-    }
-    else {
-      $scope.loadingLookUpCourses = false;
-      $('#uniqnameValidMessage').show();
-    }
-  };
+      }
+    });
+  
   // make the sections sortable drag and droppable the angular way
   $scope.sortableOptions = {
       placeholder: 'section',
       connectWith: '.sectionList',
+      dropOnEmpty: true,
       start: function(event, ui) {
         ui.item.addClass('grabbing');
       },
       receive: function(event, ui) {
+        ui.sender.closest('ul.sectionList').removeClass('dropTarget ');
+        //var sourceCourseId =  ui.sender.closest('li.course').attr('data-course-id');
+        //var sourceCoursePos = $scope.courses.indexOf(_.findWhere($scope.courses, {id: parseInt(sourceCourseId)}));
+        //$scope.courses[sourceCoursePos].sectionsDirty = true;
+
+        var targetCourseId =  ui.item.closest('li.course').attr('data-course-id');
+        var targetCoursePos = $scope.courses.indexOf(_.findWhere($scope.courses, {id: parseInt(targetCourseId)}));
+
+        //if no sections currently, get them
+        if (!$scope.courses[targetCoursePos].sectionsShown) {
+          var $getSectionsButton = ui.item.closest('li.course').find('a.getSections');
+          //trigger .getSections button to fetch this courses sections
+          angular.element($getSectionsButton).trigger('click');
+        }
+        // void the dirty status of all courses
+        _.each($scope.courses, function(course){
+          course.sectionsDirty = false;
+        });  
+        //make the current drop target dirty
+        $scope.courses[targetCoursePos].sectionsShown = true;
+        $scope.courses[targetCoursePos].sectionsDirty = true;
+        //refresh UI
+        $scope.$apply();
       //on drop, append the name of the source course
         var prevMovEl = ui.item.find('.status');
         if(prevMovEl.text() !==''){
@@ -116,6 +136,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
         ui.item.closest('li.course').addClass('activeCourse');
       },
       stop: function( event, ui ) {
+        ui.item.closest('ul.sectionList').removeClass('moveSections');
         //add some animation feedback to the move
         ui.item.css('background-color', '#FFFF9C')
           .animate({ backgroundColor: '#FFFFFF'}, 1500);
@@ -142,12 +163,135 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
   };
 
   $scope.addUserModal = function(courseId){
-    var course = $scope.courses.indexOf(_.findWhere($scope.courses, {id: courseId}));
-    SectionSet.setSectionSet($scope.courses[course]);
+    Sections.getSectionsForCourseId(courseId).then(function (data) {
+      if (data) {
+        //find the course object
+        var coursePos = $scope.courses.indexOf(_.findWhere($scope.courses, {id: courseId}));
+        //append a section object to the course scope
+        $scope.courses[coursePos].sections = data.data;
+        //sectionsShown = true hides the Get Sections link
+        $scope.courses[coursePos].sectionsShown = true;
+        var course = $scope.courses.indexOf(_.findWhere($scope.courses, {id: courseId}));
+        SectionSet.setSectionSet($scope.courses[course]);
+      } else {
+        //deal with this
+      }
+    });
+  };
+  $scope.addUserMode = function() {
+    $scope.courses.mode='addUser';
+    _.each($scope.courses, function(course){
+      course.sectionsDirty = false;
+      course.sectionsShown = false;
+      if(course.sections){
+        delete course.sections;
+      }
+    });
+  };
+  $scope.moveSectionsMode = function() {
+    $scope.courses.mode='moveSections';
+    _.each($scope.courses, function(course){
+      course.sectionsDirty = false;
+      course.sectionShown = false;
+      if(course.sections){
+        delete course.sections;
+      }    
+    });
   };
 }]);
 
+/* SINGLE COURSE CONTROLLER */
+canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections','$scope', '$filter', function (Course, Courses, Sections, $scope, $filter) {
+  //TODO - add this below to the filter
+  // /api/v1/courses?as_user_id=sis_login_id:instx&enrollment_type=teacher&include[]=sections&state[]=available&?access_token=1770~6Mn7sP9c6TLPtJAt56K8wvtmFcMmpENSYamMxdrDWInP27pCW0aNRRehpRGBEYfL
+  var courseUrl ='manager/api/v1/courses/154?include[]=sections&_=' + generateCurrentTimestamp();
+  Course.getCourse(courseUrl).then(function (result) {
+    $scope.course = result.data;
+    // ideally the ections would be returned above, if not we will need to get them here
+    Sections.getSectionsForCourseId($scope.course.id).then(function (result) {
+      $scope.course.sections =result.data;
+    });    
+  });
 
+  /*
+  var uniqname = 'instx';
+
+  $scope.getCoursesForTerm = function() {
+    $scope.loadingOtherCourses = true;
+    var coursesUrl='/sectionsUtilityTool/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher&_='+ generateCurrentTimestamp();
+    Courses.getCourses(coursesUrl).then(function (result) {
+      $scope.loadingOtherCourses = false;
+      $scope.course.addingSections = true;
+      // this is not optimal - ideally we should be requesting just this terms' courses, not all of them and then 
+      // filtering them
+      $scope.courses = _.where(result.data, {enrollment_term_id:  $scope.course.enrollment_term_id});
+    });    
+  };
+
+  $scope.getSections = function (courseId) {
+    Sections.getSectionsForCourseId(courseId).then(function (data) {
+      if (data) {
+        //find the course object
+        var coursePos = $scope.courses.indexOf(_.findWhere($scope.courses, {id: courseId}));
+        //append a section object to the course scope
+        $scope.courses[coursePos].sections = data.data;
+        
+        //sectionsShown = true hides the Get Sections link
+        $scope.courses[coursePos].sectionsShown = true;
+      } else {
+        //deal with this
+      }
+    });
+  };
+
+  $scope.returnToCourse = function (section, thisindex) {
+    var sourceCoursePos = $scope.courses.indexOf(_.findWhere($scope.courses, {id: section.course_id}));
+    // move an added section back to the course it came from
+    $scope.courses[sourceCoursePos].sections.push(section);
+    // remove it from the target course section list
+    $scope.course.sections.splice(thisindex, 1);
+    // set dirty to true if any added sections remain
+    $scope.course.dirty=false;
+    _.each($scope.course.sections, function(section){
+      if(section.course_id !== $scope.course.id){
+        $scope.course.dirty=true;
+      }
+    });
+  };
+
+  $scope.appendToCourse = function (section, parentindex, thisindex) {
+    // add a  new section to the course
+    $scope.course.sections.push(section);
+    // set dirty to true
+    $scope.course.dirty=true;
+    // remove section from source course
+    $scope.courses[parentindex].sections.splice(thisindex, 1);
+  };
+
+  $scope.cancelAddSections = function () {
+    // remove all added sections
+    $scope.course.sections = $filter('filter')($scope.course.sections, {course_id: $scope.course.id})
+    // set dirty and addingSections to false (controls display and disabled of buttons)
+    $scope.course.dirty=false;
+    $scope.course.addingSections = false;
+    // prune the source courses from the model
+    $scope.courses = [];
+  };
+
+  $scope.addUsers = function(){
+    $scope.course.addingUser = true;
+  }
+
+  $scope.sectionSelectedQuery = function () {
+    if(_.where($scope.course.sections,{selected: true}).length + 1 > 0){
+      $scope.course.sectionSelected = true;
+    }
+    else {
+      $scope.course.sectionSelected = false;
+    }
+  }
+  */
+}]);
 
 /* FRIEND PANEL CONTROLLER */
 canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScope', 'SectionSet', function (Friend, $scope, $rootScope, SectionSet) {
@@ -240,11 +384,9 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
       });
     }
     else {
-      $scope.loadingCreateUser = false;
+      $scope.loading = false;
       $scope.failedValidation = true;
     }
-
-
   };
 
   $scope.addUserToSectionsClick = function () {
@@ -275,8 +417,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
               }
             }
           }
-        });
-      
+        });      
         $('#successFullSections').append(' <span class="label label-success">' + sectionName + '</span>');
       }
     }
