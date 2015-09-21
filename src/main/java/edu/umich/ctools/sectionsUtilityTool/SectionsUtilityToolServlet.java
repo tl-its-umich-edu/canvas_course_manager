@@ -51,6 +51,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String CANVAS_API_SEARCH_USER = "canvas.api.search.user.regex";
 	private static final String CANVAS_API_CREATE_USER = "canvas.api.create.user.regex";
 	private static final String CANVAS_API_ADD_USER = "canvas.api.add.user.regex";
+	private static final String CANVAS_API_GET_COURSE = "canvas.api.get.single.course.regex";
 
 	private static final String DELETE = "DELETE";
 	private static final String POST = "POST";
@@ -254,6 +255,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			put(CANVAS_API_SEARCH_USER, "for searching for users");
 			put(CANVAS_API_CREATE_USER, "for creating a user");
 			put(CANVAS_API_ADD_USER, "for adding a user to a section");
+			put(CANVAS_API_GET_COURSE, "for getting a single course");
 		}};
 		boolean isMatch=false;
 		Set<String> apiListRegex = apiListRegexWithDebugMsg.keySet();

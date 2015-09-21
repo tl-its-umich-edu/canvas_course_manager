@@ -1,15 +1,13 @@
-
 <!DOCTYPE html>
 <html lang="en" ng-app="canvasSupportApp">
-
   <head>
       <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
       <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-      <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css">
-      <link rel="stylesheet" href="assets/css/custom_style.css">
+      <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css">
+      <link rel="stylesheet" href="assets-lti/css/custom_style.css">
       <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-      <link rel="stylesheet" href="assets/vendor/jquery/jquery-ui-1.11.2/jquery-ui.min.css">
-      <link rel="stylesheet" href="assets/vendor/animate/animate.css">
+      <link rel="stylesheet" href="vendor/jquery/jquery-ui-1.11.2/jquery-ui.min.css">
+      <link rel="stylesheet" href="vendor/animate/animate.css">
       <title>Canvas Support</title>
   </head>
   <body>
@@ -37,34 +35,35 @@
             <!-- /.navbar-collapse -->
         </div>
     </nav>
-    <div ng-include src="'assets/views/courses.html'" style="margin-top:60px"></div>
+    <div ng-if="!courseMode" ng-include src="'assets-lti/views/courses.html'" style="margin-top:60px"></div>
+    <div ng-if="courseMode" ng-include src="'assets-lti/views/course.html'" style="margin-top:60px"></div>
 
-    <script src="assets/vendor/jquery/jquery-1.11.0.min.js"></script>
-    <script src="assets/vendor/jquery/jquery-ui-1.11.2/jquery-ui.min.js"></script>
-    <script src="assets/vendor/angular/angular.min.js">
+    <script src="vendor/jquery/jquery-1.11.0.min.js"></script>
+    <script src="vendor/jquery/jquery-ui-1.11.2/jquery-ui.min.js"></script>
+    <script src="vendor/angular/angular.min.js">
     </script>
-    <script src="assets/vendor/angular/sortable.js"></script>
+    <script src="vendor/angular/sortable.js"></script>
 
-    <script src="assets/vendor/angular/angular-animate.min.js">
+    <script src="vendor/angular/angular-animate.min.js">
     </script>
-    <script src="assets/vendor/bootstrap/bootstrap.min.js">
+    <script src="vendor/bootstrap/bootstrap.min.js">
     </script>
-    <script src="assets/vendor/moment/moment.min.js">
+    <script src="vendor/moment/moment.min.js"/>
     </script>
-    <script src="assets/vendor/underscore/underscore-min.js">
+    <script src="vendor/underscore/underscore-min.js">
     </script>
-    <script src="assets/js/utils.js">
+    <script src="assets-lti/js/utils.js">
     </script>
-    <script src="assets/js/app/app.js">
+    <script src="assets-lti/js/app/app.js">
     </script>
     
-    <script src="assets/js/controllers/controllers.js">
+    <script src="assets-lti/js/controllers/controllers.js">
     </script>
-    <script src="assets/js/factories/factories.js">
+    <script src="assets-lti/js/factories/factories.js">
     </script>
-    <script src="assets/js/filters/filters.js">
+    <script src="assets-lti/js/filters/filters.js">
     </script>
-    <script src="assets/js/services/services.js">
+    <script src="assets-lti/js/services/services.js">
     </script>
 
     <!-- XList Modal -->
@@ -239,7 +238,7 @@
     <!-- add user Modal -->
     <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserLabel" aria-hidden="true" ng-controller="addUserController">
       <div class="modal-dialog modal-lg">
-        <div ng-include src="'assets/views/friends.html'"></div>
+        <div ng-include src="'assets-lti/views/friends.html'"></div>
       </div>
     </div>
 
