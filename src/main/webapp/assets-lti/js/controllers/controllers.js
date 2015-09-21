@@ -46,7 +46,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
     var mini='/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher&_='+ generateCurrentTimestamp();
     var url = '/sectionsUtilityTool'+mini;
     
-    $scope.loading = true;
+    $scope.loadingLookUpCourses = true;
 
     Courses.getCourses(url).then(function (result) {
 
@@ -56,7 +56,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
         $scope.success = false;
         $scope.error = true;
         $scope.instructions = false;
-        $scope.loading = false;
+        $scope.loadingLookUpCourses = false;
       }
       else {
         if(result.errors){
@@ -64,7 +64,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
           $scope.success = false;
           $scope.error = true;
           $scope.instructions = false;
-          $scope.loading = false;
+          $scope.loadingLookUpCourses = false;
         }
         else {
           // all is well - add the courses to the scope, extract the terms represented in course data
@@ -80,7 +80,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
           $scope.success = true;
           $scope.instructions = true;
           $scope.errorLookup = false;
-          $scope.loading = false;
+          $scope.loadingLookUpCourses = false;
           $scope.courses.mode ='moveSections';
           $rootScope.server = result.data[0].calendar.ics.split('/feed')[0];
           $rootScope.user.uniqname = uniqname;

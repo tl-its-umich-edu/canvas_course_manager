@@ -24,7 +24,7 @@
               <span class="alert alert-danger" ng-show="error" role="alert">{{errorMessage}}</span>
             </div>
             <h4 data-info="SIS-ID: {{currentTerm.currentTermId}} CV-ID: {{currentTerm.currentTermCanvasId}}"> {{currentTerm.currentTermName}} <small ng-show="success"> - found {{filtered.length}} courses you for this term</small>
-            &nbsp;&nbsp;&nbsp;&nbsp;<div class="spinner" ng-show="loading"></div>
+            &nbsp;&nbsp;&nbsp;&nbsp;<div class="spinner" ng-show="loadingLookUpCourses"></div>;
             </h4>
             <div class="alert alert-info" ng-show="courses.errors">{{courses.errors}}</div>
             <div class="clearfix" ng-show="filtered.length">
