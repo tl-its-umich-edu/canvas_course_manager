@@ -6,12 +6,12 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -26,10 +26,12 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.velocity.Template;
+
 import org.apache.velocity.context.Context;
 import org.apache.velocity.tools.view.VelocityViewServlet;
 import org.apache.velocity.tools.view.ViewToolContext;
+
+import edu.umich.its.lti.utils.RequestSignatureUtils;
 
 public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
@@ -59,12 +61,15 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String PUT = "PUT";
 	private String canvasToken;
 	private String canvasURL;
+	
+	private String callType;
+	
+	private String ltiUrl;
+	private String ltiKey;
+	private String ltiSecret;
+	
 	ResourceBundle props = ResourceBundle.getBundle("sectiontool");
-	
-	//either canvas or esb 
-	//TODO: this needs to be turned into a property
-	private final String CALL_TYPE = "canvas";
-	
+
 	public void init() throws ServletException {
 		M_log.debug(" Servlet init(): Called");
 	}
@@ -72,15 +77,15 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	public void fillContext(Context context, HttpServletRequest request) {
 		ViewToolContext vtc = (ViewToolContext)context;
 		vtc.put("variable", "happiness");
-		M_log.info("fillContext() called");
-		
+		M_log.info("fillContext() called");	
 	}
 	
 	public void doGet(HttpServletRequest request,HttpServletResponse response){
 		M_log.debug("doGet: Called");
 		try {
 			if(request.getServletPath().equals("/manager")){
-				canvasRestApiCall(request, response, CALL_TYPE);
+				
+				canvasRestApiCall(request, response);
 			}
 			else{
 				M_log.info("NOT MANAGER");
@@ -96,7 +101,31 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug("doPOST: Called");
 		try {
 			//Is this an LTI Call or a browser call?
-			canvasRestApiCall(request, response, CALL_TYPE);
+			if(request.getParameterMap().containsKey("oauth_consumer_key")){
+				for (Object e : request.getParameterMap().entrySet()) {
+			        Map.Entry<String, String[]> entry = (Map.Entry<String, String[]>) e;
+			        String name = entry.getKey();
+			        for (String value : entry.getValue()) {
+			            System.out.println(name + " = " + value);
+			        }
+			    }
+				Properties appExtSecureProperties = SectionUtilityToolFilter.appExtSecurePropertiesFile;
+				if(appExtSecureProperties!=null) {
+					ltiKey = appExtSecureProperties.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_KEY);
+					ltiSecret = appExtSecureProperties.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_SECRET);
+					ltiUrl = props.getString(SectionUtilityToolFilter.PROPERTY_LTI_URL);
+					boolean myRequest = RequestSignatureUtils.verifySignature(request, ltiKey, ltiSecret, ltiUrl);
+					M_log.info("MyRequest: " + myRequest);
+				}
+				else {
+					response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+					M_log.error("Failed to load system properties(sectionsToolProps.properties) for SectionsTool");
+					return;
+				}
+				doRequest(request, response);
+				return;
+			}
+			canvasRestApiCall(request, response);
 		}catch(Exception e) {
 			M_log.error("POST request has some exceptions",e);
 		}
@@ -105,7 +134,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	protected void doPut(HttpServletRequest request,HttpServletResponse response){
 		M_log.debug("doPut: Called");
 		try {
-			canvasRestApiCall(request, response, CALL_TYPE);
+			canvasRestApiCall(request, response);
 		}catch(Exception e) {
 			M_log.error("PUT request has some exceptions",e);
 		}
@@ -113,7 +142,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	protected void doDelete(HttpServletRequest request,HttpServletResponse response) {
 		M_log.debug("doDelete: Called");
 		try {
-			canvasRestApiCall(request, response, CALL_TYPE);
+			canvasRestApiCall(request, response);
 		}catch(Exception e) {
 			M_log.error("DELETE request has some exceptions",e);
 		}
@@ -124,7 +153,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
     * We are using canvas admin token stored in the properties file to handle the request. 
     */
 	private void canvasRestApiCall(HttpServletRequest request,
-			HttpServletResponse response, String callType) throws IOException {
+			HttpServletResponse response) throws IOException {
 		request.setCharacterEncoding("UTF-8");
 		M_log.debug("canvasRestApiCall(): called");
 		PrintWriter out = response.getWriter();
@@ -143,6 +172,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			return;
 		}
 		if(isAllowedApiRequest(request)) {
+			callType = props.getString(SectionUtilityToolFilter.PROPERTY_CALL_TYPE);
 			if(callType.equals("canvas")){
 				apiConnectionLogic(request,response);
 			}
