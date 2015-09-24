@@ -44,7 +44,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
     $scope.uniqname = 'instx';
     
     var mini='/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher&_='+ generateCurrentTimestamp();
-    var url = '/sectionsUtilityTool'+mini;
+    var url = '/canvasCourseManager'+mini;
     
     $scope.loadingLookUpCourses = true;
 
@@ -218,7 +218,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
 
   $scope.getCoursesForTerm = function() {
     $scope.loadingOtherCourses = true;
-    var coursesUrl='/sectionsUtilityTool/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher&_='+ generateCurrentTimestamp();
+    var coursesUrl='/canvasCourseManager/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher&_='+ generateCurrentTimestamp();
     Courses.getCourses(coursesUrl).then(function (result) {
       $scope.loadingOtherCourses = false;
       $scope.course.addingSections = true;
@@ -399,7 +399,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
         var sectionId = $scope.course.sections[e].id;
         var sectionName = $scope.course.sections[e].name;
         var thisSectionRole = $('li[data-sectionid="'+sectionId+'"]').find('select').val();
-        var url = '/sectionsUtilityTool/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + $scope.friend.id + '&enrollment[enrollment_state]=active&enrollment[type]=' + thisSectionRole;
+        var url = '/canvasCourseManager/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + $scope.friend.id + '&enrollment[enrollment_state]=active&enrollment[type]=' + thisSectionRole;
 
         Friend.addFriendToSection(url).then(function (data) {
           if (data.errors) {

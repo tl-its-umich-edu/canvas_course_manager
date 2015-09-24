@@ -1,41 +1,16 @@
 package edu.umich.ctools.sectionsUtilityTool;
-import java.util.Arrays;
+
 import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
-import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
-import java.lang.reflect.*;
 import java.io.IOException;
-import java.io.FileInputStream;
-import java.io.File;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.KeyStore;
-import java.security.Principal;
-import java.security.PrivateKey;
-import java.security.NoSuchAlgorithmException;
-import java.security.KeyStoreException;
-import java.security.KeyManagementException;
-import java.security.UnrecoverableKeyException;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.cert.X509Certificate;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateException;
-import java.security.SecureRandom;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.KeyFactory;
 
-import javax.net.ssl.*;
-import javax.net.SocketFactory;
 import javax.mail.*;
 import javax.mail.internet.*;
 
@@ -45,15 +20,12 @@ import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.apache.xmlrpc.client.XmlRpcSun15HttpTransportFactory;
 
-import edu.umich.its.lti.utils.PropertiesUtilities;
-
 public class Friend 
 {
-
 	private static Log M_log = LogFactory.getLog(Friend.class);
 
 	private static boolean sslInitialized = false;
-	
+
 	protected static String friendUrl = null;
 	protected static String contactEmail = null;
 	protected static String emailMessage = null;
@@ -64,31 +36,40 @@ public class Friend
 	protected static String requesterEmailFile = null;
 	protected static String mailHost = null;
 	protected static String subjectLine = null;
-	protected static Properties appExtSecurePropertiesFile=null;
-	protected static Properties appExtFriendSecurePropertiesFile=null;
 
 	protected static final String KEYSTORETYPE_PKCS12 = "pkcs12";
 	protected static final String TRUSTSTORETYPE_JKS = "jks";
-	
+
 	protected static final String DO_ACCOUNT_EXIST_WS = "doAccountsExist";
 	protected static final String SEND_INVITES_WS = "sendInvites";
-	
+
 	protected static final String INSTRUCTOR_NAME_TAG = "<instructor>";
 	protected static final String CONTACT_EMAIL_TAG = "<contactEmail>";
 
 	protected static final String FRIEND_PROPERTY_FILE_PATH = "sectionsToolFriendPropsPath";
 	protected static final String FRIEND_PROPERTY_FILE_PATH_SECURE = "sectionsToolFriendPropsPathSecure";
-	
+
 	protected static final String MAIL_SMTP_AUTH = "mail.smtp.auth";
 	protected static final String MAIL_SMTP_STARTTLS = "mail.smtp.starttls.enable";
 	protected static final String MAIL_SMTP_HOST = "mail.smtp.host";
 	protected static final String MAIL_DEBUG = "mail.debug";
+
+	private final static String CCM_PROPERTY_FILE_PATH = "ccmPropsPath";
+	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";	
+
+	protected static Properties appExtSecurePropertiesFile=null;
+	protected static Properties appExtPropertiesFile=null;	
 	
+	private XmlRpcClient Xclient;
+
 	public Friend() throws MalformedURLException {
 		super();
-		
+		M_log.debug("Friend constructor Called");
+		appExtPropertiesFile = Utils.loadProperties(CCM_PROPERTY_FILE_PATH);
+		appExtSecurePropertiesFile = Utils.loadProperties(CCM_SECURE_PROPERTY_FILE_PATH);	
+
 		setProperties();
-		
+
 		Xclient = new XmlRpcClient();
 		XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
 		config.setServerURL(new URL(friendUrl));
@@ -96,55 +77,26 @@ public class Friend
 		Xclient.setConfig(config);
 	}
 
-	private XmlRpcClient Xclient;
+	public void setProperties(){
+		if(appExtSecurePropertiesFile!=null) {
+			//PropertiesFile information
+			friendUrl = appExtPropertiesFile.getProperty("ctools.friend.url");
+			contactEmail = appExtPropertiesFile.getProperty("ctools.friend.contactemail");
+			referrerUrl = appExtPropertiesFile.getProperty("ctools.friend.referrer");
+			friendEmailFile = appExtPropertiesFile.getProperty("ctools.friend.friendemail");
+			requesterEmailFile = appExtPropertiesFile.getProperty("ctools.friend.requesteremail");
+			mailHost = appExtPropertiesFile.getProperty("ctools.friend.mailhost");
+			subjectLine = appExtPropertiesFile.getProperty("ctools.friend.subjectline");
+			ksFileName = appExtSecurePropertiesFile.getProperty("umich.friend.ksfilename");
+			ksPwd = appExtSecurePropertiesFile.getProperty("umich.friend.kspassword");
 
-	public void setProperties()
-	{
-		String propertiesFilePathSecure = System.getProperty(FRIEND_PROPERTY_FILE_PATH);
-		M_log.info("friend props: " + propertiesFilePathSecure);
-		if (!propertiesFilePathSecure.isEmpty()) {
-			appExtSecurePropertiesFile=PropertiesUtilities.getPropertiesObjectFromURL(propertiesFilePathSecure);
-			if(appExtSecurePropertiesFile!=null) {
-				//PropertiesFile information
-				friendUrl = appExtSecurePropertiesFile.getProperty("ctools.friend.url");
-				contactEmail = appExtSecurePropertiesFile.getProperty("ctools.friend.contactemail");
-				referrerUrl = appExtSecurePropertiesFile.getProperty("ctools.friend.referrer");
-				//ksFileName = appExtSecurePropertiesFile.getProperty("ctools.friend.ksfilename");
-				//ksPwd = appExtSecurePropertiesFile.getProperty("ctools.friend.kspassword");
-				friendEmailFile = appExtSecurePropertiesFile.getProperty("ctools.friend.friendemail");
-				requesterEmailFile = appExtSecurePropertiesFile.getProperty("ctools.friend.requesteremail");
-				mailHost = appExtSecurePropertiesFile.getProperty("ctools.friend.mailhost");
-				subjectLine = appExtSecurePropertiesFile.getProperty("ctools.friend.subjectline");
-				
-				M_log.debug("friendUrl: " + friendUrl);
-				M_log.debug("contactEmail: " + contactEmail);
-				M_log.debug("referrerUrl: " + referrerUrl);
-				//M_log.debug("ksFileName: " + ksFileName);
-				//M_log.debug("ksPwd: " + ksPwd);
-			}else {
-				M_log.error("Failed to load Friend application properties from sectionsToolFriend.properties for SectionsTool");
-			}
-			
+			M_log.debug("ksFileName: " + ksFileName);
+			M_log.debug("ksPwd: " + ksPwd);
+			M_log.debug("friendUrl: " + friendUrl);
+			M_log.debug("contactEmail: " + contactEmail);
+			M_log.debug("referrerUrl: " + referrerUrl);
 		}else {
-			M_log.error("File path for (sectionsToolFriend.properties) is not provided");
-		}
-		
-		String propertiesFriendFilePathSecure = System.getProperty(FRIEND_PROPERTY_FILE_PATH_SECURE);
-		M_log.info("friend secure props: " + propertiesFriendFilePathSecure);
-		if (!propertiesFriendFilePathSecure.isEmpty()) {
-			appExtFriendSecurePropertiesFile=PropertiesUtilities.getPropertiesObjectFromURL(propertiesFriendFilePathSecure);
-			if(appExtFriendSecurePropertiesFile!=null) {
-				ksFileName = appExtFriendSecurePropertiesFile.getProperty("ctools.friend.ksfilename");
-				ksPwd = appExtFriendSecurePropertiesFile.getProperty("ctools.friend.kspassword");
-				
-				M_log.debug("ksFileName: " + ksFileName);
-				M_log.debug("ksPwd: " + ksPwd);
-			}else {
-				M_log.error("Failed to load secure Friend application properties from sectionsToolFriend.properties for SectionsTool");
-			}
-			
-		}else {
-			M_log.error("File path for (sectionsToolFriendSecure.properties) is not provided");
+			M_log.error("Failed to load Friend application properties from sectionsToolFriend.properties for SectionsTool");
 		}
 
 		//Setting up properties for keyStore
@@ -191,8 +143,8 @@ public class Friend
 			System.setProperties(systemProps);
 
 			sslInitialized = true;
-		}
-	}	
+		}		
+	}
 
 	/**
 	 * Returns to uninitialized state.
@@ -235,7 +187,7 @@ public class Friend
 		CheckAccountExistsResponse response = CheckAccountExistsResponse.FRIEND_ACCOUNT_DOES_NOT_EXIST;
 		int rv = 0;	// default to be "no friend account"
 		try {
-			
+
 			Object[] params = new Object[]{new String[] {email}};
 			Object[] results = (Object[]) Xclient.execute(DO_ACCOUNT_EXIST_WS, params);
 			// though the friend XML-RPC service supports batch call mode, 
@@ -266,20 +218,20 @@ public class Friend
 		byte[] encoded = Files.readAllBytes(Paths.get(path));
 		return new String(encoded, encoding);
 	}
-	
+
 	public static String replacePlaceHolders(String message, HashMap<String,String> map){
-		
+
 		Iterator<String> keySetIterator = map.keySet().iterator();
-		
+
 		while(keySetIterator.hasNext()){ 
 			String key = keySetIterator.next(); 
 			message = message.replace(key, map.get(key)); 
 		}
-		
+
 		return message;
 	}
-	
-	
+
+
 	/*
 	 * Actually sends out an invite
 	 *
@@ -301,17 +253,17 @@ public class Friend
 		M_log.debug("Friend doSendInvite() called");
 		CreateAccountResponse response = CreateAccountResponse.RUNTIME_PROBLEM;
 		int rv = 0; // default to be "runtime error"
-		
+
 		try {
-			
+
 			HashMap<String, String> map = new HashMap<String,String>();
-			
+
 			map.put(INSTRUCTOR_NAME_TAG, instructorName);
 			map.put(CONTACT_EMAIL_TAG, contactEmail);
-			
+
 			emailMessage = Friend.readFile(friendEmailFile, StandardCharsets.UTF_8);
 			emailMessage = replacePlaceHolders(emailMessage, map);
-			
+
 			Object[] params = new Object[]{contactEmail, referrerUrl, emailMessage, new String[]{accountEmail}, currentUserEmail};
 			Object[] results = (Object[]) Xclient.execute(SEND_INVITES_WS, params);
 			// though the friend XML-RPC service supports batch call mode, 
@@ -346,7 +298,7 @@ public class Friend
 		String host = mailHost;
 
 		M_log.info("Setting up mailProps");
-		
+
 		Properties properties = System.getProperties();
 		properties.put(MAIL_SMTP_AUTH, "false");
 		properties.put(MAIL_SMTP_STARTTLS, "true"); //Put below to false, if no https is needed
@@ -357,21 +309,21 @@ public class Friend
 		Session session = Session.getInstance(properties);
 
 		try{
-			
+
 			HashMap<String, String> map = new HashMap<String,String>();
-			
+
 			map.put("<instructor>", instructorName);
 			map.put("<friend>", inviteEmail);
-			
+
 			emailMessage = Friend.readFile(requesterEmailFile, StandardCharsets.UTF_8);
 			emailMessage = replacePlaceHolders(emailMessage, map);
-						
+
 			M_log.debug("Setting up message for sendMail");
 			MimeMessage message = new MimeMessage(session);
 			message.setFrom(new InternetAddress(from));
 			message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
 			message.setSubject(subjectLine);
-			
+
 			message.setText(emailMessage);
 
 			M_log.info("Sending message");
@@ -383,5 +335,5 @@ public class Friend
 			M_log.error("notifyCurrentUser exception: " + e.getMessage());
 		}
 	}
-	
+
 }

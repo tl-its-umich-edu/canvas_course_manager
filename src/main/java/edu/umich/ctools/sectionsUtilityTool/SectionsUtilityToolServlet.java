@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +27,6 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-
 import org.apache.velocity.context.Context;
 import org.apache.velocity.tools.view.VelocityViewServlet;
 import org.apache.velocity.tools.view.ViewToolContext;
@@ -54,43 +54,64 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String CANVAS_API_CREATE_USER = "canvas.api.create.user.regex";
 	private static final String CANVAS_API_ADD_USER = "canvas.api.add.user.regex";
 	private static final String CANVAS_API_GET_COURSE = "canvas.api.get.single.course.regex";
+	private static final String MANAGER_SERVLET_NAME = "/manager";
 
 	private static final String DELETE = "DELETE";
 	private static final String POST = "POST";
 	private static final String GET = "GET";
 	private static final String PUT = "PUT";
+	
 	private String canvasToken;
 	private String canvasURL;
-	
 	private String callType;
-	
 	private String ltiUrl;
 	private String ltiKey;
 	private String ltiSecret;
 	
-	ResourceBundle props = ResourceBundle.getBundle("sectiontool");
+	private final static String CCM_PROPERTY_FILE_PATH = "ccmPropsPath";
+	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";	
+	
+	protected static Properties appExtSecurePropertiesFile=null;
+	protected static Properties appExtPropertiesFile=null;	
 
 	public void init() throws ServletException {
 		M_log.debug(" Servlet init(): Called");
+		appExtPropertiesFile = Utils.loadProperties(CCM_PROPERTY_FILE_PATH);
+		appExtSecurePropertiesFile = Utils.loadProperties(CCM_SECURE_PROPERTY_FILE_PATH);		
 	}
 	
 	public void fillContext(Context context, HttpServletRequest request) {
+		M_log.debug("fillContext() called");		
 		ViewToolContext vtc = (ViewToolContext)context;
-		vtc.put("variable", "happiness");
-		M_log.info("fillContext() called");	
+//		test code
+//		vtc.put("variable", "happiness");
 	}
+
+	// Deal nicely with error conditions.
+	public void doError(HttpServletRequest request, HttpServletResponse response, String s)
+			throws java.io.IOException {
+
+		StringBuilder return_url = new StringBuilder();
+		if (return_url != null && return_url.length() > 1) {
+			return_url.append((return_url.indexOf("?") > 1) ? "&" : "?");
+			return_url.append("lti_msg=").append(URLEncoder.encode(s,"UTF-8"));
+			response.sendRedirect(return_url.toString());
+			return;
+		}
+		PrintWriter out = response.getWriter();
+		out.println(s);
+	}	
 	
 	public void doGet(HttpServletRequest request,HttpServletResponse response){
 		M_log.debug("doGet: Called");
 		try {
-			if(request.getServletPath().equals("/manager")){
+			if(request.getServletPath().equals(MANAGER_SERVLET_NAME)){
 				
 				canvasRestApiCall(request, response);
 			}
 			else{
 				M_log.info("NOT MANAGER");
-				doRequest(request, response);
-				//doRequest will call fillContext()
+				doRequest(request, response); //doRequest will always call fillContext()
 			}
 		}catch(Exception e) {
 			M_log.error("GET request has some exceptions",e);
@@ -100,30 +121,36 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	public void doPost(HttpServletRequest request,HttpServletResponse response){
 		M_log.debug("doPOST: Called");
 		try {
-			//Is this an LTI Call or a browser call?
+			//determine if this is an LTI Call or a browser call?
 			if(request.getParameterMap().containsKey("oauth_consumer_key")){
 				for (Object e : request.getParameterMap().entrySet()) {
 			        Map.Entry<String, String[]> entry = (Map.Entry<String, String[]>) e;
 			        String name = entry.getKey();
 			        for (String value : entry.getValue()) {
-			            System.out.println(name + " = " + value);
+			            M_log.debug(name + " = " + value);
 			        }
 			    }
 				Properties appExtSecureProperties = SectionUtilityToolFilter.appExtSecurePropertiesFile;
 				if(appExtSecureProperties!=null) {
-					ltiKey = appExtSecureProperties.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_KEY);
-					ltiSecret = appExtSecureProperties.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_SECRET);
-					ltiUrl = props.getString(SectionUtilityToolFilter.PROPERTY_LTI_URL);
-					boolean myRequest = RequestSignatureUtils.verifySignature(request, ltiKey, ltiSecret, ltiUrl);
-					M_log.info("MyRequest: " + myRequest);
+					ltiKey = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_KEY);
+					ltiSecret = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_SECRET);
+					ltiUrl = appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_URL);
+					M_log.debug("ltiKey: " + ltiKey);
+					M_log.debug("ltiSecret: " + ltiSecret);
+					M_log.debug("ltiUrl: " + ltiUrl);
 				}
 				else {
 					response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 					M_log.error("Failed to load system properties(sectionsToolProps.properties) for SectionsTool");
 					return;
 				}
-				doRequest(request, response);
-				return;
+				if(RequestSignatureUtils.verifySignature(request, ltiKey, ltiSecret, ltiUrl)){
+					doRequest(request, response);
+					return;
+				}
+				else{
+					doError(request, response, "Missing required parameter:  Launch type or version is incorrect.");
+				}
 			}
 			canvasRestApiCall(request, response);
 		}catch(Exception e) {
@@ -166,13 +193,13 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		else {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			out = response.getWriter();
-			out.print(props.getString("property.file.load.error"));
+			out.print(appExtPropertiesFile.getProperty("property.file.load.error"));
 			out.flush();
 			M_log.error("Failed to load system properties(sectionsToolProps.properties) for SectionsTool");
 			return;
 		}
 		if(isAllowedApiRequest(request)) {
-			callType = props.getString(SectionUtilityToolFilter.PROPERTY_CALL_TYPE);
+			callType = appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_CALL_TYPE);
 			if(callType.equals("canvas")){
 				apiConnectionLogic(request,response);
 			}
@@ -182,7 +209,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}else {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			out = response.getWriter();
-			out.print(props.getString("api.not.allowed.error"));
+			out.print(appExtPropertiesFile.getProperty("api.not.allowed.error"));
 			out.flush();
 		}
 
@@ -290,7 +317,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		boolean isMatch=false;
 		Set<String> apiListRegex = apiListRegexWithDebugMsg.keySet();
 		for (String api : apiListRegex) {
-			if(url.matches(props.getString(api))) {
+			if(url.matches(appExtPropertiesFile.getProperty(api))) {
 				M_log.debug(prefixDebugMsg+apiListRegexWithDebugMsg.get(api));
 				isMatch= true;
 				break;
