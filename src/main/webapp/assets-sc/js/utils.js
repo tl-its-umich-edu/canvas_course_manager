@@ -26,7 +26,7 @@ $(document).ajaxStop(function(){
 var errorDisplay = function (url, status, errorMessage) {
   switch(status) {
     case 403:
-      window.location = '/sectionsUtilityTool/error.html';
+      window.location = '/canvasCourseManager/error.html';
       break;
     default:
       $('#debugPanel').html('<h3>' + status + '</h3><p><code>' + url + '</code></p><p>' + errorMessage + '</p>');
@@ -366,7 +366,7 @@ $(document).on('click', '#uniqnameOtherTrigger', function (e) {
   if(validateUniqname(uniqnameOther)){
     var termId = $.trim($('.canvasTermIdforjQuery').first().text());
     var mini='/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqnameOther+ '&include=sections&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher';
-    var url = '/sectionsUtilityTool'+mini;
+    var url = '/canvasCourseManager'+mini;
     $.ajax({
       type: 'GET',
       url: url
@@ -460,7 +460,7 @@ $(document).on('click', '#courseStringTrigger', function (e) {
   var termId = $.trim($('.canvasTermIdforjQuery').first().text());
   
   var mini='/manager/api/v1/accounts/1/courses?search_term=' + courseString + '&per_page=200';
-  var url = '/sectionsUtilityTool'+mini;
+  var url = '/canvasCourseManager'+mini;
   $.ajax({
     type: 'GET',
     url: url
@@ -500,7 +500,7 @@ $(document).on('click', '.getSectionsNoInstructor', function (e) {
   var thisCourseId = $(this).attr('data-id');
   var thisCourseTitle =$(this).closest('li').find('strong').text();
 
-  var url = '/sectionsUtilityTool/manager/api/v1/courses/' + thisCourseId + '/sections?per_page=100';
+  var url = '/canvasCourseManager/manager/api/v1/courses/' + thisCourseId + '/sections?per_page=100';
   $.ajax({
     type: 'GET',
     url: url

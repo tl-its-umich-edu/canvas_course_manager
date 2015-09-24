@@ -27,10 +27,17 @@ public class FriendServlet extends HttpServlet {
 	private static final String PARAMETER_INSTRUCTOR_EMAIL = "inst_email";
 	private static final String PARAMETER_INSTRUCTOR_FIRST_NAME = "inst_first_name";
 	private static final String PARAMETER_INSTRUCTOR_LAST_NAME = "inst_last_name";
-	ResourceBundle props = ResourceBundle.getBundle("sectiontool");
+	
+	private final static String CCM_PROPERTY_FILE_PATH = "ccmPropsPath";
+	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";	
+	
+	protected static Properties appExtSecureProperties=null;
+	protected static Properties appExtProperties=null;	
 
 	public void init() throws ServletException {
 		M_log.debug(" Servlet init(): Called");
+		appExtProperties = Utils.loadProperties(CCM_PROPERTY_FILE_PATH);
+		appExtSecureProperties = Utils.loadProperties(CCM_SECURE_PROPERTY_FILE_PATH);	
 	}
 
 	//This servlet only processes POST calls so the others have not been implemented
@@ -53,11 +60,11 @@ public class FriendServlet extends HttpServlet {
 		Friend myFriend = new Friend();
 		PrintWriter out = response.getWriter();
 		response.setContentType("application/json");
-		Properties appExtSecureProperties = Friend.appExtSecurePropertiesFile; 
+		Properties appExtSecureProperties = Friend.appExtSecureProperties; 
 		if(appExtSecureProperties==null) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			out = response.getWriter();
-			out.print(props.getString("property.file.load.error"));
+			out.print(appExtProperties.getProperty("property.file.load.error"));
 			out.flush();
 			M_log.error("Failed to load system properties(sectionsToolProps.properties) for SectionsTool");
 			return;

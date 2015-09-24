@@ -4,14 +4,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -26,15 +27,17 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.velocity.context.Context;
+import org.apache.velocity.tools.view.VelocityViewServlet;
+import org.apache.velocity.tools.view.ViewToolContext;
 
+import edu.umich.its.lti.utils.RequestSignatureUtils;
 
-
-
-public class SectionsUtilityToolServlet extends HttpServlet {
+public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	private static Log M_log = LogFactory.getLog(SectionsUtilityToolServlet.class);
 	private static final long serialVersionUID = 7284813350014385613L;
-	
+
 	private static final String CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS = "canvas.api.getcourse.by.uniqname.no.sections.regex";
 	private static final String CANVAS_API_GETALLSECTIONS_PER_COURSE = "canvas.api.getallsections.per.course.regex";
 	private static final String CANVAS_API_GETSECTION_PER_COURSE = "canvas.api.getsection.per.course.regex";
@@ -51,38 +54,117 @@ public class SectionsUtilityToolServlet extends HttpServlet {
 	private static final String CANVAS_API_CREATE_USER = "canvas.api.create.user.regex";
 	private static final String CANVAS_API_ADD_USER = "canvas.api.add.user.regex";
 	private static final String CANVAS_API_GET_COURSE = "canvas.api.get.single.course.regex";
+	private static final String MANAGER_SERVLET_NAME = "/manager";
 
 	private static final String DELETE = "DELETE";
 	private static final String POST = "POST";
 	private static final String GET = "GET";
 	private static final String PUT = "PUT";
+
 	private String canvasToken;
 	private String canvasURL;
-	ResourceBundle props = ResourceBundle.getBundle("sectiontool");
+	private String callType;
+	private String ltiUrl;
+	private String ltiKey;
+	private String ltiSecret;
 
-	
+	private final static String CCM_PROPERTY_FILE_PATH = "ccmPropsPath";
+	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";	
+
+	protected static Properties appExtSecurePropertiesFile=null;
+	protected static Properties appExtPropertiesFile=null;	
+
 	public void init() throws ServletException {
 		M_log.debug(" Servlet init(): Called");
+		appExtPropertiesFile = Utils.loadProperties(CCM_PROPERTY_FILE_PATH);
+		appExtSecurePropertiesFile = Utils.loadProperties(CCM_SECURE_PROPERTY_FILE_PATH);		
 	}
-	
-	protected void doGet(HttpServletRequest request,HttpServletResponse response){
+
+	public void fillContext(Context context, HttpServletRequest request) {
+		M_log.debug("fillContext() called");		
+		ViewToolContext vtc = (ViewToolContext)context;
+		//test code
+		//vtc.put("variable", "happiness");
+	}
+
+	// Deal nicely with error conditions.
+	public void doError(HttpServletRequest request, HttpServletResponse response, String s)
+			throws java.io.IOException {
+
+		StringBuilder return_url = new StringBuilder();
+		if (return_url != null && return_url.length() > 1) {
+			return_url.append((return_url.indexOf("?") > 1) ? "&" : "?");
+			return_url.append("lti_msg=").append(URLEncoder.encode(s,"UTF-8"));
+			response.sendRedirect(return_url.toString());
+			return;
+		}
+		PrintWriter out = response.getWriter();
+		out.println(s);
+	}	
+
+	public void doGet(HttpServletRequest request,HttpServletResponse response){
 		M_log.debug("doGet: Called");
 		try {
-			canvasRestApiCall(request, response);
+			if(request.getServletPath().equals(MANAGER_SERVLET_NAME)){
+
+				canvasRestApiCall(request, response);
+			}
+			else{
+				M_log.info("NOT MANAGER");
+				doRequest(request, response); //doRequest will always call fillContext()
+			}
 		}catch(Exception e) {
 			M_log.error("GET request has some exceptions",e);
 		}
 	}
-	
-	protected void doPost(HttpServletRequest request,HttpServletResponse response){
+
+	public void doPost(HttpServletRequest request,HttpServletResponse response){
 		M_log.debug("doPOST: Called");
 		try {
+			//determine if this is an LTI Call or a browser call?
+			if(request.getParameterMap().containsKey("oauth_consumer_key")){
+				processLti(request, response);
+				return;
+			}
 			canvasRestApiCall(request, response);
 		}catch(Exception e) {
 			M_log.error("POST request has some exceptions",e);
 		}
-		
+
 	}
+
+	public void processLti(HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
+		for (Object e : request.getParameterMap().entrySet()) {
+			Map.Entry<String, String[]> entry = (Map.Entry<String, String[]>) e;
+			String name = entry.getKey();
+			for (String value : entry.getValue()) {
+				M_log.debug(name + " = " + value);
+			}
+		}
+		//Properties appExtSecureProperties = SectionUtilityToolFilter.appExtSecurePropertiesFile;
+		if(appExtSecurePropertiesFile!=null) {
+			ltiKey = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_KEY);
+			ltiSecret = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_SECRET);
+			ltiUrl = appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_URL);
+			M_log.debug("ltiKey: " + ltiKey);
+			M_log.debug("ltiSecret: " + ltiSecret);
+			M_log.debug("ltiUrl: " + ltiUrl);
+		}
+		else {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			M_log.error("Failed to load system properties(sectionsToolProps.properties) for SectionsTool");
+			return;
+		}
+		//method verifySignature is used to verify LTI oauth authorization
+		if(RequestSignatureUtils.verifySignature(request, ltiKey, ltiSecret, ltiUrl)){
+			doRequest(request, response);
+			return;
+		}
+		doError(request, response, "Missing required parameter:  Launch type or version is incorrect.");
+		return;
+	}
+
 	protected void doPut(HttpServletRequest request,HttpServletResponse response){
 		M_log.debug("doPut: Called");
 		try {
@@ -91,6 +173,7 @@ public class SectionsUtilityToolServlet extends HttpServlet {
 			M_log.error("PUT request has some exceptions",e);
 		}
 	}
+
 	protected void doDelete(HttpServletRequest request,HttpServletResponse response) {
 		M_log.debug("doDelete: Called");
 		try {
@@ -99,18 +182,18 @@ public class SectionsUtilityToolServlet extends HttpServlet {
 			M_log.error("DELETE request has some exceptions",e);
 		}
 	}
-	
-   /*
-    * This method is handling all the different Api request like PUT, POST etc to canvas.
-    * We are using canvas admin token stored in the properties file to handle the request. 
-    */
+
+	/*
+	 * This method is handling all the different Api request like PUT, POST etc to canvas.
+	 * We are using canvas admin token stored in the secure properties file to handle the request. 
+	 */
 	private void canvasRestApiCall(HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		request.setCharacterEncoding("UTF-8");
 		M_log.debug("canvasRestApiCall(): called");
 		PrintWriter out = response.getWriter();
 		response.setContentType("application/json");
-		Properties appExtSecureProperties = SectionUtilityToolFilter.appExtSecurePropertiesFile;
+		Properties appExtSecureProperties = SectionUtilityToolFilter.appExtSecureProperties;
 		if(appExtSecureProperties!=null) {
 			canvasToken = appExtSecureProperties.getProperty(SectionUtilityToolFilter.PROPERTY_CANVAS_ADMIN);
 			canvasURL = appExtSecureProperties.getProperty(SectionUtilityToolFilter.PROPERTY_CANVAS_URL);
@@ -118,27 +201,39 @@ public class SectionsUtilityToolServlet extends HttpServlet {
 		else {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			out = response.getWriter();
-			out.print(props.getString("property.file.load.error"));
+			out.print(appExtPropertiesFile.getProperty("property.file.load.error"));
 			out.flush();
 			M_log.error("Failed to load system properties(sectionsToolProps.properties) for SectionsTool");
 			return;
 		}
 		if(isAllowedApiRequest(request)) {
-			apiConnectionLogic(request,response);
-
+			callType = appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_CALL_TYPE);
+			if(callType.equals("canvas")){
+				apiConnectionLogic(request,response);
+			}
+			else{
+				esbRestApiCall(request,response);
+			}
 		}else {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			out = response.getWriter();
-			out.print(props.getString("api.not.allowed.error"));
+			out.print(appExtPropertiesFile.getProperty("api.not.allowed.error"));
 			out.flush();
 		}
 
 	}
+
+	private void esbRestApiCall(HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
+		M_log.debug("esbRestApiCall() called");
+		//Stub: to be implemented later when ESB to canvas call is ready
+	}	
+
 	/*
 	 * This function has logic that execute client(i.e., browser) request and get results from the canvas  
 	 * using Apache Http client library
 	 */
-	
+
 
 	private void apiConnectionLogic(HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
@@ -190,11 +285,11 @@ public class SectionsUtilityToolServlet extends HttpServlet {
 		out.print(sb.toString());
 		out.flush();
 	}
-    /*
-     * This method control canvas api request allowed. If a particular request from UI is not in the allowed list then it will not process the request 
-     * and sends an error to the UI. Using regex to match the incoming request
-     */
-	
+	/*
+	 * This method control canvas api request allowed. If a particular request from UI is not in the allowed list then it will not process the request 
+	 * and sends an error to the UI. Using regex to match the incoming request
+	 */
+
 	private boolean isAllowedApiRequest(HttpServletRequest request) {
 		M_log.debug("isAllowedApiRequest(): called");
 		String url;
@@ -207,13 +302,13 @@ public class SectionsUtilityToolServlet extends HttpServlet {
 		}else {
 			url=pathInfo;
 			isAllowedRequest=isApiFoundIntheList(url);
-			
+
 		}
 		return isAllowedRequest;
 	}
-    /*
-     * This helper method iterate through the list of api's that sections tool have and if a match is found then logs associated debug message.
-     */
+	/*
+	 * This helper method iterate through the list of api's that sections tool have and if a match is found then logs associated debug message.
+	 */
 	private boolean isApiFoundIntheList(String url) {
 		M_log.debug("isApiFoundIntheList(): called");
 		String prefixDebugMsg="The canvas api request ";
@@ -230,19 +325,14 @@ public class SectionsUtilityToolServlet extends HttpServlet {
 		boolean isMatch=false;
 		Set<String> apiListRegex = apiListRegexWithDebugMsg.keySet();
 		for (String api : apiListRegex) {
-			if(url.matches(props.getString(api))) {
+			if(url.matches(appExtPropertiesFile.getProperty(api))) {
 				M_log.debug(prefixDebugMsg+apiListRegexWithDebugMsg.get(api));
 				isMatch= true;
 				break;
 			}
-			
+
 		}
 		return isMatch;
 	}
-
-	
-	
-    
-
 
 }

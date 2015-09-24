@@ -23,7 +23,7 @@ canvasSupportApp.factory('Courses', function ($http) {
 canvasSupportApp.factory('Sections', function ($http) {
   return {
     getSectionsForCourseId: function (courseId) {
-      var url = '/sectionsUtilityTool/manager/api/v1/courses/' + courseId + '/sections?per_page=100&_='+ generateCurrentTimestamp();
+      var url = '/canvasCourseManager/manager/api/v1/courses/' + courseId + '/sections?per_page=100&_='+ generateCurrentTimestamp();
       return $http.get(url, {cache: false}).then(
         function success(result) {
           return result;
@@ -40,7 +40,7 @@ canvasSupportApp.factory('Sections', function ($http) {
 canvasSupportApp.factory('Friend', function ($http, $rootScope) {
   return {
     lookUpCanvasFriend: function (friendId) {
-      var url = '/sectionsUtilityTool/manager/api/v1/accounts/self/users?search_term=' + friendId + '&_='+ generateCurrentTimestamp();
+      var url = '/canvasCourseManager/manager/api/v1/accounts/self/users?search_term=' + friendId + '&_='+ generateCurrentTimestamp();
       return $http.get(url, {cache: false}).then(
         function success(result) {
           return result;
@@ -52,7 +52,7 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
     },
 
     createCanvasFriend: function (friendEmailAddress,friendNameFirst, friendNameLast) {
-      var url = '/sectionsUtilityTool/manager/api/v1/accounts/1/users?account_id=1' +
+      var url = '/canvasCourseManager/manager/api/v1/accounts/1/users?account_id=1' +
         '&user[name]=' + friendNameFirst + ' ' + friendNameLast +
         //'&user[sortable_name]=' +  friendNameLast + ',' +  friendNameFirst +
         '&pseudonym[unique_id]=' + friendEmailAddress.replace('@','%2B') +
@@ -73,7 +73,7 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
       );
     },
     doFriendAccount: function (friendEmailAddress, requestorEmail) {
-      var url = '/sectionsUtilityTool/friend/friendCreate?id=' + friendEmailAddress +
+      var url = '/canvasCourseManager/friend/friendCreate?id=' + friendEmailAddress +
        '&inst_email=' + requestorEmail +
        // need the first name and last name, right now just using the email
        '&inst_first_name=' + requestorEmail +
