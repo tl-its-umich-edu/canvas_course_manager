@@ -24,8 +24,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import edu.umich.its.lti.utils.PropertiesUtilities;
-
 public class SectionUtilityToolFilter implements Filter {
 
 	private static Log M_log = LogFactory.getLog(SectionUtilityToolFilter.class);
@@ -50,16 +48,16 @@ public class SectionUtilityToolFilter implements Filter {
 	private final static String CCM_PROPERTY_FILE_PATH = "ccmPropsPath";
 	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";	
 	
-	protected static Properties appExtSecurePropertiesFile=null;
-	protected static Properties appExtPropertiesFile=null;
+	protected static Properties appExtSecureProperties=null;
+	protected static Properties appExtProperties=null;
 
 	private static final String FALSE = "false";
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 		M_log.debug("Filter Init(): Called");
-		appExtPropertiesFile = Utils.loadProperties(CCM_PROPERTY_FILE_PATH);
-		appExtSecurePropertiesFile = Utils.loadProperties(CCM_SECURE_PROPERTY_FILE_PATH);
+		appExtProperties = Utils.loadProperties(CCM_PROPERTY_FILE_PATH);
+		appExtSecureProperties = Utils.loadProperties(CCM_SECURE_PROPERTY_FILE_PATH);
 		getExternalAppProperties();
 	}
 
@@ -83,10 +81,10 @@ public class SectionUtilityToolFilter implements Filter {
 
 	protected void getExternalAppProperties() {
 		M_log.debug("getExternalAppProperties(): called");
-		if(appExtSecurePropertiesFile!=null) {
-			isTestUrlEnabled = Boolean.parseBoolean(appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_USE_TEST_URL,FALSE));
-			providerURL=appExtSecurePropertiesFile.getProperty(PROPERTY_LDAP_SERVER_URL);
-			mcommunityGroup=appExtSecurePropertiesFile.getProperty(PROPERTY_AUTH_GROUP);
+		if(appExtSecureProperties!=null) {
+			isTestUrlEnabled = Boolean.parseBoolean(appExtSecureProperties.getProperty(SectionUtilityToolFilter.PROPERTY_USE_TEST_URL,FALSE));
+			providerURL=appExtSecureProperties.getProperty(PROPERTY_LDAP_SERVER_URL);
+			mcommunityGroup=appExtSecureProperties.getProperty(PROPERTY_AUTH_GROUP);
 		}else {
 			M_log.error("Failed to load secure application properties from sectionsToolPropsSecure.properties for SectionsTool");
 		}
@@ -125,7 +123,6 @@ public class SectionUtilityToolFilter implements Filter {
 		}
 		isAuthorized=ldapAuthorizationVerification(user); 
 		return isAuthorized;
-
 
 	}
 	/*

@@ -57,16 +57,16 @@ public class Friend
 	private final static String CCM_PROPERTY_FILE_PATH = "ccmPropsPath";
 	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";	
 
-	protected static Properties appExtSecurePropertiesFile=null;
-	protected static Properties appExtPropertiesFile=null;	
+	protected static Properties appExtSecureProperties=null;
+	protected static Properties appExtProperties=null;	
 	
 	private XmlRpcClient Xclient;
 
 	public Friend() throws MalformedURLException {
 		super();
 		M_log.debug("Friend constructor Called");
-		appExtPropertiesFile = Utils.loadProperties(CCM_PROPERTY_FILE_PATH);
-		appExtSecurePropertiesFile = Utils.loadProperties(CCM_SECURE_PROPERTY_FILE_PATH);	
+		appExtProperties = Utils.loadProperties(CCM_PROPERTY_FILE_PATH);
+		appExtSecureProperties = Utils.loadProperties(CCM_SECURE_PROPERTY_FILE_PATH);	
 
 		setProperties();
 
@@ -78,17 +78,17 @@ public class Friend
 	}
 
 	public void setProperties(){
-		if(appExtSecurePropertiesFile!=null) {
+		if(appExtSecureProperties!=null) {
 			//PropertiesFile information
-			friendUrl = appExtPropertiesFile.getProperty("ctools.friend.url");
-			contactEmail = appExtPropertiesFile.getProperty("ctools.friend.contactemail");
-			referrerUrl = appExtPropertiesFile.getProperty("ctools.friend.referrer");
-			friendEmailFile = appExtPropertiesFile.getProperty("ctools.friend.friendemail");
-			requesterEmailFile = appExtPropertiesFile.getProperty("ctools.friend.requesteremail");
-			mailHost = appExtPropertiesFile.getProperty("ctools.friend.mailhost");
-			subjectLine = appExtPropertiesFile.getProperty("ctools.friend.subjectline");
-			ksFileName = appExtSecurePropertiesFile.getProperty("umich.friend.ksfilename");
-			ksPwd = appExtSecurePropertiesFile.getProperty("umich.friend.kspassword");
+			friendUrl = appExtProperties.getProperty("ctools.friend.url");
+			contactEmail = appExtProperties.getProperty("ctools.friend.contactemail");
+			referrerUrl = appExtProperties.getProperty("ctools.friend.referrer");
+			friendEmailFile = appExtProperties.getProperty("ctools.friend.friendemail");
+			requesterEmailFile = appExtProperties.getProperty("ctools.friend.requesteremail");
+			mailHost = appExtProperties.getProperty("ctools.friend.mailhost");
+			subjectLine = appExtProperties.getProperty("ctools.friend.subjectline");
+			ksFileName = appExtSecureProperties.getProperty("umich.friend.ksfilename");
+			ksPwd = appExtSecureProperties.getProperty("umich.friend.kspassword");
 
 			M_log.debug("ksFileName: " + ksFileName);
 			M_log.debug("ksPwd: " + ksPwd);

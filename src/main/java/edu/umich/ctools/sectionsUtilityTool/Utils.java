@@ -15,7 +15,7 @@ public class Utils {
 
 	public static Properties loadProperties(String path){
 		String propertiesFilePath = System.getProperty(path);
-		M_log.debug("ccm props: " + propertiesFilePath);
+		M_log.debug(path + " : " + propertiesFilePath);
 		if (!propertiesFilePath.isEmpty()) {
 			return PropertiesUtilities.getPropertiesObjectFromURL(propertiesFilePath);
 		}
