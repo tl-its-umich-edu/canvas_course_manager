@@ -80,13 +80,13 @@ public class Friend
 	public void setProperties(){
 		if(appExtSecureProperties!=null) {
 			//PropertiesFile information
-			friendUrl = appExtProperties.getProperty("ctools.friend.url");
-			contactEmail = appExtProperties.getProperty("ctools.friend.contactemail");
-			referrerUrl = appExtProperties.getProperty("ctools.friend.referrer");
-			friendEmailFile = appExtProperties.getProperty("ctools.friend.friendemail");
-			requesterEmailFile = appExtProperties.getProperty("ctools.friend.requesteremail");
-			mailHost = appExtProperties.getProperty("ctools.friend.mailhost");
-			subjectLine = appExtProperties.getProperty("ctools.friend.subjectline");
+			friendUrl = appExtProperties.getProperty("umich.friend.url");
+			contactEmail = appExtProperties.getProperty("umich.friend.contactemail");
+			referrerUrl = appExtProperties.getProperty("umich.friend.referrer");
+			friendEmailFile = appExtProperties.getProperty("umich.friend.friendemail");
+			requesterEmailFile = appExtProperties.getProperty("umich.friend.requesteremail");
+			mailHost = appExtProperties.getProperty("umich.friend.mailhost");
+			subjectLine = appExtProperties.getProperty("umich.friend.subjectline");
 			ksFileName = appExtSecureProperties.getProperty("umich.friend.ksfilename");
 			ksPwd = appExtSecureProperties.getProperty("umich.friend.kspassword");
 
@@ -122,7 +122,7 @@ public class Friend
 			if (ksFileName.isEmpty())
 			{
 				// log error for missing keystore file path
-				M_log.error(this + " init the ctools.friend.keystorefile path is not defined. ");
+				M_log.error(this + " init the umich.friend.keystorefile path is not defined. ");
 			}
 			else
 			{
@@ -132,7 +132,7 @@ public class Friend
 			if (ksPwd.isEmpty())
 			{
 				// log error for missing keystore password
-				M_log.error(this + " init the ctools.friend.keystorepassword is not defined. ");
+				M_log.error(this + " init the umich.friend.keystorepassword is not defined. ");
 			}
 			else
 			{
