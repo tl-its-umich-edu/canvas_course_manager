@@ -169,7 +169,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     $scope.loadingLookupFriend = true;
     var friendId = $.trim($('#friendEmailAddress').val());
     
-    if(friendId.indexOf('@') !==-1 && friendId.indexOf('@umich.edu') ===-1){
+    if(validateEmailAddress(friendId)){
       $scope.failedValidation = false;
       Friend.lookUpCanvasFriend(friendId).then(function (data) {
         if (data.data.length ===1 && data.data[0].name) {
@@ -197,7 +197,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     var friendNameFirst = $('#friendNameFirst').val();
     var friendNameLast = $('#friendNameLast').val();
 
-    if(friendEmailAddress.indexOf('@') !==-1 && friendEmailAddress.indexOf('@umich.edu') ===-1){
+    if(validateEmailAddress(friendEmailAddress)){
       $scope.failedValidation = false;
       var requestorEmail = $rootScope.user.uniqname + '@umich.edu';
       $scope.done = false;

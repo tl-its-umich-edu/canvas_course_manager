@@ -120,6 +120,24 @@ var validateUniqname = function (value) {
   }
 }
 
+/*used by modal (adding friend)
+  TODO: can we use some standard industrial strength validator?
+ */
+var validateEmailAddress = function (value) {
+  var value = $.trim(value);
+  if(value.indexOf('@') !==-1 &&
+    value.indexOf('@umich.edu') ===-1  && 
+    value.split('@').length === 2 && 
+    value.split('@')[0] !== '' && 
+    value.split('@')[1] !== '' &&
+    value.split('@')[1].split('.').length > 1){
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
 
 var xListPostStatus;
 
