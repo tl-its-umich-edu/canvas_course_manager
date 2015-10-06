@@ -6,7 +6,7 @@ The Canvas Course Manager (CCM) is an application that will be able to be used b
 
 ## Build Directions
 
-1. sectionsTool$ <code>mvn clean install</code>
+1. sectionsTool <code>$mvn clean install</code>
 
 2. Copy to tomcat/webapp
 
@@ -15,11 +15,18 @@ The Canvas Course Manager (CCM) is an application that will be able to be used b
 <code>-DccmPropsPath=file:/file-path/ccm.properties</code>
 
 4. Add the following properties to ccm.properties:  
-    <code>canvas.admin.token=canvas token  
-    canvas.url=target canvas server e.g. https://umich.test.instructure.com  
-    use.test.url=true  
-    ldap.server.url=ldap server e.g. ldap://ldap.itd.umich.edu:389/dc=umich,dc=edu  
-    mcomm.group=group that can use this tool e.g. its-canvas-sections</code>
+    
+    In addition to the properties below, there will also be several regular expression properties that will be used for validating Canvas or ESB API calls.
+    
+	* <code>umich.friend.url= friend URL to be used</code>
+	* <code>umich.friend.contactemail= Contact email used in friend template for users experiencing issues</code>
+	* <code>umich.friend.referrer= URL to direct to Canvas</code>
+	* <code>umich.friend.friendemail= File path to friend email template</code>
+	* <code>umich.friend.requesteremail=File path to requester email</code>
+	* <code>umich.friend.mailhost= always localhost</code>
+	* <code>umich.friend.subjectline= Subject line for friend email</code>
+	* <code>lti.url= URL to launch LTI tool</code>
+	* <code>call.type= Either 'canvas' or 'esb'</code>
     
 5. Add the following 9 properties to ccmSecure.properties:<br/> 
 	* <code>canvas.admin.token= Canvas Token </code>
@@ -33,39 +40,40 @@ The Canvas Course Manager (CCM) is an application that will be able to be used b
 	* <code>lti.secret=alpha numeric secret to launch LTI tool</code>
 
 6. Invoke the following URL in your browser:  
-<code>http://localhost:port/canvasCourseManager/?testUser=uniquename</code>  
+<code>http://localhost:PORT/canvasCourseManager/index-sc.vm?testUser=UNIQUENAME</code>  
 	a. testUser parameter is not allowed in Prod and this is controlled by above property with value called <code>use.test.url=false</code>  
 	b. We will enable the cosign for authentication the user so we will get remote user info through that.  
   
 7. Enable application level logging using the log4j.properties files. Put this file in tomcat/lib directory and add the content between the 
  
 	```
-log4j.rootLogger=INFO, A1
-log4j.appender.A1=org.apache.log4j.ConsoleAppender
-log4j.appender.A1.layout=org.apache.log4j.PatternLayout
-# Print the date in ISO 8601 format
-log4j.appender.A1.layout.ConversionPattern=%d [%t] %-5p %c - %m%n
-# umich
-#log4j.logger.edu.umich=INFO
-log4j.logger.edu.umich=DEBUG 
-```
+	log4j.rootLogger=INFO, A1
+	log4j.appender.A1=org.apache.log4j.ConsoleAppender
+	log4j.appender.A1.layout=org.apache.log4j.PatternLayout
+	# Print the date in ISO 8601 format
+	log4j.appender.A1.layout.ConversionPattern=%d [%t] %-5p %c - %m%n
+	# umich
+	#log4j.logger.edu.umich=INFO
+	log4j.logger.edu.umich=DEBUG 
+	```
 
 8. For Adding Build information to the Project Release candidate populate src/main/webapps/build.txt with information about the current build (GIT commit, build time, etc.).
-    If using Jenkins to build the application, the following script placed in the "Execute Shell" part of the "Pre Steps" section would do the job: 
+    If using Jenkins to build the application, the following script placed in the "Execute Shell" part of the "Pre Steps" section would do the job:
+
     
 	``` 
-	  cd src/main/webapp
-	  if [ -f "build.txt" ]; then
-	    echo "build.txt found."
-	    rm build.txt
-	    echo "Existing build.txt file removed."
-	  else
-	    echo "No existing build.txt file found."
-	  fi
+	cd src/main/webapp
+	if [ -f "build.txt" ]; then
+	   echo "build.txt found."
+	   rm build.txt
+	   echo "Existing build.txt file removed."
+	else
+	   echo "No existing build.txt file found."
+	fi
 	  touch build.txt
 	
 	  echo "$JOB_NAME | Build: $BUILD_NUMBER | $GIT_URL | $GIT_COMMIT | $GIT_BRANCH | $BUILD_ID" >> build.txt
- ```
+	```
 
 ## Notes
 
