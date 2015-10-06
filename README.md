@@ -2,7 +2,7 @@
 
 ## Project Description 
   
-The Canvas Course Manager (CCM) is an application that will be able to be used by instructors and the service center alike. The current functionality searches all courses for which a given user has the 'teacher' role within a given semester and allows the combination of sections via drag-and-drop interface. The user can also determine if the course is used before the sections are moved. In addition, the functionality for adding friend accounts is available. Not only can a 'teacher' create friend accounts for non-umich accounts, but it will also be possible to add a created friend account to a course. The service center alone will have the ability to rename a course.
+The Canvas Course Manager (CCM) is an application that will be able to be used by instructors and the service center alike. The current functionality searches all courses for which a given user has the 'teacher' role within a given semester. Specifically for the Serice Center, a user will be able to combine sections via drag-and-drop interface. The user can also determine if the course is used before the sections are moved. In addition, the functionality for adding friend accounts is available. Not only can a 'teacher' create friend accounts for non-umich accounts, but it will also be possible to add a created friend account to a course. The service center alone will have the ability to rename a course.
 
 ## Build Directions
 
