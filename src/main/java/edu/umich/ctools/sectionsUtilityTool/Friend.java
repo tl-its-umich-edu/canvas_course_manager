@@ -49,6 +49,16 @@ public class Friend
 	protected static final String FRIEND_PROPERTY_FILE_PATH = "sectionsToolFriendPropsPath";
 	protected static final String FRIEND_PROPERTY_FILE_PATH_SECURE = "sectionsToolFriendPropsPathSecure";
 
+	protected static final String FRIEND_URL = "umich.friend.url";
+	protected static final String FRIEND_CONTACT_EMAIL = "umich.friend.contactemail"; 
+	protected static final String FRIEND_REFERRER = "umich.friend.referrer";
+	protected static final String FRIEND_FRIEND_EMAIL = "umich.friend.friendemail";
+	protected static final String FRIEND_REQUESTER_EMAIL = "umich.friend.requesteremail";
+	protected static final String FRIEND_MAIL_HOST = "umich.friend.mailhost";
+	protected static final String FRIEND_SUBJECT_LINE = "umich.friend.subjectline";
+	protected static final String FRIEND_KS_FILENAME = "umich.friend.ksfilename";
+	protected static final String FRIEND_KS_PASSWORD = "umich.friend.kspassword";
+
 	protected static final String MAIL_SMTP_AUTH = "mail.smtp.auth";
 	protected static final String MAIL_SMTP_STARTTLS = "mail.smtp.starttls.enable";
 	protected static final String MAIL_SMTP_HOST = "mail.smtp.host";
@@ -59,7 +69,7 @@ public class Friend
 
 	protected static Properties appExtSecureProperties=null;
 	protected static Properties appExtProperties=null;	
-	
+
 	private XmlRpcClient Xclient;
 
 	public Friend() throws MalformedURLException {
@@ -80,15 +90,15 @@ public class Friend
 	public void setProperties(){
 		if(appExtSecureProperties!=null) {
 			//PropertiesFile information
-			friendUrl = appExtProperties.getProperty("umich.friend.url");
-			contactEmail = appExtProperties.getProperty("umich.friend.contactemail");
-			referrerUrl = appExtProperties.getProperty("umich.friend.referrer");
-			friendEmailFile = appExtProperties.getProperty("umich.friend.friendemail");
-			requesterEmailFile = appExtProperties.getProperty("umich.friend.requesteremail");
-			mailHost = appExtProperties.getProperty("umich.friend.mailhost");
-			subjectLine = appExtProperties.getProperty("umich.friend.subjectline");
-			ksFileName = appExtSecureProperties.getProperty("umich.friend.ksfilename");
-			ksPwd = appExtSecureProperties.getProperty("umich.friend.kspassword");
+			friendUrl = appExtProperties.getProperty(FRIEND_URL);
+			contactEmail = appExtProperties.getProperty(FRIEND_CONTACT_EMAIL);
+			referrerUrl = appExtProperties.getProperty(FRIEND_REFERRER);
+			friendEmailFile = appExtProperties.getProperty(FRIEND_FRIEND_EMAIL);
+			requesterEmailFile = appExtProperties.getProperty(FRIEND_REQUESTER_EMAIL);
+			mailHost = appExtProperties.getProperty(FRIEND_MAIL_HOST);
+			subjectLine = appExtProperties.getProperty(FRIEND_SUBJECT_LINE);
+			ksFileName = appExtSecureProperties.getProperty(FRIEND_KS_FILENAME);
+			ksPwd = appExtSecureProperties.getProperty(FRIEND_KS_PASSWORD);
 
 			M_log.debug("ksFileName: " + ksFileName);
 			M_log.debug("ksPwd: " + ksPwd);
@@ -301,7 +311,7 @@ public class Friend
 
 		Properties properties = System.getProperties();
 		properties.put(MAIL_SMTP_AUTH, "false");
-		properties.put(MAIL_SMTP_STARTTLS, "true"); //Put below to false, if no https is needed
+		properties.put(MAIL_SMTP_STARTTLS, "true"); //Put to false, if no https is needed
 		properties.put(MAIL_SMTP_HOST, host);
 		properties.put(MAIL_DEBUG, "true");
 

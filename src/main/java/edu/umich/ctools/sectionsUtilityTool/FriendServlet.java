@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Properties;
-import java.util.ResourceBundle;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -23,16 +22,18 @@ public class FriendServlet extends HttpServlet {
 	private static final String INVITE_EMAIL = "inviteEmail";
 	private static final String INSTRUCTOR_EMAIL = "instructorEmail";
 	private static final String INSTRUCTOR_NAME = "instructorName";
+	private static final String SEND_EMAIL = "sendEmail";
 	private static final String PARAMETER_ID = "id";
 	private static final String PARAMETER_INSTRUCTOR_EMAIL = "inst_email";
 	private static final String PARAMETER_INSTRUCTOR_FIRST_NAME = "inst_first_name";
 	private static final String PARAMETER_INSTRUCTOR_LAST_NAME = "inst_last_name";
-	
+	private static final String PARAMETER_SEND_EMAIL = "send_email";
+
 	private final static String CCM_PROPERTY_FILE_PATH = "ccmPropsPath";
 	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";	
-	
+
 	protected static Properties appExtSecureProperties=null;
-	protected static Properties appExtProperties=null;	
+	protected static Properties appExtProperties=null;
 
 	public void init() throws ServletException {
 		M_log.debug(" Servlet init(): Called");
@@ -86,6 +87,7 @@ public class FriendServlet extends HttpServlet {
 			String friendInstructorEmail = request.getParameter(PARAMETER_INSTRUCTOR_EMAIL);
 			String friendInstructorFirstName = request.getParameter(PARAMETER_INSTRUCTOR_FIRST_NAME);
 			String friendInstructorLastName = request.getParameter(PARAMETER_INSTRUCTOR_LAST_NAME);
+			String friendSendEmail = request.getParameter(PARAMETER_SEND_EMAIL);
 			if(friendInviteEmail == null || 
 					friendInstructorEmail == null ||
 					friendInstructorFirstName == null || 
@@ -102,7 +104,8 @@ public class FriendServlet extends HttpServlet {
 						friendInviteEmail, 
 						friendInstructorEmail, 
 						friendInstructorFirstName, 
-						friendInstructorLastName);
+						friendInstructorLastName,
+						friendSendEmail);
 			}
 			break;
 		default:
@@ -128,15 +131,17 @@ public class FriendServlet extends HttpServlet {
 			String inviteEmail, 
 			String instructorEmail, 
 			String instructorFirstName, 
-			String instructorLastName){
+			String instructorLastName,
+			String friendSendEmail){
 		JsonObject json;
 		String instructorName = instructorFirstName + " " + instructorLastName;
 		
 		HashMap<String, String> friendValues = new HashMap<String,String>();
 		
-		friendValues.put("inviteEmail", inviteEmail);
-		friendValues.put("instructorEmail", instructorEmail);
-		friendValues.put("instructorName", instructorName);
+		friendValues.put(INVITE_EMAIL, inviteEmail);
+		friendValues.put(INSTRUCTOR_EMAIL, instructorEmail);
+		friendValues.put(INSTRUCTOR_NAME, instructorName);
+		friendValues.put(SEND_EMAIL, friendSendEmail);
 		
 		//Step 1: determine if friend exists
 		CheckAccountExistsResponse friendExists = myFriend.checkAccountExist(inviteEmail);
@@ -190,7 +195,11 @@ public class FriendServlet extends HttpServlet {
 			json = buildResponseObject("created", detailedMessage);
 
 			//Step 3: send notification to instructor indicating that a friend account has been created.
-			Friend.notifyCurrentUser(friendValues.get(INSTRUCTOR_NAME), friendValues.get(INSTRUCTOR_EMAIL), friendValues.get(INVITE_EMAIL));
+			//If LTI don't send email, otherwise it's okay
+			M_log.debug("sendEmail: " + friendValues.get(SEND_EMAIL));
+			if(friendValues.get(SEND_EMAIL) == null || friendValues.get(SEND_EMAIL).equalsIgnoreCase("true")){
+				Friend.notifyCurrentUser(friendValues.get(INSTRUCTOR_NAME), friendValues.get(INSTRUCTOR_EMAIL), friendValues.get(INVITE_EMAIL));
+			}
 			break;
 		case INVALID_EMAIL:
 			//If attempt to create friend account fails, then send so in response
