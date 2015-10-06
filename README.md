@@ -10,7 +10,7 @@ The Canvas Course Manager (CCM) is an application that will be able to be used b
 
 2. Copy to tomcat/webapp
 
-3. Add the property file on linux box <code>sectionsToolPropsSecure.properties</code>, then in JAVA_OPTS add the  
+3. Add the property files on linux box <code>ccm.properties</code> and <code>ccmSecure.properties</code>, then in JAVA_OPTS add the  
 <code>-DccmPropsPathSecure=file:/file-path/ccmSecure.properties</code>  
 <code>-DccmPropsPath=file:/file-path/ccm.properties</code>
 
