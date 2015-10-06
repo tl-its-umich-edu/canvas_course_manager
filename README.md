@@ -1,83 +1,82 @@
-# Sections Utility Tool
+# Canvas Course Manager
+
+## Project Description 
+  
+The Canvas Course Manager (CCM) is an application that will be able to be used by instructors and the service center alike. The current functionality searches all courses for which a given user has the 'teacher' role within a given semester and allows the combination of sections via drag-and-drop interface for Service Center or point-and-click interface for LTI users. The user can also determine if the course is used before the sections are moved. In addition, the functionality for adding friend accounts is available. Not only can a 'teacher' create friend accounts for non-umich accounts, but it will also be possible to add a created friend account to a course. The service center alone will have the ability to rename a course.
 
 ## Build Directions
- 
-1. sectionsTool$ <code>mvn clean install</code>
+
+1. sectionsTool <code>$mvn clean install</code>
+
 2. Copy to tomcat/webapp
-3. Add the property file on linux box <code>sectionsToolPropsSecure.properties</code>,   
-then in JAVA_OPTS add the  
-<code>-DsectionsToolPropsPathSecure=file:/file-path/sectionsToolPropsSecure.properties</code><br/>
-<code>-DsectionsToolFriendPropsPathSecure=file:/file-path/sectionsToolFriend.properties</code><br/>
-<code>-DsectionsToolFriendPropsPathSecure=file:/file-path/sectionsToolFriendSecure.properties</code><br/>
 
-4. Add the following 5 properties to sectionsToolPropsSecure.properties: 
+3. Add the property files on linux box <code>ccm.properties</code> and <code>ccmSecure.properties</code>, then in JAVA_OPTS add the  
+<code>-DccmPropsPathSecure=file:/file-path/ccmSecure.properties</code>  
+<code>-DccmPropsPath=file:/file-path/ccm.properties</code>
 
-    <code>canvas.admin.token=canvas token  
-    canvas.url=target canvas server e.g. https://umich.test.instructure.com  
-    use.test.url=true  
-    ldap.server.url=ldap server e.g. ldap://ldap.itd.umich.edu:389/dc=umich,dc=edu  
-    mcomm.group=group that can use this tool e.g. its-canvas-sections</code>
-5. Add the following 7 properties to sectionsToolFriend.properties:<br/> 
-<code>
-ctools.friend.url= friend URL either QA or PROD<br/>
-ctools.friend.contactemail= ctools contact email for QA or help desk for prod<br/>
-ctools.friend.referrer= Friend referrer url<br/>
-ctools.friend.ksfilename= Key store file name<br/>
-ctools.friend.friendemail= /file-path/friendEmail.template<br/>
-ctools.friend.requesteremail= /file-path/requesterEmail.template<br/>
-ctools.friend.mailhost= URL or IP address to mail server hostne<br/>
-ctools.friend.subjectline= Subject line pertaining to confirmation email delivered to instructor<br/>
-</code>    
+4. Add the following properties to ccm.properties:  
+    
+    In addition to the properties below, there will also be several regular expression properties that will be used for validating Canvas or ESB API calls.
+    
+	* <code>umich.friend.url= friend URL to be used</code>
+	* <code>umich.friend.contactemail= Contact email used in friend template for users experiencing issues</code>
+	* <code>umich.friend.referrer= URL to direct to Canvas</code>
+	* <code>umich.friend.friendemail= File path to friend email template</code>
+	* <code>umich.friend.requesteremail=File path to requester email</code>
+	* <code>umich.friend.mailhost= always localhost</code>
+	* <code>umich.friend.subjectline= Subject line for friend email</code>
+	* <code>lti.url= URL to launch LTI tool</code>
+	* <code>call.type= Either 'canvas' or 'esb'</code>
+    
+5. Add the following 9 properties to ccmSecure.properties:<br/> 
+	* <code>canvas.admin.token= Canvas Token </code>
+	* <code>canvas.url= Canvas URL</code>
+	* <code>use.test.url= Test user authentication </code>
+	* <code>ldap.server.url= ldap URL </code>
+	* <code>mcomm.group= MCommunity Group </code>
+	* <code>umich.friend.ksfilename= file path to the keystore file ending in pkcs12 </code>
+	* <code>umich.friend.kspassword= password to above keystore file </code>
+	* <code>lti.key= Numeric key to launch LTI tool </code>
+	* <code>lti.secret=alpha numeric secret to launch LTI tool</code>
 
-6. Add the following 8 properties to sectionsToolFriendSecure.properties:<br/> 
-<code>
-ctools.friend.ksfilename= Key store file name<br/>
-ctools.friend.kspassword= Password for accessing keystore file<br/>
-</code>  
-
-7. Run this in local  
-<code>http://localhost:port/sectionsUtilityTool/?testUser=uniquename</code><br/>i. testUser parameter is not allowed in Prod and this is controlled by above property with value called <code>use.test.url=false</code><br/>
-ii. We will enable the cosign for authentication the user so we will get remote user info through that.<br/>
-
-8. Enable application level logging using the log4j.properties files. Put this file in tomcat/lib directory and add the content between the 
+6. Invoke the following URL in your browser:  
+<code>http://localhost:PORT/canvasCourseManager/index-sc.vm?testUser=UNIQUENAME</code>  
+	a. testUser parameter is not allowed in Prod and this is controlled by above property with value called <code>use.test.url=false</code>  
+	b. We will enable the cosign for authentication the user so we will get remote user info through that.  
+  
+7. Enable application level logging using the log4j.properties files. Put this file in tomcat/lib directory and add the content between the 
  
 	```
-log4j.rootLogger=INFO, A1
-log4j.appender.A1=org.apache.log4j.ConsoleAppender
-log4j.appender.A1.layout=org.apache.log4j.PatternLayout
-# Print the date in ISO 8601 format
-log4j.appender.A1.layout.ConversionPattern=%d [%t] %-5p %c - %m%n
-# umich
-#log4j.logger.edu.umich=INFO
-log4j.logger.edu.umich=DEBUG 
-```
+	log4j.rootLogger=INFO, A1
+	log4j.appender.A1=org.apache.log4j.ConsoleAppender
+	log4j.appender.A1.layout=org.apache.log4j.PatternLayout
+	# Print the date in ISO 8601 format
+	log4j.appender.A1.layout.ConversionPattern=%d [%t] %-5p %c - %m%n
+	# umich
+	#log4j.logger.edu.umich=INFO
+	log4j.logger.edu.umich=DEBUG 
+	```
 
-9. For Adding Build information to the Project Release candidate populate src/main/webapps/build.txt with information about the current build (GIT commit, build time, etc.).
+8. For Adding Build information to the Project Release candidate populate src/main/webapps/build.txt with information about the current build (GIT commit, build time, etc.).
     If using Jenkins to build the application, the following script placed in the "Execute Shell" part of the "Pre Steps" section would do the job:
-    
-    
-	 ``` 
-    cd src/main/webapp
-    if [ -f "build.txt" ]; then
-      echo "build.txt found."
-      rm build.txt
-      echo "Existing build.txt file removed."
-    else
-      echo "No existing build.txt file found."
-    fi
-    touch build.txt
 
-    echo "$JOB_NAME | Build: $BUILD_NUMBER | $GIT_URL | $GIT_COMMIT | $GIT_BRANCH | $BUILD_ID" >> build.txt
- ```
+    
+	``` 
+	cd src/main/webapp
+	if [ -f "build.txt" ]; then
+	   echo "build.txt found."
+	   rm build.txt
+	   echo "Existing build.txt file removed."
+	else
+	   echo "No existing build.txt file found."
+	fi
+	  touch build.txt
+	
+	  echo "$JOB_NAME | Build: $BUILD_NUMBER | $GIT_URL | $GIT_COMMIT | $GIT_BRANCH | $BUILD_ID" >> build.txt
+	```
 
 ## Notes
 
 If <code>use.test.url</code> is true, users will be able to execute the tool as if authenticated as the user specified in the URL parameter <code>?testUser=uniqname</code>. In Production this variable is  false. Based on this property property testUser is not allowed in Production.
 
 ldap is used for authorizing the user and he needs to be part of particular Mcommunity group to be authorized to use the tool.
-
-
-
-
-
- 
