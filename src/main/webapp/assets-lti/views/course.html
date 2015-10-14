@@ -28,18 +28,57 @@
                 >
                     <div class="col-md-8 col-lg-8 col-sm-8 col-xs-8"><span ng-show="course.addingUser"><input type="checkbox" id="check{{section.id}}" ng-model="section.selected" ng-click="sectionSelectedQuery()"> <label for ="check{{section.id}}">{{section.name}}</label></span><span ng-show="!course.addingUser">{{section.name}}</span></div>
                     <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4">
+                        <div class="btn-group pull-right" ng-show="course.addingUser">
+                            <select ng-show="section.selected">
+                                <option value="StudentEnrollment">Student</option>
+                                <option value="TeacherEnrollment">Teacher</option>
+                                <option value="TaEnrollment">TA</option>
+                                <option value="ObserverEnrollment">Observer</option>
+                                <option value="DesignerEnrollment">Designer</option>
+                            </select>
+                        </div>        
                         <a href="" ng-if="section.course_id !== course.id" ng-click="returnToCourse(section, $index)">Put back</a>
                     </div>
                 </li>
             </ul>
 
             <div ng-show="course.sectionSelected" class="form-inline container-fluid">
-                <div class="form-group">
-                    <label class="sr-only" for="emailAddress">Email address</label>
-                    <input class="form-control" type="text" id="emailAddress" placeholder="email address"> <button class="btn btn-default">Add user</button>
+                <div class="form-group" ng-show="!userExists && !newUser && !newUserFound">
+                    <p ng-show="failedValidation">Please specify a valid NON UMICH email address</p>
+                    <label class="sr-only" for="friendEmailAddress1">Email address</label>
+                    <input class="form-control" type="text" ng-model="friendEmailAddress" id="friendEmailAddress1" placeholder="email address"> <button class="btn btn-default" ng-click="lookUpCanvasFriendClick()">Add user</button>
+                    <div class="spinner" ng-show="loadingLookupFriend">&nbsp;&nbsp;&nbsp;&nbsp;</div>
                 </div>
+                <div ng-show="newUser">
+                  <p>The specified user ({{friendEmailAddress}}) has no account - use the form below to create.</p>
+                  <div class="form-group form-inline form-group">
+                    <p ng-show="failedValidation">Please specify a valid NON UMICH email address</p>
+                    <label for="friendEmailAddress2" class="sr-only">Enter email</label>
+                    <input type="text" class="form-control" id="friendEmailAddress2" placeholder="Enter email" ng-model="friendEmailAddress">
+                    <label for="friendNameFirst" class="sr-only">First name</label>
+                    <input type="text" class="form-control" id="friendNameFirst" placeholder="First name" ng-model="friendNameFirst">
+                    <label for="friendNameLast" class="sr-only">Last name</label>
+                    <input type="text" class="form-control" id="friendNameLast" placeholder="Last name" ng-model="friendNameLast">
+                    <button type="button" class="btn btn-primary" ng-click="createFriendClick()">Create User and Add to Sections</button>
+                    <div class="spinner" ng-show="loadingCreateUser">&nbsp;&nbsp;&nbsp;&nbsp;</div>
+                  </div>
+                </div>
+                <div  class="alert alert-danger" ng-show="newUserFail" >
+                  {{friend_account.detailedMessage}}.
+                </div>  
+                <div  class="alert alert-success" ng-show="newUserFound" >
+                  <p ng-show="friendDone">{{friend_account.detailedMessage}}. </p>
+                  <p ng-show="canvasDone">
+                    User <strong>{{friend.name}}  ({{friend.sis_user_id}})</strong> created in Canvas. 
+                  </p>
+                </div>
+                <div> <span ng-show="addSuccess" class="alert alert-success alert-inline">User added to section(s)<em id="successFullSections"></em></span> <button class="btn btn-default" ng-click="addAnother()" ng-show="resetable">Add another</div>
+                  <button style="visibility:hidden;width:1px;height:1px" type="button" class="btn btn-primary" id="addUserToSectionsClick" ng-click="addUserToSectionsClick()" ng-show="userExists || newUserExists">
+                  Add user 
+                </button>
+              </div>                
             </div>
-        </div>
+        
         
         <div class="coursePanel well nograb" ng-show="courses">
             <h4 style="padding:0 20px">Your Other Courses <small> (get their sections and then select which ones you want added to this course) </small></h4>

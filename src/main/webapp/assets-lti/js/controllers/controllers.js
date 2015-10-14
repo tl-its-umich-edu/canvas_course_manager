@@ -201,7 +201,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
 }]);
 
 /* SINGLE COURSE CONTROLLER */
-canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections','$scope', '$filter', function (Course, Courses, Sections, $scope, $filter) {
+canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend','$scope', '$filter', '$timeout', function (Course, Courses, Sections, Friend, $scope, $filter, $timeout) {
   //TODO - add this below to the filter
   // /api/v1/courses?as_user_id=sis_login_id:instx&enrollment_type=teacher&include[]=sections&state[]=available&?access_token=1770~6Mn7sP9c6TLPtJAt56K8wvtmFcMmpENSYamMxdrDWInP27pCW0aNRRehpRGBEYfL
   var courseUrl ='manager/api/v1/courses/154?include[]=sections&_=' + generateCurrentTimestamp();
@@ -277,10 +277,19 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     // prune the source courses from the model
     $scope.courses = [];
   };
-
+  */
   $scope.addUsers = function(){
     $scope.course.addingUser = true;
   }
+
+  $scope.checkAll = function(){
+    $scope.oneChecked = false;
+    for(var e in $scope.course.sections) {
+      if ($scope.course.sections[e].isChecked) {
+        $scope.oneChecked = true;
+      }
+    }
+  };
 
   $scope.sectionSelectedQuery = function () {
     if(_.where($scope.course.sections,{selected: true}).length + 1 > 0){
@@ -290,7 +299,138 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
       $scope.course.sectionSelected = false;
     }
   }
-  */
+
+  $scope.lookUpCanvasFriendClick = function () {
+    $scope.friend = {};
+    $scope.loadingLookupFriend = true;
+    var friendId = $.trim($('#friendEmailAddress1').val());
+    if(validateEmailAddress(friendId)){
+      $scope.failedValidation = false;
+      Friend.lookUpCanvasFriend(friendId).then(function (data) {
+        // there has to be a better flag for success
+        if (data.data.length ===1 && data.data[0].name) {
+          // and if there is one, call this done, if not, create it
+          $scope.friend = data.data[0];
+          $scope.userExists = true;
+
+          $timeout(function() {
+            angular.element('#addUserToSectionsClick').triggerHandler('click');
+          }, 100);
+
+        } else {
+          // not an existing user - present interface to add
+          $scope.newUser = true;
+        }
+        $scope.loadingLookupFriend = false;
+      });
+    }
+    else {
+      $scope.loadingLookupFriend = false;
+      $scope.failedValidation = true;
+    }
+  };
+
+  $scope.createFriendClick = function () {
+
+    var friendEmailAddress = $.trim($('#friendEmailAddress2').val());
+    var friendNameFirst = $('#friendNameFirst').val();
+    var friendNameLast = $('#friendNameLast').val();
+
+    if(validateEmailAddress(friendEmailAddress)){
+      $scope.failedValidation = false;
+      //will need to grab this from the LTI context and put it in the rootScope
+      var requestorEmail = 'instx@umich.edu'; // hardwired for now
+      $scope.loadingCreateUser = true;
+
+      Friend.doFriendAccount(friendEmailAddress, requestorEmail).then(function (data) {
+        if (data.data.message === 'created' || data.data.message === 'exists') {
+          $scope.friend_account = data.data;
+          $scope.newUserFound=true;
+          $scope.friendDone=true;
+          
+          Friend.createCanvasFriend(friendEmailAddress,friendNameFirst, friendNameLast).then(function (data) {
+            if (data.data.name) {
+              // here we add the person to the scope and then use another factory to add them to the sites
+              $scope.newUser=false;
+              $scope.newUserFound=true;
+              $scope.friend = data.data;
+              $scope.canvasDone=true;
+              
+              $timeout(function() {
+                angular.element('#addUserToSectionsClick').triggerHandler('click');
+              }, 100);
+
+            } else {
+              // TODO: report error
+            }
+            $scope.loadingCreateUser = false;
+          });
+          $scope.userAvailable = true;
+          $scope.done = true;
+        } else {
+          $scope.loadingCreateUser = false;
+          $scope.friend_account = data.data;
+          $scope.newUserFail=true;
+          // TODO: report error
+        }
+      });
+    }
+    else {
+      $scope.loading = false;
+      $scope.failedValidation = true;
+    }
+  };
+
+  $scope.addAnother = function() {
+    $scope.friend = false;
+    $scope.userExists = false;
+    $scope.newUser = false;
+    $scope.newUserFound = false;
+    $scope.addSuccess = false;
+    $scope.resetable = false;
+    for(var e in $scope.course.sections) {
+      $scope.course.sections[e].selected = false;
+    }
+    $scope.course.sectionSelected = false; 
+  }
+
+  $scope.addUserToSectionsClick = function () {
+    var checkedSections = $('.coursePanel input:checked').length;
+    var sectNumber = 0;
+    $('#successFullSections').empty();
+    for(var e in $scope.course.sections) {
+      if ($scope.course.sections[e].selected) {
+        sectNumber = sectNumber + 1;
+        var sectionId = $scope.course.sections[e].id;
+        var sectionName = $scope.course.sections[e].name;
+        var thisSectionRole = $('li#' +sectionId).find('select').val();
+        var url = '/canvasCourseManager/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + $scope.friend.id + '&enrollment[enrollment_state]=active&enrollment[type]=' + thisSectionRole;
+        
+        Friend.addFriendToSection(url).then(function (data) {
+          if (data.errors) {
+            // TODO: report error
+          } else {
+            if(data.data.course_id) {
+              $scope.addSuccess = true;
+              if (checkedSections === sectNumber){
+                $scope.newUser = false;
+                $scope.none = false;
+                $scope.userAvailable  = false;
+                $scope.friendEmailAddress ='';
+                $scope.resetable = true;
+              }
+            }
+          }
+        });      
+      
+        $scope.addSuccess = true;
+        $('#successFullSections').append(' <span class="label label-success">' + sectionName + '</span>');
+      }
+    
+    }
+    
+  };
+
 }]);
 
 /* FRIEND PANEL CONTROLLER */
@@ -307,6 +447,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
       }
     }
   };
+
 
   $scope.lookUpCanvasFriendClick = function () {
     $scope.friend = {};
@@ -335,6 +476,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     }
 
   };
+
   $scope.createFriendClick = function () {
 
     var friendEmailAddress = $.trim($('#friendEmailAddress2').val());
@@ -363,7 +505,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
               $scope.newUser=false;
               $scope.newUserFound=true;
               $scope.userAvaliable = true;
-              $scope.friend = data.data;//xxx
+              $scope.friend = data.data;
               $scope.canvasDone=true;
               //$scope.friend.sis_user_id = friendEmailAddress;
             } else {
