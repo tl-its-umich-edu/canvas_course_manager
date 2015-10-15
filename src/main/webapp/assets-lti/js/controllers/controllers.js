@@ -1,5 +1,5 @@
 'use strict';
-/* global $, canvasSupportApp, getTermArray, _, getCurrentTerm, errorDisplay, generateCurrentTimestamp, angular */
+/* global $, canvasSupportApp, getTermArray, _, getCurrentTerm, errorDisplay, generateCurrentTimestamp, angular, validateEmailAddress */
 
 /* TERMS CONTROLLER */
 canvasSupportApp.controller('termsController', ['Courses', '$rootScope', '$scope', '$http', function (Courses, $rootScope, $scope, $http) {
@@ -280,7 +280,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
   */
   $scope.addUsers = function(){
     $scope.course.addingUser = true;
-  }
+  };
 
   $scope.checkAll = function(){
     $scope.oneChecked = false;
@@ -298,7 +298,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     else {
       $scope.course.sectionSelected = false;
     }
-  }
+  };
 
   $scope.lookUpCanvasFriendClick = function () {
     $scope.friend = {};
@@ -312,11 +312,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
           // and if there is one, call this done, if not, create it
           $scope.friend = data.data[0];
           $scope.userExists = true;
-
-          $timeout(function() {
-            angular.element('#addUserToSectionsClick').triggerHandler('click');
-          }, 100);
-
+          $scope.addUserToSectionsClick()
         } else {
           // not an existing user - present interface to add
           $scope.newUser = true;
@@ -355,11 +351,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
               $scope.newUserFound=true;
               $scope.friend = data.data;
               $scope.canvasDone=true;
-              
-              $timeout(function() {
-                angular.element('#addUserToSectionsClick').triggerHandler('click');
-              }, 100);
-
+              $scope.addUserToSectionsClick();
             } else {
               // TODO: report error
             }
@@ -392,7 +384,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
       $scope.course.sections[e].selected = false;
     }
     $scope.course.sectionSelected = false; 
-  }
+  };
 
   $scope.addUserToSectionsClick = function () {
     var checkedSections = $('.coursePanel input:checked').length;
