@@ -16,10 +16,10 @@
                     </div>
                     <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4" style="text-align:right;">
                         <button ng-show="loadingOtherCourses" class="btn btn-link spinner"></button>  
-                        <button ng-disabled="course.addingUser" ng-hide="courses" class="btn btn-default" ng-click="getCoursesForTerm()">Add sections</button>
+                        <button ng-disabled="course.addingUser" ng-hide="courses || !functionality.sections" class="btn btn-default" ng-click="getCoursesForTerm()">Add sections</button>
                         <button ng-show="course.dirty" class="btn btn-default" ng-click="getCoursesForTerm()">Save new sections</button>
                         <button ng-show="course.addingSections" class="btn btn-default" ng-click="cancelAddSections()">Cancel add sections</button>                        
-                        <button ng-disabled="course.addingSections" class="btn btn-default" ng-click="addUsers()">Add users</button>
+                        <button ng-disabled="course.addingSections" ng-hide="!functionality.friends" class="btn btn-default" ng-click="addUsers()">Add users</button>
                     </div>
                 </div>
             </div>    
