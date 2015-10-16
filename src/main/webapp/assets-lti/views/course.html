@@ -26,7 +26,7 @@
             <ul class="container-fluid sectionList">
                 <li class="row" ng-repeat="section in course.sections" id="{{section.id}}" data-parent-id="{{section.course_id}}"
                 >
-                    <div class="col-md-8 col-lg-8 col-sm-8 col-xs-8"><span ng-show="course.addingUser"><input type="checkbox" id="check{{section.id}}" ng-model="section.selected" ng-click="sectionSelectedQuery()"> <label for ="check{{section.id}}">{{section.name}}</label></span><span ng-show="!course.addingUser">{{section.name}}</span></div>
+                    <div class="col-md-8 col-lg-8 col-sm-8 col-xs-8"><span ng-show="course.addingUser"><input type="checkbox" id="check{{section.id}}" ng-model="section.selected" ng-change="sectionSelectedQuery()"> <label for ="check{{section.id}}">{{section.name}}</label></span><span ng-show="!course.addingUser">{{section.name}}</span></div>
                     <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4">
                         <div class="btn-group pull-right" ng-show="course.addingUser">
                             <select ng-show="section.selected">

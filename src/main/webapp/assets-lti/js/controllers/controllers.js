@@ -292,8 +292,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
   };
 
   $scope.sectionSelectedQuery = function () {
-    if(_.where($scope.course.sections,{selected: true}).length + 1 > 0){
-      $scope.course.sectionSelected = true;
+    if(_.where($scope.course.sections,{selected: true}).length > 0){
     }
     else {
       $scope.course.sectionSelected = false;
@@ -307,9 +306,9 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     if(validateEmailAddress(friendId)){
       $scope.failedValidation = false;
       Friend.lookUpCanvasFriend(friendId).then(function (data) {
-        // there has to be a better flag for success
-        if (data.data.length ===1 && data.data[0].name) {
-          // and if there is one, call this done, if not, create it
+        if (data.data.length ===1 && data.data[0].sis_user_id === friendId) {
+          // user exists - set data to Canvas response
+          // and call function to add to sections
           $scope.friend = data.data[0];
           $scope.userExists = true;
           $scope.addUserToSectionsClick()
@@ -345,7 +344,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
           $scope.friendDone=true;
           
           Friend.createCanvasFriend(friendEmailAddress,friendNameFirst, friendNameLast).then(function (data) {
-            if (data.data.name) {
+            if (data.data.sis_user_id === friendEmailAddress) {
               // here we add the person to the scope and then use another factory to add them to the sites
               $scope.newUser=false;
               $scope.newUserFound=true;
