@@ -293,6 +293,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
 
   $scope.sectionSelectedQuery = function () {
     if(_.where($scope.course.sections,{selected: true}).length > 0){
+      $scope.course.sectionSelected = true;
     }
     else {
       $scope.course.sectionSelected = false;
@@ -331,7 +332,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     var friendNameFirst = $('#friendNameFirst').val();
     var friendNameLast = $('#friendNameLast').val();
 
-    if(validateEmailAddress(friendEmailAddress)){
+    if(validateEmailAddress(friendEmailAddress) && friendNameFirst !=='' && friendNameLast !==''){
       $scope.failedValidation = false;
       //will need to grab this from the LTI context and put it in the rootScope
       var requestorEmail = 'instx@umich.edu'; // hardwired for now
