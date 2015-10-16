@@ -1,6 +1,8 @@
 package edu.umich.ctools.sectionsUtilityTool;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -9,7 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.ResourceBundle;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -54,7 +55,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String CANVAS_API_CREATE_USER = "canvas.api.create.user.regex";
 	private static final String CANVAS_API_ADD_USER = "canvas.api.add.user.regex";
 	private static final String CANVAS_API_GET_COURSE = "canvas.api.get.single.course.regex";
+	private static final String MPATHWAYS_API_GNERIC = "mpathways.api.get.generic";
 	private static final String MANAGER_SERVLET_NAME = "/manager";
+	private static final String MPATHWAYS_PATH_INFO = "/mpathways/Instructors";
 
 	private static final String DELETE = "DELETE";
 	private static final String POST = "POST";
@@ -106,7 +109,6 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug("doGet: Called");
 		try {
 			if(request.getServletPath().equals(MANAGER_SERVLET_NAME)){
-
 				canvasRestApiCall(request, response);
 			}
 			else{
@@ -130,7 +132,6 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}catch(Exception e) {
 			M_log.error("POST request has some exceptions",e);
 		}
-
 	}
 
 	public void processLti(HttpServletRequest request,
@@ -220,12 +221,12 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			out.print(appExtPropertiesFile.getProperty("api.not.allowed.error"));
 			out.flush();
 		}
-
 	}
 
 	private void esbRestApiCall(HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		M_log.debug("esbRestApiCall() called");
+		return;
 		//Stub: to be implemented later when ESB to canvas call is ready
 	}	
 
@@ -246,44 +247,66 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}else {
 			url=canvasURL+pathInfo;
 		}
-		String sessionId = request.getSession().getId();
-		String loggingApiWithSessionInfo = String.format("Canvas API request with Session Id \"%s\" for URL \"%s\"", sessionId,url);
-		M_log.info(loggingApiWithSessionInfo);
-		HttpUriRequest clientRequest = null;
-		if(request.getMethod().equals(GET)) {
-			clientRequest = new HttpGet(url);
-		}else if (request.getMethod().equals(POST)) {
-			clientRequest = new HttpPost(url);
-		}else if(request.getMethod().equals(PUT)) {
-			clientRequest=new HttpPut(url);
-		}else if(request.getMethod().equals(DELETE)) {
-			clientRequest=new HttpDelete(url);
+		if(pathInfo.equalsIgnoreCase(MPATHWAYS_PATH_INFO)){
+			try{
+				M_log.info("MPathways call stub");
+				//Sample File for strict use of testing esb calls made from front end application
+				File testFile = new File( this.getClass().getResource("/mpathwaysSample.txt").toURI() );
+				FileReader fr = new FileReader(testFile);  
+				BufferedReader rd = new BufferedReader(fr);;
+				String line = "";
+				StringBuilder sb = new StringBuilder();
+				while ((line = rd.readLine()) != null) {
+					sb.append(line);
+				}
+				out.print(sb.toString());
+				out.flush();
+			}
+			catch(Exception e){
+				e.printStackTrace();
+			}
+
 		}
-		HttpClient client = new DefaultHttpClient();
-		final ArrayList<NameValuePair> nameValues = new ArrayList<NameValuePair>();
-		nameValues.add(new BasicNameValuePair("Authorization", "Bearer"+ " " +canvasToken));
-		nameValues.add(new BasicNameValuePair("content-type", "application/json"));
-		for (final NameValuePair h : nameValues)
-		{
-			clientRequest.addHeader(h.getName(), h.getValue());
+		else{
+			String sessionId = request.getSession().getId();
+			String loggingApiWithSessionInfo = String.format("Canvas API request with Session Id \"%s\" for URL \"%s\"", sessionId,url);
+			M_log.info(loggingApiWithSessionInfo);
+			HttpUriRequest clientRequest = null;
+			if(request.getMethod().equals(GET)) {
+				clientRequest = new HttpGet(url);
+			}else if (request.getMethod().equals(POST)) {
+				clientRequest = new HttpPost(url);
+			}else if(request.getMethod().equals(PUT)) {
+				clientRequest=new HttpPut(url);
+			}else if(request.getMethod().equals(DELETE)) {
+				clientRequest=new HttpDelete(url);
+			}
+			HttpClient client = new DefaultHttpClient();
+			final ArrayList<NameValuePair> nameValues = new ArrayList<NameValuePair>();
+			nameValues.add(new BasicNameValuePair("Authorization", "Bearer"+ " " +canvasToken));
+			nameValues.add(new BasicNameValuePair("content-type", "application/json"));
+			for (final NameValuePair h : nameValues)
+			{
+				clientRequest.addHeader(h.getName(), h.getValue());
+			}
+			BufferedReader rd = null;
+			long startTime = System.currentTimeMillis();
+			try {
+				rd = new BufferedReader(new InputStreamReader(client.execute(clientRequest).getEntity().getContent()));
+			} catch (IOException e) {
+				M_log.error("Canvas API call did not complete successfully", e);
+			}
+			long stopTime = System.currentTimeMillis();
+			long elapsedTime = stopTime - startTime;
+			M_log.info(String.format("CANVAS Api response took %sms",elapsedTime));
+			String line = "";
+			StringBuilder sb = new StringBuilder();
+			while ((line = rd.readLine()) != null) {
+				sb.append(line);
+			}
+			out.print(sb.toString());
+			out.flush();
 		}
-		BufferedReader rd = null;
-		long startTime = System.currentTimeMillis();
-		try {
-			rd = new BufferedReader(new InputStreamReader(client.execute(clientRequest).getEntity().getContent()));
-		} catch (IOException e) {
-			M_log.error("Canvas API call did not complete successfully", e);
-		}
-		long stopTime = System.currentTimeMillis();
-		long elapsedTime = stopTime - startTime;
-		M_log.info(String.format("CANVAS Api response took %sms",elapsedTime));
-		String line = "";
-		StringBuilder sb = new StringBuilder();
-		while ((line = rd.readLine()) != null) {
-			sb.append(line);
-		}
-		out.print(sb.toString());
-		out.flush();
 	}
 	/*
 	 * This method control canvas api request allowed. If a particular request from UI is not in the allowed list then it will not process the request 
@@ -313,14 +336,23 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug("isApiFoundIntheList(): called");
 		String prefixDebugMsg="The canvas api request ";
 		HashMap<String,String> apiListRegexWithDebugMsg= new HashMap<String,String>(){{
-			put(CANVAS_API_TERMS, "for terms");put(CANVAS_API_CROSSLIST, "for crosslist");put(CANVAS_API_RENAME_COURSE, "for rename a course");put(CANVAS_API_GETCOURSE_BY_UNIQNAME, "for getting courses by uniqname");
-			put(CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS, "for getting courses by uniqname not including sections");put(CANVAS_API_ENROLLMENT, "for enrollment");put(CANVAS_API_GETCOURSE_INFO, "for getting course info");put(CANVAS_API_DECROSSLIST,"for decrosslist");
-			put(CANVAS_API_GETSECTION_INFO, "for getting section info");put(CANVAS_API_GETSECTION_PER_COURSE, "for getting section info for a given course");put(CANVAS_API_GETALLSECTIONS_PER_COURSE, "for getting all sections info for a given course");
+			put(CANVAS_API_TERMS, "for terms");
+			put(CANVAS_API_CROSSLIST, "for crosslist");
+			put(CANVAS_API_RENAME_COURSE, "for rename a course");
+			put(CANVAS_API_GETCOURSE_BY_UNIQNAME, "for getting courses by uniqname");
+			put(CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS, "for getting courses by uniqname not including sections");
+			put(CANVAS_API_ENROLLMENT, "for enrollment");
+			put(CANVAS_API_GETCOURSE_INFO, "for getting course info");
+			put(CANVAS_API_DECROSSLIST,"for decrosslist");
+			put(CANVAS_API_GETSECTION_INFO, "for getting section info");
+			put(CANVAS_API_GETSECTION_PER_COURSE, "for getting section info for a given course");
+			put(CANVAS_API_GETALLSECTIONS_PER_COURSE, "for getting all sections info for a given course");
 			put(CANVAS_API_SEARCH_COURSES, "for searching courses");
 			put(CANVAS_API_SEARCH_USER, "for searching for users");
 			put(CANVAS_API_CREATE_USER, "for creating a user");
 			put(CANVAS_API_ADD_USER, "for adding a user to a section");
 			put(CANVAS_API_GET_COURSE, "for getting a single course");
+			put(MPATHWAYS_API_GNERIC, "for mpathways calls");
 		}};
 		boolean isMatch=false;
 		Set<String> apiListRegex = apiListRegexWithDebugMsg.keySet();
