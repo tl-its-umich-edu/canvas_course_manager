@@ -238,67 +238,72 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	private void apiConnectionLogic(HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
-		String queryString = request.getQueryString();
 		String pathInfo = request.getPathInfo();
 		PrintWriter out = response.getWriter();
+		if(pathInfo.equalsIgnoreCase(MPATHWAYS_PATH_INFO)){
+			testMpathwaysCall(out);
+		}
+		else{
+			getCanvasResponse(request, response, out, pathInfo);
+		}
+	}
+
+	private void getCanvasResponse(HttpServletRequest request,
+			HttpServletResponse response, PrintWriter out, String pathInfo) throws IOException {
+		String queryString = request.getQueryString();
 		String url;
 		if(queryString!=null) {
 			url= canvasURL+pathInfo+"?"+queryString;
 		}else {
 			url=canvasURL+pathInfo;
 		}
-		if(pathInfo.equalsIgnoreCase(MPATHWAYS_PATH_INFO)){
-			try{
-				M_log.info("MPathways call stub");
-				//Sample File for strict use of testing esb calls made from front end application
-				File testFile = new File( this.getClass().getResource("/mpathwaysSample.txt").toURI() );
-				FileReader fr = new FileReader(testFile);  
-				BufferedReader rd = new BufferedReader(fr);;
-				String line = "";
-				StringBuilder sb = new StringBuilder();
-				while ((line = rd.readLine()) != null) {
-					sb.append(line);
-				}
-				out.print(sb.toString());
-				out.flush();
-			}
-			catch(Exception e){
-				e.printStackTrace();
-			}
-
+		String sessionId = request.getSession().getId();
+		String loggingApiWithSessionInfo = String.format("Canvas API request with Session Id \"%s\" for URL \"%s\"", sessionId,url);
+		M_log.info(loggingApiWithSessionInfo);
+		HttpUriRequest clientRequest = null;
+		if(request.getMethod().equals(GET)) {
+			clientRequest = new HttpGet(url);
+		}else if (request.getMethod().equals(POST)) {
+			clientRequest = new HttpPost(url);
+		}else if(request.getMethod().equals(PUT)) {
+			clientRequest=new HttpPut(url);
+		}else if(request.getMethod().equals(DELETE)) {
+			clientRequest=new HttpDelete(url);
 		}
-		else{
-			String sessionId = request.getSession().getId();
-			String loggingApiWithSessionInfo = String.format("Canvas API request with Session Id \"%s\" for URL \"%s\"", sessionId,url);
-			M_log.info(loggingApiWithSessionInfo);
-			HttpUriRequest clientRequest = null;
-			if(request.getMethod().equals(GET)) {
-				clientRequest = new HttpGet(url);
-			}else if (request.getMethod().equals(POST)) {
-				clientRequest = new HttpPost(url);
-			}else if(request.getMethod().equals(PUT)) {
-				clientRequest=new HttpPut(url);
-			}else if(request.getMethod().equals(DELETE)) {
-				clientRequest=new HttpDelete(url);
-			}
-			HttpClient client = new DefaultHttpClient();
-			final ArrayList<NameValuePair> nameValues = new ArrayList<NameValuePair>();
-			nameValues.add(new BasicNameValuePair("Authorization", "Bearer"+ " " +canvasToken));
-			nameValues.add(new BasicNameValuePair("content-type", "application/json"));
-			for (final NameValuePair h : nameValues)
-			{
-				clientRequest.addHeader(h.getName(), h.getValue());
-			}
-			BufferedReader rd = null;
-			long startTime = System.currentTimeMillis();
-			try {
-				rd = new BufferedReader(new InputStreamReader(client.execute(clientRequest).getEntity().getContent()));
-			} catch (IOException e) {
-				M_log.error("Canvas API call did not complete successfully", e);
-			}
-			long stopTime = System.currentTimeMillis();
-			long elapsedTime = stopTime - startTime;
-			M_log.info(String.format("CANVAS Api response took %sms",elapsedTime));
+		HttpClient client = new DefaultHttpClient();
+		final ArrayList<NameValuePair> nameValues = new ArrayList<NameValuePair>();
+		nameValues.add(new BasicNameValuePair("Authorization", "Bearer"+ " " +canvasToken));
+		nameValues.add(new BasicNameValuePair("content-type", "application/json"));
+		for (final NameValuePair h : nameValues)
+		{
+			clientRequest.addHeader(h.getName(), h.getValue());
+		}
+		BufferedReader rd = null;
+		long startTime = System.currentTimeMillis();
+		try {
+			rd = new BufferedReader(new InputStreamReader(client.execute(clientRequest).getEntity().getContent()));
+		} catch (IOException e) {
+			M_log.error("Canvas API call did not complete successfully", e);
+		}
+		long stopTime = System.currentTimeMillis();
+		long elapsedTime = stopTime - startTime;
+		M_log.info(String.format("CANVAS Api response took %sms",elapsedTime));
+		String line = "";
+		StringBuilder sb = new StringBuilder();
+		while ((line = rd.readLine()) != null) {
+			sb.append(line);
+		}
+		out.print(sb.toString());
+		out.flush();
+	}
+
+	public void testMpathwaysCall(PrintWriter out) {
+		try{
+			M_log.info("MPathways call stub");
+			//Sample File for strict use of testing esb calls made from front end application
+			File testFile = new File( this.getClass().getResource("/mpathwaysSample.txt").toURI() );
+			FileReader fr = new FileReader(testFile);  
+			BufferedReader rd = new BufferedReader(fr);;
 			String line = "";
 			StringBuilder sb = new StringBuilder();
 			while ((line = rd.readLine()) != null) {
@@ -306,6 +311,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			}
 			out.print(sb.toString());
 			out.flush();
+		}
+		catch(Exception e){
+			e.printStackTrace();
 		}
 	}
 	/*
