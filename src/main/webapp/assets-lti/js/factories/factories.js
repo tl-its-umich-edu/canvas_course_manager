@@ -106,7 +106,7 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
        // need the first name and last name, right now just using the email
        '&inst_first_name=' + requestorEmail +
        '&inst_last_name= '  +
-       '&instructor_notify='  + notifyInstructor;
+       '&notify_instructor='  + notifyInstructor;
        
       return $http.post(url, {cache: false}).then(
         function success(result) {
