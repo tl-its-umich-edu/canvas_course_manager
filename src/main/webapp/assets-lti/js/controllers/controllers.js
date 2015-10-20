@@ -331,6 +331,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     var friendEmailAddress = $.trim($('#friendEmailAddress2').val());
     var friendNameFirst = $('#friendNameFirst').val();
     var friendNameLast = $('#friendNameLast').val();
+    var notifyInstructor = 'false';
 
     if(validateEmailAddress(friendEmailAddress) && friendNameFirst !=='' && friendNameLast !==''){
       $scope.failedValidation = false;
@@ -338,7 +339,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
       var requestorEmail = 'instx@umich.edu'; // hardwired for now
       $scope.loadingCreateUser = true;
 
-      Friend.doFriendAccount(friendEmailAddress, requestorEmail).then(function (data) {
+      Friend.doFriendAccount(friendEmailAddress, requestorEmail, notifyInstructor).then(function (data) {
         if (data.data.message === 'created' || data.data.message === 'exists') {
           $scope.friend_account = data.data;
           $scope.newUserFound=true;
