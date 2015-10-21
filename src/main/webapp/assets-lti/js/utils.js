@@ -70,6 +70,16 @@ var generateCurrentTimestamp = function(){
   return new Date().getTime();
 };
 
+var prepareMPathData = function(MPathData) {
+  var mPathArray = [];
+  $.each(MPathData.Result.getInstrClassListResponse.InstructedClass, function() {
+    if(this.InstructorRole === 'Primary Instructor' || this.InstructorRole === 'Seconday Instructor'){
+      //TODO: need to get the term id to concatenate it below
+      mPathArray.push({'sis_term_id': this.ClassNumber});// Term ID needed here
+    }
+    return mPathArray;
+  });
+}
 
 // use moment to craft a user friendly message about last recorded activity
 var calculateLastActivity = function(last_activity_at) {

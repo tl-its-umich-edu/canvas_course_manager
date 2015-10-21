@@ -202,8 +202,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
 
 /* SINGLE COURSE CONTROLLER */
 canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend','$scope', '$filter', '$timeout', function (Course, Courses, Sections, Friend, $scope, $filter, $timeout) {
-  //TODO - add this below to the filter
-  // /api/v1/courses?as_user_id=sis_login_id:instx&enrollment_type=teacher&include[]=sections&state[]=available&?access_token=1770~6Mn7sP9c6TLPtJAt56K8wvtmFcMmpENSYamMxdrDWInP27pCW0aNRRehpRGBEYfL
+  //TODO: this URL will be constructed from the LIT launch parameters - hardcoded here
   var courseUrl ='manager/api/v1/courses/154?include[]=sections&_=' + generateCurrentTimestamp();
   Course.getCourse(courseUrl).then(function (result) {
     $scope.course = result.data;
@@ -212,6 +211,15 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
       $scope.course.sections =result.data;
     });    
   });
+
+  //TODO: MPATH dummy data now 
+  // URL is wrong  
+  var mPathwaysCoursesUrl = '/assets-lti/data/mpathwaysdata.json';
+  Course.getMPathwaysCourses(mPathwaysCoursesUrl).then(function (result) {
+    $scope.mpath_courses = result.data;
+    // ideally the ections would be returned above, if not we will need to get them here
+  });
+
 
   /*
   var uniqname = 'instx';
