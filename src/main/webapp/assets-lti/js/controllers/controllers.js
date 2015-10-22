@@ -201,10 +201,10 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
 }]);
 
 /* SINGLE COURSE CONTROLLER */
-canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend','$scope', '$rootScope', '$filter', '$timeout', function (Course, Courses, Sections, Friend, $scope, $rootScope, $filter, $timeout) {
+canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend','$scope', '$rootScope', '$filter', function (Course, Courses, Sections, Friend, $scope, $rootScope, $filter) {
   //TODO: this URL will be constructed from the LIT launch parameters - hardcoded here
-  $rootScope.contextCourseId = parseInt('34356');
-  var courseUrl ='manager/api/v1/courses/34356?include[]=sections&_=' + generateCurrentTimestamp();
+  $rootScope.contextCourseId = parseInt('20193');
+  var courseUrl ='manager/api/v1/courses/20193?include[]=sections&_=' + generateCurrentTimestamp();
   Course.getCourse(courseUrl).then(function (result) {
     $scope.course = result.data;
     // ideally the ections would be returned above, if not we will need to get them here
@@ -235,7 +235,8 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
       $scope.course.addingSections = true;
       // this is not optimal - ideally we should be requesting just this terms' courses, not all of them and then 
       // filtering them
-      $scope.courses = _.where(result.data, {enrollment_term_id:  $scope.course.enrollment_term_id});
+      //$scope.courses = _.where(result.data, {enrollment_term_id:  $scope.course.enrollment_term_id});
+      $scope.courses = _.where(result.data, {enrollment_term_id:  43});
     });    
   };
 
@@ -245,8 +246,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
         //find the course object
         var coursePos = $scope.courses.indexOf(_.findWhere($scope.courses, {id: courseId}));
         //append a section object to the course scope
-        $scope.courses[coursePos].sections = data.data;
-        
+        $scope.courses[coursePos].sections = filterOutSections(data.data,$scope.mpath_courses);
         //sectionsShown = true hides the Get Sections link
         $scope.courses[coursePos].sectionsShown = true;
       } else {
@@ -281,7 +281,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
 
   $scope.cancelAddSections = function () {
     // remove all added sections
-    $scope.course.sections = $filter('filter')($scope.course.sections, {course_id: $scope.course.id})
+    $scope.course.sections = $filter('filter')($scope.course.sections, {course_id: $scope.course.id});
     // set dirty and addingSections to false (controls display and disabled of buttons)
     $scope.course.dirty=false;
     $scope.course.addingSections = false;
@@ -323,7 +323,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
           // and call function to add to sections
           $scope.friend = data.data[0];
           $scope.userExists = true;
-          $scope.addUserToSectionsClick()
+          $scope.addUserToSectionsClick();
         } else {
           // not an existing user - present interface to add
           $scope.newUser = true;

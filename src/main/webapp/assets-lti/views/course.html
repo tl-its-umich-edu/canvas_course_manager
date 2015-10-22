@@ -79,7 +79,6 @@
               </div>                
             </div>
         
-        
         <div class="coursePanel well nograb" ng-show="courses">
             <h4 style="padding:0 20px">Your Other Courses <small> (get their sections and then select which ones you want added to this course) </small></h4>
             <ul class="container-fluid courseList">
@@ -96,7 +95,7 @@
                     <ul class="container-fluid sectionList">
                         <li class="row" ng-repeat="section in course.sections" id="{{section.id}}" data-parent="{{section.course_id}}" data-parent="{{course.id}}">
                             <div class="col-md-8 col-lg-8 col-sm-8 col-xs-8">{{section.name}}</div>
-                            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4"><a ng-hide="section.moved" href="" ng-click="appendToCourse(section, $parent.$index, $index)">Add to course</a></div>
+                            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4"><span ng-if="section.enabled"> <a ng-hide="section.moved" href="" ng-click="appendToCourse(section, $parent.$index, $index)">Add to course</a></span></div>
                         </li>
                     </ul>
                 </li>
