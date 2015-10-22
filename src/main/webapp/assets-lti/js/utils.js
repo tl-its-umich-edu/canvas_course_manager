@@ -77,8 +77,8 @@ var prepareMPathData = function(MPathData) {
       //TODO: need to get the term id to concatenate it below
       mPathArray.push({'sis_term_id': this.ClassNumber});// Term ID needed here
     }
-    return mPathArray;
   });
+  return mPathArray;
 }
 
 // use moment to craft a user friendly message about last recorded activity

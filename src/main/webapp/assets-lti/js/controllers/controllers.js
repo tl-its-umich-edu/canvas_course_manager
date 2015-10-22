@@ -212,12 +212,14 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     });    
   });
 
-  //TODO: MPATH dummy data now 
-  // URL is wrong  
-  var mPathwaysCoursesUrl = '/assets-lti/data/mpathwaysdata.json';
+  /*
+  TODO: MPATH dummy data now 
+  adds to the scope a list if sections (by sis_section_id) that the current user can perform actions on
+  */
+
+  var mPathwaysCoursesUrl = 'assets-lti/data/mpathwaysdata.json';
   Course.getMPathwaysCourses(mPathwaysCoursesUrl).then(function (result) {
-    $scope.mpath_courses = result.data;
-    // ideally the ections would be returned above, if not we will need to get them here
+    $scope.mpath_courses = result;
   });
 
 
