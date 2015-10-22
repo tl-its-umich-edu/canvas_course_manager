@@ -201,9 +201,10 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
 }]);
 
 /* SINGLE COURSE CONTROLLER */
-canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend','$scope', '$filter', '$timeout', function (Course, Courses, Sections, Friend, $scope, $filter, $timeout) {
+canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend','$scope', '$rootScope', '$filter', '$timeout', function (Course, Courses, Sections, Friend, $scope, $rootScope, $filter, $timeout) {
   //TODO: this URL will be constructed from the LIT launch parameters - hardcoded here
-  var courseUrl ='manager/api/v1/courses/154?include[]=sections&_=' + generateCurrentTimestamp();
+  $rootScope.contextCourseId = parseInt('34356');
+  var courseUrl ='manager/api/v1/courses/34356?include[]=sections&_=' + generateCurrentTimestamp();
   Course.getCourse(courseUrl).then(function (result) {
     $scope.course = result.data;
     // ideally the ections would be returned above, if not we will need to get them here
@@ -223,8 +224,8 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
   });
 
 
-  /*
-  var uniqname = 'instx';
+  //hardcoded here to match same user and term as MPathways data
+  var uniqname = 'bkg';
 
   $scope.getCoursesForTerm = function() {
     $scope.loadingOtherCourses = true;
@@ -287,7 +288,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     // prune the source courses from the model
     $scope.courses = [];
   };
-  */
+  
   $scope.addUsers = function(){
     $scope.course.addingUser = true;
   };
