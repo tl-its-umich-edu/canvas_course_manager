@@ -206,9 +206,11 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
   $rootScope.contextCourseId = parseInt('20193');
   var courseUrl ='manager/api/v1/courses/20193?include[]=sections&_=' + generateCurrentTimestamp();
   Course.getCourse(courseUrl).then(function (result) {
+    $scope.loadingSections = true;
     $scope.course = result.data;
     // ideally the ections would be returned above, if not we will need to get them here
     Sections.getSectionsForCourseId($scope.course.id).then(function (result) {
+      $scope.loadingSections = false;
       $scope.course.sections =result.data;
     });    
   });
@@ -236,17 +238,20 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
       // this is not optimal - ideally we should be requesting just this terms' courses, not all of them and then 
       // filtering them
       //$scope.courses = _.where(result.data, {enrollment_term_id:  $scope.course.enrollment_term_id});
+      //TODO: hardwired term here tfor the same term we have an MPATH sample for
       $scope.courses = _.where(result.data, {enrollment_term_id:  43});
     });    
   };
 
   $scope.getSections = function (courseId) {
+    //find the course object
+    var coursePos = $scope.courses.indexOf(_.findWhere($scope.courses, {id: courseId}));
+    $scope.courses[coursePos].loadingOtherSections = true;
     Sections.getSectionsForCourseId(courseId).then(function (data) {
       if (data) {
-        //find the course object
-        var coursePos = $scope.courses.indexOf(_.findWhere($scope.courses, {id: courseId}));
         //append a section object to the course scope
         $scope.courses[coursePos].sections = filterOutSections(data.data,$scope.mpath_courses);
+        $scope.courses[coursePos].loadingOtherSections = false;
         //sectionsShown = true hides the Get Sections link
         $scope.courses[coursePos].sectionsShown = true;
       } else {
@@ -270,13 +275,15 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     });
   };
 
-  $scope.appendToCourse = function (section, parentindex, thisindex) {
-    // add a  new section to the course
+  $scope.appendToCourse = function (section, thisindex) {
+    //find hte source course object
+    var sourceCoursePos = $scope.courses.indexOf(_.findWhere($scope.courses, {id: section.course_id}));
+    // add new section to the target course
     $scope.course.sections.push(section);
     // set dirty to true
     $scope.course.dirty=true;
     // remove section from source course
-    $scope.courses[parentindex].sections.splice(thisindex, 1);
+    $scope.courses[sourceCoursePos].sections.splice(thisindex, 1);
   };
 
   $scope.cancelAddSections = function () {

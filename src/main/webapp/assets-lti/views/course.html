@@ -12,7 +12,7 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-8 col-lg-8 col-sm-8 col-xs-8">
-                        <h4>{{course.course_code}} <small ng-show="course.addingUser">First select sections, then specify user</small></h4>
+                        <h4>{{course.course_code}} <button ng-show="loadingSections" class="btn btn-link spinner"></button> <small ng-show="course.addingUser">First select sections, then specify user</small></h4>
                     </div>
                     <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4" style="text-align:right;">
                         <button ng-show="loadingOtherCourses" class="btn btn-link spinner"></button>  
@@ -24,8 +24,7 @@
                 </div>
             </div>    
             <ul class="container-fluid sectionList">
-                <li class="row" ng-repeat="section in course.sections" id="{{section.id}}" data-parent-id="{{section.course_id}}"
-                >
+                <li class="row" ng-repeat="section in course.sections" id="{{section.id}}" data-parent-id="{{section.course_id}}">
                     <div class="col-md-8 col-lg-8 col-sm-8 col-xs-8"><span ng-show="course.addingUser"><input type="checkbox" id="check{{section.id}}" ng-model="section.selected" ng-change="sectionSelectedQuery()"> <label for ="check{{section.id}}">{{section.name}}</label></span><span ng-show="!course.addingUser">{{section.name}}</span></div>
                     <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4">
                         <div class="btn-group pull-right" ng-show="course.addingUser">
@@ -88,14 +87,16 @@
                             {{course.course_code}}
                         </div>
                         <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4">
-                            <a href="" ng-click="getSections(course.id)" ng-hide="course.sectionsShown">Get sections</a>
+                            <span ng-hide="course.sectionsShown">
+                                <a href="" ng-click="getSections(course.id)">Get sections</a> <button ng-show="course.loadingOtherSections" class="btn btn-link spinner"></button>
+                            </span>
                         </div>
                     </div>
                         
                     <ul class="container-fluid sectionList">
-                        <li class="row" ng-repeat="section in course.sections" id="{{section.id}}" data-parent="{{section.course_id}}" data-parent="{{course.id}}">
+                        <li class="row" ng-repeat="section in course.sections" id="{{section.id}}"> 
                             <div class="col-md-8 col-lg-8 col-sm-8 col-xs-8">{{section.name}}</div>
-                            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4"><span ng-if="section.enabled"> <a ng-hide="section.moved" href="" ng-click="appendToCourse(section, $parent.$index, $index)">Add to course</a></span></div>
+                            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4"><span ng-if="section.enabled"> <a ng-hide="section.moved" href="" ng-click="appendToCourse(section, $index)">Add to course</a></span></div>
                         </li>
                     </ul>
                 </li>
