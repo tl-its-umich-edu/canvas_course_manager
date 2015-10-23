@@ -273,15 +273,14 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			throws IOException {
 		PrintWriter out = response.getWriter();
 		if(request.getPathInfo().equalsIgnoreCase(MPATHWAYS_PATH_INFO)){
-			realMpathwaysCall(request, response, out);
-			//testMpathwaysCall(out);
+			mpathwaysCall(request, response, out);
 		}
 		else{
 			getCanvasResponse(request, response, out);
 		}
 	}
 
-	private void realMpathwaysCall(HttpServletRequest request, HttpServletResponse response, PrintWriter out){
+	private void mpathwaysCall(HttpServletRequest request, HttpServletResponse response, PrintWriter out){
 		WAPIResultWrapper wrappedResult = null;
 		String mpathwaysInstructor = request.getParameter(PARAMETER_INSTRUCTOR);
 		String mpathwaysTermId = request.getParameter(PARAMETER_TERMID);
