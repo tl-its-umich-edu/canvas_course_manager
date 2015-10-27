@@ -11,15 +11,17 @@
         <div class="coursePanel well nograb">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-md-8 col-lg-8 col-sm-8 col-xs-8">
+                    <div class="col-md-6 col-lg-6 col-sm-8 col-xs-6">
                         <h4>{{course.course_code}} <button ng-show="loadingSections" class="btn btn-link spinner"></button> <small ng-show="course.addingUser">First select sections, then specify user</small></h4>
                     </div>
-                    <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4" style="text-align:right;">
+                    <div class="col-md-6 col-lg-6 col-sm-6 col-xs-6" style="text-align:right;">
                         <button ng-show="loadingOtherCourses" class="btn btn-link spinner"></button>  
-                        <button ng-disabled="course.addingUser" ng-hide="courses || !functionality.sections" class="btn btn-default" ng-click="getCoursesForTerm()">Add sections</button>
-                        <button ng-show="course.dirty" class="btn btn-default" ng-click="getCoursesForTerm()">Save new sections</button>
-                        <button ng-show="course.addingSections" class="btn btn-default" ng-click="cancelAddSections()">Cancel add sections</button>                        
-                        <button ng-disabled="course.addingSections" ng-hide="!functionality.friends" class="btn btn-default" ng-click="addUsers()">Add users</button>
+                        <div class="btn-group" role="group">
+                            <button ng-disabled="course.addingUser" ng-hide="courses || !functionality.sections" class="btn btn-default" ng-click="getCoursesForTerm()">Add sections</button>
+                            <button ng-show="course.dirty" class="btn btn-default" ng-click="getCoursesForTerm()">Save new sections</button>
+                            <button ng-show="course.addingSections" class="btn btn-default" ng-click="cancelAddSections()">Cancel add sections</button>                        
+                            <button ng-disabled="course.addingSections" ng-hide="!functionality.friends" class="btn btn-default" ng-click="addUsers()">Add users</button>
+                        </div>
                     </div>
                 </div>
             </div>    
