@@ -296,6 +296,12 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     $scope.courses = [];
   };
   
+  $scope.cancelAddUsers = function () {
+    $scope.course.addingUser = false;
+  };
+
+
+  
   $scope.addUsers = function(){
     $scope.course.addingUser = true;
   };
