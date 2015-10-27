@@ -11,17 +11,6 @@ $.ajaxSetup({
   cache: false
 });
 
-    
-$(document).ajaxStart(function(){
-  $(".spinner").show();
-  $(".spinner2").show();
-});
-$(document).ajaxStop(function(){
-  $(".spinner").hide();
-  $(".spinner2").hide();
-});
-
-
 // generic error report
 var errorDisplay = function (url, status, errorMessage) {
   switch(status) {
@@ -70,6 +59,25 @@ var generateCurrentTimestamp = function(){
   return new Date().getTime();
 };
 
+var prepareMPathData = function(MPathData) {
+  var mPathArray = [];
+  $.each(MPathData.Result.getInstrClassListResponse.InstructedClass, function() {
+    if(this.InstructorRole === 'Primary Instructor' || this.InstructorRole === 'Seconday Instructor'){
+      //TODO: need to get the term id to concatenate it below
+      mPathArray.push('2060' + this.ClassNumber);// Term ID needed here
+    }
+  });
+  return mPathArray;
+};
+
+var filterOutSections = function(sectionData, mPathArray){
+  $.each(sectionData, function() {
+    if(_.contains(mPathArray, this.sis_section_id)){
+      this.enabled = true;
+    }
+  });
+  return sectionData;
+};
 
 // use moment to craft a user friendly message about last recorded activity
 var calculateLastActivity = function(last_activity_at) {
@@ -111,14 +119,14 @@ var utilPopWindow = function(url, name){
 
 /*used by modal (other instructor field) */
 var validateUniqname = function (value) {
-  var value = $.trim(value)
+  var value = $.trim(value);
   var letterOnly = /^[a-z]+$/i;  
   if(value.match(letterOnly) && value !=='') {  
     return true;
   } else {
     return false;
   }
-}
+};
 
 
 /*used by adding friend
@@ -136,7 +144,7 @@ var validateEmailAddress = function (value) {
   } else {
     return false;
   }
-}
+};
 
 var xListPostStatus;
 
@@ -185,7 +193,7 @@ $(document).on('click', '.setSections', function (e) {
   e.preventDefault();
   $('#debugPanel').empty();
   var thisCourse = $(this).attr('data-courseid');
-  $('#postXList').attr('course-id', thisCourse)
+  $('#postXList').attr('course-id', thisCourse);
 
   var thisCourseContainer = $(this).closest('li.course');
   var thisCourseTitle = thisCourseContainer.find('a.courseLink').text();
@@ -205,8 +213,8 @@ $(document).on('click', '.setSections', function (e) {
 });
 
 //handle the  button in modal that triggers the crosslist posts
-$(document).on('click', '#postXList', function (e) {
-  var thisCourse = $('#postXList').attr('course-id')
+$(document).on('click', '#postXList', function () {
+  var thisCourse = $('#postXList').attr('course-id');
   $('#postXList, #postXListCancel').hide();
 
   var thisCourseContainer = $('li.course[data-course-id="' + thisCourse + '"]');
@@ -498,7 +506,7 @@ $(document).on('click', '#courseStringTrigger', function (e) {
             '<div class="btn-group pull-right">' + 
             '<button type="button" class="getSectionsNoInstructor btn btn-default btn-xs" data-id="' + this.id + '">Get Sections</button>' + 
             '<button title="Get Enrollments" data-target="#courseGetEnrollmentsModal" data-toggle="modal" data-courseid="' + this.id + '" class="btn btn-default btn-xs instructorsOnly getEnrollements"><span class="sr-only">Get Enrollments</span>' +
-            '<i class="glyphicon glyphicon-user"></i></button></div><div class="clearfix"></div></li>'
+            '<i class="glyphicon glyphicon-user"></i></button></div><div class="clearfix"></div></li>';
           });
           $('#noInstructorInnerPayload').append(render);
         } else {
