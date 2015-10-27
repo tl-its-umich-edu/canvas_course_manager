@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.json.Json;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,7 +32,12 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.tools.view.VelocityViewServlet;
 import org.apache.velocity.tools.view.ViewToolContext;
+import org.json.JSONObject;
 
+import com.mashape.unirest.http.exceptions.UnirestException;
+
+import edu.umich.ctools.esb.utils.WAPI;
+import edu.umich.ctools.esb.utils.WAPIResultWrapper;
 import edu.umich.its.lti.utils.RequestSignatureUtils;
 
 public class SectionsUtilityToolServlet extends VelocityViewServlet {
@@ -56,6 +62,10 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String CANVAS_API_ADD_USER = "canvas.api.add.user.regex";
 	private static final String CANVAS_API_GET_COURSE = "canvas.api.get.single.course.regex";
 	private static final String MPATHWAYS_API_GNERIC = "mpathways.api.get.generic";
+
+	private static final String PARAMETER_INSTRUCTOR = "instructor";
+	private static final String PARAMETER_TERMID = "termid";
+
 	private static final String MANAGER_SERVLET_NAME = "/manager";
 	private static final String MPATHWAYS_PATH_INFO = "/mpathways/Instructors";
 
@@ -63,28 +73,6 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String POST = "POST";
 	private static final String GET = "GET";
 	private static final String PUT = "PUT";
-
-	private static final HashMap<String,String> apiListRegexWithDebugMsg = new HashMap<String,String>(){
-		private static final long serialVersionUID = -1389517682290891890L;
-	{			
-		put(CANVAS_API_TERMS, "for terms");
-		put(CANVAS_API_CROSSLIST, "for crosslist");
-		put(CANVAS_API_RENAME_COURSE, "for rename a course");
-		put(CANVAS_API_GETCOURSE_BY_UNIQNAME, "for getting courses by uniqname");
-		put(CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS, "for getting courses by uniqname not including sections");
-		put(CANVAS_API_ENROLLMENT, "for enrollment");
-		put(CANVAS_API_GETCOURSE_INFO, "for getting course info");
-		put(CANVAS_API_DECROSSLIST,"for decrosslist");
-		put(CANVAS_API_GETSECTION_INFO, "for getting section info");
-		put(CANVAS_API_GETSECTION_PER_COURSE, "for getting section info for a given course");
-		put(CANVAS_API_GETALLSECTIONS_PER_COURSE, "for getting all sections info for a given course");
-		put(CANVAS_API_SEARCH_COURSES, "for searching courses");
-		put(CANVAS_API_SEARCH_USER, "for searching for users");
-		put(CANVAS_API_CREATE_USER, "for creating a user");
-		put(CANVAS_API_ADD_USER, "for adding a user to a section");
-		put(CANVAS_API_GET_COURSE, "for getting a single course");
-		put(MPATHWAYS_API_GNERIC, "for mpathways calls");
-	}};
 
 	private String canvasToken;
 	private String canvasURL;
@@ -98,6 +86,30 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	protected static Properties appExtSecurePropertiesFile=null;
 	protected static Properties appExtPropertiesFile=null;	
+
+	private static final HashMap<String,String> apiListRegexWithDebugMsg = new HashMap<String,String>(){
+		private static final long serialVersionUID = -1389517682290891890L;
+
+		{			
+			put(CANVAS_API_TERMS, "for terms");
+			put(CANVAS_API_CROSSLIST, "for crosslist");
+			put(CANVAS_API_RENAME_COURSE, "for rename a course");
+			put(CANVAS_API_GETCOURSE_BY_UNIQNAME, "for getting courses by uniqname");
+			put(CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS, "for getting courses by uniqname not including sections");
+			put(CANVAS_API_ENROLLMENT, "for enrollment");
+			put(CANVAS_API_GETCOURSE_INFO, "for getting course info");
+			put(CANVAS_API_DECROSSLIST,"for decrosslist");
+			put(CANVAS_API_GETSECTION_INFO, "for getting section info");
+			put(CANVAS_API_GETSECTION_PER_COURSE, "for getting section info for a given course");
+			put(CANVAS_API_GETALLSECTIONS_PER_COURSE, "for getting all sections info for a given course");
+			put(CANVAS_API_SEARCH_COURSES, "for searching courses");
+			put(CANVAS_API_SEARCH_USER, "for searching for users");
+			put(CANVAS_API_CREATE_USER, "for creating a user");
+			put(CANVAS_API_ADD_USER, "for adding a user to a section");
+			put(CANVAS_API_GET_COURSE, "for getting a single course");
+			put(MPATHWAYS_API_GNERIC, "for mpathways calls");
+		}
+	};
 
 	public void init() throws ServletException {
 		M_log.debug(" Servlet init(): Called");
@@ -262,11 +274,40 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			throws IOException {
 		PrintWriter out = response.getWriter();
 		if(request.getPathInfo().equalsIgnoreCase(MPATHWAYS_PATH_INFO)){
-			testMpathwaysCall(out);
+			mpathwaysCall(request, response, out);
 		}
 		else{
 			getCanvasResponse(request, response, out);
 		}
+	}
+
+	private void mpathwaysCall(HttpServletRequest request, HttpServletResponse response, PrintWriter out){
+		WAPIResultWrapper wrappedResult = null;
+		String mpathwaysInstructor = request.getParameter(PARAMETER_INSTRUCTOR);
+		String mpathwaysTermId = request.getParameter(PARAMETER_TERMID);
+		if(mpathwaysInstructor == null || 
+				mpathwaysTermId == null){
+			response.setStatus(400);
+			wrappedResult = new WAPIResultWrapper(400, "Parameter missing in Instructors request", new JSONObject());
+			M_log.error("Error in mpathwaysCall(), missing parameter in Instuctors request");
+		}
+		else{
+			if(appExtSecurePropertiesFile!=null) {
+				HashMap<String, String> wapiValuesMap = new HashMap<String, String>();
+				wapiValuesMap.put("tokenServer", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_TOKEN_SERVER));
+				wapiValuesMap.put("apiPrefix", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_PREFIX));
+				wapiValuesMap.put("key", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_KEY));
+				wapiValuesMap.put("secret", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_SECRET));
+				WAPI wapi = new WAPI(wapiValuesMap);
+				try {
+					wrappedResult = wapi.getRequest(wapi.getApiPrefix() + mpathwaysInstructor + "/Terms/" + mpathwaysTermId + "/Classes");
+				} catch (UnirestException e) {
+					M_log.error("MPathways API call did not complete successfully", e);
+				}	
+			}
+		}
+		out.print(wrappedResult.toJson());
+		out.flush();
 	}
 
 	private void getCanvasResponse(HttpServletRequest request,
@@ -365,25 +406,6 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private boolean isApiFoundIntheList(String url) {
 		M_log.debug("isApiFoundIntheList(): called");
 		String prefixDebugMsg="The canvas api request ";
-//		HashMap<String,String> apiListRegexWithDebugMsg= new HashMap<String,String>(){{
-//			put(CANVAS_API_TERMS, "for terms");
-//			put(CANVAS_API_CROSSLIST, "for crosslist");
-//			put(CANVAS_API_RENAME_COURSE, "for rename a course");
-//			put(CANVAS_API_GETCOURSE_BY_UNIQNAME, "for getting courses by uniqname");
-//			put(CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS, "for getting courses by uniqname not including sections");
-//			put(CANVAS_API_ENROLLMENT, "for enrollment");
-//			put(CANVAS_API_GETCOURSE_INFO, "for getting course info");
-//			put(CANVAS_API_DECROSSLIST,"for decrosslist");
-//			put(CANVAS_API_GETSECTION_INFO, "for getting section info");
-//			put(CANVAS_API_GETSECTION_PER_COURSE, "for getting section info for a given course");
-//			put(CANVAS_API_GETALLSECTIONS_PER_COURSE, "for getting all sections info for a given course");
-//			put(CANVAS_API_SEARCH_COURSES, "for searching courses");
-//			put(CANVAS_API_SEARCH_USER, "for searching for users");
-//			put(CANVAS_API_CREATE_USER, "for creating a user");
-//			put(CANVAS_API_ADD_USER, "for adding a user to a section");
-//			put(CANVAS_API_GET_COURSE, "for getting a single course");
-//			put(MPATHWAYS_API_GNERIC, "for mpathways calls");
-//		}};
 		boolean isMatch=false;
 		Set<String> apiListRegex = apiListRegexWithDebugMsg.keySet();
 		for (String api : apiListRegex) {

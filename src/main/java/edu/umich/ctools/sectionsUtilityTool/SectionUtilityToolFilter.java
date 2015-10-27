@@ -39,7 +39,11 @@ public class SectionUtilityToolFilter implements Filter {
 	protected static final String PROPERTY_LTI_KEY = "lti.key";
 	protected static final String PROPERTY_LTI_SECRET = "lti.secret";
 	protected static final String PROPERTY_CALL_TYPE = "call.type";
-	private static final String PROPERTY_AUTH_GROUP = "mcomm.group";
+	protected static final String PROPERTY_AUTH_GROUP = "mcomm.group";
+	protected static final String ESB_TOKEN_SERVER = "esb.token.server";
+	protected static final String ESB_KEY = "esb.key";
+	protected static final String ESB_SECRET = "esb.secret";
+	protected static final String ESB_PREFIX = "esb.prefix";
 	private static final String TEST_USER = "testUser";
 	private String providerURL = null;
 	private String mcommunityGroup = null;
