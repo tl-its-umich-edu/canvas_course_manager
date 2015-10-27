@@ -1,0 +1,37 @@
+{
+    "Result": {
+        "getInstrClassListResponse": {
+            "@schemaLocation": "http://mais.he.umich.edu/schemas/getInstrClassListResponse.v1 http://csqa9ib.dsc.umich.edu/PSIGW/PeopleSoftServiceListeningConnector/getInstrClassListResponse.v1.xsd",
+            "InstructedClass": [
+                {
+                    "SectionNumber": "001",
+                    "InstructorRole": "Primary Instructor",
+                    "InstructorAccess": "Approve Grade Roster",
+                    "CatalogNumber": 250,
+                    "SubjectCode": "STATS",
+                    "ClassNumber": 15043
+                },
+                {
+                    "SectionNumber": "006",
+                    "InstructorRole": "Primary Instructor",
+                    "InstructorAccess": "Approve Grade Roster",
+                    "CatalogNumber": 250,
+                    "SubjectCode": "STATS",
+                    "ClassNumber": 25017
+                },
+                {
+                    "SectionNumber": "001",
+                    "InstructorRole": "Primary Instructor",
+                    "InstructorAccess": "Approve Grade Roster",
+                    "CatalogNumber": 993,
+                    "SubjectCode": "STATS",
+                    "ClassNumber": 12254
+                }
+            ]
+        }
+    },
+    "Meta": {
+        "httpStatus": 200,
+        "Message": "OK"
+    }
+}
