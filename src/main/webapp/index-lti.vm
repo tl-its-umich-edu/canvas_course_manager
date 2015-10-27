@@ -65,80 +65,7 @@
     </script>
     <script src="assets-lti/js/services/services.js">
     </script>
-
-    <!-- XList Modal -->
-    <div class="modal fade" id="xListModal" tabindex="-1" role="dialog" aria-labelledby="xListLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal">
-              <span aria-hidden="true">&times;</span>
-              <span class="sr-only">Close</span>
-            </button>
-            <h3 class="modal-title" id="xListLabel">Crosslist confirm</h3>
-          </div>
-          <div class="modal-body" id="xListInner">
-          </div>
-          <div class="modal-footer">
-            <a id="xListConfirm" target="_blank" class="btn btn-link pull-left" href="" style="display:none">
-              <span id="xListConfirmMessage"></span> Confirm in Canvas?
-            </a>
-            <button type="button" class="btn btn-primary" id="postXList">
-              Crosslist
-            </button>
-            <button type="button" class="btn btn-primary" data-dismiss="modal" id="postXListDone">
-              Finished?
-            </button>
-            <button type="button" class="btn btn-link" data-dismiss="modal" id="postXListCancel">
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- enrollments Modal -->
-    <div class="modal fade" id="courseGetEnrollmentsModal" tabindex="-1" role="dialog" aria-labelledby="courseGetEnrollmentsLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal">
-              <span aria-hidden="true">&times;</span>
-              <span class="sr-only">Close</span>
-            </button>
-            <h3 class="modal-title" id="courseGetEnrollmentsLabel"></h3>
-          </div>
-          <div class="modal-body" id="courseGetEnrollmentsInner">
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" data-dismiss="modal">
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- courseInfo Modal -->
-    <div class="modal fade" id="courseInfoModal" tabindex="-1" role="dialog" aria-labelledby="courseInfoLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal">
-              <span aria-hidden="true">&times;</span>
-              <span class="sr-only">Close</span>
-            </button>
-            <h3 class="modal-title" id="courseInfoLabel"></h3>
-          </div>
-          <div class="modal-body" id="courseInfoInner">
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" data-dismiss="modal">
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- unCrossList Modal -->
+    <!-- unCrossList Modal 
     <div class="modal fade" id="unCrossListModal" tabindex="-1" role="dialog" aria-labelledby="unCrossListLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -165,82 +92,14 @@
         </div>
       </div>
     </div>
-    <!-- otherInstructor Modal -->
-    <div class="modal fade" id="otherInstructorModal" tabindex="-1" role="dialog" aria-labelledby="otherInstructorLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal">
-              <span aria-hidden="true">&times;</span>
-              <span class="sr-only">Close</span>
-            </button>
-            <h3 class="modal-title" id="otherInstructorLabel">Select sections from other instructors  for term <span id="canvasTermId" style='display:none'>{{currentTerm.currentTermCanvasId}}</span> <span class="canvasTermNameforjQuery"></span><span class="canvasTermIdforjQuery" style="display:none"></span></h3>
-          </div>
-          <div class="modal-body otherInstructorInner" id="otherInstructorInner">
-            <div class="form-inline">
-              <div class="form-group">
-                <label for="uniqnameOther" class="sr-only">Enter uniqname</label>
-                <input type="text" ng-model="uniqnameOther" id="uniqnameOther" class="form-control" placeholder="other instructor uniqname" style="width:200px">
-                <button id="uniqnameOtherTrigger" type="button" class="btn btn-primary">Look up courses <span ng-show="uniqnameOther">for</span> {{uniqnameOther}}
-                </button>
-                <div class="spinner2" style="display:none"></div>
-              </div>
-            </div>
-            <div id="otherInstructorInnerPayload"></div>
-          </div>
-          <div class="modal-footer">
-            <button id="useOtherSections" type="button" class="btn btn-primary">
-              Use selected
-            </button>
-            <button type="button" class="btn btn-link" data-dismiss="modal">
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- noInstructor Modal -->
-    <div class="modal fade" id="noInstructorModal" tabindex="-1" role="dialog" aria-labelledby="noInstructorLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal">
-              <span aria-hidden="true">&times;</span>
-              <span class="sr-only">Close</span>
-            </button>
-            <h3 class="modal-title" id="noInstructorLabel">Search for courses for term <span id="canvasTermId" style="display:none">{{currentTerm.currentTermCanvasId}}</span><span class="canvasTermNameforjQuery"></span><span class="canvasTermIdforjQuery" style="display:none"></span></h3>
-          </div>
-          <div class="modal-body noInstructorInner" id="noInstructorInner">
-            <div class="form-inline">
-              <div class="form-group">
-                <label for="courseString" class="sr-only">Enter course</label>
-                <input type="text" id="courseString" class="form-control" placeholder="course info" style="width:200px">
-                <button id="courseStringTrigger" type="button" class="btn btn-primary">
-                  <span id="courseStringTriggerPrefix">Search courses</span>
-                </button>
-                <div class="spinner2" style="display:none"></div>
-              </div>
-            </div>
-            <div id="noInstructorInnerPayload"></div>
-          </div>
-          <div class="modal-footer">
-            <button id="useNoInstructorSections" type="button" class="btn btn-primary">
-              Use selected
-            </button>
-            <button type="button" class="btn btn-link" data-dismiss="modal">
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- add user Modal -->
+    -->
+    <!-- add user Modal 
     <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserLabel" aria-hidden="true" ng-controller="addUserController">
       <div class="modal-dialog modal-lg">
         <div ng-include src="'assets-lti/views/friends.html'"></div>
       </div>
     </div>
+    -->
 
   </body>
 

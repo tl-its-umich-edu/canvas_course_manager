@@ -11,17 +11,6 @@ $.ajaxSetup({
   cache: false
 });
 
-    
-$(document).ajaxStart(function(){
-  $('.spinner').show();
-  $('.spinner2').show();
-});
-$(document).ajaxStop(function(){
-  $('.spinner').hide();
-  $('.spinner2').hide();
-});
-
-
 // generic error report
 var errorDisplay = function (url, status, errorMessage) {
   switch(status) {
