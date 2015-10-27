@@ -89,6 +89,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	private static final HashMap<String,String> apiListRegexWithDebugMsg = new HashMap<String,String>(){
 		private static final long serialVersionUID = -1389517682290891890L;
+
 		{			
 			put(CANVAS_API_TERMS, "for terms");
 			put(CANVAS_API_CROSSLIST, "for crosslist");
@@ -288,19 +289,20 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 				mpathwaysTermId == null){
 			response.setStatus(400);
 			wrappedResult = new WAPIResultWrapper(400, "Parameter missing in Instructors request", new JSONObject());
+			M_log.error("Error in mpathwaysCall(), missing parameter in Instuctors request");
 		}
 		else{
 			if(appExtSecurePropertiesFile!=null) {
-				HashMap<String, String> value = new HashMap<String, String>();
-				value.put("tokenServer", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_TOKEN_SERVER));
-				value.put("apiPrefix", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_PREFIX));
-				value.put("key", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_KEY));
-				value.put("secret", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_SECRET));
-				WAPI wapi = new WAPI(value);
+				HashMap<String, String> wapiValuesMap = new HashMap<String, String>();
+				wapiValuesMap.put("tokenServer", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_TOKEN_SERVER));
+				wapiValuesMap.put("apiPrefix", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_PREFIX));
+				wapiValuesMap.put("key", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_KEY));
+				wapiValuesMap.put("secret", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_SECRET));
+				WAPI wapi = new WAPI(wapiValuesMap);
 				try {
 					wrappedResult = wapi.getRequest(wapi.getApiPrefix() + mpathwaysInstructor + "/Terms/" + mpathwaysTermId + "/Classes");
 				} catch (UnirestException e) {
-					e.printStackTrace();
+					M_log.error("MPathways API call did not complete successfully", e);
 				}	
 			}
 		}
