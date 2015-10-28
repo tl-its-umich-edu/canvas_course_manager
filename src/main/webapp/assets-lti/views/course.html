@@ -18,7 +18,11 @@
                     <div class="col-md-6 col-lg-6 col-sm-6 col-xs-6" style="text-align:right;">
                         <button ng-show="loadingOtherCourses" class="btn btn-link spinner"></button>  
                         <div class="btn-group" role="group">
+                            <!-- // add users without a modal - preserving the workflow entry state not important
                             <button ng-disabled="course.addingSections" ng-hide="!functionality.friends || course.addingUser" class="btn btn-default" ng-click="addUsers()">Add Friends</button>
+                            -->
+                            <!--// add users with a modal -->
+                            <button ng-disabled="course.addingSections" ng-hide="!functionality.friends || course.addingUser" class="btn btn-default" ng-click="addUserModal()" data-toggle="modal"  data-target="#addUserModal">Add Friends</button>
                             <button ng-show="course.addingUser" class="btn btn-default" ng-click="cancelAddUsers()">Cancel Add Friends</button>
                             <button ng-disabled="course.addingUser" ng-hide="courses || !functionality.sections" class="btn btn-default" ng-click="getCoursesForTerm()">Add sections</button>
                             <button ng-show="course.dirty" class="btn btn-default" ng-click="getCoursesForTerm()">Save new sections</button>
@@ -64,6 +68,14 @@
                   </div>
 
 
+            <div class="container-fluid" ng-show="course.addingUser">
+                <div class="pull-right">
+                    <button type="button" ng-show="!course.sectionSelected" class="btn btn-primary" disabled>Add Friend</button>
+                    <button type="button" ng-show="course.sectionSelected && !newUser" class="btn btn-primary" ng-click="lookUpCanvasFriendClick()">Add Friend</button>
+                    <button type="button" ng-show="course.sectionSelected && newUser" class="btn btn-primary" ng-click="createFriendClick()">Add Friend</button>
+
+                </div>
+            </div>
 
 
 
@@ -85,14 +97,6 @@
                     </div>
                 </li>
             </ul>
-            <div class="container-fluid" ng-show="course.addingUser">
-                <div class="pull-right">
-                    <button type="button" ng-show="!course.sectionSelected" class="btn btn-primary" disabled>Add Friend</button>
-                    <button type="button" ng-show="course.sectionSelected && !newUser" class="btn btn-primary" ng-click="lookUpCanvasFriendClick()">Add Friend</button>
-                    <button type="button" ng-show="course.sectionSelected && newUser" class="btn btn-primary" ng-click="createFriendClick()">Add Friend</button>
-
-                </div>
-            </div>
         </div>    
         
         <div class="coursePanel well nograb" ng-show="courses">
