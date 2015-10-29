@@ -211,7 +211,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     // ideally the ections would be returned above, if not we will need to get them here
     Sections.getSectionsForCourseId($scope.course.id).then(function (result) {
       $scope.loadingSections = false;
-      $scope.course.sections =result.data;
+      $scope.course.sections =_.sortBy(result.data, 'name');
     });    
   });
 
@@ -251,7 +251,8 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     Sections.getSectionsForCourseId(courseId).then(function (data) {
       if (data) {
         //append a section object to the course scope
-        $scope.courses[coursePos].sections = filterOutSections(data.data,$scope.mpath_courses);
+        $scope.courses[coursePos].sections = _.sortBy(filterOutSections(data.data,$scope.mpath_courses), 'name');
+
         $scope.courses[coursePos].loadingOtherSections = false;
         //sectionsShown = true hides the Get Sections link
         $scope.courses[coursePos].sectionsShown = true;
@@ -298,7 +299,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
   };
   
   $scope.addUserModal = function(){
-    //console.log($scope.course.sections)
+    // use a service to pass context course model to the friends controller
     SectionSet.setSectionSet($scope.course);
   };
 
@@ -306,11 +307,13 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
 
 /* FRIEND PANEL CONTROLLER */
 canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScope', 'SectionSet', function (Friend, $scope, $rootScope, SectionSet) {
-  
+  // listen for changes triggered by the service to load course context
   $scope.$on('courseSetChanged', function(event, sectionSet) {
       $scope.coursemodal = sectionSet[0];
   });
   
+  //change handler for section checkboxes - calculates if any checkbox is checked and updates
+  // a variable used to enable the 'Add Friend' button
   $scope.sectionSelectedQuery = function () {
     if(_.where($scope.coursemodal.sections,{selected: true}).length > 0){
 
@@ -320,6 +323,9 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
       $scope.coursemodal.sectionSelected = false;
     }
   };
+
+  // handler for 'Add Friend' (the first one), if account exists in Canvas, add to sections, if not 
+  // present a form to create
 
   $scope.lookUpCanvasFriendClick = function () {
     $scope.friend = {};
@@ -347,6 +353,10 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     }
   };
 
+  // handler for 'Add Friend' (the second one) - calls Friends endpoint (that does the call to
+  // the external Friend service) - if successful the account is also created in Canvas and 
+  // the user gets added to the selected sections
+
   $scope.createFriendClick = function () {
 
     var friendEmailAddress = $.trim($scope.coursemodal.friendEmailAddress);
@@ -368,7 +378,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
           
           Friend.createCanvasFriend(friendEmailAddress,friendNameFirst, friendNameLast).then(function (data) {
             if (data.data.sis_user_id === friendEmailAddress) {
-              // here we add the person to the scope and then use another factory to add them to the sites
+              // here we add the person to the scope and then use another function to add them to the sites
               $scope.newUser=false;
               $scope.newUserFound=true;
               $scope.friend = data.data;
@@ -394,6 +404,9 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     }
   };
 
+  // handler to reset the state in the workflow 
+  // and a allow the user to add another
+
   $scope.addAnother = function() {
     $scope.friend = false;
     $scope.userExists = false;
@@ -410,6 +423,9 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     }
     $scope.coursemodal.sectionSelected = false; 
   };
+
+  // function used by the event handlers attached to the two 
+  // 'Add Friend' buttons. It adds the user to the selected sections
 
   $scope.addUserToSectionsClick = function () {
     var checkedSections = $('.coursePanel input:checked').length;
