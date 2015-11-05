@@ -80,3 +80,9 @@ The Canvas Course Manager (CCM) is an application that will be able to be used b
 If <code>use.test.url</code> is true, users will be able to execute the tool as if authenticated as the user specified in the URL parameter <code>?testUser=uniqname</code>. In Production this variable is  false. Based on this property property testUser is not allowed in Production.
 
 ldap is used for authorizing the user and he needs to be part of particular Mcommunity group to be authorized to use the tool.
+
+During development we received the following error:
+
+	Failed to create input stream: Received fatal alert: handshake_failure
+
+This error occurs when attempting to create a friend account with an unrecognized .pkc12 file which is required for the application. If this occurs, try getting a fresh copy of the .pkcs12 file.

@@ -13,10 +13,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.json.Json;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,6 +38,9 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 
 import edu.umich.ctools.esb.utils.WAPI;
 import edu.umich.ctools.esb.utils.WAPIResultWrapper;
+import edu.umich.its.lti.TcSessionData;
+import edu.umich.its.lti.utils.OauthCredentials;
+import edu.umich.its.lti.utils.OauthCredentialsFactory;
 import edu.umich.its.lti.utils.RequestSignatureUtils;
 
 public class SectionsUtilityToolServlet extends VelocityViewServlet {
@@ -45,6 +48,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static Log M_log = LogFactory.getLog(SectionsUtilityToolServlet.class);
 	private static final long serialVersionUID = 7284813350014385613L;
 
+	//Constants
 	private static final String CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS = "canvas.api.getcourse.by.uniqname.no.sections.regex";
 	private static final String CANVAS_API_GETALLSECTIONS_PER_COURSE = "canvas.api.getallsections.per.course.regex";
 	private static final String CANVAS_API_GETSECTION_PER_COURSE = "canvas.api.getsection.per.course.regex";
@@ -61,7 +65,23 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String CANVAS_API_CREATE_USER = "canvas.api.create.user.regex";
 	private static final String CANVAS_API_ADD_USER = "canvas.api.add.user.regex";
 	private static final String CANVAS_API_GET_COURSE = "canvas.api.get.single.course.regex";
+
 	private static final String MPATHWAYS_API_GNERIC = "mpathways.api.get.generic";
+
+	private static final String CUSTOM_CANVAS_COURSE_ID = "custom_canvas_course_id";
+	private static final String CUSTOM_CANVAS_ENROLLMENT_STATE = "custom_canvas_enrollment_state";
+	private static final String CUSTOM_CANVAS_USER_LOGIN_ID = "custom_canvas_user_login_id";
+	private static final String LIS_PERSON_CONTACT_EMAIL_PRIMARY = "lis_person_contact_email_primary";
+	private static final String LIS_PERSON_NAME_FAMILY = "lis_person_name_family";
+	private static final String LIS_PERSON_NAME_GIVEN = "lis_person_name_given";
+
+	//private static final String BASIC_LTI_LAUNCH_REQUEST = "basic-lti-launch-request";
+	//private static final String LTI_MESSAGE_TYPE = "lti_message_type";
+	private static final String TC_SESSION_DATA = "tcSessionData";
+	private static final String OAUTH_CONSUMER_KEY_STRING = "oauth_consumer_key";
+	private static final String LTI_1P0_CONST = "LTI-1p0";
+	private static final String LTI_VERSION = "lti_version";
+	private static final String CONTEXT_ID_CONST = "context_id";
 
 	private static final String PARAMETER_INSTRUCTOR = "instructor";
 	private static final String PARAMETER_TERMID = "termid";
@@ -69,20 +89,29 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String MANAGER_SERVLET_NAME = "/manager";
 	private static final String MPATHWAYS_PATH_INFO = "/mpathways/Instructors";
 
+	private final static String CCM_PROPERTY_FILE_PATH = "ccmPropsPath";
+	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";	
+
 	private static final String DELETE = "DELETE";
 	private static final String POST = "POST";
 	private static final String GET = "GET";
 	private static final String PUT = "PUT";
 
+	//Member variabls
 	private String canvasToken;
 	private String canvasURL;
 	private String callType;
 	private String ltiUrl;
 	private String ltiKey;
 	private String ltiSecret;
+	private OauthCredentialsFactory oacf;
 
-	private final static String CCM_PROPERTY_FILE_PATH = "ccmPropsPath";
-	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";	
+	private String customCanvasCourseId;
+	private String customCanvasEnrollmentState;
+	private String customCanvasUserLogin;
+	private String lisPersonContactEmailPrimary;
+	private String lisPersonNameFamily;
+	private String lisPersonNameGiven;
 
 	protected static Properties appExtSecurePropertiesFile=null;
 	protected static Properties appExtPropertiesFile=null;	
@@ -114,14 +143,110 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	public void init() throws ServletException {
 		M_log.debug(" Servlet init(): Called");
 		appExtPropertiesFile = Utils.loadProperties(CCM_PROPERTY_FILE_PATH);
-		appExtSecurePropertiesFile = Utils.loadProperties(CCM_SECURE_PROPERTY_FILE_PATH);		
+		appExtSecurePropertiesFile = Utils.loadProperties(CCM_SECURE_PROPERTY_FILE_PATH);
+		oacf = new OauthCredentialsFactory(appExtSecurePropertiesFile);
 	}
 
 	public void fillContext(Context context, HttpServletRequest request) {
-		M_log.debug("fillContext() called");		
+		M_log.debug("fillContext() called");
+
+		if ( SectionUtilityToolFilter.BASIC_LTI_LAUNCH_REQUEST.equals(request.getParameter(SectionUtilityToolFilter.LTI_MESSAGE_TYPE))) {
+			storeContext(context, request);
+		}
+	}
+
+	public void storeContext(Context context, HttpServletRequest request) {
+		Map<String, String> ltiValues = new HashMap<String, String>();
+
+		String oauth_consumer_key = "lti";
 		ViewToolContext vtc = (ViewToolContext)context;
-		//test code
-		//vtc.put("variable", "happiness");
+		HttpServletResponse response = vtc.getResponse();
+		HttpSession session= request.getSession(true);
+		M_log.debug("session id: "+session.getId());
+
+		HashMap<String, Object> customValuesMap = new HashMap<String, Object>();
+
+		customValuesMap.put(CUSTOM_CANVAS_COURSE_ID, request.getParameter(CUSTOM_CANVAS_COURSE_ID));
+		customValuesMap.put(CUSTOM_CANVAS_ENROLLMENT_STATE, request.getParameter(CUSTOM_CANVAS_ENROLLMENT_STATE));
+		customValuesMap.put(CUSTOM_CANVAS_USER_LOGIN_ID, request.getParameter(CUSTOM_CANVAS_USER_LOGIN_ID));
+		customValuesMap.put(LIS_PERSON_CONTACT_EMAIL_PRIMARY, request.getParameter(LIS_PERSON_CONTACT_EMAIL_PRIMARY));
+		customValuesMap.put(LIS_PERSON_NAME_FAMILY, request.getParameter(LIS_PERSON_NAME_FAMILY));
+		customValuesMap.put(LIS_PERSON_NAME_GIVEN, request.getParameter(LIS_PERSON_NAME_GIVEN));
+
+		TcSessionData tc = (TcSessionData) session.getAttribute(TC_SESSION_DATA);
+
+		OauthCredentials oac = oacf.getOauthCredentials(oauth_consumer_key);
+
+		if (tc == null) {
+			tc = new TcSessionData(request, oac, customValuesMap);
+		}
+
+		session.setAttribute(TC_SESSION_DATA,tc);
+		M_log.debug("TC Session Data: " + tc.getUserId());
+
+		// sanity check the result
+		if (tc.getUserId() == null || tc.getUserId().length() == 0) {
+			String msg = "Canvas Course Manager: tc session data is bad - userId is empty.";
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			M_log.error(msg);
+			try {
+				doError(request, response, "Canvas Course Manager LTI: tc session data is bad: userId is empty.");
+			} catch (IOException e) {
+				M_log.error("fillContext: IOException: ",e);
+			}
+			return;
+		}
+
+		// Verify this is an LTI launch request and some of the required parameters.
+		if ( ! SectionUtilityToolFilter.BASIC_LTI_LAUNCH_REQUEST.equals(request.getParameter(SectionUtilityToolFilter.LTI_MESSAGE_TYPE)) ||
+				! LTI_1P0_CONST.equals(request.getParameter(LTI_VERSION)) ||
+				oauth_consumer_key == null) {
+			try {
+				doError(request, response, "Missing required parameter:  Launch type or version is incorrect.");
+			} catch (IOException e) {
+				M_log.error("fillContext: IOException: ",e);
+			}
+			return;
+		}
+
+		OauthCredentials oc = tc.getOauthCredentials();
+
+		Boolean validMessage = checkForValidMessage(request, oc);
+		if (!validMessage) {
+			String msg = "Launch data does not validate";
+			M_log.error(msg);
+			return;
+		}
+
+		// Fill context with the required lti values.
+		// The VelocityViewServlet will take care of sending the processing on
+		// to the proper velocity template.
+		fillCcmValuesForContext(ltiValues, request);
+
+		context.put("ltiValues", ltiValues);
+	}
+
+	public void fillCcmValuesForContext(Map<String, String> ltiValues, HttpServletRequest request) {
+		ltiValues.put(CUSTOM_CANVAS_COURSE_ID, request.getParameter(CUSTOM_CANVAS_COURSE_ID));
+		ltiValues.put(CUSTOM_CANVAS_ENROLLMENT_STATE, request.getParameter(CUSTOM_CANVAS_ENROLLMENT_STATE));
+		ltiValues.put(CUSTOM_CANVAS_USER_LOGIN_ID, request.getParameter(CUSTOM_CANVAS_USER_LOGIN_ID));
+		ltiValues.put(LIS_PERSON_CONTACT_EMAIL_PRIMARY, request.getParameter(LIS_PERSON_CONTACT_EMAIL_PRIMARY));
+		ltiValues.put(LIS_PERSON_NAME_FAMILY, request.getParameter(LIS_PERSON_NAME_FAMILY));
+		ltiValues.put(LIS_PERSON_NAME_GIVEN, request.getParameter(LIS_PERSON_NAME_GIVEN));
+
+		M_log.info("Course ID: " + ltiValues.get(CUSTOM_CANVAS_COURSE_ID));
+		M_log.info("Enrollment State: " + ltiValues.get(CUSTOM_CANVAS_ENROLLMENT_STATE));
+		M_log.info("Login ID: " + ltiValues.get(CUSTOM_CANVAS_USER_LOGIN_ID));
+		M_log.info("Primary Email: " + ltiValues.get(LIS_PERSON_CONTACT_EMAIL_PRIMARY));
+		M_log.info("Last Name: " + ltiValues.get(LIS_PERSON_NAME_FAMILY));
+		M_log.info("First Name: " + ltiValues.get(LIS_PERSON_NAME_GIVEN));
+
+	}
+
+	public Boolean checkForValidMessage(HttpServletRequest request,
+			OauthCredentials oc) {
+		Boolean errorReturn = RequestSignatureUtils.validateMessage(request, oc);
+		return !errorReturn;
 	}
 
 	// Deal nicely with error conditions.
@@ -139,18 +264,27 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		out.println(s);
 	}	
 
-	public void doGet(HttpServletRequest request,HttpServletResponse response){
+	public void doGet(HttpServletRequest request,HttpServletResponse response) 
+			throws IOException{
 		M_log.debug("doGet: Called");
-		try {
-			if(request.getServletPath().equals(MANAGER_SERVLET_NAME)){
-				canvasRestApiCall(request, response);
+		M_log.info("request.getPathInfo(): " + request.getPathInfo());
+		if( request.getPathInfo().equals("/index-lti.vm") ){
+			response.sendError(403);
+			return;
+		}
+		else{
+			try {
+				if(request.getServletPath().equals(MANAGER_SERVLET_NAME)){
+					M_log.debug("Manager Servlet invoked");
+					canvasRestApiCall(request, response);
+				}
+				else{
+					M_log.info("NOT MANAGER");
+					doRequest(request, response); //doRequest will always call fillContext()
+				}
+			}catch(Exception e) {
+				M_log.error("GET request has some exceptions",e);
 			}
-			else{
-				M_log.info("NOT MANAGER");
-				doRequest(request, response); //doRequest will always call fillContext()
-			}
-		}catch(Exception e) {
-			M_log.error("GET request has some exceptions",e);
 		}
 	}
 
@@ -181,7 +315,12 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		if(appExtSecurePropertiesFile!=null) {
 			ltiKey = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_KEY);
 			ltiSecret = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_SECRET);
-			ltiUrl = appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_URL);
+			if(appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_URL) != null){
+				ltiUrl = appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_URL);
+			}
+			else{
+				ltiUrl = request.getRequestURL().toString();
+			}
 			M_log.debug("ltiKey: " + ltiKey);
 			M_log.debug("ltiSecret: " + ltiSecret);
 			M_log.debug("ltiUrl: " + ltiUrl);
