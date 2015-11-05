@@ -201,7 +201,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
 }]);
 
 /* SINGLE COURSE CONTROLLER */
-canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', '$scope', '$rootScope', '$filter', function (Course, Courses, Sections, Friend, SectionSet, $scope, $rootScope, $filter) {
+canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'focus', '$scope', '$rootScope', '$filter', function (Course, Courses, Sections, Friend, SectionSet, focus, $scope, $rootScope, $filter) {
   //TODO: this URL will be constructed from the LIT launch parameters - hardcoded here
   $rootScope.contextCourseId = parseInt('20193');
   var courseUrl ='manager/api/v1/courses/20193?include[]=sections&_=' + generateCurrentTimestamp();
@@ -241,6 +241,12 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
       //$scope.courses = _.where(result.data, {enrollment_term_id:  $scope.course.enrollment_term_id});
       //TODO: hardwired term here tfor the same term we have an MPATH sample for
       $scope.courses = _.where(result.data, {enrollment_term_id:  43});
+      $scope.$evalAsync(function() { 
+        focus('otherCourses');
+      })
+
+
+
     });    
   };
 
@@ -306,7 +312,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
 }]);
 
 /* FRIEND PANEL CONTROLLER */
-canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScope', 'SectionSet', function (Friend, $scope, $rootScope, SectionSet) {
+canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScope', 'SectionSet', 'focus', function (Friend, $scope, $rootScope, SectionSet, focus) {
   // listen for changes triggered by the service to load course context
   $scope.$on('courseSetChanged', function(event, sectionSet) {
       $scope.coursemodal = sectionSet[0];
@@ -343,6 +349,10 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
         } else {
           // not an existing user - present interface to add
           $scope.newUser = true;
+          $scope.$evalAsync(function() { 
+            focus('newUser');
+          })
+
         }
         $scope.coursemodal.loadingLookupFriend = false;
       });
@@ -350,6 +360,9 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     else {
       $scope.coursemodal.loadingLookupFriend = false;
       $scope.failedValidation = true;
+      $scope.$evalAsync(function() { 
+        focus('failedValEmail');
+      })
     }
   };
 
@@ -401,6 +414,10 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     }
     else {
       $scope.failedValidation = true;
+      $scope.$evalAsync(function() { 
+        focus('failedValEmailName');
+      })
+
     }
   };
 
@@ -460,7 +477,13 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
         successes.push(sectionName)
       }
       $scope.successes = successes
+
     }
+      $scope.$evalAsync(function() { 
+        focus('addMessageContainer');
+      })
+
+
   };
 
 }]);

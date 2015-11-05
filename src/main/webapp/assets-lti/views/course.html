@@ -45,13 +45,13 @@
                                     <option value="DesignerEnrollment">Designer</option>
                                 </select>
                             </div>        
-                            <a href="" ng-if="section.course_id !== course.id" ng-click="returnToCourse(section, $index)">Put back</a>
+                            <a href="" ng-if="section.course_id !== course.id" ng-click="returnToCourse(section, $index)">Put back<span class="sr-only"> {{section.name}}</span></a>
                         </div>
                     </li>
                 </ul>
             </div>    
         
-        <div class="coursePanel nograb" ng-show="courses">
+        <div class="coursePanel nograb" ng-show="courses" id="otherCourses" tabindex="-1">
             <h4 style="padding:0 20px">Your Other Courses <small> (get their sections and then select which ones you want added to this course) </small></h4>
             <ul class="container-fluid courseList">
                 <li ng-repeat="course in courses | filter:{id:'!' + contextCourseId}">
@@ -61,7 +61,7 @@
                         </div>
                         <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4">
                             <span ng-hide="course.sectionsShown">
-                                <a href="" ng-click="getSections(course.id)">Get sections</a> <button ng-show="course.loadingOtherSections" class="btn btn-link spinner"></button>
+                                <a href="" ng-click="getSections(course.id)">Get sections <span class="sr-only"> for course {{course.course_code}}</a> <button ng-show="course.loadingOtherSections" class="btn btn-link spinner"></button>
                             </span>
                         </div>
                     </div>
@@ -69,7 +69,7 @@
                     <ul class="container-fluid sectionList">
                         <li class="row" ng-repeat="section in course.sections" id="{{section.id}}"> 
                             <div class="col-md-8 col-lg-8 col-sm-8 col-xs-8">{{section.name}}</div>
-                            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4"><span ng-if="section.enabled"> <a ng-hide="section.moved" href="" ng-click="appendToCourse(section, $index)">Add to course</a></span></div>
+                            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4"><span ng-if="section.enabled"> <a ng-hide="section.moved" href="" ng-click="appendToCourse(section, $index)">Add <span class="sr-only"> {{section.name}} </span>to course</a></span></div>
                         </li>
                     </ul>
                 </li>
