@@ -258,6 +258,10 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
       if (data) {
         //append a section object to the course scope
         $scope.courses[coursePos].sections = _.sortBy(filterOutSections(data.data,$scope.mpath_courses), 'name');
+        $scope.$evalAsync(function() { 
+          focus('sections' + courseId);
+        })
+
 
         $scope.courses[coursePos].loadingOtherSections = false;
         //sectionsShown = true hides the Get Sections link

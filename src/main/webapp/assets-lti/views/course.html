@@ -66,7 +66,7 @@
                         </div>
                     </div>
                         
-                    <ul class="container-fluid sectionList">
+                    <ul class="container-fluid sectionList" tabindex="-1" id="sections{{course.id}}">
                         <li class="row" ng-repeat="section in course.sections" id="{{section.id}}"> 
                             <div class="col-md-8 col-lg-8 col-sm-8 col-xs-8">{{section.name}}</div>
                             <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4"><span ng-if="section.enabled"> <a ng-hide="section.moved" href="" ng-click="appendToCourse(section, $index)">Add <span class="sr-only"> {{section.name}} </span>to course</a></span></div>
