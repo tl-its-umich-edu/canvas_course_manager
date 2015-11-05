@@ -75,11 +75,11 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String LIS_PERSON_NAME_FAMILY = "lis_person_name_family";
 	private static final String LIS_PERSON_NAME_GIVEN = "lis_person_name_given";
 
-	private static final String BASIC_LTI_LAUNCH_REQUEST = "basic-lti-launch-request";
-	private static final String LTI_MESSAGE_TYPE = "lti_message_type";
+	//private static final String BASIC_LTI_LAUNCH_REQUEST = "basic-lti-launch-request";
+	//private static final String LTI_MESSAGE_TYPE = "lti_message_type";
 	private static final String TC_SESSION_DATA = "tcSessionData";
 	private static final String OAUTH_CONSUMER_KEY_STRING = "oauth_consumer_key";
-	private static final Object LTI_1P0_CONST = "LTI-1p0";
+	private static final String LTI_1P0_CONST = "LTI-1p0";
 	private static final String LTI_VERSION = "lti_version";
 	private static final String CONTEXT_ID_CONST = "context_id";
 
@@ -150,76 +150,80 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	public void fillContext(Context context, HttpServletRequest request) {
 		M_log.debug("fillContext() called");
 
-		if ( BASIC_LTI_LAUNCH_REQUEST.equals(request.getParameter(LTI_MESSAGE_TYPE))) {
-			Map<String, String> ltiValues = new HashMap<String, String>();
-
-			String oauth_consumer_key = "lti";
-			ViewToolContext vtc = (ViewToolContext)context;
-			HttpServletResponse response = vtc.getResponse();
-			HttpSession session= request.getSession(true);
-			M_log.debug("session id: "+session.getId());
-
-			HashMap<String, Object> customValuesMap = new HashMap<String, Object>();
-
-			customValuesMap.put(CUSTOM_CANVAS_COURSE_ID, request.getParameter(CUSTOM_CANVAS_COURSE_ID));
-			customValuesMap.put(CUSTOM_CANVAS_ENROLLMENT_STATE, request.getParameter(CUSTOM_CANVAS_ENROLLMENT_STATE));
-			customValuesMap.put(CUSTOM_CANVAS_USER_LOGIN_ID, request.getParameter(CUSTOM_CANVAS_USER_LOGIN_ID));
-			customValuesMap.put(LIS_PERSON_CONTACT_EMAIL_PRIMARY, request.getParameter(LIS_PERSON_CONTACT_EMAIL_PRIMARY));
-			customValuesMap.put(LIS_PERSON_NAME_FAMILY, request.getParameter(LIS_PERSON_NAME_FAMILY));
-			customValuesMap.put(LIS_PERSON_NAME_GIVEN, request.getParameter(LIS_PERSON_NAME_GIVEN));
-
-			TcSessionData tc = (TcSessionData) session.getAttribute(TC_SESSION_DATA);
-
-			OauthCredentials oac = oacf.getOauthCredentials(oauth_consumer_key);
-
-			if (tc == null) {
-				tc = new TcSessionData(request, oac, customValuesMap);
-			}
-
-			session.setAttribute(TC_SESSION_DATA,tc);
-			M_log.debug("TC Session Data: " + tc.getUserId());
-
-			// sanity check the result
-			if (tc.getUserId() == null || tc.getUserId().length() == 0) {
-				String msg = "Canvas Course Manager: tc session data is bad - userId is empty.";
-				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				M_log.error(msg);
-				try {
-					doError(request, response, "Canvas Course Manager LTI: tc session data is bad: userId is empty.");
-				} catch (IOException e) {
-					M_log.error("fillContext: IOException: ",e);
-				}
-				return;
-			}
-
-			// Verify this is an LTI launch request and some of the required parameters.
-			if ( ! BASIC_LTI_LAUNCH_REQUEST.equals(request.getParameter(LTI_MESSAGE_TYPE)) ||
-					! LTI_1P0_CONST.equals(request.getParameter(LTI_VERSION)) ||
-					oauth_consumer_key == null) {
-				try {
-					doError(request, response, "Missing required parameter:  Launch type or version is incorrect.");
-				} catch (IOException e) {
-					M_log.error("fillContext: IOException: ",e);
-				}
-				return;
-			}
-
-			OauthCredentials oc = tc.getOauthCredentials();
-
-			Boolean validMessage = checkForValidMessage(request, oc);
-			if (!validMessage) {
-				String msg = "Launch data does not validate";
-				M_log.error(msg);
-				return;
-			}
-
-			// Fill context with the required lti values.
-			// The VelocityViewServlet will take care of sending the processing on
-			// to the proper velocity template.
-			fillCcmValuesForContext(ltiValues, request);
-
-			context.put("ltiValues", ltiValues);
+		if ( SectionUtilityToolFilter.BASIC_LTI_LAUNCH_REQUEST.equals(request.getParameter(SectionUtilityToolFilter.LTI_MESSAGE_TYPE))) {
+			storeContext(context, request);
 		}
+	}
+
+	public void storeContext(Context context, HttpServletRequest request) {
+		Map<String, String> ltiValues = new HashMap<String, String>();
+
+		String oauth_consumer_key = "lti";
+		ViewToolContext vtc = (ViewToolContext)context;
+		HttpServletResponse response = vtc.getResponse();
+		HttpSession session= request.getSession(true);
+		M_log.debug("session id: "+session.getId());
+
+		HashMap<String, Object> customValuesMap = new HashMap<String, Object>();
+
+		customValuesMap.put(CUSTOM_CANVAS_COURSE_ID, request.getParameter(CUSTOM_CANVAS_COURSE_ID));
+		customValuesMap.put(CUSTOM_CANVAS_ENROLLMENT_STATE, request.getParameter(CUSTOM_CANVAS_ENROLLMENT_STATE));
+		customValuesMap.put(CUSTOM_CANVAS_USER_LOGIN_ID, request.getParameter(CUSTOM_CANVAS_USER_LOGIN_ID));
+		customValuesMap.put(LIS_PERSON_CONTACT_EMAIL_PRIMARY, request.getParameter(LIS_PERSON_CONTACT_EMAIL_PRIMARY));
+		customValuesMap.put(LIS_PERSON_NAME_FAMILY, request.getParameter(LIS_PERSON_NAME_FAMILY));
+		customValuesMap.put(LIS_PERSON_NAME_GIVEN, request.getParameter(LIS_PERSON_NAME_GIVEN));
+
+		TcSessionData tc = (TcSessionData) session.getAttribute(TC_SESSION_DATA);
+
+		OauthCredentials oac = oacf.getOauthCredentials(oauth_consumer_key);
+
+		if (tc == null) {
+			tc = new TcSessionData(request, oac, customValuesMap);
+		}
+
+		session.setAttribute(TC_SESSION_DATA,tc);
+		M_log.debug("TC Session Data: " + tc.getUserId());
+
+		// sanity check the result
+		if (tc.getUserId() == null || tc.getUserId().length() == 0) {
+			String msg = "Canvas Course Manager: tc session data is bad - userId is empty.";
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			M_log.error(msg);
+			try {
+				doError(request, response, "Canvas Course Manager LTI: tc session data is bad: userId is empty.");
+			} catch (IOException e) {
+				M_log.error("fillContext: IOException: ",e);
+			}
+			return;
+		}
+
+		// Verify this is an LTI launch request and some of the required parameters.
+		if ( ! SectionUtilityToolFilter.BASIC_LTI_LAUNCH_REQUEST.equals(request.getParameter(SectionUtilityToolFilter.LTI_MESSAGE_TYPE)) ||
+				! LTI_1P0_CONST.equals(request.getParameter(LTI_VERSION)) ||
+				oauth_consumer_key == null) {
+			try {
+				doError(request, response, "Missing required parameter:  Launch type or version is incorrect.");
+			} catch (IOException e) {
+				M_log.error("fillContext: IOException: ",e);
+			}
+			return;
+		}
+
+		OauthCredentials oc = tc.getOauthCredentials();
+
+		Boolean validMessage = checkForValidMessage(request, oc);
+		if (!validMessage) {
+			String msg = "Launch data does not validate";
+			M_log.error(msg);
+			return;
+		}
+
+		// Fill context with the required lti values.
+		// The VelocityViewServlet will take care of sending the processing on
+		// to the proper velocity template.
+		fillCcmValuesForContext(ltiValues, request);
+
+		context.put("ltiValues", ltiValues);
 	}
 
 	public void fillCcmValuesForContext(Map<String, String> ltiValues, HttpServletRequest request) {
@@ -311,7 +315,12 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		if(appExtSecurePropertiesFile!=null) {
 			ltiKey = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_KEY);
 			ltiSecret = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_SECRET);
-			ltiUrl = request.getRequestURL().toString();
+			if(appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_URL) != null){
+				ltiUrl = appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_URL);
+			}
+			else{
+				ltiUrl = request.getRequestURL().toString();
+			}
 			M_log.debug("ltiKey: " + ltiKey);
 			M_log.debug("ltiSecret: " + ltiSecret);
 			M_log.debug("ltiUrl: " + ltiUrl);

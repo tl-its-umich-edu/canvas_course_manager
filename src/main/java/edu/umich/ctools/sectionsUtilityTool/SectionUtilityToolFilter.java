@@ -58,8 +58,8 @@ public class SectionUtilityToolFilter implements Filter {
 
 	private static final String FALSE = "false";
 
-	private static final String BASIC_LTI_LAUNCH_REQUEST = "basic-lti-launch-request";
-	private static final String LTI_MESSAGE_TYPE = "lti_message_type";
+	public static final String BASIC_LTI_LAUNCH_REQUEST = "basic-lti-launch-request";
+	public static final String LTI_MESSAGE_TYPE = "lti_message_type";
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
@@ -79,7 +79,7 @@ public class SectionUtilityToolFilter implements Filter {
 		if ( BASIC_LTI_LAUNCH_REQUEST.equals(request.getParameter(LTI_MESSAGE_TYPE))) {
 			M_log.debug("new launch so invalidate any existing session");
 			if (useRequest.getSession() != null) {
-				M_log.debug("session id to invalidate: " + useRequest.getSession().getId());
+				M_log.info("session id to invalidate: " + useRequest.getSession().getId());
 				useRequest.getSession().invalidate();
 			}
 		}
