@@ -93,13 +93,13 @@
       </div>
     </div>
     -->
-    <!-- add user Modal 
+    <!-- add user Modal -->
     <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserLabel" aria-hidden="true" ng-controller="addUserController">
       <div class="modal-dialog modal-lg">
         <div ng-include src="'assets-lti/views/friends.html'"></div>
       </div>
     </div>
-    -->
+    
 
   </body>
 

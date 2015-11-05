@@ -459,17 +459,20 @@ $(document).on('click', '.openOtherInstructorModal', function (e) {
 
 //cleaning up scope of adding friend panel
 $(document).on('hidden.bs.modal', '#addUserModal', function(){
-    var appElement = $('#addUserModal');
+  var appElement = $('#addUserModal');
   var $scope = angular.element(appElement).scope();
   $scope.$apply(function() {
-   for(var e in $scope.course.sections) {
-      $scope.course.sections[e].isChecked = false;
+    for(var e in $scope.coursemodal.sections) {
+      $scope.coursemodal.sections[e].selected = false;
     }
-    $('#friendEmailAddress').val('');
-    $('#friendEmailAddressButton').text('Check');
-    $scope.oneChecked = false;
+    $scope.coursemodal.sectionSelected = false;
+    $scope.coursemodal.friendEmailAddress ='';
+    $scope.coursemodal.friendNameFirst ='';
+    $scope.coursemodal.friendNameLast ='';
     $scope.user = false;
     $scope.newUser = false;
+    $scope.newUserFound = false;
+    $scope.newUserFail = false;
     $scope.friend = {};
     $scope.addSuccess= false;
     $scope.failedValidation = false;
