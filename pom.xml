@@ -58,7 +58,7 @@
 		<dependency>
 			<groupId>lti</groupId>
 			<artifactId>lti-utils</artifactId>
-			<version>1.4</version>
+			<version>1.5</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>

@@ -20,6 +20,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,6 +58,9 @@ public class SectionUtilityToolFilter implements Filter {
 
 	private static final String FALSE = "false";
 
+	private static final String BASIC_LTI_LAUNCH_REQUEST = "basic-lti-launch-request";
+	private static final String LTI_MESSAGE_TYPE = "lti_message_type";
+
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 		M_log.debug("Filter Init(): Called");
@@ -71,6 +75,18 @@ public class SectionUtilityToolFilter implements Filter {
 		M_log.debug("doFilter: Called");
 		HttpServletRequest useRequest = (HttpServletRequest) request;
 		HttpServletResponse useResponse=(HttpServletResponse)response;
+		
+		if ( BASIC_LTI_LAUNCH_REQUEST.equals(request.getParameter(LTI_MESSAGE_TYPE))) {
+			M_log.debug("new launch so invalidate any existing session");
+			if (useRequest.getSession() != null) {
+				M_log.debug("session id to invalidate: " + useRequest.getSession().getId());
+				useRequest.getSession().invalidate();
+			}
+		}
+		
+		HttpSession session= useRequest.getSession(true);
+		M_log.debug("session id: "+session.getId());
+		
 		if(!checkForAuthorization(useRequest)) {
 			useResponse.sendError(403);
 			return;
