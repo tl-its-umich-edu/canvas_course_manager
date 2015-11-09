@@ -1,5 +1,5 @@
 'use strict';
-/* global $, canvasSupportApp, getTermArray, _, getCurrentTerm, errorDisplay, generateCurrentTimestamp, angular */
+/* global $, canvasSupportApp, getTermArray, _, getCurrentTerm, errorDisplay, generateCurrentTimestamp, angular, validateEmailAddress */
 
 /* TERMS CONTROLLER */
 canvasSupportApp.controller('termsController', ['Courses', '$rootScope', '$scope', '$http', function (Courses, $rootScope, $scope, $http) {
@@ -201,20 +201,34 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
 }]);
 
 /* SINGLE COURSE CONTROLLER */
-canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections','$scope', '$filter', function (Course, Courses, Sections, $scope, $filter) {
-  //TODO - add this below to the filter
-  // /api/v1/courses?as_user_id=sis_login_id:instx&enrollment_type=teacher&include[]=sections&state[]=available&?access_token=1770~6Mn7sP9c6TLPtJAt56K8wvtmFcMmpENSYamMxdrDWInP27pCW0aNRRehpRGBEYfL
-  var courseUrl ='manager/api/v1/courses/154?include[]=sections&_=' + generateCurrentTimestamp();
+canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', '$scope', '$rootScope', '$filter', function (Course, Courses, Sections, Friend, SectionSet, $scope, $rootScope, $filter) {
+  //TODO: this URL will be constructed from the LIT launch parameters - hardcoded here
+  $rootScope.contextCourseId = parseInt('20193');
+  var courseUrl ='manager/api/v1/courses/20193?include[]=sections&_=' + generateCurrentTimestamp();
   Course.getCourse(courseUrl).then(function (result) {
+    $scope.loadingSections = true;
     $scope.course = result.data;
     // ideally the ections would be returned above, if not we will need to get them here
     Sections.getSectionsForCourseId($scope.course.id).then(function (result) {
-      $scope.course.sections =result.data;
+      $scope.loadingSections = false;
+      $scope.course.sections =_.sortBy(result.data, 'name');
     });    
   });
 
   /*
-  var uniqname = 'instx';
+  TODO: MPATH dummy data now 
+  adds to the scope a list if sections (by sis_section_id) that the current user can perform actions on
+  */
+  var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?instructor=bkg&termid=2060';
+
+  //var mPathwaysCoursesUrl = 'assets-lti/data/mpathwaysdata.json';
+  Course.getMPathwaysCourses(mPathwaysCoursesUrl).then(function (result) {
+    $scope.mpath_courses = result;
+  });
+
+
+  //hardcoded here to match same user and term as MPathways data
+  var uniqname = 'bkg';
 
   $scope.getCoursesForTerm = function() {
     $scope.loadingOtherCourses = true;
@@ -224,18 +238,22 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
       $scope.course.addingSections = true;
       // this is not optimal - ideally we should be requesting just this terms' courses, not all of them and then 
       // filtering them
-      $scope.courses = _.where(result.data, {enrollment_term_id:  $scope.course.enrollment_term_id});
+      //$scope.courses = _.where(result.data, {enrollment_term_id:  $scope.course.enrollment_term_id});
+      //TODO: hardwired term here tfor the same term we have an MPATH sample for
+      $scope.courses = _.where(result.data, {enrollment_term_id:  43});
     });    
   };
 
   $scope.getSections = function (courseId) {
+    //find the course object
+    var coursePos = $scope.courses.indexOf(_.findWhere($scope.courses, {id: courseId}));
+    $scope.courses[coursePos].loadingOtherSections = true;
     Sections.getSectionsForCourseId(courseId).then(function (data) {
       if (data) {
-        //find the course object
-        var coursePos = $scope.courses.indexOf(_.findWhere($scope.courses, {id: courseId}));
         //append a section object to the course scope
-        $scope.courses[coursePos].sections = data.data;
-        
+        $scope.courses[coursePos].sections = _.sortBy(filterOutSections(data.data,$scope.mpath_courses), 'name');
+
+        $scope.courses[coursePos].loadingOtherSections = false;
         //sectionsShown = true hides the Get Sections link
         $scope.courses[coursePos].sectionsShown = true;
       } else {
@@ -259,124 +277,122 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     });
   };
 
-  $scope.appendToCourse = function (section, parentindex, thisindex) {
-    // add a  new section to the course
+  $scope.appendToCourse = function (section, thisindex) {
+    //find hte source course object
+    var sourceCoursePos = $scope.courses.indexOf(_.findWhere($scope.courses, {id: section.course_id}));
+    // add new section to the target course
     $scope.course.sections.push(section);
     // set dirty to true
     $scope.course.dirty=true;
     // remove section from source course
-    $scope.courses[parentindex].sections.splice(thisindex, 1);
+    $scope.courses[sourceCoursePos].sections.splice(thisindex, 1);
   };
 
   $scope.cancelAddSections = function () {
     // remove all added sections
-    $scope.course.sections = $filter('filter')($scope.course.sections, {course_id: $scope.course.id})
+    $scope.course.sections = $filter('filter')($scope.course.sections, {course_id: $scope.course.id});
     // set dirty and addingSections to false (controls display and disabled of buttons)
     $scope.course.dirty=false;
     $scope.course.addingSections = false;
     // prune the source courses from the model
     $scope.courses = [];
   };
+  
+  $scope.addUserModal = function(){
+    // use a service to pass context course model to the friends controller
+    SectionSet.setSectionSet($scope.course);
+  };
 
-  $scope.addUsers = function(){
-    $scope.course.addingUser = true;
-  }
-
-  $scope.sectionSelectedQuery = function () {
-    if(_.where($scope.course.sections,{selected: true}).length + 1 > 0){
-      $scope.course.sectionSelected = true;
-    }
-    else {
-      $scope.course.sectionSelected = false;
-    }
-  }
-  */
 }]);
 
 /* FRIEND PANEL CONTROLLER */
 canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScope', 'SectionSet', function (Friend, $scope, $rootScope, SectionSet) {
-  
+  // listen for changes triggered by the service to load course context
   $scope.$on('courseSetChanged', function(event, sectionSet) {
-      $scope.course = sectionSet[0];
+      $scope.coursemodal = sectionSet[0];
   });
-  $scope.checkAll = function(){
-    $scope.oneChecked = false;
-    for(var e in $scope.course.sections) {
-      if ($scope.course.sections[e].isChecked) {
-        $scope.oneChecked = true;
-      }
+  
+  //change handler for section checkboxes - calculates if any checkbox is checked and updates
+  // a variable used to enable the 'Add Friend' button
+  $scope.sectionSelectedQuery = function () {
+    if(_.where($scope.coursemodal.sections,{selected: true}).length > 0){
+
+      $scope.coursemodal.sectionSelected = true;
+    }
+    else {
+      $scope.coursemodal.sectionSelected = false;
     }
   };
+
+  // handler for 'Add Friend' (the first one), if account exists in Canvas, add to sections, if not 
+  // present a form to create
 
   $scope.lookUpCanvasFriendClick = function () {
     $scope.friend = {};
-    $scope.loadingLookupFriend = true;
-    var friendId = $.trim($('#friendEmailAddress').val());
-    
-    if(friendId.indexOf('@') !==-1 && friendId.indexOf('@umich.edu') ===-1){
+    $scope.coursemodal.loadingLookupFriend = true;
+    var friendId = $.trim($scope.coursemodal.friendEmailAddress);
+    if(validateEmailAddress(friendId)){
       $scope.failedValidation = false;
       Friend.lookUpCanvasFriend(friendId).then(function (data) {
-        if (data.data.length ===1 && data.data[0].name) {
-          // TODO: check Friend account correlate
-          // and if there is one, call this done, if not, create it
+        if (data.data.length ===1 && data.data[0].sis_user_id === friendId) {
+          // user exists - set data to Canvas response
+          // and call function to add to sections
           $scope.friend = data.data[0];
-          $scope.userAvailable = true;
+          $scope.userExists = true;
+          $scope.addUserToSectionsClick();
         } else {
           // not an existing user - present interface to add
-          // TODO: need to see if there is a Friend account correlate
           $scope.newUser = true;
         }
-        $scope.loadingLookupFriend = false;
+        $scope.coursemodal.loadingLookupFriend = false;
       });
     }
     else {
-      $scope.loadingLookupFriend = false;
+      $scope.coursemodal.loadingLookupFriend = false;
       $scope.failedValidation = true;
     }
-
   };
+
+  // handler for 'Add Friend' (the second one) - calls Friends endpoint (that does the call to
+  // the external Friend service) - if successful the account is also created in Canvas and 
+  // the user gets added to the selected sections
+
   $scope.createFriendClick = function () {
 
-    var friendEmailAddress = $.trim($('#friendEmailAddress2').val());
-    var friendNameFirst = $('#friendNameFirst').val();
-    var friendNameLast = $('#friendNameLast').val();
+    var friendEmailAddress = $.trim($scope.coursemodal.friendEmailAddress);
+    var friendNameFirst = $.trim($scope.coursemodal.friendNameFirst);//$('#friendNameFirst').val();
+    var friendNameLast = $.trim($scope.coursemodal.friendNameLast);//$('#friendNameLast').val();
+    var notifyInstructor = 'false';
 
-    if(friendEmailAddress.indexOf('@') !==-1 && friendEmailAddress.indexOf('@umich.edu') ===-1){
+    if(validateEmailAddress(friendEmailAddress) && friendNameFirst !=='' && friendNameLast !==''){
       $scope.failedValidation = false;
-      var requestorEmail = $rootScope.user.uniqname + '@umich.edu';
-      $scope.done = false;
-      $scope.loadingCreateUser = true;
-      $scope.addSuccess = false;
+      //will need to grab this from the LTI context and put it in the rootScope
+      var requestorEmail = 'instx@umich.edu'; // hardwired for now
+      $scope.coursemodal.loadingCreateUser = true;
 
-      Friend.doFriendAccount(friendEmailAddress, requestorEmail).then(function (data) {
-        //TODO: at some point the servlet will return message values
-        //of 'created, exists, error, invalid' with a detailedMessage with the details
-        //and we will need to change the string detecting below
+      Friend.doFriendAccount(friendEmailAddress, requestorEmail, notifyInstructor).then(function (data) {
         if (data.data.message === 'created' || data.data.message === 'exists') {
           $scope.friend_account = data.data;
           $scope.newUserFound=true;
           $scope.friendDone=true;
           
           Friend.createCanvasFriend(friendEmailAddress,friendNameFirst, friendNameLast).then(function (data) {
-            if (data.data.name) {
-              // here we add the person to the scope and then use another factory to add them to the sites
+            if (data.data.sis_user_id === friendEmailAddress) {
+              // here we add the person to the scope and then use another function to add them to the sites
               $scope.newUser=false;
               $scope.newUserFound=true;
-              $scope.userAvaliable = true;
-              $scope.friend = data.data;//xxx
+              $scope.friend = data.data;
               $scope.canvasDone=true;
-              //$scope.friend.sis_user_id = friendEmailAddress;
+              $scope.addUserToSectionsClick();
             } else {
               // TODO: report error
             }
-            $scope.loadingCreateUser = false;
+            $scope.coursemodal.loadingCreateUser = false;
           });
-          
-          //$scope.friend = friendEmailAddress;
           $scope.userAvailable = true;
           $scope.done = true;
         } else {
-          $scope.loadingCreateUser = false;
+          $scope.coursemodal.loadingCreateUser = false;
           $scope.friend_account = data.data;
           $scope.newUserFail=true;
           // TODO: report error
@@ -384,23 +400,47 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
       });
     }
     else {
-      $scope.loading = false;
       $scope.failedValidation = true;
     }
   };
 
-  $scope.addUserToSectionsClick = function () {
-    var checkedSections = $('.addUserInner input:checked').length;
-    var sectNumber = 0;
-    $('#successFullSections').empty();
-    for(var e in $scope.course.sections) {
-      if ($scope.course.sections[e].isChecked) {
-        sectNumber = sectNumber + 1;
-        var sectionId = $scope.course.sections[e].id;
-        var sectionName = $scope.course.sections[e].name;
-        var thisSectionRole = $('li[data-sectionid="'+sectionId+'"]').find('select').val();
-        var url = '/canvasCourseManager/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + $scope.friend.id + '&enrollment[enrollment_state]=active&enrollment[type]=' + thisSectionRole;
+  // handler to reset the state in the workflow 
+  // and a allow the user to add another
 
+  $scope.addAnother = function() {
+    $scope.friend = false;
+    $scope.userExists = false;
+    $scope.newUser = false;
+    $scope.newUserFound = false;
+    $scope.addSuccess = false;
+    $scope.coursemodal.friendEmailAddress ='';
+    $scope.coursemodal.friendNameFirst ='';
+    $scope.coursemodal.friendNameLast ='';
+
+    $scope.resetable = false;
+    for(var e in $scope.coursemodal.sections) {
+      $scope.coursemodal.sections[e].selected = false;
+    }
+    $scope.coursemodal.sectionSelected = false; 
+  };
+
+  // function used by the event handlers attached to the two 
+  // 'Add Friend' buttons. It adds the user to the selected sections
+
+  $scope.addUserToSectionsClick = function () {
+    var checkedSections = $('.coursePanel input:checked').length;
+    var sectNumber = 0;
+    var successes = [];
+    $('#successFullSections').empty();
+    for(var e in $scope.coursemodal.sections) {
+      if ($scope.coursemodal.sections[e].selected) {
+        sectNumber = sectNumber + 1;
+        var sectionId = $scope.coursemodal.sections[e].id;
+        var sectionName = $scope.coursemodal.sections[e].name;
+        var thisSectionRole = $('li#' +sectionId).find('select').val();
+        
+        var url = '/canvasCourseManager/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + $scope.friend.id + '&enrollment[enrollment_state]=active&enrollment[type]=' + thisSectionRole;
+        
         Friend.addFriendToSection(url).then(function (data) {
           if (data.errors) {
             // TODO: report error
@@ -409,17 +449,17 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
               $scope.addSuccess = true;
               if (checkedSections === sectNumber){
                 $scope.newUser = false;
-                $scope.newUserFound = false;
                 $scope.none = false;
                 $scope.userAvailable  = false;
-                $scope.friendEmailAddress ='';
-                $scope.friend = {};
+                $scope.coursemodal.resetable = true;
               }
             }
           }
-        });      
-        $('#successFullSections').append(' <span class="label label-success">' + sectionName + '</span>');
+        });
+        $scope.addSuccess = true;
+        successes.push(sectionName)
       }
+      $scope.successes = successes
     }
   };
 

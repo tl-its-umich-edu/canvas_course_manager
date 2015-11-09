@@ -35,7 +35,22 @@ canvasSupportApp.factory('Course', function ($http) {
           return result;
         }
       );
-    }
+    },
+    
+    getMPathwaysCourses: function (url) {
+      return $http.get(url, {cache: false}).then(
+        function success(result) {
+          //forward the data - let the controller deal with it
+          return prepareMPathData(result.data);
+        },
+        function error(result) {
+          errorDisplay(url, result.status, 'Unable to get MPathways data');
+          result.errors.failure = true;    
+          return result;
+        }
+      );
+    },
+
   };
 });
 
@@ -94,12 +109,20 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
         }
       );
     },
-    doFriendAccount: function (friendEmailAddress, requestorEmail) {
+    doFriendAccount: function (friendEmailAddress, requestorEmail, notifyInstructor) {
+      if(!notifyInstructor || notifyInstructor === 'true'){
+        notifyInstructor = 'true';
+      }
+      else {
+       notifyInstructor = 'false';
+      }
       var url = '/canvasCourseManager/friend/friendCreate?id=' + friendEmailAddress +
        '&inst_email=' + requestorEmail +
        // need the first name and last name, right now just using the email
        '&inst_first_name=' + requestorEmail +
-       '&inst_last_name= ';
+       '&inst_last_name= '  +
+       '&notify_instructor='  + notifyInstructor;
+       
       return $http.post(url, {cache: false}).then(
         function success(result) {
           return result;
