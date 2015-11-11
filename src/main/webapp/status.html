@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; Charset=UTF-8">
 <title>Canvas Course Manager Status Page</title>
-<link href="bootstrap/css/bootstrap.css" type="text/css"
+<link href="vendor/bootstrap/bootstrap.min.css" type="text/css"
 	rel="stylesheet" media="all">
 <script type="text/javascript"
 	src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js">
@@ -69,42 +69,32 @@
 
 	</div>
 
-	<h1>Points of Integration</h1>
+	<h2>Points of Integration</h2>
 
-	<div>
-		<div id="dev-canvas">
-			<b>Canvas</b>: The Canvas API is used by this application to make
-			calls that fetch sections information, look up courses, etc. If you
-			would like to assure that Canvas is available then the API console is
-			available at <a
-				href="https://umich.test.instructure.com/doc/api/live">Here</a>
-		</div>
-		</br>
-		<div id="dev-esb">
-			<b>ESB</b>: The ESB is used in this application to retrieve
-			information regarding instructor roles. The API used is called
-			Instructor. If a user requires access to the API, permission will
-			have to be granted to Instructor explicitly. An API console is
+	<ul>
+		<li><strong>Canvas</strong>: The Canvas API is used by this
+			application to make calls that fetch sections information, look up
+			courses, etc. If you would like to assure that Canvas is available
+			then the API console is available at <a
+			href="https://umich.test.instructure.com/doc/api/live">Here</a></li>
+
+		<li><strong>ESB</strong>: The ESB is used in this application to
+			retrieve information regarding instructor roles. The API used is
+			called Instructor. If a user requires access to the API, permission
+			will have to be granted to Instructor explicitly. An API console is
 			available at <a href="https://api-dev.dsc.umich.edu/store/">Here</a>
-		</div>
-		</br>
-		<div id="dev-mpathways">
-			<b>MPathways</b>: MPathways (or PeopleSoft) must be available for the
-			ESB call to be processed as the ESB relies on MPathways to retrieve
-			information regarding Instructor Roles in a course.
-		</div>
-		</br>
-		<div id="dev-friend">
-			<b>Friend</b>: There is a WebService available that will check if a
-			friend account exists. The WebService also has the ability to add
-			friends with the proper information.
-		</div>
+		</li>
 
-	</div>
+		<li><strong>MPathways</strong>: MPathways (or PeopleSoft) must be
+			available for the ESB call to be processed as the ESB relies on
+			MPathways to retrieve information regarding Instructor Roles in a
+			course.</li>
 
+		<li><strong>Friend</strong>: There is a WebService available that
+			will check if a friend account exists. The WebService also has the
+			ability to add friends with the proper information.</li>
 
-
-
+	</ul>
 
 </body>
 </html>
