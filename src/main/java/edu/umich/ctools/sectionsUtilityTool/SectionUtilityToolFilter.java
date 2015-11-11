@@ -46,6 +46,7 @@ public class SectionUtilityToolFilter implements Filter {
 	protected static final String ESB_SECRET = "esb.secret";
 	protected static final String ESB_PREFIX = "esb.prefix";
 	private static final String TEST_USER = "testUser";
+	private static final String CANVAS_ID = "custom_canvas_user_login_id";
 	private String providerURL = null;
 	private String mcommunityGroup = null;
 	private boolean isTestUrlEnabled=false;
@@ -121,22 +122,32 @@ public class SectionUtilityToolFilter implements Filter {
 	 * 
 	 */
 	private boolean checkForAuthorization(HttpServletRequest request) {
-		M_log.debug("checkLdapForAuthorization(): called");
+		M_log.debug("checkLdapForAuthorization(): called");		
 		String remoteUser = request.getRemoteUser();
 		String testUser = request.getParameter(TEST_USER);
+		String ltiTestUser = request.getParameter(CANVAS_ID);
 		boolean isAuthorized = false;
 		String user=null;
 
 		String testUserInSession = (String)request.getSession().getAttribute(TEST_USER);
 		String sessionId = request.getSession().getId();
 
-		if ( isTestUrlEnabled && testUser != null ) { 
+		if( isTestUrlEnabled && ltiTestUser != null ) {
+			user=ltiTestUser;
+			request.getSession().setAttribute(TEST_USER, ltiTestUser);
+		}
+		else if ( isTestUrlEnabled && testUserInSession != null ){
+			user=testUserInSession;
+		} 
+		
+		if ( isTestUrlEnabled && testUser != null  ) { 
 			user=testUser;
 			request.getSession().setAttribute(TEST_USER, testUser);
 		}
 		else if ( isTestUrlEnabled && testUserInSession != null ){
 			user=testUserInSession;
 		} 
+		
 		if  ( !isAuthorized && remoteUser != null ) {
 			user=remoteUser;
 			M_log.info(String.format("The session id \"%s\" of Service Desk Person with uniqname  \"%s\" issuing the request" ,sessionId,remoteUser));
