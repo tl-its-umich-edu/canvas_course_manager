@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="sectionsApp">
+<head>
+<meta http-equiv="Content-Type" content="text/html; Charset=UTF-8">
+<title>Canvas Course Manager Status Ping Page</title>
+<link href="../vendor/bootstrap/bootstrap.min.css" type="text/css"
+	rel="stylesheet" media="all">
+<script type="text/javascript"
+	src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js">
+	
+</script>
+<script>
+	$(document).ready(function() {
+		var url = document.URL;
+		var ts = new Date().toLocaleString();
+		$("#includedContent").load("BUILD.TXT");
+		$("#url").append(url);
+		$("#time").append(ts);
+	});
+</script>
+</head>
+<body class="container-fluid" style="padding-top: 20px;">
+	<h1>Status Ping for Canvas Course Manager</h1>
+	<!--  /status/ping - This would just ensure that an application server
+		instance is up and responds quickly to a "hello there" probe. This is
+		a bit more lightweight than the status URL. -->
+
+	<div>
+		<span class="muted">Current URL: </span>
+		<code id="url"></code>
+	</div>
+</body>
+</html>

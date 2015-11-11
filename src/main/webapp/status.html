@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="sectionsApp">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; Charset=UTF-8">
+<title>Canvas Course Manager Status Page</title>
+<link href="vendor/bootstrap/bootstrap.min.css" type="text/css"
+	rel="stylesheet" media="all">
+<script type="text/javascript"
+	src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js">
+	
+</script>
+<script>
+	$(document).ready(function() {
+		var url = document.URL;
+		var ts = new Date().toLocaleString();
+		$("#includedContent").load("BUILD.TXT");
+		$("#includedContent").load("props.js");
+		$("#url").append(url);
+		$("#time").append(ts);
+	});
+</script>
+
+<script type="text/javascript">
+	$('document').ready(
+			function() {
+				$buildInfo = $('#buildInfo');
+
+				displayContentOrError = function(response, status, xhr) {
+					if (status == 'error') {
+						var errorMessage = 'Unable to display due to error. ('
+								+ xhr.status + ' ' + xhr.statusText + ')';
+						$buildInfo.html(errorMessage);
+					}
+
+					$buildInfo.show();
+				}
+				$buildInfo.load('build.txt', displayContentOrError);
+			});
+</script>
+
+</head>
+
+<body class="container-fluid" style="padding-top: 20px;">
+	<h1>Status for Canvas Course Manager</h1>
+	<!--  /status - Return a page with application version information and
+		a list of other available status URLs. This is a quick check and
+		implements only enough to return this information. It does NOT do any
+		automatic checks. Response format should be based on the request and
+		be HTML or JSON or plain text. This request allows a quick check that
+		the application is running AND documents the other available status
+		URLs. (The status page doesn't need to explicitly list all available
+		status urls directly. It does need to list all the next level of
+		status urls. All status URLs should be available from this page by
+		following a chain of one or more links.)
+	-->
+
+	<div>
+		<span class="muted">Current url: </span>
+		<code id="url"></code>
+
+		<div id="versionDiv">
+			Build Version:<span id="buildInfo"></span>
+		</div>
+
+		<div id="statusPing">
+			Status Ping: <a href="status/ping.html">Here</a>
+		</div>
+
+	</div>
+
+	<h2>Points of Integration</h2>
+
+	<ul>
+		<li><strong>Canvas</strong>: The Canvas API is used by this
+			application to make calls that fetch sections information, look up
+			courses, etc. If you would like to assure that Canvas is available
+			then the API console is available at <a
+			href="https://umich.test.instructure.com/doc/api/live">Here</a></li>
+
+		<li><strong>ESB</strong>: The ESB is used in this application to
+			retrieve information regarding instructor roles. The API used is
+			called Instructor. If a user requires access to the API, permission
+			will have to be granted to Instructor explicitly. An API console is
+			available at <a href="https://api-dev.dsc.umich.edu/store/">Here</a>
+		</li>
+
+		<li><strong>MPathways</strong>: MPathways (or PeopleSoft) must be
+			available for the ESB call to be processed as the ESB relies on
+			MPathways to retrieve information regarding Instructor Roles in a
+			course.</li>
+
+		<li><strong>Friend</strong>: There is a WebService available that
+			will check if a friend account exists. The WebService also has the
+			ability to add friends with the proper information.</li>
+
+	</ul>
+
+</body>
+</html>
