@@ -99,7 +99,19 @@
         <div ng-include src="'assets-lti/views/friends.html'"></div>
       </div>
     </div>
-    
+    #set($ltiList = ${ltiValues})
+    #set($ltiEntry="")  
+    <script>
+      var ltiLaunch = {
+        "custom_canvas_course_id": "$ltiValues.get("custom_canvas_course_id")",
+        "custom_canvas_enrollment_state": "$ltiValues.get("custom_canvas_enrollment_state")",
+        "custom_canvas_user_login_id": "$ltiValues.get("custom_canvas_user_login_id")",
+        "lis_person_contact_email_primary": "$ltiValues.get("lis_person_contact_email_primary")",
+        "lis_person_name_family": "$ltiValues.get("lis_person_name_family")",
+        "lis_person_name_given": "$ltiValues.get("lis_person_name_given")",
+      }
+    </script>
+
 
   </body>
 
