@@ -73,7 +73,7 @@ public class SectionUtilityToolFilter implements Filter {
 		appExtSecureProperties = Utils.loadProperties(CCM_SECURE_PROPERTY_FILE_PATH);
 		getExternalAppProperties();
 	}
-	
+
 	@Override
 	public void destroy() {
 		M_log.debug("destroy: Called");
@@ -97,6 +97,9 @@ public class SectionUtilityToolFilter implements Filter {
 		HttpSession session= useRequest.getSession(true);
 		M_log.debug("session id: "+session.getId());
 
+		//Launch type for for the LTI part will be different from the launch
+		//type for SC because LTI will only be launched within LMS and SC can 
+		//be launched from a browser
 		setLaunchType(request, session);
 
 		if (session.getAttribute(LAUNCH_TYPE).equals("lti")){
@@ -121,7 +124,7 @@ public class SectionUtilityToolFilter implements Filter {
 		if ( BASIC_LTI_LAUNCH_REQUEST.equals(request.getParameter(LTI_MESSAGE_TYPE)) && session.getAttribute(LAUNCH_TYPE) == null) {
 			session.setAttribute(LAUNCH_TYPE, "lti");
 		}
-		else if (session.getAttribute(LAUNCH_TYPE) == null){
+		if (session.getAttribute(LAUNCH_TYPE) == null){
 			session.setAttribute(LAUNCH_TYPE, "sc");
 		}
 	}
@@ -148,12 +151,11 @@ public class SectionUtilityToolFilter implements Filter {
 	 * 
 	 */
 	private boolean checkForAuthorization(HttpServletRequest request) {
-		M_log.debug("checkLdapForAuthorization(): called");		
+		M_log.debug("checkLdapForAuthorization(): called");
 		String remoteUser = request.getRemoteUser();
 		String testUser = request.getParameter(TEST_USER);
 		boolean isAuthorized = false;
 		String user=null;
-
 		String testUserInSession = (String)request.getSession().getAttribute(TEST_USER);
 		String sessionId = request.getSession().getId();
 
