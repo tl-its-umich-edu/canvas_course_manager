@@ -46,13 +46,15 @@ public class SectionUtilityToolFilter implements Filter {
 	protected static final String ESB_SECRET = "esb.secret";
 	protected static final String ESB_PREFIX = "esb.prefix";
 	private static final String TEST_USER = "testUser";
+	//private static final String CANVAS_ID = "custom_canvas_user_login_id";
+	private static final String LAUNCH_TYPE = "launchType";
 	private String providerURL = null;
 	private String mcommunityGroup = null;
 	private boolean isTestUrlEnabled=false;
-	
+
 	private final static String CCM_PROPERTY_FILE_PATH = "ccmPropsPath";
 	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";	
-	
+
 	protected static Properties appExtSecureProperties=null;
 	protected static Properties appExtProperties=null;
 
@@ -60,6 +62,9 @@ public class SectionUtilityToolFilter implements Filter {
 
 	public static final String BASIC_LTI_LAUNCH_REQUEST = "basic-lti-launch-request";
 	public static final String LTI_MESSAGE_TYPE = "lti_message_type";
+
+	public static final String LTI_PAGE = "/index-lti.vm";
+	public static final String SC_PAGE = "/index-sc.vm";
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
@@ -70,12 +75,17 @@ public class SectionUtilityToolFilter implements Filter {
 	}
 
 	@Override
+	public void destroy() {
+		M_log.debug("destroy: Called");
+	}
+
+	@Override
 	public void doFilter(ServletRequest request, ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {
 		M_log.debug("doFilter: Called");
 		HttpServletRequest useRequest = (HttpServletRequest) request;
 		HttpServletResponse useResponse=(HttpServletResponse)response;
-		
+
 		if ( BASIC_LTI_LAUNCH_REQUEST.equals(request.getParameter(LTI_MESSAGE_TYPE))) {
 			M_log.debug("new launch so invalidate any existing session");
 			if (useRequest.getSession() != null) {
@@ -83,20 +93,40 @@ public class SectionUtilityToolFilter implements Filter {
 				useRequest.getSession().invalidate();
 			}
 		}
-		
+
 		HttpSession session= useRequest.getSession(true);
 		M_log.debug("session id: "+session.getId());
-		
-		if(!checkForAuthorization(useRequest)) {
-			useResponse.sendError(403);
-			return;
+
+		//Launch type for for the LTI part will be different from the launch
+		//type for SC because LTI will only be launched within LMS and SC can 
+		//be launched from a browser
+		setLaunchType(request, session);
+
+		if (session.getAttribute(LAUNCH_TYPE).equals("lti")){
+			if( useRequest.getPathInfo().equals(SC_PAGE)){
+				useRequest.getSession().invalidate();
+				useResponse.sendError(403);
+				return;
+			}
+			chain.doFilter(useRequest, response);
 		}
-		chain.doFilter(useRequest, response);
+		else if(session.getAttribute(LAUNCH_TYPE).equals("sc")){
+
+			if(!checkForAuthorization(useRequest)) {
+				useResponse.sendError(403);
+				return;
+			}
+			chain.doFilter(useRequest, response);
+		}
 	}
 
-	@Override
-	public void destroy() {
-		M_log.debug("destroy: Called");
+	public void setLaunchType(ServletRequest request, HttpSession session) {
+		if ( BASIC_LTI_LAUNCH_REQUEST.equals(request.getParameter(LTI_MESSAGE_TYPE)) && session.getAttribute(LAUNCH_TYPE) == null) {
+			session.setAttribute(LAUNCH_TYPE, "lti");
+		}
+		if (session.getAttribute(LAUNCH_TYPE) == null){
+			session.setAttribute(LAUNCH_TYPE, "sc");
+		}
 	}
 
 	protected void getExternalAppProperties() {
@@ -126,17 +156,17 @@ public class SectionUtilityToolFilter implements Filter {
 		String testUser = request.getParameter(TEST_USER);
 		boolean isAuthorized = false;
 		String user=null;
-
 		String testUserInSession = (String)request.getSession().getAttribute(TEST_USER);
 		String sessionId = request.getSession().getId();
 
-		if ( isTestUrlEnabled && testUser != null ) { 
+		if ( isTestUrlEnabled && testUser != null  ) { 
 			user=testUser;
 			request.getSession().setAttribute(TEST_USER, testUser);
 		}
 		else if ( isTestUrlEnabled && testUserInSession != null ){
 			user=testUserInSession;
 		} 
+
 		if  ( !isAuthorized && remoteUser != null ) {
 			user=remoteUser;
 			M_log.info(String.format("The session id \"%s\" of Service Desk Person with uniqname  \"%s\" issuing the request" ,sessionId,remoteUser));
