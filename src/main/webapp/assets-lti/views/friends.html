@@ -20,16 +20,18 @@
                         <div class="form-inline"  ng-class="failedValidation ? 'form-inline has-error' : 'form-inline'">
                           <span id="helpBlockFriend" class="help-block">Specify a user, then pick sections and roles the user will have, then click "Add Friend".</span>
                           <div class="form-group" ng-show="!userExists && !newUser && !newUserFound">
+                            <p style="margin:10px 0" class="alert alert-warning alert-inline" ng-show="failedValidation" id="failedToValidateEmail" tabindex="-1">Please specify a valid NON UMICH email address</p>
+                            <div class="clearfix"></div>
                             <label class="sr-only" for="friendEmailAddress1">Email address</label>
                             <input class="form-control" type="text" ng-model="coursemodal.friendEmailAddress" id="friendEmailAddress1" placeholder="email address" style="width:300px" aria-describedby="helpBlockFriend">
-                            <span class="alert alert-warning alert-inline" ng-show="failedValidation">Please specify a valid NON UMICH email address</span>
                           </div>
-                          <div ng-show="newUser">
+                          <div ng-show="newUser" id="newUser" tabindex="-1">
                             <span id="helpBlockFriendCreate" class="help-block alert alert-info">The specified user <strong>({{coursemodal.friendEmailAddress}})</strong> has no account - use the form below to create.</span>
                             <div class="form-group form-inline form-group">
                               <fieldset aria-describedby="helpBlockFriendCreate">
                                 <legend class="sr-only">Create new user to add to sections</legend>
-                                <p class="alert alert-warning"  ng-show="failedValidation">Please specify a valid NON UMICH email address, as well as a first and last names.</p>
+                                <p style="margin:0 0 10px 0" class="alert alert-warning alert-inline "  ng-show="failedValidation" id="failedToValidateEmailName" tabindex="-1">Please specify a valid NON UMICH email address, as well as a first and last names.</p>
+                                <div class="clearfix"></div>
                                 <label for="friendEmailAddress2" class="sr-only">Enter email</label>
                                 <input type="text" class="form-control" id="friendEmailAddress2" placeholder="Enter email" ng-model="coursemodal.friendEmailAddress">
                                 <label for="friendNameFirst" class="sr-only">First name</label>
@@ -39,20 +41,22 @@
                               </fieldset>
                             </div>
                           </div>
-                          <div class="alert alert-danger" ng-show="newUserFail">
-                            {{friend_account.detailedMessage}}.
-                          </div>
-                          <div class="alert alert-success" ng-show="newUserFound">
-                            <p ng-show="friendDone">{{friend_account.detailedMessage}}. </p>
-                            <p ng-show="canvasDone">
-                              User <strong>{{friend.name}}  ({{friend.sis_user_id}})</strong> created in Canvas.
-                            </p>
-                          </div>
-                          <div> <span ng-show="addSuccess" class="alert alert-success alert-inline">User {{coursemodal.friendEmailAddress}} added to section(s) <span class="label label-success" ng-repeat="success in successes">{{success}}</span>
-                            <button class="btn btn-default" ng-click="addAnother()">Add another</button>
-                          </span>
+                          <div id="addMessageContainer" tabindex="-1">
+                            <div class="alert alert-danger" ng-show="newUserFail">
+                              {{friend_account.detailedMessage}}.
+                            </div>
+                            <div class="alert alert-success" ng-show="newUserFound">
+                              <p ng-show="friendDone">{{friend_account.detailedMessage}}. </p>
+                              <p ng-show="canvasDone">
+                                User <strong>{{friend.name}}  ({{friend.sis_user_id}})</strong> created in Canvas.
+                              </p>
+                            </div>
+                            <div> <span ng-show="addSuccess" class="alert alert-success alert-inline">User {{coursemodal.friendEmailAddress}} added to section(s) <span class="label label-success" ng-repeat="success in successes">{{success}}</span>
+                              <button class="btn btn-default" ng-click="addAnother()">Add another</button>
+                            </span>
 
-                          </div>
+                            </div>
+                          </div>  
                         </div>
                         <ul class="sectionListAddFriend" id="course{{coursemodal.id}}">
                             <li ng-repeat="section in coursemodal.sections | orderBy:'name'" class="row section" data-sectionid="{{section.id}}">
@@ -63,14 +67,17 @@
                                 </div>
                                 <div class="col-md-7">
                                 	<div class="btn-group pull-right">
-	                                	<select ng-show="section.selected">
-		                                	<option value="StudentEnrollment">Student</option>
-                                      <option value="TeacherEnrollment">Teacher</option>
-																			<option value="TaEnrollment">TA</option>
-																			<option value="ObserverEnrollment">Observer</option>
-																			<option value="DesignerEnrollment">Designer</option>
-																		</select>
-                                </div>        
+                                    <div  ng-show="section.selected">
+                                      <label for="s{{section.id}}" class="sr-only">Select role for user in section {{section.name}}</label>
+  	                                	<select id="s{{section.id}}">
+  		                                	<option value="StudentEnrollment">Student</option>
+                                        <option value="TeacherEnrollment">Teacher</option>
+  																			<option value="TaEnrollment">TA</option>
+  																			<option value="ObserverEnrollment">Observer</option>
+  																			<option value="DesignerEnrollment">Designer</option>
+  																		</select>
+                                    </div>
+                                  </div>        
                             </li>
                         </ul>
                     </li>

@@ -160,6 +160,8 @@ ul {
     animation:slideInRight 2s both ease, fadeIn 1s both ease 2s; 
 }
 
+*:focus {outline:1px solid red !important};
+
 /* leave animation */
 .alert-inline.ng-leave            { 
     -webkit-animation:slideOutLeft 2s both ease 1s, fadeOut 1s both ease;
