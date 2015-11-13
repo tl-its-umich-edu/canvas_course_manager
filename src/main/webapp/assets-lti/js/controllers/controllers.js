@@ -365,7 +365,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
       $scope.coursemodal.loadingLookupFriend = false;
       $scope.failedValidation = true;
       $scope.$evalAsync(function() { 
-        focus('failedValEmail');
+        focus('failedToValidateEmail');
       })
     }
   };
@@ -419,7 +419,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     else {
       $scope.failedValidation = true;
       $scope.$evalAsync(function() { 
-        focus('failedValEmailName');
+        focus('failedToValidateEmailName');
       })
 
     }
