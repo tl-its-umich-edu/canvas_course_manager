@@ -226,6 +226,7 @@ $(document).on('hidden.bs.modal', '#addUserModal', function(){
     $scope.newUser = false;
     $scope.newUserFound = false;
     $scope.newUserFail = false;
+    $scope.userExists = false;
     $scope.friend = {};
     $scope.addSuccess= false;
     $scope.failedValidation = false;

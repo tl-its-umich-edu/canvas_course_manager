@@ -87,6 +87,10 @@ ul {
     right:25%;
 }
 
+li.addedSection {
+    background: #ffe;
+ }
+
 .getCourseInfo {
     display:none;
 }
@@ -121,7 +125,6 @@ ul {
     margin:0 25%;
     z-index: 10000;
 }
-
 .otherSectionsTarget {
     border:1px solid #000 !important;
 }

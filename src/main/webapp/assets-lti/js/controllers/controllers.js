@@ -149,7 +149,6 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
           // and call function to add to sections
           $scope.friend = data.data[0];
           $scope.userExists = true;
-          $scope.addUserToSectionsClick();
         } else {
           // not an existing user - present interface to add
           $scope.newUser = true;
@@ -258,10 +257,9 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
         sectNumber = sectNumber + 1;
         var sectionId = $scope.coursemodal.sections[e].id;
         var sectionName = $scope.coursemodal.sections[e].name;
-        var thisSectionRole = $('li#' +sectionId).find('select').val();
+        var thisSectionRole = $('li#sect' +sectionId).find('select').val();
         
         var url = '/canvasCourseManager/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + $scope.friend.id + '&enrollment[enrollment_state]=active&enrollment[type]=' + thisSectionRole;
-        
         Friend.addFriendToSection(url).then(function (data) {
           if (data.errors) {
             // TODO: report error
