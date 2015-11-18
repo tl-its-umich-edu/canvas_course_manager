@@ -20,6 +20,25 @@ canvasSupportApp.factory('Courses', function ($http) {
   };
 });
 
+//TERMS FACTORY - does the request for terms
+canvasSupportApp.factory('Terms', function ($http) {
+  return {
+    getTerms: function (url) {
+      return $http.get(url, {cache: false}).then(
+        function success(result) {
+          //forward the data - let the controller deal with it
+          return result; 
+        },
+        function error(result) {
+          errorDisplay(url, result.status, 'Unable to get courses');
+          result.errors.failure = true;    
+          return result;
+        }
+      );
+    }
+  };
+});
+
 //COURSE FACTORY - does the request for the single course controller
 canvasSupportApp.factory('Course', function ($http) {
   return {
@@ -37,11 +56,11 @@ canvasSupportApp.factory('Course', function ($http) {
       );
     },
     
-    getMPathwaysCourses: function (url) {
+    getMPathwaysCourses: function (url, sis_term_id) {
       return $http.get(url, {cache: false}).then(
         function success(result) {
           //forward the data - let the controller deal with it
-          return prepareMPathData(result.data);
+          return prepareMPathData(result.data, sis_term_id);
         },
         function error(result) {
           errorDisplay(url, result.status, 'Unable to get MPathways data');
@@ -109,7 +128,7 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
         }
       );
     },
-    doFriendAccount: function (friendEmailAddress, requestorEmail, notifyInstructor) {
+    doFriendAccount: function (friendEmailAddress, requestorEmail, notifyInstructor, requestorFirst, requestorLast) {
       if(!notifyInstructor || notifyInstructor === 'true'){
         notifyInstructor = 'true';
       }
@@ -119,8 +138,8 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
       var url = '/canvasCourseManager/friend/friendCreate?id=' + friendEmailAddress +
        '&inst_email=' + requestorEmail +
        // need the first name and last name, right now just using the email
-       '&inst_first_name=' + requestorEmail +
-       '&inst_last_name= '  +
+       '&inst_first_name=' + requestorFirst +
+       '&inst_last_name= '  + requestorLast +
        '&notify_instructor='  + notifyInstructor;
        
       return $http.post(url, {cache: false}).then(

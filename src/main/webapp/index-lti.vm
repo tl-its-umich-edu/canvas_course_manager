@@ -9,6 +9,18 @@
       <link rel="stylesheet" href="vendor/jquery/jquery-ui-1.11.2/jquery-ui.min.css">
       <link rel="stylesheet" href="vendor/animate/animate.css">
       <title>Canvas Support</title>
+      #set($ltiList = ${ltiValues})
+      #set($ltiEntry="")  
+      <script>
+        var ltiLaunch = {
+          "custom_canvas_course_id": "$ltiValues.get("custom_canvas_course_id")",
+          "custom_canvas_enrollment_state": "$ltiValues.get("custom_canvas_enrollment_state")",
+          "custom_canvas_user_login_id": "$ltiValues.get("custom_canvas_user_login_id")",
+          "lis_person_contact_email_primary": "$ltiValues.get("lis_person_contact_email_primary")",
+          "lis_person_name_family": "$ltiValues.get("lis_person_name_family")",
+          "lis_person_name_given": "$ltiValues.get("lis_person_name_given")",
+        }
+      </script>
   </head>
   <body>
     <div class="alert alert-danger debugPanel" id="debugPanel"></div>
@@ -22,7 +34,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <h1 class="navbar-brand collapse-nav">Canvas Support <small id="serverInfo" ng-show="server">{{server}}</small> <small ng-show="user.uniqname" style="display:none">(for {{user.uniqname}})</small></h1>
+                <h1 class="navbar-brand collapse-nav">Canvas Support</h1>
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -35,8 +47,7 @@
             <!-- /.navbar-collapse -->
         </div>
     </nav>
-    <div ng-if="!courseMode" ng-include src="'assets-lti/views/courses.html'" style="margin-top:60px"></div>
-    <div ng-if="courseMode" ng-include src="'assets-lti/views/course.html'" style="margin-top:60px"></div>
+    <div ng-include src="'assets-lti/views/course.html'" style="margin-top:60px"></div>
 
     <script src="vendor/jquery/jquery-1.11.0.min.js"></script>
     <script src="vendor/jquery/jquery-ui-1.11.2/jquery-ui.min.js"></script>
@@ -99,19 +110,6 @@
         <div ng-include src="'assets-lti/views/friends.html'"></div>
       </div>
     </div>
-    #set($ltiList = ${ltiValues})
-    #set($ltiEntry="")  
-    <script>
-      var ltiLaunch = {
-        "custom_canvas_course_id": "$ltiValues.get("custom_canvas_course_id")",
-        "custom_canvas_enrollment_state": "$ltiValues.get("custom_canvas_enrollment_state")",
-        "custom_canvas_user_login_id": "$ltiValues.get("custom_canvas_user_login_id")",
-        "lis_person_contact_email_primary": "$ltiValues.get("lis_person_contact_email_primary")",
-        "lis_person_name_family": "$ltiValues.get("lis_person_name_family")",
-        "lis_person_name_given": "$ltiValues.get("lis_person_name_given")",
-      }
-    </script>
-
 
   </body>
 

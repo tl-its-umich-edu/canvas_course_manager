@@ -7,16 +7,12 @@ canvasSupportApp.run(function ($rootScope) {
 	//for any init values needed
 	$rootScope.server = '';
 	$rootScope.user = {};
-	// this would be determined from the LTI launch parameters - if 
-	// a course, set to true, if not set to false
-	// in singleViewMode only one course (the current course)can be expanded
-	
-	$rootScope.courseMode = true;
-
 	//to turn on/off the 2 functionalities
 	$rootScope.functionality = {
     'friends': true,
     'sections': true
 	};
+	// this uses an object populated with LTI launch parameters and added to index.lti.vm
+	$rootScope.ltiLaunch = ltiLaunch;
 });
 
