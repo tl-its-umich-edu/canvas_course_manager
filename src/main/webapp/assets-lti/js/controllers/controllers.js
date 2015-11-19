@@ -23,17 +23,14 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     $scope.currentTermSISID = _.where(result.data.enrollment_terms, {id:  $rootScope.termId}).sis_term_id
   });  
   
-  /*
-  KYLE: uncommenting this will just work - once we have a fix for the cosign thing
-  adds to the scope a list of sections (by sis_section_id) that the current user can perform actions on
+  /* adds to the scope a list of sections (by sis_section_id) that the current user can perform actions on */
 
-  var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?instructor=' + $rootScope.ltiLaunch.custom_canvas_user_login_id +'&termid=2060';
+  var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?instructor=' + $rootScope.ltiLaunch.custom_canvas_user_login_id +'&termid=' + $scope.currentTermSISID;
 
   //var mPathwaysCoursesUrl = 'assets-lti/data/mpathwaysdata.json';
   Course.getMPathwaysCourses(mPathwaysCoursesUrl, $scope.currentTermSISID).then(function (result) {
     $scope.mpath_courses = result;
   });
-  */
 
   $scope.getCoursesForTerm = function() {
     $scope.loadingOtherCourses = true;
