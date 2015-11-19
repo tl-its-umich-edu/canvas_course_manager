@@ -23,17 +23,14 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     $scope.currentTermSISID = _.where(result.data.enrollment_terms, {id:  $rootScope.termId}).sis_term_id
   });  
   
-  /*
-  KYLE: uncommenting this will just work - once we have a fix for the cosign thing
-  adds to the scope a list of sections (by sis_section_id) that the current user can perform actions on
+  /* adds to the scope a list of sections (by sis_section_id) that the current user can perform actions on */
 
-  var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?instructor=' + $rootScope.ltiLaunch.custom_canvas_user_login_id +'&termid=2060';
+  var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?instructor=' + $rootScope.ltiLaunch.custom_canvas_user_login_id +'&termid=' + $scope.currentTermSISID;
 
   //var mPathwaysCoursesUrl = 'assets-lti/data/mpathwaysdata.json';
   Course.getMPathwaysCourses(mPathwaysCoursesUrl, $scope.currentTermSISID).then(function (result) {
     $scope.mpath_courses = result;
   });
-  */
 
   $scope.getCoursesForTerm = function() {
     $scope.loadingOtherCourses = true;
@@ -149,7 +146,6 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
           // and call function to add to sections
           $scope.friend = data.data[0];
           $scope.userExists = true;
-          $scope.addUserToSectionsClick();
         } else {
           // not an existing user - present interface to add
           $scope.newUser = true;
@@ -258,10 +254,9 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
         sectNumber = sectNumber + 1;
         var sectionId = $scope.coursemodal.sections[e].id;
         var sectionName = $scope.coursemodal.sections[e].name;
-        var thisSectionRole = $('li#' +sectionId).find('select').val();
+        var thisSectionRole = $('li#sect' +sectionId).find('select').val();
         
         var url = '/canvasCourseManager/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + $scope.friend.id + '&enrollment[enrollment_state]=active&enrollment[type]=' + thisSectionRole;
-        
         Friend.addFriendToSection(url).then(function (data) {
           if (data.errors) {
             // TODO: report error

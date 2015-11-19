@@ -7,33 +7,27 @@
         <div class="msg"></div>
     </div>
     <div class="container-fluid">
-        <p>Some explanatory text here. What, how. <a href="">Links</a> to Service Center help for exotic moving section action.</p>
+        <p>Here instructors can add people with non-UM email addresses and add other class sections to this course.</p>
         <div class="coursePanel well nograb">
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-6 col-lg-6 col-sm-8 col-xs-6">
-                        <h4>{{course.course_code}} <button ng-show="loadingSections" class="btn btn-link spinner"></button></h4>
+                        <h4>Current sections <button ng-show="loadingSections" class="btn btn-link spinner"></button></h4>
                         <p ng-show="course.addingUser">Specify user, pick sections and roles the user will have, then click "Next".</p>
                     </div>
                     <div class="col-md-6 col-lg-6 col-sm-6 col-xs-6" style="text-align:right;">
                         <button ng-show="loadingOtherCourses" class="btn btn-link spinner"></button>  
                         <div class="btn-group" role="group">
-                            <!-- // add users without a modal - preserving the workflow entry state not important
-                            <button ng-disabled="course.addingSections" ng-hide="!functionality.friends || course.addingUser" class="btn btn-default" ng-click="addUsers()">Add Friends</button>
-                            -->
                             <!--// add users with a modal -->
-                            <button ng-disabled="course.addingSections" ng-hide="!functionality.friends || course.addingUser" class="btn btn-default" ng-click="addUserModal()" data-toggle="modal"  data-target="#addUserModal">Add Friends</button>
-                            <button ng-show="course.addingUser" class="btn btn-default" ng-click="cancelAddUsers()">Cancel Add Friends</button>
+                            <button ng-disabled="course.addingSections" ng-hide="!functionality.friends || course.addingUser" class="btn btn-default" ng-click="addUserModal()" data-toggle="modal"  data-target="#addUserModal">Add non-UM users</button>
                             <button ng-disabled="course.addingUser" ng-hide="courses || !functionality.sections" class="btn btn-default" ng-click="getCoursesForTerm()">Add sections</button>
-                            <button ng-show="course.dirty" class="btn btn-default" ng-click="getCoursesForTerm()">Save new sections</button>
-                            <button ng-show="course.addingSections" class="btn btn-default" ng-click="cancelAddSections()">Cancel add sections</button>                        
                         </div>
                     </div>
                 </div>
 
 
                 <ul class="container-fluid sectionList">
-                    <li class="row" ng-repeat="section in course.sections | orderBy:'section.name'" id="{{section.id}}" data-parent-id="{{section.course_id}}">
+                    <li ng-class="section.course_id !== course.id ? 'row addedSection' :'row'" ng-repeat="section in course.sections | orderBy:'section.name'" id="{{section.id}}" data-parent-id="{{section.course_id}}">
                         <div class="col-md-8 col-lg-8 col-sm-8 col-xs-8"><span ng-show="course.addingUser"><input type="checkbox" id="check{{section.id}}" ng-model="section.selected" ng-change="sectionSelectedQuery()"> <label for ="check{{section.id}}">{{section.name}}</label></span><span ng-show="!course.addingUser">{{section.name}}</span></div>
                         <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4">
                             <div class="btn-group pull-right" ng-show="course.addingUser">
@@ -44,11 +38,19 @@
                                     <option value="ObserverEnrollment">Observer</option>
                                     <option value="DesignerEnrollment">Designer</option>
                                 </select>
-                            </div>        
+                            </div>
                             <a href="" ng-if="section.course_id !== course.id" ng-click="returnToCourse(section, $index)">Put back<span class="sr-only"> {{section.name}}</span></a>
                         </div>
                     </li>
                 </ul>
+                <div class="container-fluid">
+                    <span class="pull-right">
+                        <button ng-show="course.addingSections" class="btn btn-default" ng-click="cancelAddSections()">Cancel</button>
+                        <button ng-show="course.dirty" class="btn btn-primary" ng-click="getCoursesForTerm()">Save Sections</button>
+                    </span>
+                </div>
+
+
             </div>    
         
         <div class="coursePanel nograb" ng-show="courses" id="otherCourses" tabindex="-1">
@@ -62,7 +64,7 @@
                         </div>
                         <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4">
                             <span ng-hide="course.sectionsShown">
-                                <a href="" ng-click="getSections(course.id)">Get sections <span class="sr-only"> for course {{course.course_code}}</a> <button ng-show="course.loadingOtherSections" class="btn btn-link spinner"></button>
+                                <a href="" ng-click="getSections(course.id)">Choose sections to add <span class="sr-only"> from course {{course.course_code}}</a> <button ng-show="course.loadingOtherSections" class="btn btn-link spinner"></button>
                             </span>
                         </div>
                     </div>
@@ -70,7 +72,9 @@
                     <ul class="container-fluid sectionList" tabindex="-1" id="sections{{course.id}}">
                         <li class="row" ng-repeat="section in course.sections" id="{{section.id}}"> 
                             <div class="col-md-8 col-lg-8 col-sm-8 col-xs-8">{{section.name}}</div>
-                            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4"><span ng-if="section.enabled"> <a ng-hide="section.moved" href="" ng-click="appendToCourse(section, $index)">Add <span class="sr-only"> {{section.name}} </span>to course</a></span></div>
+                            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4">
+                                <span ng-if="section.enabled"> <a ng-hide="section.moved" href="" ng-click="appendToCourse(section, $index)">Add <span class="sr-only"> {{section.name}} </span>to course</a></span>
+                            </div>
                         </li>
                     </ul>
                 </li>
