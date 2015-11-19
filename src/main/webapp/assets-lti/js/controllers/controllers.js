@@ -102,6 +102,20 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     $scope.courses = [];
   };
   
+  $scope.xListSections = function(courseId){
+    // get the added sections by rejecting all of the original sections 
+    // and keeping the remainder
+    var addedSections = _.reject($scope.course.sections, {course_id : courseId});
+    // for each added section call a factory that will do a post
+    $scope.course.xLists =[];
+    _.each(addedSections, function(section){
+      var xListUrl = 'manager/api/v1/sections/' + section.id + '/crosslist/' + courseId;
+      Course.xListSection(xListUrl).then(function (result) {
+        $scope.course.xLists.push(section.name);
+      });
+    });
+  };
+
   $scope.addUserModal = function(){
     // use a service to pass context course model to the friends controller
     SectionSet.setSectionSet($scope.course);
