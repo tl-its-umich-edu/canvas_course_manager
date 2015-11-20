@@ -17,7 +17,7 @@ import edu.umich.its.lti.utils.PropertiesUtilities;
 public class Utils {
 
 	private static Log M_log = LogFactory.getLog(Utils.class);
-	
+
 	private static final String CANVAS_API_GETALLSECTIONS_PER_COURSE = "canvas.api.getallsections.per.course.regex";
 	private static final String CANVAS_API_TERMS = "canvas.api.terms.regex";
 	private static final String CANVAS_API_GET_COURSE = "canvas.api.get.single.course.regex";
@@ -37,107 +37,48 @@ public class Utils {
 		M_log.debug("Stub method called");
 		String pathInfo = request.getPathInfo();
 		M_log.debug("Path Info: " + pathInfo);
-		
-		String url;
+
+		String url = request.getPathInfo();
 		String queryString = request.getQueryString();
-		
+
 		if(queryString!=null) {
 			url=pathInfo+"?"+queryString;
-		}else {
-			url=pathInfo;
 		}
-		
-		File testFile = null;
+
 		FileReader fr = null;
 
 		if (url.matches(SectionsUtilityToolServlet.appExtPropertiesFile.getProperty(CANVAS_API_TERMS))){
-			try{
-				M_log.info("Courses call stub");
-				testFile = new File( Utils.class.getResource("/stubs/canvas/termsSample.txt").toURI() );
-				fr = new FileReader(testFile);  
-			}
-			catch(Exception e){
-				M_log.error("I don't think it worked");
-				e.printStackTrace();
-			}
+			fr = retrieveTestFile(url, fr, "Courses call stub", "/stubs/canvas/termsSample.txt");
 		}
-		
+
 		else if(pathInfo.equalsIgnoreCase("/api/v1/courses/2222/sections")){
-			try{
-				M_log.info("Courses call stub");
-				testFile = new File( Utils.class.getResource("/stubs/canvas/mySecondSections.txt").toURI() );
-				fr = new FileReader(testFile);  
-			}
-			catch(Exception e){
-				M_log.error("I don't think it worked");
-				e.printStackTrace();
-			}
+			fr = retrieveTestFile(url, fr, "Sections call for course 2222 stub", "/stubs/canvas/mySecondSections.txt");
 		}
-		
+
 		else if(pathInfo.equalsIgnoreCase("/api/v1/courses/1111/sections")){
-			try{
-				M_log.info("Courses call stub");
-				testFile = new File( Utils.class.getResource("/stubs/canvas/myFirstSections.txt").toURI() );
-				fr = new FileReader(testFile);  
-			}
-			catch(Exception e){
-				M_log.error("I don't think it worked");
-				e.printStackTrace();
-			}
+			fr = retrieveTestFile(url, fr, "Sections call for course 1111 stub", "/stubs/canvas/myFirstSections.txt");
 		}
-		
+
 		else if(pathInfo.equalsIgnoreCase("/api/v1/courses")){
-			try{
-				M_log.info("Courses call stub");
-				testFile = new File( Utils.class.getResource("/stubs/canvas/coursesSample.txt").toURI() );
-				fr = new FileReader(testFile);  
-			}
-			catch(Exception e){
-				M_log.error("I don't think it worked");
-				e.printStackTrace();
-			}
+			fr = retrieveTestFile(url, fr, "Courses call stub", "/stubs/canvas/coursesSample.txt");
 		}
-		
+
 		else if(url.matches(SectionsUtilityToolServlet.appExtPropertiesFile.getProperty(CANVAS_API_GET_COURSE))){
-			try{
-				M_log.info("Specific courses call stub");
-				testFile = new File( Utils.class.getResource("/stubs/canvas/myCoursesSample.txt").toURI() );
-				fr = new FileReader(testFile);  
-			}
-			catch(Exception e){
-				M_log.error("I don't think it worked");
-				e.printStackTrace();
-			}
+			fr = retrieveTestFile(url, fr, "Specific courses call stub", "/stubs/canvas/myCoursesSample.txt");
 		}
-		
-		// canvas.api.getsection.per.course.regex
+
 		else if(url.matches(SectionsUtilityToolServlet.appExtPropertiesFile.getProperty(CANVAS_API_GETALLSECTIONS_PER_COURSE))){
-			try{
-				M_log.info("Sections call stub");
-				testFile = new File( Utils.class.getResource("/stubs/canvas/sectionsSample.txt").toURI() );
-				fr = new FileReader(testFile);  
-			}
-			catch(Exception e){
-				M_log.error("I don't think it worked");
-				e.printStackTrace();
-			}
+			fr = retrieveTestFile(url, fr, "Sections call stub", "/stubs/canvas/sectionsSample.txt");
 		}
-		
+
 		else if(pathInfo.equalsIgnoreCase(SectionsUtilityToolServlet.MPATHWAYS_PATH_INFO)){
-			try{
-				M_log.info("MPathways call stub");
-				testFile = new File( Utils.class.getResource("/stubs/esb/mpathwaysSample.txt").toURI() );
-				fr = new FileReader(testFile);  
-			}
-			catch(Exception e){
-				M_log.error("I don't think it worked");
-				e.printStackTrace();
-			}
+			fr = retrieveTestFile(url, fr, "MPathways call stub", "/stubs/esb/mpathwaysSample.txt");
 		}
+
 		else{
-			M_log.debug("Hello, I'm not ready yet! " + url);
+			M_log.debug("Unrecognized call: " + url);
 		}
-		
+
 		try{
 			BufferedReader rd = new BufferedReader(fr);;
 			String line = "";
@@ -147,13 +88,25 @@ public class Utils {
 			}
 			out.print(sb.toString());
 			out.flush();
-			M_log.debug("I think it worked");
+			M_log.debug("SUCCESS");
 		}
 		catch(Exception e){
-			M_log.error("I don't think it worked");
+			M_log.error("FAILURE");
 			e.printStackTrace();
 		}
-		
-		
+	}
+
+	public static FileReader retrieveTestFile(String url, FileReader fr, String msg, String path) {
+		File testFile;
+		try{
+			M_log.info(msg);
+			testFile = new File( Utils.class.getResource(path).toURI() );
+			fr = new FileReader(testFile);  
+		}
+		catch(Exception e){
+			M_log.error("Call Failed: " + url);
+			e.printStackTrace();
+		}
+		return fr;
 	}
 }

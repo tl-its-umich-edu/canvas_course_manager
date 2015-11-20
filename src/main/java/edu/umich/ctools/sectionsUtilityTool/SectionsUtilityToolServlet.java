@@ -313,7 +313,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			M_log.debug("ltiSecret: " + ltiSecret);
 			M_log.debug("ltiUrl: " + ltiUrl);
 		}
-		else {			
+		else {	
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			M_log.error("Failed to load system properties(sectionsToolProps.properties) for SectionsTool");
 			return;
@@ -394,6 +394,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	/*
 	 * This function has logic that execute client(i.e., browser) request and get results from the canvas  
 	 * using Apache Http client library
+	 * If the property for stub testing is set to true, stub testing will be performed. Stub testing may
+	 * be done during load testing or other kinds of testing. The reason for stubbing is so that we load
+	 * test the application and none of its dependencies.
 	 */
 
 	private void apiConnectionLogic(HttpServletRequest request, HttpServletResponse response)
@@ -403,14 +406,13 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug("isStubTesting: " + isStubTesting);
 		if(Boolean.valueOf(isStubTesting)){
 			Utils.openFile(request, response, out);
+			return;
+		}
+		if(request.getPathInfo().equalsIgnoreCase(MPATHWAYS_PATH_INFO)){
+			mpathwaysCall(request, response, out);
 		}
 		else{
-			if(request.getPathInfo().equalsIgnoreCase(MPATHWAYS_PATH_INFO)){
-				mpathwaysCall(request, response, out);
-			}
-			else{
-				getCanvasResponse(request, response, out);
-			}
+			getCanvasResponse(request, response, out);
 		}
 	}
 
