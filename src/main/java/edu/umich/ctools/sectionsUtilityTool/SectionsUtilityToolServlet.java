@@ -75,19 +75,15 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String LIS_PERSON_NAME_FAMILY = "lis_person_name_family";
 	private static final String LIS_PERSON_NAME_GIVEN = "lis_person_name_given";
 
-	//private static final String BASIC_LTI_LAUNCH_REQUEST = "basic-lti-launch-request";
-	//private static final String LTI_MESSAGE_TYPE = "lti_message_type";
 	private static final String TC_SESSION_DATA = "tcSessionData";
-	private static final String OAUTH_CONSUMER_KEY_STRING = "oauth_consumer_key";
 	private static final String LTI_1P0_CONST = "LTI-1p0";
 	private static final String LTI_VERSION = "lti_version";
-	private static final String CONTEXT_ID_CONST = "context_id";
 
 	private static final String PARAMETER_INSTRUCTOR = "instructor";
 	private static final String PARAMETER_TERMID = "termid";
 
 	private static final String MANAGER_SERVLET_NAME = "/manager";
-	private static final String MPATHWAYS_PATH_INFO = "/mpathways/Instructors";
+	protected static final String MPATHWAYS_PATH_INFO = "/mpathways/Instructors";
 
 	private final static String CCM_PROPERTY_FILE_PATH = "ccmPropsPath";
 	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";	
@@ -105,13 +101,6 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private String ltiKey;
 	private String ltiSecret;
 	private OauthCredentialsFactory oacf;
-
-	private String customCanvasCourseId;
-	private String customCanvasEnrollmentState;
-	private String customCanvasUserLogin;
-	private String lisPersonContactEmailPrimary;
-	private String lisPersonNameFamily;
-	private String lisPersonNameGiven;
 
 	protected static Properties appExtSecurePropertiesFile=null;
 	protected static Properties appExtPropertiesFile=null;	
@@ -158,7 +147,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	public void storeContext(Context context, HttpServletRequest request) {
 		Map<String, String> ltiValues = new HashMap<String, String>();
 
-		String oauth_consumer_key = "lti";
+		String oauth_consumer_key = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_KEY);
 		ViewToolContext vtc = (ViewToolContext)context;
 		HttpServletResponse response = vtc.getResponse();
 		HttpSession session= request.getSession(true);
@@ -240,7 +229,6 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.info("Primary Email: " + ltiValues.get(LIS_PERSON_CONTACT_EMAIL_PRIMARY));
 		M_log.info("Last Name: " + ltiValues.get(LIS_PERSON_NAME_FAMILY));
 		M_log.info("First Name: " + ltiValues.get(LIS_PERSON_NAME_GIVEN));
-
 	}
 
 	public Boolean checkForValidMessage(HttpServletRequest request,
@@ -268,7 +256,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			throws IOException{
 		M_log.debug("doGet: Called");
 		M_log.info("request.getPathInfo(): " + request.getPathInfo());
-		if( request.getPathInfo().equals("/index-lti.vm") ){
+		if( request.getPathInfo().equals(SectionUtilityToolFilter.LTI_PAGE) ){
 			response.sendError(403);
 			return;
 		}
@@ -325,7 +313,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			M_log.debug("ltiSecret: " + ltiSecret);
 			M_log.debug("ltiUrl: " + ltiUrl);
 		}
-		else {
+		else {	
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			M_log.error("Failed to load system properties(sectionsToolProps.properties) for SectionsTool");
 			return;
@@ -406,12 +394,20 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	/*
 	 * This function has logic that execute client(i.e., browser) request and get results from the canvas  
 	 * using Apache Http client library
+	 * If the property for stub testing is set to true, stub testing will be performed. Stub testing may
+	 * be done during load testing or other kinds of testing. The reason for stubbing is so that we load
+	 * test the application and none of its dependencies.
 	 */
-
 
 	private void apiConnectionLogic(HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
 		PrintWriter out = response.getWriter();
+		String isStubTesting = appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_TEST_STUB);
+		M_log.debug("isStubTesting: " + isStubTesting);
+		if(Boolean.valueOf(isStubTesting)){
+			Utils.openFile(request, response, out);
+			return;
+		}
 		if(request.getPathInfo().equalsIgnoreCase(MPATHWAYS_PATH_INFO)){
 			mpathwaysCall(request, response, out);
 		}

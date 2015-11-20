@@ -1,0 +1,72 @@
+[
+    {
+        "account_id": 12,
+        "course_code": "STATS 250 FA 2015 STUB",
+        "default_view": "wiki",
+        "enrollment_term_id": 12,
+        "grading_standard_id": null,
+        "id": 1111,
+        "is_public": false,
+        "name": "STATS 250 FA 2015",
+        "start_at": "2015-08-26T02:14:24Z",
+        "end_at": null,
+        "public_syllabus": false,
+        "storage_quota_mb": 3000,
+        "is_public_to_auth_users": false,
+        "apply_assignment_group_weights": true,
+        "calendar": {
+            "ics": ""
+        },
+        "sis_course_id": "123456789012345",
+        "integration_id": null,
+        "enrollments": [
+            {
+                "type": "teacher",
+                "role": "TeacherEnrollment",
+                "role_id": 12,
+                "enrollment_state": "active"
+            },
+            {
+                "type": "teacher",
+                "role": "TeacherEnrollment",
+                "role_id": 12,
+                "enrollment_state": "active"
+            }
+        ],
+        "hide_final_grades": true,
+        "workflow_state": "available",
+        "restrict_enrollments_to_course_dates": false
+    },
+    {
+        "account_id": 12,
+        "course_code": "STATS 993 001 FA 2015 STUB",
+        "default_view": "feed",
+        "enrollment_term_id": 12,
+        "grading_standard_id": null,
+        "id": 2222,
+        "is_public": null,
+        "name": "STATS 993 001 FA 2015",
+        "start_at": null,
+        "end_at": null,
+        "public_syllabus": false,
+        "storage_quota_mb": 3000,
+        "is_public_to_auth_users": false,
+        "apply_assignment_group_weights": false,
+        "calendar": {
+            "ics": ""
+        },
+        "sis_course_id": "123456789012345",
+        "integration_id": null,
+        "enrollments": [
+            {
+                "type": "teacher",
+                "role": "TeacherEnrollment",
+                "role_id": 12,
+                "enrollment_state": "active"
+            }
+        ],
+        "hide_final_grades": false,
+        "workflow_state": "unpublished",
+        "restrict_enrollments_to_course_dates": false
+    }
+]

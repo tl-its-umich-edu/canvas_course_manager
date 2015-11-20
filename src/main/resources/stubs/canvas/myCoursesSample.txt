@@ -1,0 +1,26 @@
+{
+    "account_id": 12,
+    "course_code": "MOVESCI 110 002 FA 2015 STUB",
+    "default_view": "modules",
+    "enrollment_term_id": 12,
+    "grading_standard_id": null,
+    "id": 12345,
+    "is_public": false,
+    "name": "MOVESCI 110 002 FA 2015 STUB",
+    "start_at": "2015-09-09T04:00:00Z",
+    "end_at": "2015-12-23T05:00:00Z",
+    "public_syllabus": false,
+    "storage_quota_mb": 3000,
+    "is_public_to_auth_users": false,
+    "hide_final_grades": false,
+    "apply_assignment_group_weights": true,
+    "sections": [],
+    "calendar": {
+        "ics": ""
+    },
+    "sis_course_id": "123456789012345",
+    "integration_id": null,
+    "enrollments": [],
+    "workflow_state": "available",
+    "restrict_enrollments_to_course_dates": false
+}

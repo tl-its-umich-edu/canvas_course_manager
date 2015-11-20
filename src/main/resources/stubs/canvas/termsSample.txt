@@ -1,0 +1,12 @@
+{
+    "enrollment_terms": [
+        {
+            "end_at": "2016-02-12T05:00:00Z",
+            "id": 12,
+            "name": "Fall 2015",
+            "start_at": "2015-09-08T04:00:00Z",
+            "workflow_state": "active",
+            "sis_term_id": "1234"
+        }
+    ]
+}

@@ -27,6 +27,7 @@ The Canvas Course Manager (CCM) is an application that will be able to be used b
 	* <code>umich.friend.subjectline= Subject line for friend email</code>
 	* <code>lti.url= URL to launch LTI tool</code>
 	* <code>call.type= Either 'canvas' or 'esb'</code>
+	* <code>stub.test= 'true' or 'false'</code>
     
 5. Add the following 9 properties to ccmSecure.properties:<br/> 
 	* <code>canvas.admin.token= Canvas Token </code>
