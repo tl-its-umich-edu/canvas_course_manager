@@ -25,7 +25,6 @@
                     </div>
                 </div>
 
-
                 <ul class="container-fluid sectionList">
                     <li ng-class="section.course_id !== course.id ? 'row addedSection' :'row'" ng-repeat="section in course.sections | orderBy:'section.name'" id="{{section.id}}" data-parent-id="{{section.course_id}}">
                         <div class="col-md-8 col-lg-8 col-sm-8 col-xs-8"><span ng-show="course.addingUser"><input type="checkbox" id="check{{section.id}}" ng-model="section.selected" ng-change="sectionSelectedQuery()"> <label for ="check{{section.id}}">{{section.name}}</label></span><span ng-show="!course.addingUser">{{section.name}}</span></div>
@@ -44,16 +43,26 @@
                     </li>
                 </ul>
                 <div class="container-fluid">
+                    <span class="pull-left">
+                        <span ng-hide="!course.xLists">Sections added: </span>
+                        <span class="label label-success" ng-repeat="xList in course.xLists">{{xList}}</span>
+                    </span>
                     <span class="pull-right">
+                        <button ng-show="course.addingSectionsDone" class="btn btn-default" ng-click="cancelAddSections()">Done</button>
                         <button ng-show="course.addingSections" class="btn btn-default" ng-click="cancelAddSections()">Cancel</button>
-                        <button ng-show="course.dirty" class="btn btn-primary" ng-click="getCoursesForTerm()">Save Sections</button>
+                        <button ng-show="course.dirty" class="btn btn-primary" ng-click="xListSections(course.id)">Save Sections</button>
+
                     </span>
                 </div>
 
 
             </div>    
         
-        <div class="coursePanel nograb" ng-show="courses" id="otherCourses" tabindex="-1">
+        <div class="container-fluid"  ng-show="courses.length === 1">
+            <p></p>
+            <p class="alert alert-info">You have no other course sites to pick sections from.</p>
+        </div>
+        <div class="coursePanel nograb" ng-show="courses.length > 1" id="otherCourses" tabindex="-1">
             <h4 style="padding:0 20px">Your Other Courses <small> (get their sections and then select which ones you want added to this course) </small></h4>
             <ul class="container-fluid courseList">
                 
