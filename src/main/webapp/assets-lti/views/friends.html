@@ -19,11 +19,11 @@
                             <input class="form-control" type="text" ng-model="coursemodal.friendEmailAddress" id="friendEmailAddress1" placeholder="email address" style="width:300px" aria-describedby="helpBlockFriend">
                           </div>
                           <div ng-show="newUser" id="newUser" tabindex="-1">
-                            <span id="helpBlockFriendCreate" class="help-block alert alert-info">Please supply a name for <strong>({{coursemodal.friendEmailAddress}})</strong>.</span>
+                            <span id="helpBlockFriendCreate" class="help-block alert alert-warning">Please supply a name for <strong>{{coursemodal.friendEmailAddress}}</strong>.</span>
                             <div class="form-group form-inline form-group">
                               <fieldset aria-describedby="helpBlockFriendCreate">
                                 <legend class="sr-only">Create new user to add to sections</legend>
-                                <p style="margin:0 0 10px 0" class="alert alert-warning alert-inline "  ng-show="failedValidation" id="failedToValidateEmailName" tabindex="-1">Please specify a first and last names.</p>
+                                <p style="margin:0 0 10px 0" class="alert alert-warning alert-inline "  ng-show="failedValidation" id="failedToValidateEmailName" tabindex="-1">Please supply a first and last names.</p>
                                 <div class="clearfix"></div>
                                 <label for="friendEmailAddress2" class="sr-only" style="display:none">Enter email</label>
                                 <input type="text" class="form-control" id="friendEmailAddress2" placeholder="Enter email" ng-model="coursemodal.friendEmailAddress"  style="display:none">
@@ -100,6 +100,7 @@
             <button type="button" ng-show="coursemodal.sectionSelected && !newUser && userExists && !addSuccess" class="btn btn-primary" ng-click="addUserToSectionsClick()">Add User</button>
             <button type="button" ng-show="addSuccess" class="btn btn-default"  ng-click="addAnother()">Add More Users</button>
             <button type="button" ng-show="addSuccess" class="btn btn-primary"  data-dismiss="modal">Done</button> 
+            <button type="button" ng-show="coursemodal.sectionSelected && newUser && !addSuccess" class="btn btn-default"  ng-click="addAnother()">Start Over</button> 
             <button type="button" ng-show="coursemodal.sectionSelected && newUser && !addSuccess" class="btn btn-primary" ng-click="createFriendClick()">Add User</button>
           </div>
         </div>
