@@ -13,17 +13,28 @@
       #set($ltiEntry="")  
       <script>
         var ltiLaunch = {
+          "custom_canvas_course_id": "24299",
+          //"custom_canvas_enrollment_state": "$ltiValues.get("custom_canvas_enrollment_state")",
+          "custom_canvas_user_login_id": "charityh",
+          "lis_person_contact_email_primary": "charityh@umich.edu",
+          "lis_person_name_family": "Hoffman",
+          "lis_person_name_given": "Charity"
+          /*
           "custom_canvas_course_id": "$ltiValues.get("custom_canvas_course_id")",
           "custom_canvas_enrollment_state": "$ltiValues.get("custom_canvas_enrollment_state")",
           "custom_canvas_user_login_id": "$ltiValues.get("custom_canvas_user_login_id")",
           "lis_person_contact_email_primary": "$ltiValues.get("lis_person_contact_email_primary")",
           "lis_person_name_family": "$ltiValues.get("lis_person_name_family")",
-          "lis_person_name_given": "$ltiValues.get("lis_person_name_given")",
+          "lis_person_name_given": "$ltiValues.get("lis_person_name_given")"*/
+
         }
       </script>
   </head>
   <body>
-    <div class="alert alert-danger debugPanel" id="debugPanel"></div>
+    <div class="alert alert-danger debugPanel alert-dismissible" id="debugPanel" role="alert">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div id="debugPanelBody"></div>
+    </div>
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
         <div class="container-fluid">
             <!-- Brand and toggle get grouped for better mobile display -->

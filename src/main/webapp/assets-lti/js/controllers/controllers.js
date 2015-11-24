@@ -8,21 +8,27 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
 
   var courseUrl ='manager/api/v1/courses/' + $rootScope.ltiLaunch.custom_canvas_course_id + '?include[]=sections&_=' + generateCurrentTimestamp();
   Course.getCourse(courseUrl).then(function (result) {
-    $scope.loadingSections = true;
-    $scope.course = result.data;
-    $rootScope.termId = $scope.course.enrollment_term_id;
-    Sections.getSectionsForCourseId($scope.course.id).then(function (result) {
-      $scope.loadingSections = false;
-      $scope.course.sections =_.sortBy(result.data, 'name');
-      $scope.currentTermSISID = $scope.course.sections[0].sis_course_id.substring(0, 4);
-      /* adds to the scope a list of sections (by sis_section_id) that the current user can perform actions on */
-      var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?instructor=' + $rootScope.ltiLaunch.custom_canvas_user_login_id +'&termid=' + $scope.currentTermSISID;
-      Course.getMPathwaysCourses(mPathwaysCoursesUrl, $scope.currentTermSISID).then(function (result) {
-        $scope.mpath_courses = result;
+    if(!result.data.errors) {
+      $scope.loadingSections = true;
+      $scope.course = result.data;
+      $rootScope.termId = $scope.course.enrollment_term_id;
+      Sections.getSectionsForCourseId($scope.course.id).then(function (result) {
+        $scope.loadingSections = false;
+        if(!result.data.errors) {
+          $scope.course.sections =_.sortBy(result.data, 'name');
+          $scope.currentTermSISID = $scope.course.sections[0].sis_course_id.substring(0, 4);
+          /* adds to the scope a list of sections (by sis_section_id) that the current user can perform actions on */
+          var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?instructor=' + $rootScope.ltiLaunch.custom_canvas_user_login_id +'&termid=' + $scope.currentTermSISID;
+          Course.getMPathwaysCourses(mPathwaysCoursesUrl, $scope.currentTermSISID).then(function (result) {
+            // Factory takes care of the error, here we just check that data is well formed
+            if(Array.isArray(result)) {
+              $scope.mpath_courses = result;
+            }
+          });
+        }  
       });
-    });
+    }
   });
-
 
   $scope.getCoursesForTerm = function() {
     $scope.loadingOtherCourses = true;
