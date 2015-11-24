@@ -32,7 +32,12 @@ var generateCurrentTimestamp = function(){
 
 var prepareMPathData = function(MPathData, sis_term_id) {
   var mPathArray = [];
-  $.each(MPathData.Result.getInstrClassListResponse.InstructedClass, function() {
+  // MPath via ESB will return an object if a single course, an array if more than one
+  /// so turn everything into an array
+  var arrayMPath = [].concat(MPathData.Result.getInstrClassListResponse.InstructedClass);
+  
+  $.each(arrayMPath, function() {
+
     if(this.InstructorRole === 'Primary Instructor' || this.InstructorRole === 'Seconday Instructor'  || this.InstructorRole === 'Faculty grader'  || this.InstructorRole === 'Graduate Student Instructor'){
       mPathArray.push(sis_term_id + this.ClassNumber);
     }

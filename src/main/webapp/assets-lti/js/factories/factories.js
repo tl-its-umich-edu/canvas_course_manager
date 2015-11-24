@@ -55,7 +55,6 @@ canvasSupportApp.factory('Course', function ($http) {
         }
       );
     },
-    
     getMPathwaysCourses: function (url, sis_term_id) {
       return $http.get(url, {cache: false}).then(
         function success(result) {
@@ -69,7 +68,16 @@ canvasSupportApp.factory('Course', function ($http) {
         }
       );
     },
-
+    xListSection: function (url) {
+      return $http.post(url).then(
+        function success(result) {
+          return result
+        },
+        function error(result) {
+          return result;
+        }
+      );
+    }
   };
 });
 

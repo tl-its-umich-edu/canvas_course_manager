@@ -14,20 +14,15 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     Sections.getSectionsForCourseId($scope.course.id).then(function (result) {
       $scope.loadingSections = false;
       $scope.course.sections =_.sortBy(result.data, 'name');
-    });    
+      $scope.currentTermSISID = $scope.course.sections[0].sis_course_id.substring(0, 4);
+      /* adds to the scope a list of sections (by sis_section_id) that the current user can perform actions on */
+      var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?instructor=' + $rootScope.ltiLaunch.custom_canvas_user_login_id +'&termid=' + $scope.currentTermSISID;
+      Course.getMPathwaysCourses(mPathwaysCoursesUrl, $scope.currentTermSISID).then(function (result) {
+        $scope.mpath_courses = result;
+      });
+    });
   });
 
-  var termsUrl ='manager/api/v1/accounts/1/terms?per_page=4000&_=' + generateCurrentTimestamp();
-  Terms.getTerms(termsUrl).then(function (result) {
-    // this seems so unnecessary, getting all terms so that we can extract the sis_term_id of the Canvas term id
-    $scope.currentTermSISID = _.where(result.data.enrollment_terms, {id:  $rootScope.termId})[0].sis_term_id
-    /* adds to the scope a list of sections (by sis_section_id) that the current user can perform actions on */
-    var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?instructor=' + $rootScope.ltiLaunch.custom_canvas_user_login_id +'&termid=' + $scope.currentTermSISID;
-    //var mPathwaysCoursesUrl = 'assets-lti/data/mpathwaysdata.json';
-    Course.getMPathwaysCourses(mPathwaysCoursesUrl, $scope.currentTermSISID).then(function (result) {
-      $scope.mpath_courses = result;
-    });
-  });  
 
   $scope.getCoursesForTerm = function() {
     $scope.loadingOtherCourses = true;
@@ -100,8 +95,30 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     $scope.course.addingSections = false;
     // prune the source courses from the model
     $scope.courses = [];
+    // hide the "Done" button
+    $scope.course.addingSectionsDone = false;
   };
   
+  $scope.xListSections = function(courseId){
+    // get the added sections by rejecting all of the original sections 
+    // and keeping the remainder
+    var addedSections = _.reject($scope.course.sections, {course_id : courseId});
+    // for each added section call a factory that will do a post
+    $scope.course.xLists =[];
+    _.each(addedSections, function(section){
+      var xListUrl = 'manager/api/v1/sections/' + section.id + '/crosslist/' + courseId;
+      Course.xListSection(xListUrl).then(function (result) {
+        $scope.course.xLists.push(section.name);
+        section.course_id = courseId;
+        if (addedSections.length === $scope.course.xLists.length) {
+          $scope.course.dirty = false;
+          $scope.course.addingSections = false;
+          $scope.course.addingSectionsDone = true;
+        }
+      });
+    });
+  };
+
   $scope.addUserModal = function(){
     // use a service to pass context course model to the friends controller
     SectionSet.setSectionSet($scope.course);
