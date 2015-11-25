@@ -11,7 +11,7 @@
                 <ul class="container-fluid courseList">
                     <li data-course-id="{{coursemodal.id}}">
                         <div class="form-inline"  ng-class="failedValidation ? 'form-inline has-error' : 'form-inline'">
-                          <span id="helpBlockFriend" class="help-block" ng-hide="userExists || newUser || successes">Type or paste a non-UM user.</span>
+                          <span id="helpBlockFriend" class="help-block" ng-hide="userExists || newUser || addSuccess || addError ">Type or paste a non-UM user.</span>
                           <div class="form-group" ng-show="!userExists && !newUser && !newUserFound">
                             <p style="margin:10px 0" class="alert alert-warning alert-inline" ng-show="failedValidation" id="failedToValidateEmail" tabindex="-1">Please specify a valid NON UMICH email address</p>
                             <div class="clearfix"></div>
@@ -38,13 +38,16 @@
                             <div class="alert alert-danger" ng-show="newUserFail">
                               {{friend_account.detailedMessage}}.
                             </div>
-                            <div class="alert alert-success" ng-show="addSuccess">
+                            <div class="alert alert-success" ng-show="addSuccess && !addError">
                               The following user is now enrolled in this course. In future you can use the People tool to add, delete or modify his/her enrollment in any course section(s). 
+                            </div>
+                            <div class="alert alert-danger" ng-show="addError">
+                              There were some errors.
                             </div>
                           </div>  
                         </div>
                         <div ng-show="userExists || addSuccess">
-                          <div class="alert alert-info" ng-show="!addSuccess && userExists">Validated and ready to add</div>
+                          <div class="alert alert-info" ng-show="!addSuccess && !addError && userExists">Validated and ready to add</div>
                           <table class="table">
                             <tr>
                               <th scope="col">Name</th>
@@ -58,8 +61,9 @@
                               <td>
                                 {{friend.sis_user_id}}
                               </td>
-                              <td ng-show="addSuccess">
+                              <td ng-show="addSuccess || addErrors">
                                   <span class="label label-success" ng-repeat="success in successes">{{success}}</span>
+                                  <span class="label label-danger" ng-repeat="error in errors">{{error}}</span>
                               </td>    
                             </tr>
                           </table> 
