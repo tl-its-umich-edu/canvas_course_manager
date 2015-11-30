@@ -1,5 +1,5 @@
 'use strict';
-/* global  canvasSupportApp, errorDisplay, generateCurrentTimestamp  */
+/* global canvasSupportApp, errorDisplay, generateCurrentTimestamp  */
 
 //COURSES FACTORY - does the request for the courses controller
 canvasSupportApp.factory('Courses', function ($http) {

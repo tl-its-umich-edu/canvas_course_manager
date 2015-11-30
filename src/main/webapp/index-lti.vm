@@ -59,8 +59,6 @@
     </script>
     <script src="vendor/bootstrap/bootstrap.min.js">
     </script>
-    <script src="vendor/moment/moment.min.js"/>
-    </script>
     <script src="vendor/underscore/underscore-min.js">
     </script>
     <script src="assets-lti/js/utils.js">

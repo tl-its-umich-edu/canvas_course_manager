@@ -1,5 +1,5 @@
 'use strict';
-/* global $, canvasSupportApp, getTermArray, _, getCurrentTerm, errorDisplay, generateCurrentTimestamp, angular, validateEmailAddress */
+/* global $, canvasSupportApp, _, generateCurrentTimestamp, angular, validateEmailAddress */
 
 /* SINGLE COURSE CONTROLLER */
 canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', '$scope', '$rootScope', '$filter', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, $scope, $rootScope, $filter) {
