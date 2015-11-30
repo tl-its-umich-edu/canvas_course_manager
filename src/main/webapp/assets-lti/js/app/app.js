@@ -1,7 +1,7 @@
 'use strict';
 /* global angular*/
 
-var canvasSupportApp = angular.module('canvasSupportApp', ['sectionsFilters','ui.sortable', 'ngAnimate']);
+var canvasSupportApp = angular.module('canvasSupportApp', ['sectionsFilters', 'ngAnimate', 'ngAria']);
 
 canvasSupportApp.run(function ($rootScope) {
 	//for any init values needed

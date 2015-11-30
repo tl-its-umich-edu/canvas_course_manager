@@ -51,11 +51,11 @@
 
     <script src="vendor/jquery/jquery-1.11.0.min.js"></script>
     <script src="vendor/jquery/jquery-ui-1.11.2/jquery-ui.min.js"></script>
-    <script src="vendor/angular/angular.min.js">
+    <script src="assets-lti/vendor/angular/angular.min.js">
     </script>
-    <script src="vendor/angular/sortable.js"></script>
-
-    <script src="vendor/angular/angular-animate.min.js">
+    <script src="assets-lti/vendor/angular/angular-animate.min.js">
+    </script>
+    <script src="assets-lti/vendor/angular/angular-aria.min.js">
     </script>
     <script src="vendor/bootstrap/bootstrap.min.js">
     </script>
@@ -76,34 +76,6 @@
     </script>
     <script src="assets-lti/js/services/services.js">
     </script>
-    <!-- unCrossList Modal 
-    <div class="modal fade" id="unCrossListModal" tabindex="-1" role="dialog" aria-labelledby="unCrossListLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal">
-              <span aria-hidden="true">&times;</span>
-              <span class="sr-only">Close</span>
-            </button>
-            <h3 class="modal-title" id="unCrossListLabel">Uncrosslisting</h3>
-          </div>
-          <div class="modal-body" id="unCrossListInner">
-          </div>
-          <div class="modal-footer">
-            <button id="unCrossList" type="button" class="btn btn-primary" data-section-id="">
-              Uncrosslist
-            </button>
-            <button id="unCrossListDone" type="button" class="btn btn-primary" data-dismiss="modal" style="display:none">
-              Done
-            </button>
-            <button type="button" class="btn btn-default" data-dismiss="modal">
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    -->
     <!-- add user Modal -->
     <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserLabel" aria-hidden="true" ng-controller="addUserController">
       <div class="modal-dialog modal-lg">
