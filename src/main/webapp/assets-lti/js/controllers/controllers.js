@@ -255,6 +255,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     $scope.userExists = false;
     $scope.newUser = false;
     $scope.newUserFound = false;
+    $scope.successes = false;
     $scope.addSuccess = false;
     $scope.coursemodal.friendEmailAddress ='';
     $scope.coursemodal.friendNameFirst ='';

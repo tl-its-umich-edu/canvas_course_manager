@@ -19,8 +19,8 @@
                         <button ng-show="loadingOtherCourses" class="btn btn-link spinner"></button>  
                         <div class="btn-group" role="group">
                             <!--// add users with a modal -->
-                            <button ng-disabled="course.addingSections" ng-hide="!functionality.friends || course.addingUser" class="btn btn-default" ng-click="addUserModal()" data-toggle="modal"  data-target="#addUserModal">Add non-UM users</button>
-                            <button ng-disabled="course.addingUser" ng-hide="courses || !functionality.sections" class="btn btn-default" ng-click="getCoursesForTerm()">Add sections</button>
+                            <button ng-disabled="course.addingSections" class="btn btn-default" ng-click="addUserModal()" data-toggle="modal"  data-target="#addUserModal">Add non-UM users</button>
+                            <button ng-disabled="course.addingUser" ng-hide="course.addingSections" class="btn btn-default" ng-click="getCoursesForTerm()">Add sections</button>
                         </div>
                     </div>
                 </div>
@@ -43,7 +43,7 @@
                     </li>
                 </ul>
                 <div class="container-fluid">
-                    <span class="pull-left">
+                    <span class="pull-left" role="alert">
                         <span ng-hide="!course.xLists">Sections added: </span>
                         <span class="label label-success" ng-repeat="xList in course.xLists">{{xList}}</span>
                     </span>
