@@ -18,8 +18,8 @@ var errorDisplay = function (url, status, errorMessage) {
       window.location = '/canvasCourseManager/error.html';
       break;
     default:
-      $('#debugPanel').html('<h3>' + status + '</h3><p><code>' + url + '</code></p><p>' + errorMessage + '</p>');
-      $('#debugPanel').fadeIn().delay(5000).fadeOut();
+      $('#debugPanelBody').html('<h3>' + status + '</h3><p><code>' + url + '</code></p><p>' + errorMessage + '</p>');
+      $('#debugPanel').fadeIn();
   }
 };
 
@@ -37,7 +37,6 @@ var prepareMPathData = function(MPathData, sis_term_id) {
   var arrayMPath = [].concat(MPathData.Result.getInstrClassListResponse.InstructedClass);
   
   $.each(arrayMPath, function() {
-
     if(this.InstructorRole === 'Primary Instructor' || this.InstructorRole === 'Seconday Instructor'  || this.InstructorRole === 'Faculty grader'  || this.InstructorRole === 'Graduate Student Instructor'){
       mPathArray.push(sis_term_id + this.ClassNumber);
     }
