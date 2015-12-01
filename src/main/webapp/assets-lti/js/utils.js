@@ -1,6 +1,6 @@
 'use strict';
 /* jshint  strict: true*/
-/* global $, moment, _*/
+/* global $, _*/
 
 /**
  * set up global ajax options
