@@ -103,8 +103,11 @@ public class SectionUtilityToolFilter implements Filter {
 		//be launched from a browser
 		setLaunchType(request, session);
 
+		M_log.debug("Launch Type: " + session.getAttribute(LAUNCH_TYPE));
+		M_log.debug("Path Info: " + useRequest.getPathInfo() );
+		
 		if (session.getAttribute(LAUNCH_TYPE).equals("lti")){
-			if( useRequest.getPathInfo().equals(SC_PAGE)){
+			if( useRequest.getPathInfo() != null && useRequest.getPathInfo().equals(SC_PAGE)){
 				useRequest.getSession().invalidate();
 				useResponse.sendError(403);
 				return;
