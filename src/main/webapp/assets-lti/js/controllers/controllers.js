@@ -16,15 +16,29 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
         $scope.loadingSections = false;
         if(!resultSections.data.errors) {
           $scope.course.sections =_.sortBy(resultSections.data, 'name');
-          $scope.currentTermSISID = $scope.course.sections[0].sis_course_id.substring(0, 4);
-          /* adds to the scope a list of sections (by sis_section_id) that the current user can perform actions on */
-          var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?instructor=' + $rootScope.ltiLaunch.custom_canvas_user_login_id +'&termid=' + $scope.currentTermSISID;
-          Course.getMPathwaysCourses(mPathwaysCoursesUrl, $scope.currentTermSISID).then(function (resultMPathData) {
-            // Factory takes care of the error, here we just check that data is well formed
-            if(Array.isArray(resultMPathData)) {
-              $scope.mpath_courses = resultMPathData;
-            }
-          });
+          if($scope.course.sections[0].sis_course_id) {
+            $scope.currentTermSISID = $scope.course.sections[0].sis_course_id.substring(0, 4);
+          }
+          else {
+           $scope.currentTermSISID = $scope.course.sections[0].sis_course_id; 
+          }
+          if($scope.currentTermSISID) {
+            /* adds to the scope a list of sections (by sis_section_id) that the current user can perform actions on */
+            var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?instructor=' + $rootScope.ltiLaunch.custom_canvas_user_login_id +'&termid=' + $scope.currentTermSISID;
+            Course.getMPathwaysCourses(mPathwaysCoursesUrl, $scope.currentTermSISID).then(function (resultMPathData) {  
+              if(!resultMPathData.data) {
+                if(Array.isArray(resultMPathData)) {
+                  $scope.mpath_courses = resultMPathData;
+                }
+              } else {
+                $scope.mpath_courses =[];
+                $scope.mpath_courses_error =true;
+              }
+            });
+          }
+          else {
+            $scope.mpath_courses =[];
+          }
         }  
       });
     }
@@ -129,7 +143,9 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     // use a service to pass context course model to the friends controller
     SectionSet.setSectionSet($scope.course);
   };
-
+  $scope.showInfo = function(){
+    $scope.showPop = !$scope.showPop
+  }
 }]);
 
 /* FRIEND PANEL CONTROLLER */

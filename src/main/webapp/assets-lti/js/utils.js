@@ -235,6 +235,5 @@ $(document).on('hidden.bs.modal', '#addUserModal', function(){
     $scope.addSuccess= false;
     $scope.failedValidation = false;
   });
-});;
-
+});
 

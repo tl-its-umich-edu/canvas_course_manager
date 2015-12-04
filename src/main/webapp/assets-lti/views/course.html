@@ -17,10 +17,23 @@
                     </div>
                     <div class="col-md-6 col-lg-6 col-sm-6 col-xs-6" style="text-align:right;">
                         <button ng-show="loadingOtherCourses" class="btn btn-link spinner"></button>  
+                        <small ng-cloak ng-show="mpath_courses && (mpath_courses.length === 0 || mpath_courses.length === 1)">Cannot add sections (<a ng-click="showInfo()" href="#">why?</a>)</small>
+
+                        <div ng-show="showPop" class="whyPop">
+                            <small ng-show="(mpath_courses.length === 0 || mpath_courses.length === 1) && !mpath_courses_error">
+                                You have no additional class sections for this term assigned to you to teach in M-Pathways/Wolverine Access. If you are teaching additional classes, please contact your departmental curriculum administrator.
+                            </small>
+                            <small ng-show="mpath_courses_error">
+                                We were unable to contact M-Pathways/Wolverine Access to determine what classes you are teaching. Try again later.
+                            </small>
+                        </div>
+
+
+
                         <div class="btn-group" role="group">
-                            <!--// add users with a modal -->
+                            <button ng-disabled="course.addingUser || mpath_courses.length === 0 || mpath_courses.length === 1 || !mpath_courses" ng-hide="course.addingSections" class="btn btn-default" ng-click="getCoursesForTerm()">Add sections</button>
                             <button ng-disabled="course.addingSections" class="btn btn-default" ng-click="addUserModal()" data-toggle="modal"  data-target="#addUserModal">Add non-UM users</button>
-                            <button ng-disabled="course.addingUser" ng-hide="course.addingSections" class="btn btn-default" ng-click="getCoursesForTerm()">Add sections</button>
+                            
                         </div>
                     </div>
                 </div>

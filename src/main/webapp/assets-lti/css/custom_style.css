@@ -87,6 +87,21 @@ ul {
     right:25%;
 }
 
+.whyPop {
+    text-align: left;
+    position:absolute;
+    top:0;
+    border:1px solid #ccc;
+    background:#fff;
+    top:35px;
+    z-index:1;
+    right:270px;
+    padding:5px;
+    webkit-box-shadow: 3px 3px 5px 0px rgba(212,208,212,1);
+    -moz-box-shadow: 3px 3px 5px 0px rgba(212,208,212,1);
+    box-shadow: 3px 3px 5px 0px rgba(212,208,212,1);
+}
+
 li.addedSection {
     background: #ffe;
  }
@@ -163,7 +178,7 @@ li.addedSection {
     animation:slideInRight 2s both ease, fadeIn 1s both ease 2s; 
 }
 
-*:focus {outline:1px solid red !important};
+#otherCourses:focus, .sectionList:focus, #newUser:focus, #failedToValidateEmail:focus, #failedToValidateEmailName:focus,#addMessageContainer:focus {outline:none};
 
 /* leave animation */
 .alert-inline.ng-leave            { 
