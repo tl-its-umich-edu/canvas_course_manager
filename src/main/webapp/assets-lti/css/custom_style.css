@@ -178,7 +178,14 @@ li.addedSection {
     animation:slideInRight 2s both ease, fadeIn 1s both ease 2s; 
 }
 
+
 #otherCourses:focus, .sectionList:focus, #newUser:focus, #failedToValidateEmail:focus, #failedToValidateEmailName:focus,#addMessageContainer:focus {outline:none};
+/*set all bootstrap alerts to black text
+to get WACG 2 AAA contrast, preserving the background colors*/
+.alert {
+    color:#000;
+}
+
 
 /* leave animation */
 .alert-inline.ng-leave            { 

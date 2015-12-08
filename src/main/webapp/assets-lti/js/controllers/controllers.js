@@ -23,8 +23,9 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
            $scope.currentTermSISID = $scope.course.sections[0].sis_course_id; 
           }
           if($scope.currentTermSISID) {
-            /* adds to the scope a list of sections (by sis_section_id) that the current user can perform actions on */
-            var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?instructor=' + $rootScope.ltiLaunch.custom_canvas_user_login_id +'&termid=' + $scope.currentTermSISID;
+          /* adds to the scope a list of sections (by sis_section_id) that the current user can perform actions on */
+          var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?user=self&termid=' + $scope.currentTermSISID;
+          //var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?instructor=' + $rootScope.ltiLaunch.custom_canvas_user_login_id +'&termid=' + $scope.currentTermSISID;
             Course.getMPathwaysCourses(mPathwaysCoursesUrl, $scope.currentTermSISID).then(function (resultMPathData) {  
               if(!resultMPathData.data) {
                 if(Array.isArray(resultMPathData)) {
@@ -46,7 +47,9 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
 
   $scope.getCoursesForTerm = function() {
     $scope.loadingOtherCourses = true;
-    var coursesUrl='/canvasCourseManager/manager/api/v1/courses?as_user_id=sis_login_id:' + $rootScope.ltiLaunch.custom_canvas_user_login_id + '&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher&_='+ generateCurrentTimestamp();
+    
+    var coursesUrl='/canvasCourseManager/manager/api/v1/courses?user=self&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher&_='+ generateCurrentTimestamp();
+    //var coursesUrl='/canvasCourseManager/manager/api/v1/courses?as_user_id=sis_login_id:' + $rootScope.ltiLaunch.custom_canvas_user_login_id + '&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher&_='+ generateCurrentTimestamp();
     Courses.getCourses(coursesUrl).then(function (resultCourses) {
       $scope.loadingOtherCourses = false;
       $scope.course.addingSections = true;
