@@ -63,21 +63,36 @@ canvasSupportApp.factory('Course', function ($http) {
     getMPathwaysCourses: function (url, sis_term_id) {
       return $http.get(url, {cache: false}).then(
         function success(result) {
-          // MPathways returns valid data, but with errors (bad uniqname)
-          if (result.data.Meta.httpStatus === 404) {
-            errorDisplay(url, result.data.Meta.httpStatus, result.data.Result.ErrorResponse.responseDescription);
-            //not a 404, and has a class listing
-          } else if(result.data.Result.getInstrClassListResponse.InstructedClass) {
-            return prepareMPathData(result.data, sis_term_id);  
+          //ESB down, timed out
+          if(result === undefined){
+            return {"Meta":{"Message":"COMPLETED","httpStatus":666},"Result":{"ErrorResponse":{"responseDescription":"Server not available","responseCode":666}}}
           }
-          //not a 404, and has no class listing, which is unlikely as they ARE in a course
+          //Malformed request (because sis_course_id is bogus)
+          if (result.data.Meta.httpStatus === 404) {
+            return [];
+          } 
+          //Malformed request (because sis_course_id is bogus)
+          if (result.data.Meta.httpStatus === 400) {
+            return [];
+          } 
+          //MPath not available
+          if (result.data.Meta.httpStatus === 666) {
+            return result;
+          } 
+          // ESB down
+          if (result.data.Meta.httpStatus === 503) {
+            return result;
+          } 
+          
+          if(result.data.Result.getInstrClassListResponse.InstructedClass) {
+            return prepareMPathData(result.data, sis_term_id);
+          }
           else {
-            errorDisplay(url, result.data.Meta.httpStatus, 'MPathways reported no courses for you.');
+            return [];
           }
           
         },
         function error(result) {
-          errorDisplay(url, result.status, 'Unable to get MPathways data');
           return result;
         }
       );
