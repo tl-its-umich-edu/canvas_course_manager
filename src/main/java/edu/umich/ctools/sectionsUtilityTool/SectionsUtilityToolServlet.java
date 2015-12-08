@@ -8,7 +8,9 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -50,6 +52,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	//Constants
 	private static final String CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS = "canvas.api.getcourse.by.uniqname.no.sections.regex";
+	private static final String CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS_MASK = "canvas.api.getcourse.by.uniqname.no.sections.mask.regex";
 	private static final String CANVAS_API_GETALLSECTIONS_PER_COURSE = "canvas.api.getallsections.per.course.regex";
 	private static final String CANVAS_API_GETSECTION_PER_COURSE = "canvas.api.getsection.per.course.regex";
 	private static final String CANVAS_API_GETSECTION_INFO = "canvas.api.getsection.info.regex";
@@ -58,6 +61,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String CANVAS_API_GETCOURSE_INFO = "canvas.api.getcourse.info.regex";
 	private static final String CANVAS_API_RENAME_COURSE = "canvas.api.rename.course.regex";
 	private static final String CANVAS_API_GETCOURSE_BY_UNIQNAME = "canvas.api.getcourse.by.uniqname.regex";
+	private static final String CANVAS_API_GETCOURSE_BY_UNIQNAME_MASK = "canvas.api.getcourse.by.uniqname.mask.regex";
 	private static final String CANVAS_API_ENROLLMENT = "canvas.api.enrollment.regex";
 	private static final String CANVAS_API_TERMS = "canvas.api.terms.regex";
 	private static final String CANVAS_API_SEARCH_COURSES = "canvas.api.search.courses.regex";
@@ -113,7 +117,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			put(CANVAS_API_CROSSLIST, "for crosslist");
 			put(CANVAS_API_RENAME_COURSE, "for rename a course");
 			put(CANVAS_API_GETCOURSE_BY_UNIQNAME, "for getting courses by uniqname");
+			put(CANVAS_API_GETCOURSE_BY_UNIQNAME_MASK, "for getting courses by masked uniqname");
 			put(CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS, "for getting courses by uniqname not including sections");
+			put(CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS_MASK, "for getting courses by masked uniqname not including sections");
 			put(CANVAS_API_ENROLLMENT, "for enrollment");
 			put(CANVAS_API_GETCOURSE_INFO, "for getting course info");
 			put(CANVAS_API_DECROSSLIST,"for decrosslist");
@@ -418,9 +424,14 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	private void mpathwaysCall(HttpServletRequest request, HttpServletResponse response, PrintWriter out){
 		WAPIResultWrapper wrappedResult = null;
-		String mpathwaysInstructor = request.getParameter(PARAMETER_INSTRUCTOR);
+		String uniqname = null;
+		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(TC_SESSION_DATA);
+		if( tc != null){
+			uniqname = (String) tc.getCustomValuesMap().get("custom_canvas_user_login_id");
+		}
+		M_log.debug("WAPI uniqname: " + uniqname);
 		String mpathwaysTermId = request.getParameter(PARAMETER_TERMID);
-		if(mpathwaysInstructor == null || 
+		if(uniqname == null || 
 				mpathwaysTermId == null){
 			response.setStatus(400);
 			wrappedResult = new WAPIResultWrapper(400, "Parameter missing in Instructors request", new JSONObject());
@@ -435,7 +446,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 				wapiValuesMap.put("secret", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_SECRET));
 				WAPI wapi = new WAPI(wapiValuesMap);
 				try {
-					wrappedResult = wapi.getRequest(wapi.getApiPrefix() + mpathwaysInstructor + "/Terms/" + mpathwaysTermId + "/Classes");
+					String url = wapi.getApiPrefix() + uniqname + "/Terms/" + mpathwaysTermId + "/Classes";
+					M_log.info("WAPI URL: " + url);
+					wrappedResult = wapi.getRequest(url);
 				} catch (UnirestException e) {
 					M_log.error("MPathways API call did not complete successfully", e);
 				}	
@@ -455,6 +468,28 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}else {
 			url=canvasURL+pathInfo;
 		}
+
+		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(TC_SESSION_DATA);
+		M_log.debug("TC Session Data: " + tc);
+
+		//useful for debugging
+		//displaySessionAttributes(request);
+		//displayKeyValuePairs(tc);
+
+		String stringToReplace = "user=self";
+
+		//Retrieve Canvas Data from TC Session Data in order to mask user. 
+		//This API is being masked because a uniqname is considered sensitive data.
+		if (tc != null){
+			String uniqname = (String) tc.getCustomValuesMap().get("custom_canvas_user_login_id");
+			M_log.debug("uniqname: " + uniqname);
+			String replaceValue = "as_user_id=sis_login_id:" + uniqname;
+			if(url.toLowerCase().contains(stringToReplace.toLowerCase())){
+				url = url.replace(stringToReplace.toLowerCase(), replaceValue);
+			}
+			M_log.debug("New URL: " + url);			
+		}
+
 		String sessionId = request.getSession().getId();
 		String loggingApiWithSessionInfo = String.format("Canvas API request with Session Id \"%s\" for URL \"%s\"", sessionId,url);
 		M_log.info(loggingApiWithSessionInfo);
@@ -495,6 +530,21 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		out.flush();
 	}
 
+	public void displayKeyValuePairs(TcSessionData tc) {
+		Iterator tcIterator = tc.getCustomValuesMap().entrySet().iterator();
+		while(tcIterator.hasNext()){
+			Map.Entry pair = (Map.Entry)tcIterator.next();
+			M_log.debug(pair.getKey() + " = " + pair.getValue());
+		}
+	}
+
+	public void displaySessionAttributes(HttpServletRequest request) {
+		Enumeration attrs = request.getSession().getAttributeNames();
+		while(attrs.hasMoreElements()){
+			M_log.debug("Attribute: " + attrs.nextElement());
+		}
+	}
+
 	public void testMpathwaysCall(PrintWriter out) {
 		try{
 			M_log.info("MPathways call stub");
@@ -531,7 +581,6 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}else {
 			url=pathInfo;
 			isAllowedRequest=isApiFoundIntheList(url);
-
 		}
 		return isAllowedRequest;
 	}
