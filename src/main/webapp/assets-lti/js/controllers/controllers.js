@@ -11,6 +11,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     if(!resultCourse.data.errors) {
       $scope.loadingSections = true;
       $scope.course = resultCourse.data;
+      $scope.course.addingSections = false;
       $rootScope.termId = $scope.course.enrollment_term_id;
       Sections.getSectionsForCourseId($scope.course.id).then(function (resultSections) {
         $scope.loadingSections = false;
