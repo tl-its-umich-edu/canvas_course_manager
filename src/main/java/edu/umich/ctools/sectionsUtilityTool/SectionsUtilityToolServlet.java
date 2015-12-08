@@ -446,8 +446,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 				wapiValuesMap.put("secret", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_SECRET));
 				WAPI wapi = new WAPI(wapiValuesMap);
 				try {
-					M_log.info("WAPI URL: " + wapi.getApiPrefix() + uniqname + "/Terms/" + mpathwaysTermId + "/Classes");
-					wrappedResult = wapi.getRequest(wapi.getApiPrefix() + uniqname + "/Terms/" + mpathwaysTermId + "/Classes");
+					String url = wapi.getApiPrefix() + uniqname + "/Terms/" + mpathwaysTermId + "/Classes";
+					M_log.info("WAPI URL: " + url);
+					wrappedResult = wapi.getRequest(url);
 				} catch (UnirestException e) {
 					M_log.error("MPathways API call did not complete successfully", e);
 				}	
@@ -472,30 +473,20 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug("TC Session Data: " + tc);
 
 		//useful for debugging
-		//		Enumeration attrs = request.getSession().getAttributeNames();
-		//		while(attrs.hasMoreElements()){
-		//			M_log.debug("Attribute: " + attrs.nextElement());
-		//		}
-
-		//useful for debugging
-		//		Iterator tcIterator = tc.getCustomValuesMap().entrySet().iterator();
-		//		while(tcIterator.hasNext()){
-		//			Map.Entry pair = (Map.Entry)tcIterator.next();
-		//			M_log.debug(pair.getKey() + " = " + pair.getValue());
-		//		}
+		//displaySessionAttributes(request);
+		//displayKeyValuePairs(tc);
 
 		String stringToReplace = "user=self";
 
+		//Retrieve Canvas Data from TC Session Data in order to mask user. 
+		//This API is being masked because a uniqname is considered sensitive data.
 		if (tc != null){
 			String uniqname = (String) tc.getCustomValuesMap().get("custom_canvas_user_login_id");
 			M_log.debug("uniqname: " + uniqname);
-
 			String replaceValue = "as_user_id=sis_login_id:" + uniqname;
-
 			if(url.toLowerCase().contains(stringToReplace.toLowerCase())){
-				url = url.replace(stringToReplace, replaceValue);
+				url = url.replace(stringToReplace.toLowerCase(), replaceValue);
 			}
-
 			M_log.debug("New URL: " + url);			
 		}
 
@@ -537,6 +528,21 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}
 		out.print(sb.toString());
 		out.flush();
+	}
+
+	public void displayKeyValuePairs(TcSessionData tc) {
+		Iterator tcIterator = tc.getCustomValuesMap().entrySet().iterator();
+		while(tcIterator.hasNext()){
+			Map.Entry pair = (Map.Entry)tcIterator.next();
+			M_log.debug(pair.getKey() + " = " + pair.getValue());
+		}
+	}
+
+	public void displaySessionAttributes(HttpServletRequest request) {
+		Enumeration attrs = request.getSession().getAttributeNames();
+		while(attrs.hasMoreElements()){
+			M_log.debug("Attribute: " + attrs.nextElement());
+		}
 	}
 
 	public void testMpathwaysCall(PrintWriter out) {
