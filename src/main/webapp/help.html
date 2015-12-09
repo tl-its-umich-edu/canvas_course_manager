@@ -1,34 +1,78 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="sectionsApp">
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/custom_style.css">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Help for Sections Manager</title>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <script type="text/javascript">
-	$('document').ready(function() {
-		$buildInfo=$('#buildInfo');
-		
-		displayContentOrError = function(response, status, xhr) {
-			if (status == 'error') {
-				var errorMessage = 'Unable to display due to error. ('
-						+ xhr.status + ' ' + xhr.statusText + ')';
-				$buildInfo.html(errorMessage);
-			}
+<html lang="en">
 
-			$buildInfo.show();
-		}
-		$buildInfo.load('build.txt',displayContentOrError);
-			});
-</script>
-  </head>
-  <body class="container-fluid" style="padding-top:20px;">
-  	<h1>Help for Sections Utility</h1>
-	  <p><a href="https://umichprod.service-now.com/kb_view.do?sysparm_article=KB0020309">ServiceLink knowledge base article</a></p>
-	  
-	   <div id="versionDiv">Build Version:<span id="buildInfo"></span></div>
-	    
-  </body>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Help for Sections Manager</title>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <script type="text/javascript">
+  $('document').ready(function() {
+    $buildInfo = $('#buildInfo');
+
+    displayContentOrError = function(response, status, xhr) {
+      if (status == 'error') {
+        var errorMessage = 'Unable to display due to error. (' + xhr.status + ' ' + xhr.statusText + ')';
+        $buildInfo.html(errorMessage);
+      }
+      $buildInfo.show();
+    }
+    $buildInfo.load('build.txt', displayContentOrError);
+  });
+  </script>
+</head>
+
+<body class="container-fluid" style="padding-top:20px;">
+  <h1>Help for Sections Utility</h1>
+  <p>Note: This documentation only applies to course instructors; the ITS Service Center should consult separate documentation in their Knowledgebase.
+  </p>
+  <h2>Introduction</h2>
+  <p>The Canvas Course Management tool allows UM instructors and users in specific roles to:</p>
+  <ol>
+    <li>Add non-UM external users to a Canvas course</li>
+    <li>Add sections to an existing Canvas course</li>
+  </ol>
+  <p>CCM is not visible to students (it does not appear in the left hand navigation for them). You can verify this if you like by checking Student View for your course.</p>
+  <p>Only UM uniqname holders can use CCM.</p>
+  <h3>Adding non-UM external users to your Canvas course</h3>
+  <p>To add external users, you must have an appropriate course role in Canvas (Teacher, TA, Assistant or Designer). </p>
+  <ol>
+    <li>Click Add non-UM users.</li>
+    <li>In the box that opens, type the full email address of the external user, e.g., exampleuser@gmail.com </li>
+    <li>Check the box for the section you would like to add the external user to.</li>
+    <li>On the right, choose a role for the user. Then click Next.</li>
+    <li>The first time an external user is added to Canvas, you'll be asked for his or her first and last name. If the user has not previously used Canvas at UM, he or she will be sent an email with instructions on how to create a password and with a link to Canvas.
+      <p>No other emails are sent automatically; some instructors choose to send an individual email to the users letting them know they've been added to the course.</p>
+    </li>
+    <li>You'll see a confirmation that the user was added. You can then choose to add more users or click Done.
+    </li>
+  </ol>
+  <p>To delete a user who was added with the Course Management tool, use the Canvas People tool.</p>
+  <h3>Adding sections to your Canvas course</h3>
+  <p>To add a section to a Canvas course, you must be listed as the official instructor (primary, secondary, grad student instructor, or faculty grader) in MPathways.</p>
+  <ol>
+    <li>Click Add Sections.</li>
+    <li>In "Your Other Courses," click Choose Sections to Add to the right of a course.</li>
+    <li>Click Add to Course to add a section.</li>
+    <li>Before saving an added section, you have the option to return it to the original course. Once saved, it's still possible to move it back to the original course (or to another course) by using the Course Management tool while you are in the other course.
+      <p>Note that you cannot use the Course Management tool to completely remove a section from all of your courses. To do that, you will need to contact 4HELP@umich.edu</p>
+    </li>
+    <li>When finished, click Save Sections and then Done.</li>
+  </ol>
+  <h3>Getting Help</h3>
+  <p>Contact the ITS Service Center at 4HELP@umich.edu or 734-764-HELP to:</p>
+  <ul>
+    <li>completely remove a section from all your courses</li>
+    <li>rename a course</li>
+    <li>ask a question</li>
+  </ul>
+  <div class="well">
+    <footer>
+      <p><a href="https://umichprod.service-now.com/kb_view.do?sysparm_article=KB0020309">ServiceLink knowledge base article</a></p>
+      <div id="versionDiv">Build Version:<span id="buildInfo"></span></div>
+    </footer>
+  </div>
+</body>
+
 </html>
