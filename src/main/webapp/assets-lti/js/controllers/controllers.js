@@ -5,50 +5,66 @@
 canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', '$scope', '$rootScope', '$filter', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, $scope, $rootScope, $filter) {
   
   $scope.contextCourseId = $rootScope.ltiLaunch.custom_canvas_course_id;
-
-  var courseUrl ='manager/api/v1/courses/' + $rootScope.ltiLaunch.custom_canvas_course_id + '?include[]=sections&_=' + generateCurrentTimestamp();
-  Course.getCourse(courseUrl).then(function (resultCourse) {
-    if(!resultCourse.data.errors) {
-      $scope.loadingSections = true;
-      $scope.course = resultCourse.data;
-      $scope.course.addingSections = false;
-      $rootScope.termId = $scope.course.enrollment_term_id;
-      Sections.getSectionsForCourseId($scope.course.id).then(function (resultSections) {
-        $scope.loadingSections = false;
-        if(!resultSections.data.errors) {
-          $scope.course.sections =_.sortBy(resultSections.data, 'name');
-          if($scope.course.sections[0].sis_course_id) {
-            $scope.currentTermSISID = $scope.course.sections[0].sis_course_id.substring(0, 4);
-          }
-          else {
-           $scope.currentTermSISID = $scope.course.sections[0].sis_course_id; 
-          }
-          if($scope.currentTermSISID) {
-          /* adds to the scope a list of sections (by sis_section_id) that the current user can perform actions on */
-          var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?user=self&termid=' + $scope.currentTermSISID;
-          //var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?instructor=' + $rootScope.ltiLaunch.custom_canvas_user_login_id +'&termid=' + $scope.currentTermSISID;
-            Course.getMPathwaysCourses(mPathwaysCoursesUrl, $scope.currentTermSISID).then(function (resultMPathData) {  
-              if(!resultMPathData.data) {
-                if(Array.isArray(resultMPathData)) {
-                  $scope.mpath_courses = resultMPathData;
+  $scope.currentUserId = $rootScope.ltiLaunch.custom_canvas_user_login_id;
+  Friend.lookUpCanvasFriend($scope.currentUserId).then(function (resultLookUpCanvasUser) {
+    $scope.canvas_user_id = resultLookUpCanvasUser.data[0].id;
+    var courseUrl ='manager/api/v1/courses/' + $rootScope.ltiLaunch.custom_canvas_course_id + '?include[]=sections&with_enrollments=true&enrollment_type=teacher&_=' + generateCurrentTimestamp();
+    Course.getCourse(courseUrl).then(function (resultCourse) {
+      if(!resultCourse.data.errors) {
+        //console.log(resultCourseEnrollment)
+        $scope.loadingSections = true;
+        $scope.course = resultCourse.data;
+        $scope.course.addingSections = false;
+        $rootScope.termId = $scope.course.enrollment_term_id;
+        Sections.getSectionsForCourseId($scope.course.id).then(function (resultSections) {
+          $scope.loadingSections = false;
+          if(!resultSections.data.errors) {
+            $scope.course.sections =_.sortBy(resultSections.data, 'name');
+            if($scope.course.sections[0].sis_course_id) {
+              $scope.currentTermSISID = $scope.course.sections[0].sis_course_id.substring(0, 4);
+            }
+            else {
+             $scope.currentTermSISID = $scope.course.sections[0].sis_course_id; 
+            }
+            if($scope.currentTermSISID) {
+            /* adds to the scope a list of sections (by sis_section_id) that the current user can perform actions on */
+            var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?user=self&termid=' + $scope.currentTermSISID;
+            //var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?instructor=' + $rootScope.ltiLaunch.custom_canvas_user_login_id +'&termid=' + $scope.currentTermSISID;
+              Course.getMPathwaysCourses(mPathwaysCoursesUrl, $scope.currentTermSISID).then(function (resultMPathData) {  
+                if(!resultMPathData.data) {
+                  if(Array.isArray(resultMPathData)) {
+                    $scope.mpath_courses = resultMPathData;
+                  }
+                } else {
+                  $scope.mpath_courses =[];
+                  $scope.mpath_courses_error =true;
                 }
-              } else {
-                $scope.mpath_courses =[];
-                $scope.mpath_courses_error =true;
-              }
-            });
-          }
-          else {
-            $scope.mpath_courses =[];
-          }
-        }  
-      });
-    }
+              });
+            }
+            else {
+              $scope.mpath_courses =[];
+            }
+          }  
+        });
+      //});
+      }
+    });
+    var courseEnrollmentUrl ='manager/api/v1/courses/' + $rootScope.ltiLaunch.custom_canvas_course_id + '/enrollments?user_id=' + $scope.canvas_user_id + '&_=' + generateCurrentTimestamp();
+    Course.getCourse(courseEnrollmentUrl).then(function (resultCourseEnrollment) {
+      //var getPersonRole = getPersonRole(resultCourseEnrollment.data);
+      if(_.findWhere(resultCourseEnrollment.data, {role: 'TeacherEnrollment'}).role || _.findWhere(resultCourseEnrollment.data, {role: 'DesignerEnrollment'}).role) {
+        $rootScope.courseRole='TeacherEnrollment';
+        //$rootScope.courseRole='TeacherEnrollment';
+      } else {
+        $rootScope.courseRole='TAEnrollment';
+      }
+
+    });
   });
 
   $scope.getCoursesForTerm = function() {
     $scope.loadingOtherCourses = true;
-    
+    $rootScope.courseRole
     var coursesUrl='/canvasCourseManager/manager/api/v1/courses?user=self&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher&_='+ generateCurrentTimestamp();
     //var coursesUrl='/canvasCourseManager/manager/api/v1/courses?as_user_id=sis_login_id:' + $rootScope.ltiLaunch.custom_canvas_user_login_id + '&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher&_='+ generateCurrentTimestamp();
     Courses.getCourses(coursesUrl).then(function (resultCourses) {
@@ -144,11 +160,15 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
   };
 
   $scope.addUserModal = function(){
+    _.each($scope.course.sections, function(section){
+      section.courseRole=$rootScope.courseRole;
+    });
+
     // use a service to pass context course model to the friends controller
     SectionSet.setSectionSet($scope.course);
   };
   $scope.showInfo = function(){
-    $scope.showPop = !$scope.showPop
+    $scope.showPop = !$scope.showPop;
   }
 }]);
 
@@ -159,6 +179,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
       $scope.coursemodal = sectionSet[0];
   });
   
+
   //change handler for section checkboxes - calculates if any checkbox is checked and updates
   // a variable used to enable the 'Add Friend' button
   $scope.sectionSelectedQuery = function () {
