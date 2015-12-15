@@ -476,19 +476,12 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		//displaySessionAttributes(request);
 		//displayKeyValuePairs(tc);
 
-		String stringToReplace = "user=self";
+		String stringToReplaceUser = "user=self";
+		String stringToReplaceCourse = "course_id";
 
 		//Retrieve Canvas Data from TC Session Data in order to mask user. 
 		//This API is being masked because a uniqname is considered sensitive data.
-		if (tc != null){
-			String uniqname = (String) tc.getCustomValuesMap().get("custom_canvas_user_login_id");
-			M_log.debug("uniqname: " + uniqname);
-			String replaceValue = "as_user_id=sis_login_id:" + uniqname;
-			if(url.toLowerCase().contains(stringToReplace.toLowerCase())){
-				url = url.replace(stringToReplace.toLowerCase(), replaceValue);
-			}
-			M_log.debug("New URL: " + url);			
-		}
+		url = unmaskUrl(url, tc, stringToReplaceUser, stringToReplaceCourse);
 
 		String sessionId = request.getSession().getId();
 		String loggingApiWithSessionInfo = String.format("Canvas API request with Session Id \"%s\" for URL \"%s\"", sessionId,url);
@@ -528,6 +521,24 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}
 		out.print(sb.toString());
 		out.flush();
+	}
+
+	public String unmaskUrl(String url, TcSessionData tc,
+			String stringToReplaceUser, String stringToReplaceCourse) {
+		if (tc != null){
+			String uniqname = (String) tc.getCustomValuesMap().get(CUSTOM_CANVAS_USER_LOGIN_ID);
+			String courseId = (String) tc.getCustomValuesMap().get(CUSTOM_CANVAS_COURSE_ID);
+			M_log.debug("uniqname: " + uniqname);
+			String replaceValue = "as_user_id=sis_login_id:" + uniqname;
+			if(url.toLowerCase().contains(stringToReplaceUser.toLowerCase())){
+				url = url.replace(stringToReplaceUser.toLowerCase(), replaceValue);
+			}
+			if(url.toLowerCase().contains(stringToReplaceCourse.toLowerCase())){
+				url = url.replace(stringToReplaceCourse.toLowerCase(), courseId);
+			}
+			M_log.debug("New URL: " + url);			
+		}
+		return url;
 	}
 
 	public void displayKeyValuePairs(TcSessionData tc) {
@@ -593,6 +604,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		boolean isMatch=false;
 		Set<String> apiListRegex = apiListRegexWithDebugMsg.keySet();
 		for (String api : apiListRegex) {
+			M_log.debug("URL: " + url);
+			M_log.debug("API: " + appExtPropertiesFile.getProperty(api));
 			if(url.matches(appExtPropertiesFile.getProperty(api))) {
 				M_log.debug(prefixDebugMsg+apiListRegexWithDebugMsg.get(api));
 				isMatch= true;

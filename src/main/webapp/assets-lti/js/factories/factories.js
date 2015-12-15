@@ -114,8 +114,15 @@ canvasSupportApp.factory('Course', function ($http) {
 //SECTIONS FACTORY - does the request for the sections controller
 canvasSupportApp.factory('Sections', function ($http) {
   return {
-    getSectionsForCourseId: function (courseId) {
-      var url = '/canvasCourseManager/manager/api/v1/courses/' + courseId + '/sections?per_page=100&_='+ generateCurrentTimestamp();
+    getSectionsForCourseId: function (courseId, context) {
+    	console.log('Course: ' + courseId);
+    	console.log('Context: ' + context);
+    	if ( context === true){
+    		var url = '/canvasCourseManager/manager/api/v1/courses/course_id/sections?per_page=100&_='+ generateCurrentTimestamp();
+    	} 
+    	else{
+    		var url = '/canvasCourseManager/manager/api/v1/courses/' + courseId + '/sections?per_page=100&_='+ generateCurrentTimestamp();	
+    	}
       return $http.get(url, {cache: false}).then(
         function success(result) {
           if (result.data.errors) {
