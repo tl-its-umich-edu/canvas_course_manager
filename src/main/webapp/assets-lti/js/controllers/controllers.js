@@ -8,14 +8,14 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
   $scope.currentUserId = $rootScope.ltiLaunch.custom_canvas_user_login_id;
   Friend.lookUpCanvasFriend($scope.currentUserId).then(function (resultLookUpCanvasUser) {
     $scope.canvas_user_id = resultLookUpCanvasUser.data[0].id;
-    var courseUrl ='manager/api/v1/courses/' + $rootScope.ltiLaunch.custom_canvas_course_id + '?include[]=sections&with_enrollments=true&enrollment_type=teacher&_=' + generateCurrentTimestamp();
+    var courseUrl ='manager/api/v1/courses/course_id?include[]=sections&with_enrollments=true&enrollment_type=teacher&_=' + generateCurrentTimestamp();
     Course.getCourse(courseUrl).then(function (resultCourse) {
       if(!resultCourse.data.errors) {
         $scope.loadingSections = true;
         $scope.course = resultCourse.data;
         $scope.course.addingSections = false;
         $rootScope.termId = $scope.course.enrollment_term_id;
-        Sections.getSectionsForCourseId($scope.course.id).then(function (resultSections) {
+        Sections.getSectionsForCourseId('', true).then(function (resultSections) {
           $scope.loadingSections = false;
           if(!resultSections.data.errors) {
             $scope.course.sections =_.sortBy(resultSections.data, 'name');
@@ -86,7 +86,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     //find the course object
     var coursePos = $scope.courses.indexOf(_.findWhere($scope.courses, {id: courseId}));
     $scope.courses[coursePos].loadingOtherSections = true;
-    Sections.getSectionsForCourseId(courseId).then(function (resultSections) {
+    Sections.getSectionsForCourseId(courseId, false).then(function (resultSections) {
       if (resultSections) {
         //append a section object to the course scope
         $scope.courses[coursePos].sections = _.sortBy(filterOutSections(resultSections.data,$scope.mpath_courses), 'name');
