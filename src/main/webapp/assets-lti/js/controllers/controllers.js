@@ -5,34 +5,6 @@
 canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', '$scope', '$rootScope', '$filter', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, $scope, $rootScope, $filter) {
   
   $scope.contextCourseId = $rootScope.ltiLaunch.custom_canvas_course_id;
-// <<<<<<< HEAD
-//   var courseUrl ='manager/api/v1/courses/course_id?include[]=sections&_=' + generateCurrentTimestamp();
-//   //var courseUrl ='manager/api/v1/courses/' + $rootScope.ltiLaunch.custom_canvas_course_id + '?include[]=sections&_=' + generateCurrentTimestamp();
-//   Course.getCourse(courseUrl).then(function (resultCourse) {
-//     if(!resultCourse.data.errors) {
-//       $scope.loadingSections = true;
-//       $scope.course = resultCourse.data;
-//       $scope.course.addingSections = false;
-//       $rootScope.termId = $scope.course.enrollment_term_id;
-//       Sections.getSectionsForCourseId('', true).then(function (resultSections) {
-//         $scope.loadingSections = false;
-//         if(!resultSections.data.errors) {
-//           $scope.course.sections =_.sortBy(resultSections.data, 'name');
-//           if($scope.course.sections[0].sis_course_id) {
-//             $scope.currentTermSISID = $scope.course.sections[0].sis_course_id.substring(0, 4);
-//           }
-//           else {
-//            $scope.currentTermSISID = $scope.course.sections[0].sis_course_id; 
-//           }
-//           if($scope.currentTermSISID) {
-//           /* adds to the scope a list of sections (by sis_section_id) that the current user can perform actions on */
-//           var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?user=self&termid=' + $scope.currentTermSISID;
-//           //var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?instructor=' + $rootScope.ltiLaunch.custom_canvas_user_login_id +'&termid=' + $scope.currentTermSISID;
-//             Course.getMPathwaysCourses(mPathwaysCoursesUrl, $scope.currentTermSISID).then(function (resultMPathData) {  
-//               if(!resultMPathData.data) {
-//                 if(Array.isArray(resultMPathData)) {
-//                   $scope.mpath_courses = resultMPathData;
-// =======
   $scope.currentUserId = $rootScope.ltiLaunch.custom_canvas_user_login_id;
   Friend.lookUpCanvasFriend($scope.currentUserId).then(function (resultLookUpCanvasUser) {
     $scope.canvas_user_id = resultLookUpCanvasUser.data[0].id;
@@ -65,7 +37,6 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
                 } else {
                   $scope.mpath_courses =[];
                   $scope.mpath_courses_error =true;
-// >>>>>>> remote-master/master
                 }
               });
             }
