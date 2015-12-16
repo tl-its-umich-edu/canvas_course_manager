@@ -11,7 +11,6 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     var courseUrl ='manager/api/v1/courses/' + $rootScope.ltiLaunch.custom_canvas_course_id + '?include[]=sections&with_enrollments=true&enrollment_type=teacher&_=' + generateCurrentTimestamp();
     Course.getCourse(courseUrl).then(function (resultCourse) {
       if(!resultCourse.data.errors) {
-        //console.log(resultCourseEnrollment)
         $scope.loadingSections = true;
         $scope.course = resultCourse.data;
         $scope.course.addingSections = false;
@@ -46,17 +45,21 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
             }
           }  
         });
-      //});
       }
     });
     var courseEnrollmentUrl ='manager/api/v1/courses/' + $rootScope.ltiLaunch.custom_canvas_course_id + '/enrollments?user_id=' + $scope.canvas_user_id + '&_=' + generateCurrentTimestamp();
+
     Course.getCourse(courseEnrollmentUrl).then(function (resultCourseEnrollment) {
-      //var getPersonRole = getPersonRole(resultCourseEnrollment.data);
-      if(_.findWhere(resultCourseEnrollment.data, {role: 'TeacherEnrollment'}).role || _.findWhere(resultCourseEnrollment.data, {role: 'DesignerEnrollment'}).role) {
+      var extractedRoles =[];
+      _.each(resultCourseEnrollment.data, function(enrollment){
+        extractedRoles.push(enrollment.type)
+      })
+      if(_.contains(extractedRoles, 'TeacherEnrollment') || _.contains(extractedRoles, 'DesignerEnrollment') ) {
         $rootScope.courseRole='TeacherEnrollment';
-        //$rootScope.courseRole='TeacherEnrollment';
-      } else {
+      } else if(_.contains(extractedRoles, 'TaEnrollment')){
         $rootScope.courseRole='TAEnrollment';
+      } else {
+        $rootScope.courseRole='StudentEnrollment';
       }
 
     });

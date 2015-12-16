@@ -81,10 +81,10 @@
                                       <label for="s{{section.id}}" class="sr-only">Select role for user in section {{section.name}}</label>
   	                                	<select id="s{{section.id}}">
   		                                	<option value="StudentEnrollment">Student</option>
-                                        <option ng-hide="section.courseRole === 'TAEnrollment'" value="TeacherEnrollment">Teacher</option>
-  																			<option ng-hide="section.courseRole === 'TAEnrollment'"  value="TaEnrollment">TA</option>
+                                        <option ng-hide="section.courseRole !== 'TeacherEnrollment'" value="TeacherEnrollment">Teacher</option>
+  																			<option ng-hide="section.courseRole !== 'TeacherEnrollment'"  value="TaEnrollment">TA</option>
   																			<option value="ObserverEnrollment">Observer</option>
-  																			<option ng-hide="section.courseRole === 'TAEnrollment'" value="DesignerEnrollment">Designer</option>
+  																			<option ng-hide="section.courseRole !== 'TeacherEnrollment'" value="DesignerEnrollment">Designer</option>
   																		</select>
                                     </div>
                                   </div>        
