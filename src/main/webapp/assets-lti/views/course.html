@@ -45,10 +45,10 @@
                             <div class="btn-group pull-right" ng-show="course.addingUser">
                                 <select ng-show="section.selected">
                                     <option value="StudentEnrollment">Student</option>
-                                    <option value="TeacherEnrollment">Teacher</option>
-                                    <option value="TaEnrollment">TA</option>
-                                    <option value="ObserverEnrollment">Observer</option>
-                                    <option value="DesignerEnrollment">Designer</option>
+                                    <option ng-hide="section.courseRole ==='TAEnrollment'" value="TeacherEnrollment">Teacher</option>
+                                    <option ng-hide="section.courseRole ==='TAEnrollment'" value="TaEnrollment">TA</option>
+                                    <option value="section.ObserverEnrollment">Observer</option>
+                                    <option ng-hide="section.courseRole ==='TAEnrollment'"value="DesignerEnrollment">Designer</option>
                                 </select>
                             </div>
                             <a href="" ng-if="section.course_id !== course.id" ng-click="returnToCourse(section, $index)">Put back<span class="sr-only"> {{section.name}}</span></a>

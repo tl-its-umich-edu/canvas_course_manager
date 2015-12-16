@@ -69,6 +69,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String CANVAS_API_CREATE_USER = "canvas.api.create.user.regex";
 	private static final String CANVAS_API_ADD_USER = "canvas.api.add.user.regex";
 	private static final String CANVAS_API_GET_COURSE = "canvas.api.get.single.course.regex";
+	private static final String CANVAS_API_GET_COURSE_ENROLL = "canvas.api.get.single.course.enrollment.regex";
 
 	private static final String MPATHWAYS_API_GNERIC = "mpathways.api.get.generic";
 
@@ -131,6 +132,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			put(CANVAS_API_CREATE_USER, "for creating a user");
 			put(CANVAS_API_ADD_USER, "for adding a user to a section");
 			put(CANVAS_API_GET_COURSE, "for getting a single course");
+			put(CANVAS_API_GET_COURSE_ENROLL,"for getting the enrollments of a user in a course");
 			put(MPATHWAYS_API_GNERIC, "for mpathways calls");
 		}
 	};
