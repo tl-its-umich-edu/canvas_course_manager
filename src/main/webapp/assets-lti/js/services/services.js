@@ -21,6 +21,7 @@ canvasSupportApp.service('SectionSet', function($rootScope) {
 
 });
 
+
 canvasSupportApp.directive('eventFocus', function(focus) {
   return function(scope, elem, attr) {
     elem.on(attr.eventFocus, function() {
