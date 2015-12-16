@@ -112,11 +112,10 @@ canvasSupportApp.factory('Course', function ($http) {
 });
 
 //SECTIONS FACTORY - does the request for the sections controller
+//Handling the LTI request different to mask the API call
 canvasSupportApp.factory('Sections', function ($http) {
   return {
     getSectionsForCourseId: function (courseId, context) {
-    	console.log('Course: ' + courseId);
-    	console.log('Context: ' + context);
     	if ( context === true){
     		var url = '/canvasCourseManager/manager/api/v1/courses/course_id/sections?per_page=100&_='+ generateCurrentTimestamp();
     	} 

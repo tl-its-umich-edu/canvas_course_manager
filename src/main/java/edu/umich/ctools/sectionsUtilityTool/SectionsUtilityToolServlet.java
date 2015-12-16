@@ -523,21 +523,27 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		out.flush();
 	}
 
+	//Canvas adds custom parameters for lti launches. These custom paramerers 
+	//include user_login and course_id. We use these parameters to unmask the
+	//API calls.
 	public String unmaskUrl(String url, TcSessionData tc,
 			String stringToReplaceUser, String stringToReplaceCourse) {
-		if (tc != null){
-			String uniqname = (String) tc.getCustomValuesMap().get(CUSTOM_CANVAS_USER_LOGIN_ID);
-			String courseId = (String) tc.getCustomValuesMap().get(CUSTOM_CANVAS_COURSE_ID);
-			M_log.debug("uniqname: " + uniqname);
-			String replaceValue = "as_user_id=sis_login_id:" + uniqname;
-			if(url.toLowerCase().contains(stringToReplaceUser.toLowerCase())){
-				url = url.replace(stringToReplaceUser.toLowerCase(), replaceValue);
-			}
-			if(url.toLowerCase().contains(stringToReplaceCourse.toLowerCase())){
-				url = url.replace(stringToReplaceCourse.toLowerCase(), courseId);
-			}
-			M_log.debug("New URL: " + url);			
+		if(tc == null){
+			return url;
 		}
+
+		String uniqname = (String) tc.getCustomValuesMap().get(CUSTOM_CANVAS_USER_LOGIN_ID);
+		String courseId = (String) tc.getCustomValuesMap().get(CUSTOM_CANVAS_COURSE_ID);
+		M_log.debug("uniqname: " + uniqname);
+		String replaceUserIdValue = "as_user_id=sis_login_id:" + uniqname;
+		if(url.toLowerCase().contains(stringToReplaceUser.toLowerCase())){
+			url = url.replace(stringToReplaceUser.toLowerCase(), replaceUserIdValue);
+		}
+		if(url.toLowerCase().contains(stringToReplaceCourse.toLowerCase())){
+			url = url.replace(stringToReplaceCourse.toLowerCase(), courseId);
+		}
+		M_log.debug("New URL: " + url);			
+
 		return url;
 	}
 
