@@ -62,8 +62,8 @@
                                 {{friend.sis_user_id}}
                               </td>
                               <td ng-show="addSuccess || addErrors">
-                                  <span class="label label-success" ng-repeat="success in successes">{{success}}</span>
-                                  <span class="label label-danger" ng-repeat="error in errors">{{error}}</span>
+                                  <span ng-repeat="success in successes track by $index"><span class="label label-success" >{{success}}</span> </span>
+                                  <span ng-repeat="error in errors track by $index"><span class="label label-danger" >{{error}}</span> </span>
                               </td>    
                             </tr>
                           </table> 
