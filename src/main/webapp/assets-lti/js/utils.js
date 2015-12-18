@@ -37,7 +37,7 @@ var prepareMPathData = function(MPathData, sis_term_id) {
   var arrayMPath = [].concat(MPathData.Result.getInstrClassListResponse.InstructedClass);
   
   $.each(arrayMPath, function() {
-    if(this.InstructorRole === 'Primary Instructor' || this.InstructorRole === 'Secondary Instructor'  || this.InstructorRole === 'Faculty grader'  || this.InstructorRole === 'Graduate Student Instructor'){
+    if(this.InstructorRole === 'Primary Instructor' || this.InstructorRole === 'Secondary Instructor'  || this.InstructorRole === 'Faculty Grader'  || this.InstructorRole === 'Graduate Student Instructor'){
       mPathArray.push(sis_term_id + this.ClassNumber);
     }
   });
