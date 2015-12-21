@@ -53,6 +53,10 @@ var filterOutSections = function(sectionData, mPathArray){
   return sectionData;
 };
 
+var parseResultLookUpCanvasUser = function(userArray, uniqname){
+  var thisUser = _.findWhere(userArray, {sis_login_id: uniqname});
+  return thisUser.id
+}
 // specific success reporting, used in the jQuery requests
 var reportSuccess = function(position, msg){
   $('#successContainer').css('top', position);
