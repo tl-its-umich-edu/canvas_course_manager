@@ -199,7 +199,10 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 				! LTI_1P0_CONST.equals(request.getParameter(LTI_VERSION)) ||
 				oauth_consumer_key == null) {
 			try {
-				doError(request, response, "Missing required parameter:  Launch type or version is incorrect.");
+				M_log.debug("LTI Message: " + request.getParameter(SectionUtilityToolFilter.LTI_MESSAGE_TYPE));
+				M_log.debug("LTI Version: " + request.getParameter(LTI_VERSION));
+				M_log.debug("LTI Key: " + oauth_consumer_key);
+				doError(request, response, "Missing required parameter:  LTI Message Type, LTI Version, or Consumer Key is incorrect.");
 			} catch (IOException e) {
 				M_log.error("fillContext: IOException: ",e);
 			}
@@ -303,8 +306,10 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		for (Object e : request.getParameterMap().entrySet()) {
 			Map.Entry<String, String[]> entry = (Map.Entry<String, String[]>) e;
 			String name = entry.getKey();
-			for (String value : entry.getValue()) {
-				M_log.debug(name + " = " + value);
+			if(M_log.isDebugEnabled()){
+				for (String value : entry.getValue()) {
+					M_log.debug(name + " = " + value);
+				}
 			}
 		}
 		//Properties appExtSecureProperties = SectionUtilityToolFilter.appExtSecurePropertiesFile;
@@ -317,9 +322,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			else{
 				ltiUrl = request.getRequestURL().toString();
 			}
-			M_log.debug("ltiKey: " + ltiKey);
-			M_log.debug("ltiSecret: " + ltiSecret);
-			M_log.debug("ltiUrl: " + ltiUrl);
+			M_log.debug("ltiKey from props: "    + ltiKey);
+			M_log.debug("ltiSecret from props: " + ltiSecret);
+			M_log.debug("ltiUrl from props: "    + ltiUrl);
 		}
 		else {	
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -331,7 +336,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			doRequest(request, response);
 			return;
 		}
-		doError(request, response, "Missing required parameter:  Launch type or version is incorrect.");
+
+		doError(request, response, "Missing required parameter:  Key, secret, or URL is incorrect.");
 		return;
 	}
 

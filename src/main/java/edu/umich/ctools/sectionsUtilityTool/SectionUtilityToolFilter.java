@@ -170,7 +170,10 @@ public class SectionUtilityToolFilter implements Filter {
 		else if ( isTestUrlEnabled && testUserInSession != null ){
 			user=testUserInSession;
 		} 
-
+		M_log.debug("remote user: " + remoteUser);
+		M_log.debug("test user: " + testUser);
+		M_log.debug("session test user: " + testUserInSession);
+		M_log.debug("User: " + user);
 		if  ( !isAuthorized && remoteUser != null ) {
 			user=remoteUser;
 			M_log.info(String.format("The session id \"%s\" of Service Desk Person with uniqname  \"%s\" issuing the request" ,sessionId,remoteUser));
