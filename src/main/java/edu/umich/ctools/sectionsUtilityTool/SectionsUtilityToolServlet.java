@@ -324,7 +324,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			}
 			M_log.debug("ltiKey from props: "    + ltiKey);
 			M_log.debug("ltiSecret from props: " + ltiSecret);
-			M_log.debug("ltiUrl from props: "    + ltiUrl);
+			M_log.debug("ltiUrl from props: "    + ltiUrl); 
 		}
 		else {	
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
