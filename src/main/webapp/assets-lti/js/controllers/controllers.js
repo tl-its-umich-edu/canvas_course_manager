@@ -68,14 +68,20 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
   $scope.getCoursesForTerm = function() {
     $scope.loadingOtherCourses = true;
     $rootScope.courseRole
-    var coursesUrl='/canvasCourseManager/manager/api/v1/courses?user=self&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher&_='+ generateCurrentTimestamp();
+    var coursesUrl='/canvasCourseManager/manager/api/v1/courses?user=self&per_page=200&published=true&with_enrollments=true&_='+ generateCurrentTimestamp();
     //var coursesUrl='/canvasCourseManager/manager/api/v1/courses?as_user_id=sis_login_id:' + $rootScope.ltiLaunch.custom_canvas_user_login_id + '&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher&_='+ generateCurrentTimestamp();
     Courses.getCourses(coursesUrl).then(function (resultCourses) {
       $scope.loadingOtherCourses = false;
       $scope.course.addingSections = true;
       // this is not optimal - ideally we should be requesting just this terms' courses, not all of them and then 
-      // filtering them
-      $scope.courses = _.where(resultCourses.data, {enrollment_term_id:  $rootScope.termId});
+      // filtering them      
+      //filter term
+      var filteredByTerm = _.where(resultCourses.data, {enrollment_term_id:  $rootScope.termId});
+      // filter by enrollment
+      // will need to get enrollments and cycle through them, if not teacher or ta, disable section move
+      var filteredByRole = filterByRole(filteredByTerm);
+      $scope.courses = filteredByRole;
+
       $scope.$evalAsync(function() { 
         focus('otherCourses');
       })
