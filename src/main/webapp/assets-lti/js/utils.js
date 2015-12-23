@@ -54,6 +54,7 @@ var filterOutSections = function(sectionData, mPathArray){
 };
 
 
+
 var parseResultLookUpCanvasUser = function(userArray, uniqname){
   var thisUser = _.findWhere(userArray, {sis_login_id: uniqname});
   return thisUser.id
