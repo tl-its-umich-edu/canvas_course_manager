@@ -53,6 +53,19 @@ var filterOutSections = function(sectionData, mPathArray){
   return sectionData;
 };
 
+var filterByRole = function(courseData){
+  $.each(courseData, function(index, course) {
+    if( _.findWhere(course.enrollments, {type: "ta"})){
+      course.enabled = true;
+    }  
+    if( _.findWhere(course.enrollments, {type: "teacher"})){
+      course.enabled = true;
+    }  
+  });
+  return courseData;
+}
+
+
 // specific success reporting, used in the jQuery requests
 var reportSuccess = function(position, msg){
   $('#successContainer').css('top', position);
