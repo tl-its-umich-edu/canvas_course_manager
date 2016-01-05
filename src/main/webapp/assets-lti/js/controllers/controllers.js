@@ -7,6 +7,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
   $scope.contextCourseId = $rootScope.ltiLaunch.custom_canvas_course_id;
   $scope.currentUserId = $rootScope.ltiLaunch.custom_canvas_user_login_id;
   Friend.lookUpCanvasFriend($scope.currentUserId).then(function (resultLookUpCanvasUser) {
+    // Canvas does fuzzy searches on uniqname, need to parse results of search to return the user who is an exact match
     $scope.canvas_user_id = parseResultLookUpCanvasUser(resultLookUpCanvasUser.data, $scope.currentUserId);
     var courseUrl ='manager/api/v1/courses/course_id?include[]=sections&with_enrollments=true&enrollment_type=teacher&_=' + generateCurrentTimestamp();
     Course.getCourse(courseUrl).then(function (resultCourse) {
