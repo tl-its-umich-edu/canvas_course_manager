@@ -35,7 +35,9 @@ var prepareMPathData = function(MPathData, sis_term_id) {
   // MPath via ESB will return an object if a single course, an array if more than one
   /// so turn everything into an array
   var arrayMPath = [].concat(MPathData.Result.getInstrClassListResponse.InstructedClass);
-  
+  // For each item - if the role is of a specific type, add that section to an array
+  // the section identifier concatenates the sis term id and the class number, and will be used to match
+  // with Canvas data
   $.each(arrayMPath, function() {
     if(this.InstructorRole === 'Primary Instructor' || this.InstructorRole === 'Secondary Instructor'  || this.InstructorRole === 'Faculty Grader'  || this.InstructorRole === 'Graduate Student Instructor'){
       mPathArray.push(sis_term_id + this.ClassNumber);

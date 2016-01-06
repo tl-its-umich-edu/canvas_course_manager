@@ -1,3 +1,9 @@
+/*set all bootstrap alerts to black text
+to get WACG 2 AAA contrast, preserving the background colors*/
+.alert, .alert-warning, .alert-info {
+    color:#000 !important;
+}
+
 .mastHead {
     color:#fff;
 }
@@ -180,12 +186,6 @@ li.addedSection {
 
 
 #otherCourses:focus, .sectionList:focus, #newUser:focus, #failedToValidateEmail:focus, #failedToValidateEmailName:focus,#addMessageContainer:focus {outline:none};
-/*set all bootstrap alerts to black text
-to get WACG 2 AAA contrast, preserving the background colors*/
-.alert {
-    color:#000;
-}
-
 
 /* leave animation */
 .alert-inline.ng-leave            { 
