@@ -12,6 +12,8 @@ canvasSupportApp.controller('termsController', ['Courses', '$rootScope', '$scope
     if(data.enrollment_terms){
       $scope.terms = data.enrollment_terms;
       $scope.$parent.currentTerm =  getCurrentTerm(data.enrollment_terms);
+      $('.canvasTermIdforjQuery').text($scope.$parent.currentTerm.currentTermCanvasId);
+      $('.canvasTermNameforjQuery').text($scope.$parent.currentTerm.currentTermName);
     }
     else {
       errorDisplay(termsUrl,status,'Unable to get terms data');  
