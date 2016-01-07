@@ -108,8 +108,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private boolean isStubTesting = false;
 	private OauthCredentialsFactory oacf;
 
-	protected static Properties appExtSecureProperties=null;
-	protected static Properties appExtProperties=null;	
+	protected static Properties appExtSecurePropertiesFile=null;
+	protected static Properties appExtPropertiesFile=null;	
 
 	private static final HashMap<String,String> apiListRegexWithDebugMsg = new HashMap<String,String>(){
 		private static final long serialVersionUID = -1389517682290891890L;
@@ -140,16 +140,16 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	public void init() throws ServletException {
 		M_log.debug(" Servlet init(): Called");
-		appExtProperties = Utils.loadProperties(CCM_PROPERTY_FILE_PATH);
-		appExtSecureProperties = Utils.loadProperties(CCM_SECURE_PROPERTY_FILE_PATH);
+		appExtPropertiesFile = Utils.loadProperties(CCM_PROPERTY_FILE_PATH);
+		appExtSecurePropertiesFile = Utils.loadProperties(CCM_SECURE_PROPERTY_FILE_PATH);
       
-		if(appExtSecureProperties!=null) {
-			ltiKey = appExtSecureProperties.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_KEY);
-			ltiSecret = appExtSecureProperties.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_SECRET);
-			ltiUrl = appExtProperties.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_URL);
-			canvasToken = appExtSecureProperties.getProperty(SectionUtilityToolFilter.PROPERTY_CANVAS_ADMIN);
-			canvasURL = appExtSecureProperties.getProperty(SectionUtilityToolFilter.PROPERTY_CANVAS_URL);
-			isStubTesting = Boolean.valueOf( appExtProperties.getProperty(SectionUtilityToolFilter.PROPERTY_TEST_STUB) );
+		if(appExtSecurePropertiesFile!=null) {
+			ltiKey = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_KEY);
+			ltiSecret = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_SECRET);
+			ltiUrl = appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_URL);
+			canvasToken = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_CANVAS_ADMIN);
+			canvasURL = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_CANVAS_URL);
+			isStubTesting = Boolean.valueOf( appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_TEST_STUB) );
 			M_log.debug("ltiKey from props: "	 + ltiKey);
 			M_log.debug("ltiSecret from props: " + ltiSecret);
 			M_log.debug("ltiUrl from props: "	 + ltiUrl);
@@ -159,7 +159,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			M_log.error("Failed to load system properties(sectionsToolProps.properties) for SectionsTool");
 		}
       
-		oacf = new OauthCredentialsFactory(appExtSecureProperties);
+		oacf = new OauthCredentialsFactory(appExtSecurePropertiesFile);
 	}
 
 	public void fillContext(Context context, HttpServletRequest request) {
@@ -382,13 +382,13 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		if ( canvasToken == null || canvasURL == null ) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			out = response.getWriter();
-			out.print(appExtProperties.getProperty("property.file.load.error"));
+			out.print(appExtPropertiesFile.getProperty("property.file.load.error"));
 			out.flush();
 			M_log.error("Failed to load system properties(sectionsToolProps.properties) for SectionsTool");
 			return;
 		}
 		if(isAllowedApiRequest(request)) {
-			callType = appExtProperties.getProperty(SectionUtilityToolFilter.PROPERTY_CALL_TYPE);
+			callType = appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_CALL_TYPE);
 			if(callType.equals("canvas")){
 				apiConnectionLogic(request,response);
 			}
@@ -398,7 +398,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}else {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			out = response.getWriter();
-			out.print(appExtProperties.getProperty("api.not.allowed.error"));
+			out.print(appExtPropertiesFile.getProperty("api.not.allowed.error"));
 			out.flush();
 		}
 	}
@@ -449,12 +449,12 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			M_log.error("Error in mpathwaysCall(), missing parameter in Instuctors request");
 		}
 		else{
-			if(appExtSecureProperties!=null) {
+			if(appExtSecurePropertiesFile!=null) {
 				HashMap<String, String> wapiValuesMap = new HashMap<String, String>();
-				wapiValuesMap.put("tokenServer", appExtSecureProperties.getProperty(SectionUtilityToolFilter.ESB_TOKEN_SERVER));
-				wapiValuesMap.put("apiPrefix", appExtSecureProperties.getProperty(SectionUtilityToolFilter.ESB_PREFIX));
-				wapiValuesMap.put("key", appExtSecureProperties.getProperty(SectionUtilityToolFilter.ESB_KEY));
-				wapiValuesMap.put("secret", appExtSecureProperties.getProperty(SectionUtilityToolFilter.ESB_SECRET));
+				wapiValuesMap.put("tokenServer", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_TOKEN_SERVER));
+				wapiValuesMap.put("apiPrefix", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_PREFIX));
+				wapiValuesMap.put("key", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_KEY));
+				wapiValuesMap.put("secret", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_SECRET));
 				WAPI wapi = new WAPI(wapiValuesMap);
 				try {
 					String url = wapi.getApiPrefix() + uniqname + "/Terms/" + mpathwaysTermId + "/Classes";
@@ -622,8 +622,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		Set<String> apiListRegex = apiListRegexWithDebugMsg.keySet();
 		for (String api : apiListRegex) {
 			M_log.debug("URL: " + url);
-			M_log.debug("API: " + appExtProperties.getProperty(api));
-			if(url.matches(appExtProperties.getProperty(api))) {
+			M_log.debug("API: " + appExtPropertiesFile.getProperty(api));
+			if(url.matches(appExtPropertiesFile.getProperty(api))) {
 				M_log.debug(prefixDebugMsg+apiListRegexWithDebugMsg.get(api));
 				isMatch= true;
 				break;
