@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -141,6 +142,11 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			put(MPATHWAYS_API_GNERIC, "for mpathways calls");
 		}
 	};
+
+	private static final ArrayList<String> allowedRoles = new ArrayList<String>(Arrays.asList("Primary Instructor",
+			"Secondary Instructor",
+			"Faculty grader",
+			"Graduate Student Instructor"));
 
 	public void init() throws ServletException {
 		M_log.debug(" Servlet init(): Called");
@@ -486,17 +492,16 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 			for(int i = 0; i < mPathJsonArray.length(); i++){
 				JSONObject childJSONObject = mPathJsonArray.getJSONObject(i);
-				if(childJSONObject.get("InstructorRole").equals("Primary Instructor") ||
-						childJSONObject.get("InstructorRole").equals("Secondary Instructor") ||
-						childJSONObject.get("InstructorRole").equals("Faculty grader") || 
-						childJSONObject.get("InstructorRole").equals("Graduate Student Instructor")){ 
+				if(allowedRoles.contains(childJSONObject.get("InstructorRole"))){
 					M_log.debug("Class Number: " + childJSONObject.get("ClassNumber"));
 					mPathwayData.add(mpathwaysTermId + childJSONObject.get("ClassNumber").toString());
 				}
 			}
 
-			for(String course : mPathwayData){
-				M_log.debug("Course: " + course);
+			if(M_log.isDebugEnabled()){
+				for(String course : mPathwayData){
+					M_log.debug("Course: " + course);
+				}
 			}
 
 			HttpSession session = request.getSession(true);
@@ -514,9 +519,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		String pathInfo = request.getPathInfo();
 		String url;
 		if(queryString!=null) {
-			url= canvasURL+pathInfo+"?"+queryString;
+			url = canvasURL+pathInfo+"?"+queryString;
 		}else {
-			url= canvasURL+pathInfo;
+			url = canvasURL+pathInfo;
 		}
 
 		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(TC_SESSION_DATA);
@@ -546,29 +551,13 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}else if(request.getMethod().equals(DELETE)) {
 			clientRequest=new HttpDelete(url);
 		}
-		HttpClient client = new DefaultHttpClient();
-		final ArrayList<NameValuePair> nameValues = new ArrayList<NameValuePair>();
-		nameValues.add(new BasicNameValuePair("Authorization", "Bearer"+ " " +canvasToken));
-		nameValues.add(new BasicNameValuePair("content-type", "application/json"));
-		for (final NameValuePair h : nameValues)
-		{
-			clientRequest.addHeader(h.getName(), h.getValue());
-		}
-		BufferedReader rd = null;
-		long startTime = System.currentTimeMillis();
-		try {
-			rd = new BufferedReader(new InputStreamReader(client.execute(clientRequest).getEntity().getContent()));
-		} catch (IOException e) {
-			M_log.error("Canvas API call did not complete successfully", e);
-		}
-		long stopTime = System.currentTimeMillis();
-		long elapsedTime = stopTime - startTime;
-		M_log.info(String.format("CANVAS Api response took %sms",elapsedTime));
+		BufferedReader rd = newMethod(clientRequest);
 		String line = "";
 		StringBuilder sb = new StringBuilder();
 		while ((line = rd.readLine()) != null) {
 			sb.append(line);
 		}
+
 		out.print(sb.toString());
 		out.flush();
 	}
@@ -638,7 +627,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	private boolean isAllowedApiRequest(HttpServletRequest request) {
 		M_log.debug("isAllowedApiRequest(): called");
-		HttpSession session= request.getSession(true);
+		HttpSession session = request.getSession(true);
 		String url;
 		String queryString = request.getQueryString();
 		String pathInfo = request.getPathInfo();
@@ -674,6 +663,46 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		clientRequest = new HttpGet(crosslistApiCall);
 
+		BufferedReader rd = newMethod(clientRequest);
+		
+		String line = "";
+		StringBuilder sb = new StringBuilder();
+		
+		try {
+			while ((line = rd.readLine()) != null) {
+				sb.append(line);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		M_log.debug("RESPONSE TO isCrosslistAllowed: " + sb.toString());
+		JSONObject crosslistSectionResponse = new JSONObject( sb.toString() );
+		String sisSectionId = crosslistSectionResponse.getString("sis_section_id");
+		M_log.debug("SIS SECTION ID: " + sisSectionId);
+
+		M_log.debug("session id: "+session.getId());
+		ArrayList<String> courses = (ArrayList<String>) session.getAttribute(M_PATH_DATA);
+		if(M_log.isDebugEnabled()){
+			if(courses != null){
+				for(String section : courses){
+					M_log.debug("CrossSection: " + section);
+				}
+			}
+		}
+
+		if(courses.contains(sisSectionId)){
+			M_log.debug("SECTION MATCH FOUND - CROSSLIST CALL ALLOWED");
+			isSectionMatch = true;
+		}
+		else{
+			M_log.debug("API CALL FAILED DUE TO CROSSLIST MISMATCH");
+			isSectionMatch = false;
+		}
+
+		return isSectionMatch;
+	}
+
+	private BufferedReader newMethod(HttpUriRequest clientRequest) {
 		HttpClient client = new DefaultHttpClient();
 		final ArrayList<NameValuePair> nameValues = new ArrayList<NameValuePair>();
 		nameValues.add(new BasicNameValuePair("Authorization", "Bearer"+ " " +canvasToken));
@@ -692,38 +721,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		long stopTime = System.currentTimeMillis();
 		long elapsedTime = stopTime - startTime;
 		M_log.info(String.format("CANVAS Api response took %sms",elapsedTime));
-		String line = "";
-		StringBuilder sb = new StringBuilder();
-		try {
-			while ((line = rd.readLine()) != null) {
-				sb.append(line);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		M_log.debug("Some stirng: " + sb.toString());
-		JSONObject crosslistSectionResponse = new JSONObject( sb.toString() );
-		String sisSectionId = crosslistSectionResponse.getString("sis_section_id");
-		M_log.debug("SIS SECTION ID: " + sisSectionId);
-
-		M_log.debug("session id: "+session.getId());
-		ArrayList<String> courses = (ArrayList<String>) session.getAttribute(M_PATH_DATA);
-		if(courses != null){
-			for(String section : courses){
-				M_log.debug("CrossSection: " + section);
-			}
-		}
-
-		if(courses.contains(sisSectionId)){
-			M_log.debug("SECTION MATCH FOUND - CROSSLIST CALL ALLOWED");
-			isSectionMatch = true;
-		}
-		else{
-			M_log.debug("API CALL FAILED DUE TO CROSSLIST MISMATCH");
-			isSectionMatch = false;
-		}
-
-		return isSectionMatch;
+		return rd;
 	}
 	/*
 	 * This helper method iterate through the list of api's that sections tool have and if a match is found then logs associated debug message.
@@ -734,8 +732,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		boolean isMatch=false;
 		Set<String> apiListRegex = apiListRegexWithDebugMsg.keySet();
 		for (String api : apiListRegex) {
-			//M_log.debug("URL: " + url);
-			//M_log.debug("API: " + appExtPropertiesFile.getProperty(api));
+			M_log.debug("URL: " + url);
+			M_log.debug("API: " + appExtPropertiesFile.getProperty(api));
 			if(url.matches(appExtPropertiesFile.getProperty(api))) {
 				M_log.debug(prefixDebugMsg+apiListRegexWithDebugMsg.get(api));
 				isMatch= true;
