@@ -551,7 +551,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}else if(request.getMethod().equals(DELETE)) {
 			clientRequest=new HttpDelete(url);
 		}
-		BufferedReader rd = newMethod(clientRequest);
+		BufferedReader rd = processApiCall(clientRequest);
 		String line = "";
 		StringBuilder sb = new StringBuilder();
 		while ((line = rd.readLine()) != null) {
@@ -663,7 +663,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		clientRequest = new HttpGet(crosslistApiCall);
 
-		BufferedReader rd = newMethod(clientRequest);
+		BufferedReader rd = processApiCall(clientRequest);
 		
 		String line = "";
 		StringBuilder sb = new StringBuilder();
@@ -695,14 +695,14 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			isSectionMatch = true;
 		}
 		else{
-			M_log.debug("API CALL FAILED DUE TO CROSSLIST MISMATCH");
+			M_log.debug("API CALL REJECTED DUE TO CROSSLIST MISMATCH");
 			isSectionMatch = false;
 		}
 
 		return isSectionMatch;
 	}
 
-	private BufferedReader newMethod(HttpUriRequest clientRequest) {
+	private BufferedReader processApiCall(HttpUriRequest clientRequest) {
 		HttpClient client = new DefaultHttpClient();
 		final ArrayList<NameValuePair> nameValues = new ArrayList<NameValuePair>();
 		nameValues.add(new BasicNameValuePair("Authorization", "Bearer"+ " " +canvasToken));
