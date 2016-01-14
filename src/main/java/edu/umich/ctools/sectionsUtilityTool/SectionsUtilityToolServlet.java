@@ -23,6 +23,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,6 +50,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.tools.view.VelocityViewServlet;
 import org.apache.velocity.tools.view.ViewToolContext;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
@@ -96,6 +99,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String LIS_PERSON_NAME_GIVEN = "lis_person_name_given";
 
 	private static final String TC_SESSION_DATA = "tcSessionData";
+	private static final String M_PATH_DATA = "mPathData";
 	private static final String LTI_1P0_CONST = "LTI-1p0";
 	private static final String LTI_VERSION = "lti_version";
 
@@ -106,13 +110,16 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	protected static final String MPATHWAYS_PATH_INFO = "/mpathways/Instructors";
 
 	private final static String CCM_PROPERTY_FILE_PATH = "ccmPropsPath";
-	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";	
+	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";
+
+	private static final String LAUNCH_TYPE = "launchType";
 
 	private static final String DELETE = "DELETE";
 	private static final String POST = "POST";
 	private static final String GET = "GET";
 	private static final String PUT = "PUT";
 
+<<<<<<< HEAD
 	//Member variabls
 	private String canvasToken = null;
 	private String canvasURL= null;
@@ -121,6 +128,15 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private String ltiKey = null;
 	private String ltiSecret = null;
 	private boolean isStubTesting = false;
+=======
+	//Member variables
+	private String canvasToken;
+	private String canvasURL;
+	private String callType;
+	private String ltiUrl;
+	private String ltiKey;
+	private String ltiSecret;
+>>>>>>> remote-master/master
 	private OauthCredentialsFactory oacf;
 
 	protected static Properties appExtSecurePropertiesFile=null;
@@ -152,6 +168,11 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			put(MPATHWAYS_API_GNERIC, "for mpathways calls");
 		}
 	};
+
+	private static final ArrayList<String> allowedRoles = new ArrayList<String>(Arrays.asList("Primary Instructor",
+			"Secondary Instructor",
+			"Faculty grader",
+			"Graduate Student Instructor"));
 
 	public void init() throws ServletException {
 		M_log.debug(" Servlet init(): Called");
@@ -346,9 +367,27 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 				}
 			}
 		}
+<<<<<<< HEAD
       
 		// Verify valid LTI key & secret
 		if( ltiKey == null || ltiSecret == null ) {
+=======
+		//Properties appExtSecureProperties = SectionUtilityToolFilter.appExtSecurePropertiesFile;
+		if(appExtSecurePropertiesFile!=null) {
+			ltiKey = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_KEY);
+			ltiSecret = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_SECRET);
+			if(appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_URL) != null){
+				ltiUrl = appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_URL);
+			}
+			else{
+				ltiUrl = request.getRequestURL().toString();
+			}
+			M_log.debug("ltiKey from props: "    + ltiKey);
+			M_log.debug("ltiSecret from props: " + ltiSecret);
+			M_log.debug("ltiUrl from props: "    + ltiUrl);
+		}
+		else {
+>>>>>>> remote-master/master
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			M_log.error("No LTI key and secret defined in ccmSecure.properties file");
 			return;
@@ -475,6 +514,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 					String url = wapi.getApiPrefix() + uniqname + "/Terms/" + mpathwaysTermId + "/Classes";
 					M_log.info("WAPI URL: " + url);
 					wrappedResult = wapi.getRequest(url);
+					addMpathwayDataToSession(request, wrappedResult, mpathwaysTermId);
 				} catch (UnirestException e) {
 					M_log.error("MPathways API call did not complete successfully", e);
 				}	
@@ -484,15 +524,50 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		out.flush();
 	}
 
+	public void addMpathwayDataToSession(HttpServletRequest request,
+			WAPIResultWrapper wrappedResult, String mpathwaysTermId) {
+		try{
+			M_log.debug("Mapth Wrapped Result: " + wrappedResult.toJson().toString());
+			//Add mpathways info to session data
+			ArrayList<String> mPathwayData = new ArrayList<String>();
+			JSONArray mPathJsonArray;
+			//pluck result from json
+			JSONObject result = new JSONObject(wrappedResult.toJson());
+			mPathJsonArray = result.getJSONObject("Result").getJSONObject("getInstrClassListResponse").getJSONArray("InstructedClass");
+			M_log.debug("mPathJsonArray: " + mPathJsonArray);
+
+			for(int i = 0; i < mPathJsonArray.length(); i++){
+				JSONObject childJSONObject = mPathJsonArray.getJSONObject(i);
+				if(allowedRoles.contains(childJSONObject.get("InstructorRole"))){
+					M_log.debug("Class Number: " + childJSONObject.get("ClassNumber"));
+					mPathwayData.add(mpathwaysTermId + childJSONObject.get("ClassNumber").toString());
+				}
+			}
+
+			if(M_log.isDebugEnabled()){
+				for(String course : mPathwayData){
+					M_log.debug("Course: " + course);
+				}
+			}
+
+			HttpSession session = request.getSession(true);
+			session.setAttribute(M_PATH_DATA,mPathwayData);
+		}
+		catch(JSONException e){
+			M_log.error(e.getMessage());
+			return;
+		}
+	}
+
 	private void getCanvasResponse(HttpServletRequest request,
 			HttpServletResponse response, PrintWriter out) throws IOException {
 		String queryString = request.getQueryString();
 		String pathInfo = request.getPathInfo();
 		String url;
 		if(queryString!=null) {
-			url= canvasURL+pathInfo+"?"+queryString;
+			url = canvasURL+pathInfo+"?"+queryString;
 		}else {
-			url=canvasURL+pathInfo;
+			url = canvasURL+pathInfo;
 		}
 
 		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(TC_SESSION_DATA);
@@ -522,29 +597,13 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}else if(request.getMethod().equals(DELETE)) {
 			clientRequest=new HttpDelete(url);
 		}
-		HttpClient client = new DefaultHttpClient();
-		final ArrayList<NameValuePair> nameValues = new ArrayList<NameValuePair>();
-		nameValues.add(new BasicNameValuePair("Authorization", "Bearer"+ " " +canvasToken));
-		nameValues.add(new BasicNameValuePair("content-type", "application/json"));
-		for (final NameValuePair h : nameValues)
-		{
-			clientRequest.addHeader(h.getName(), h.getValue());
-		}
-		BufferedReader rd = null;
-		long startTime = System.currentTimeMillis();
-		try {
-			rd = new BufferedReader(new InputStreamReader(client.execute(clientRequest).getEntity().getContent()));
-		} catch (IOException e) {
-			M_log.error("Canvas API call did not complete successfully", e);
-		}
-		long stopTime = System.currentTimeMillis();
-		long elapsedTime = stopTime - startTime;
-		M_log.info(String.format("CANVAS Api response took %sms",elapsedTime));
+		BufferedReader rd = processApiCall(clientRequest);
 		String line = "";
 		StringBuilder sb = new StringBuilder();
 		while ((line = rd.readLine()) != null) {
 			sb.append(line);
 		}
+
 		out.print(sb.toString());
 		out.flush();
 	}
@@ -614,6 +673,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	private boolean isAllowedApiRequest(HttpServletRequest request) {
 		M_log.debug("isAllowedApiRequest(): called");
+		HttpSession session = request.getSession(true);
 		String url;
 		String queryString = request.getQueryString();
 		String pathInfo = request.getPathInfo();
@@ -625,7 +685,89 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			url=pathInfo;
 			isAllowedRequest=isApiFoundIntheList(url);
 		}
+
+		if( url.matches(appExtPropertiesFile.getProperty(CANVAS_API_CROSSLIST)) && session.getAttribute(LAUNCH_TYPE).equals("lti")){
+			isAllowedRequest = isCrosslistAllowed(request, session, url);
+		}
+
 		return isAllowedRequest;
+	}
+
+	private boolean isCrosslistAllowed(HttpServletRequest request,
+			HttpSession session, String url) {
+		boolean isSectionMatch = false;
+
+		//build api call
+		String crosslistApiCall = canvasURL + url.substring(0, url.indexOf("/crosslist"));
+		M_log.debug("crosslist API call: " + crosslistApiCall);
+
+		//String is built, time to make the call
+		String sessionId = request.getSession().getId();
+		String loggingApiWithSessionInfo = String.format("Canvas API request with Session Id \"%s\" for URL \"%s\"", sessionId,crosslistApiCall);
+		M_log.info(loggingApiWithSessionInfo);
+		HttpUriRequest clientRequest = null;
+
+		clientRequest = new HttpGet(crosslistApiCall);
+
+		BufferedReader rd = processApiCall(clientRequest);
+		
+		String line = "";
+		StringBuilder sb = new StringBuilder();
+		
+		try {
+			while ((line = rd.readLine()) != null) {
+				sb.append(line);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		M_log.debug("RESPONSE TO isCrosslistAllowed: " + sb.toString());
+		JSONObject crosslistSectionResponse = new JSONObject( sb.toString() );
+		String sisSectionId = crosslistSectionResponse.getString("sis_section_id");
+		M_log.debug("SIS SECTION ID: " + sisSectionId);
+
+		M_log.debug("session id: "+session.getId());
+		ArrayList<String> courses = (ArrayList<String>) session.getAttribute(M_PATH_DATA);
+		if(M_log.isDebugEnabled()){
+			if(courses != null){
+				for(String section : courses){
+					M_log.debug("CrossSection: " + section);
+				}
+			}
+		}
+
+		if(courses.contains(sisSectionId)){
+			M_log.debug("SECTION MATCH FOUND - CROSSLIST CALL ALLOWED");
+			isSectionMatch = true;
+		}
+		else{
+			M_log.debug("API CALL REJECTED DUE TO CROSSLIST MISMATCH");
+			isSectionMatch = false;
+		}
+
+		return isSectionMatch;
+	}
+
+	private BufferedReader processApiCall(HttpUriRequest clientRequest) {
+		HttpClient client = new DefaultHttpClient();
+		final ArrayList<NameValuePair> nameValues = new ArrayList<NameValuePair>();
+		nameValues.add(new BasicNameValuePair("Authorization", "Bearer"+ " " +canvasToken));
+		nameValues.add(new BasicNameValuePair("content-type", "application/json"));
+		for (final NameValuePair h : nameValues)
+		{
+			clientRequest.addHeader(h.getName(), h.getValue());
+		}
+		BufferedReader rd = null;
+		long startTime = System.currentTimeMillis();
+		try {
+			rd = new BufferedReader(new InputStreamReader(client.execute(clientRequest).getEntity().getContent()));
+		} catch (IOException e) {
+			M_log.error("Canvas API call did not complete successfully", e);
+		}
+		long stopTime = System.currentTimeMillis();
+		long elapsedTime = stopTime - startTime;
+		M_log.info(String.format("CANVAS Api response took %sms",elapsedTime));
+		return rd;
 	}
 	/*
 	 * This helper method iterate through the list of api's that sections tool have and if a match is found then logs associated debug message.
@@ -643,7 +785,6 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 				isMatch= true;
 				break;
 			}
-
 		}
 		return isMatch;
 	}

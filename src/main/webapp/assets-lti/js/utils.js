@@ -55,8 +55,6 @@ var filterOutSections = function(sectionData, mPathArray){
   return sectionData;
 };
 
-
-
 var parseResultLookUpCanvasUser = function(userArray, uniqname){
   var thisUser = _.findWhere(userArray, {sis_login_id: uniqname});
   return thisUser.id
@@ -121,7 +119,7 @@ var validateUniqname = function (value) {
 var validateEmailAddress = function (value) {
   var value = $.trim(value);
   if(value.indexOf('@') !==-1 &&
-    value.indexOf('@umich.edu') ===-1  && 
+    value.indexOf('umich.edu') ===-1  && 
     value.split('@').length === 2 && 
     value.split('@')[0] !== '' && 
     value.split('@')[1] !== '' &&
