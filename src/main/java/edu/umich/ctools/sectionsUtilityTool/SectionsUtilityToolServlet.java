@@ -116,6 +116,17 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	protected static Properties appExtSecurePropertiesFile=null;
 	protected static Properties appExtPropertiesFile=null;	
 
+	private static final HashMap<String, Integer> enrollmentsMap = new HashMap<String, Integer>(){
+		private static final long serialVersionUID = -1389517682290891890L;
+		
+		{
+			put("StudentEnrollment", 0);
+			put("TaEnrollment", 1);
+			put("TeacherEnrollment", 2);
+			put("DesignerEnrollment", 3);
+		}
+	};
+	
 	private static final HashMap<String,String> apiListRegexWithDebugMsg = new HashMap<String,String>(){
 		private static final long serialVersionUID = -1389517682290891890L;
 
@@ -558,8 +569,26 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			sb.append(line);
 		}
 
+		if( url.substring(url.indexOf("/api")).matches(appExtPropertiesFile.getProperty(CANVAS_API_GET_COURSE_ENROLL)) && request.getSession().getAttribute(LAUNCH_TYPE).equals("lti")){
+			addEnrollmentsToSession(request, sb);
+		}
+		
 		out.print(sb.toString());
 		out.flush();
+	}
+
+	private void addEnrollmentsToSession(HttpServletRequest request,
+			StringBuilder sb) {
+		M_log.debug("ENROLLMENTS: " + sb.toString());
+		HashMap<Integer, String> enrollmentsFound =  new HashMap<Integer, String>();
+		JSONArray enrollmentsArray = new JSONArray(sb.toString());
+		for(int i = 0; i < enrollmentsArray.length(); i++){
+			JSONObject childJSONObject = enrollmentsArray.getJSONObject(i);
+			M_log.debug("ENROLLMENT RECORD: " + childJSONObject.get("course_id") + " " + childJSONObject.get("course_section_id") + " " + childJSONObject.get("type"));
+			enrollmentsFound.put(childJSONObject.getInt("course_section_id"), childJSONObject.getString("type"));
+		}
+		request.getSession().setAttribute("enrollments", enrollmentsFound);
+		M_log.debug("SESSION ENROLLMENTS: " + request.getSession().getAttribute("enrollments"));
 	}
 
 	//Canvas adds custom parameters for lti launches. These custom paramerers 
@@ -643,8 +672,46 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		if( url.matches(appExtPropertiesFile.getProperty(CANVAS_API_CROSSLIST)) && session.getAttribute(LAUNCH_TYPE).equals("lti")){
 			isAllowedRequest = isCrosslistAllowed(request, session, url);
 		}
+		
+		if( url.matches(appExtPropertiesFile.getProperty(CANVAS_API_ADD_USER)) && request.getSession().getAttribute(LAUNCH_TYPE).equals("lti")){
+			isAllowedRequest = isAddUserAllowed(request, url);
+		}
 
 		return isAllowedRequest;
+	}
+
+	private boolean isAddUserAllowed(HttpServletRequest request, String url) {
+		boolean isCallAllowed = false;
+		String sectionString = url.substring(url.indexOf("sections/")+9, url.indexOf("/enrollments"));
+		String enrollmentTypeFromRequest = url.substring(url.indexOf("enrollment[type]=")+17, url.length());
+		M_log.debug("SECTION_STRING: " + sectionString);
+		M_log.debug("ENROLLMENT_TYPE: " + enrollmentTypeFromRequest);
+		
+		HashMap<Integer, String> enrollmentsFound = (HashMap<Integer, String>) request.getSession().getAttribute("enrollments");
+		M_log.debug("SESSION ENROLLMENTS FOUND: " + request.getSession().getAttribute("enrollments"));
+		
+		String enrollmentTypeFromSession = enrollmentsFound.get(new Integer(sectionString));
+		M_log.debug("ENROLLMENT FOUND: " + enrollmentTypeFromSession);
+		
+		if(enrollmentTypeFromSession == null){
+			return isCallAllowed;
+		}
+		
+		int enrollmentValueFromRequest = enrollmentsMap.get(enrollmentTypeFromRequest);
+		int enrollmentValueFromSession = enrollmentsMap.get(enrollmentTypeFromSession);
+		
+		M_log.debug("ENROLLMENT TYPE VALUE: " + enrollmentValueFromRequest);
+		M_log.debug("ENROLLMENT FOUND VALUE: " + enrollmentValueFromSession);
+		
+		if(enrollmentValueFromSession >= enrollmentValueFromRequest){
+			M_log.debug("NON UMICH USER ADD ALLOWED");
+			isCallAllowed = true;
+		}
+		else{
+			M_log.debug("API CALL REJECTED DUE TO INSUFFICIENT PERMISSION");
+			isCallAllowed = false;
+		}
+		return isCallAllowed;
 	}
 
 	private boolean isCrosslistAllowed(HttpServletRequest request,
@@ -664,10 +731,10 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		clientRequest = new HttpGet(crosslistApiCall);
 
 		BufferedReader rd = processApiCall(clientRequest);
-		
+
 		String line = "";
 		StringBuilder sb = new StringBuilder();
-		
+
 		try {
 			while ((line = rd.readLine()) != null) {
 				sb.append(line);
