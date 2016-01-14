@@ -119,7 +119,7 @@ var validateUniqname = function (value) {
 var validateEmailAddress = function (value) {
   var value = $.trim(value);
   if(value.indexOf('@') !==-1 &&
-    value.indexOf('@umich.edu') ===-1  && 
+    value.indexOf('umich.edu') ===-1  && 
     value.split('@').length === 2 && 
     value.split('@')[0] !== '' && 
     value.split('@')[1] !== '' &&
