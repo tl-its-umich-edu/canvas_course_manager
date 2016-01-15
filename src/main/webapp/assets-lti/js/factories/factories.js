@@ -201,9 +201,14 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
       );
     },
 
-    addFriendToSection: function (url) {
+    addFriendToSection: function (url, sectionName, sectionNumber) {
       return $http.post(url).then(
+
         function success(result) {
+          var resultSection = [];
+          resultSection.push({'section_name':sectionName,'section_number':sectionNumber});
+          resultSection.push(result.data);
+          result.data = resultSection;
           return result;
         },
         function error(result) {
