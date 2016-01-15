@@ -88,7 +88,6 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String LTI_1P0_CONST = "LTI-1p0";
 	private static final String LTI_VERSION = "lti_version";
 
-	private static final String PARAMETER_INSTRUCTOR = "instructor";
 	private static final String PARAMETER_TERMID = "termid";
 
 	private static final String MANAGER_SERVLET_NAME = "/manager";
@@ -118,15 +117,16 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	private static final HashMap<String, Integer> enrollmentsMap = new HashMap<String, Integer>(){
 		private static final long serialVersionUID = -1389517682290891890L;
-		
+
 		{
-			put("StudentEnrollment", 0);
+			put("ObserverEnrollment", 0);
+			put("StudentEnrollment", 0); //all others will be 0
 			put("TaEnrollment", 1);
 			put("TeacherEnrollment", 2);
-			put("DesignerEnrollment", 3);
+			put("DesignerEnrollment", 2);
 		}
 	};
-	
+
 	private static final HashMap<String,String> apiListRegexWithDebugMsg = new HashMap<String,String>(){
 		private static final long serialVersionUID = -1389517682290891890L;
 
@@ -572,7 +572,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		if( url.substring(url.indexOf("/api")).matches(appExtPropertiesFile.getProperty(CANVAS_API_GET_COURSE_ENROLL)) && request.getSession().getAttribute(LAUNCH_TYPE).equals("lti")){
 			addEnrollmentsToSession(request, sb);
 		}
-		
+
 		out.print(sb.toString());
 		out.flush();
 	}
@@ -585,7 +585,18 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		for(int i = 0; i < enrollmentsArray.length(); i++){
 			JSONObject childJSONObject = enrollmentsArray.getJSONObject(i);
 			M_log.debug("ENROLLMENT RECORD: " + childJSONObject.get("course_id") + " " + childJSONObject.get("course_section_id") + " " + childJSONObject.get("type"));
-			enrollmentsFound.put(childJSONObject.getInt("course_section_id"), childJSONObject.getString("type"));
+			if(enrollmentsFound.containsKey(childJSONObject.getInt("course_id"))){
+				String oldType = enrollmentsFound.get(childJSONObject.getInt("course_id"));
+				String newType = childJSONObject.getString("type");
+				M_log.debug("OLD TYPE: " + oldType);
+				M_log.debug("NEW TYPE: " + newType);
+				if(enrollmentsMap.get(newType) > enrollmentsMap.get(oldType)){
+					enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString("type"));
+				}
+			}
+			else{
+				enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString("type"));
+			}
 		}
 		request.getSession().setAttribute("enrollments", enrollmentsFound);
 		M_log.debug("SESSION ENROLLMENTS: " + request.getSession().getAttribute("enrollments"));
@@ -672,7 +683,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		if( url.matches(appExtPropertiesFile.getProperty(CANVAS_API_CROSSLIST)) && session.getAttribute(LAUNCH_TYPE).equals("lti")){
 			isAllowedRequest = isCrosslistAllowed(request, session, url);
 		}
-		
+
 		if( url.matches(appExtPropertiesFile.getProperty(CANVAS_API_ADD_USER)) && request.getSession().getAttribute(LAUNCH_TYPE).equals("lti")){
 			isAllowedRequest = isAddUserAllowed(request, url);
 		}
@@ -682,29 +693,83 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	private boolean isAddUserAllowed(HttpServletRequest request, String url) {
 		boolean isCallAllowed = false;
+		//when using the substring method, the +9, +17, +x, the int is the 
+		//number of characters in the phrase for the indexOf method. The int 
+		//in this case is an offset.
 		String sectionString = url.substring(url.indexOf("sections/")+9, url.indexOf("/enrollments"));
 		String enrollmentTypeFromRequest = url.substring(url.indexOf("enrollment[type]=")+17, url.length());
 		M_log.debug("SECTION_STRING: " + sectionString);
 		M_log.debug("ENROLLMENT_TYPE: " + enrollmentTypeFromRequest);
-		
+
+		//build api call
+		String sectionsApiCall = canvasURL + "/api/v1/sections/" + sectionString;
+		M_log.debug("SECTIONS API CALL: " + sectionsApiCall);
+
+		//string built, time to make call
+		String sessionId = request.getSession().getId();
+		String loggingApiWithSessionInfo = String.format("Canvas API request with Session Id \"%s\" for URL \"%s\"", sessionId,sectionsApiCall);
+		M_log.info(loggingApiWithSessionInfo);
+		HttpUriRequest clientRequest = null;
+
+		clientRequest = new HttpGet(sectionsApiCall);
+
+		BufferedReader rd = processApiCall(clientRequest);
+
+		String line = "";
+		StringBuilder sb = new StringBuilder();
+
+		try {
+			while ((line = rd.readLine()) != null) {
+				sb.append(line);
+			}
+		} catch (IOException e) {
+			M_log.error("Canvas API call did not complete successfully", e);
+		}
+		M_log.debug("RESPONSE TO isAddUserAllowed: " + sb.toString());
+
+		Integer courseIdFromRequest = null;
+		try{
+			//If JSON isn't properly formed catch exception
+			JSONObject sectionsCallResponse = new JSONObject( sb.toString() );
+			courseIdFromRequest = sectionsCallResponse.getInt("course_id");
+		}
+		catch(JSONException e){
+			M_log.error("JSONException found attempting to process sectionsCallResponse");
+			return false;
+		}
+		M_log.debug("COURSE ID FROM REQUEST: " + courseIdFromRequest);
+
 		HashMap<Integer, String> enrollmentsFound = (HashMap<Integer, String>) request.getSession().getAttribute("enrollments");
 		M_log.debug("SESSION ENROLLMENTS FOUND: " + request.getSession().getAttribute("enrollments"));
-		
-		String enrollmentTypeFromSession = enrollmentsFound.get(new Integer(sectionString));
+
+		String enrollmentTypeFromSession = enrollmentsFound.get(courseIdFromRequest);
 		M_log.debug("ENROLLMENT FOUND: " + enrollmentTypeFromSession);
-		
+
 		if(enrollmentTypeFromSession == null){
-			return isCallAllowed;
+			return false;
+		}
+
+		M_log.debug("ENROLLMENT FROM REQUEST: " + enrollmentTypeFromRequest);
+		
+		if(enrollmentsMap.containsKey(enrollmentTypeFromRequest) == false){
+			return false;
 		}
 		
 		int enrollmentValueFromRequest = enrollmentsMap.get(enrollmentTypeFromRequest);
 		int enrollmentValueFromSession = enrollmentsMap.get(enrollmentTypeFromSession);
-		
+
 		M_log.debug("ENROLLMENT TYPE VALUE: " + enrollmentValueFromRequest);
 		M_log.debug("ENROLLMENT FOUND VALUE: " + enrollmentValueFromSession);
-		
-		if(enrollmentValueFromSession >= enrollmentValueFromRequest){
-			M_log.debug("NON UMICH USER ADD ALLOWED");
+
+		//Enrollment types are ordered by rank. If you are of the same or 
+		//higher rank, then you can add user with rank in request, otherwise 
+		//fail.
+		if(enrollmentValueFromSession == 2){
+			M_log.debug("NON UMICH USER ADD ALLOWED BY TEACHER OR DESIGNER");
+			isCallAllowed = true;
+		}
+		else if(enrollmentValueFromSession == 1 && enrollmentValueFromSession > enrollmentValueFromRequest){
+			M_log.debug("NON UMICH USER ADD ALLOWED BY TEACHER OR DESIGNER");
 			isCallAllowed = true;
 		}
 		else{
@@ -740,11 +805,19 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 				sb.append(line);
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			M_log.error("Canvas API call did not complete successfully", e);
 		}
 		M_log.debug("RESPONSE TO isCrosslistAllowed: " + sb.toString());
+
+		String sisSectionId = null;
+		try{
 		JSONObject crosslistSectionResponse = new JSONObject( sb.toString() );
-		String sisSectionId = crosslistSectionResponse.getString("sis_section_id");
+		sisSectionId = crosslistSectionResponse.getString("sis_section_id");
+		}
+		catch(JSONException e){
+			M_log.error("JSONException found attempting to process sectionsCallResponse");
+			return false;
+		}
 		M_log.debug("SIS SECTION ID: " + sisSectionId);
 
 		M_log.debug("session id: "+session.getId());
@@ -758,11 +831,11 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}
 
 		if(courses.contains(sisSectionId)){
-			M_log.debug("SECTION MATCH FOUND - CROSSLIST CALL ALLOWED");
+			M_log.info("SECTION MATCH FOUND - CROSSLIST CALL ALLOWED");
 			isSectionMatch = true;
 		}
 		else{
-			M_log.debug("API CALL REJECTED DUE TO CROSSLIST MISMATCH");
+			M_log.info("API CALL REJECTED DUE TO CROSSLIST MISMATCH");
 			isSectionMatch = false;
 		}
 
