@@ -337,20 +337,25 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
         var thisSectionRole = $('li#sect' +sectionId).find('select').val();
         var url = '/canvasCourseManager/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + $scope.friend.id + '&enrollment[enrollment_state]=active&enrollment[type]=' + thisSectionRole;
         Friend.addFriendToSection(url, sectionName, sectNumber).then(function (resultAddFriendToSection) {
-          if (resultAddFriendToSection.data.errors) {
-            // failed to process this add
-            errors.push(sectionName);
-            $scope.addError = true;
-          } else {
-            if(resultAddFriendToSection.data[1].course_id) {
-              // was able to process this add
-              successes.push(resultAddFriendToSection.data[0].section_name);
-              if (checkedSections === resultAddFriendToSection.data[0].section_number){
-                // the last request, clean up the scope
-                $scope.newUser = false;
-                $scope.none = false;
-                $scope.userAvailable  = false;
-                $scope.coursemodal.resetable = true;
+          if(resultAddFriendToSection.data[1].message){
+            $scope.addErrorGeneric = resultAddFriendToSection.data[1].message;
+          }
+          else {
+            if (resultAddFriendToSection.data.errors) {
+              // failed to process this add
+              errors.push(sectionName);
+              $scope.addError = true;
+            } else {
+              if(resultAddFriendToSection.data[1].course_id) {
+                // was able to process this add
+                successes.push(resultAddFriendToSection.data[0].section_name);
+                if (checkedSections === resultAddFriendToSection.data[0].section_number){
+                  // the last request, clean up the scope
+                  $scope.newUser = false;
+                  $scope.none = false;
+                  $scope.userAvailable  = false;
+                  $scope.coursemodal.resetable = true;
+                }
               }
             }
           }
@@ -358,7 +363,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
       }
     }
     // if a single failure, toggle error message
-    if($scope.addError) {
+    if($scope.addError || $scope.addErrorGeneric) {
       $scope.addSuccess = false;
     } else {
       $scope.addSuccess = true;
