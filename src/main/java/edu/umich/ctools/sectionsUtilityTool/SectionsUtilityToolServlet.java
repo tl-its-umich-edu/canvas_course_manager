@@ -119,8 +119,12 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		private static final long serialVersionUID = -1389517682290891890L;
 
 		{
+			//Those who have a TeacherEnrollment or a DesignerEnrollment can 
+			//add anyone. Those users with a TaEnrollment type can only add 
+			//users with type lower that TaEnrollment, i.e. Student and 
+			//Observer Enrollments.
 			put("ObserverEnrollment", 0);
-			put("StudentEnrollment", 0); //all others will be 0
+			put("StudentEnrollment", 0);
 			put("TaEnrollment", 1);
 			put("TeacherEnrollment", 2);
 			put("DesignerEnrollment", 2);
@@ -585,11 +589,15 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		for(int i = 0; i < enrollmentsArray.length(); i++){
 			JSONObject childJSONObject = enrollmentsArray.getJSONObject(i);
 			M_log.debug("ENROLLMENT RECORD: " + childJSONObject.get("course_id") + " " + childJSONObject.get("course_section_id") + " " + childJSONObject.get("type"));
-			if(enrollmentsFound.containsKey(childJSONObject.getInt("course_id"))){
+			//if the key is already in the map, check and see if the new value is greater for that key
+			//if it is greater then replace, if not then skip.
+
+			if( enrollmentsFound.containsKey(childJSONObject.getInt("course_id"))                          ){
 				String oldType = enrollmentsFound.get(childJSONObject.getInt("course_id"));
 				String newType = childJSONObject.getString("type");
 				M_log.debug("OLD TYPE: " + oldType);
 				M_log.debug("NEW TYPE: " + newType);
+				//Only want to overwrite the key,value pair if the value is greater
 				if(enrollmentsMap.get(newType) > enrollmentsMap.get(oldType)){
 					enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString("type"));
 				}
@@ -597,6 +605,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			else{
 				enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString("type"));
 			}
+
 		}
 		request.getSession().setAttribute("enrollments", enrollmentsFound);
 		M_log.debug("SESSION ENROLLMENTS: " + request.getSession().getAttribute("enrollments"));
@@ -694,8 +703,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private boolean isAddUserAllowed(HttpServletRequest request, String url) {
 		boolean isCallAllowed = false;
 		//when using the substring method, the +9, +17, +x, the int is the 
-		//number of characters in the phrase for the indexOf method. The int 
-		//in this case is an offset.
+		//number of characters in the length of the string to skip.
 		String sectionString = url.substring(url.indexOf("sections/")+9, url.indexOf("/enrollments"));
 		String enrollmentTypeFromRequest = url.substring(url.indexOf("enrollment[type]=")+17, url.length());
 		M_log.debug("SECTION_STRING: " + sectionString);
@@ -724,6 +732,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			}
 		} catch (IOException e) {
 			M_log.error("Canvas API call did not complete successfully", e);
+			return false;
 		}
 		M_log.debug("RESPONSE TO isAddUserAllowed: " + sb.toString());
 
@@ -750,10 +759,23 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}
 
 		M_log.debug("ENROLLMENT FROM REQUEST: " + enrollmentTypeFromRequest);
-		
+
 		if(enrollmentsMap.containsKey(enrollmentTypeFromRequest) == false){
 			return false;
 		}
+
+		isCallAllowed = compareRanks(enrollmentTypeFromRequest,
+				enrollmentTypeFromSession);
+		
+		return isCallAllowed;
+	}
+
+	private boolean compareRanks(String enrollmentTypeFromRequest,
+			String enrollmentTypeFromSession) {
+		boolean isCallAllowed;
+		
+		int teacherDesignerEnrollmentRank = 2;
+		int taEnrollmentRank = 1;
 		
 		int enrollmentValueFromRequest = enrollmentsMap.get(enrollmentTypeFromRequest);
 		int enrollmentValueFromSession = enrollmentsMap.get(enrollmentTypeFromSession);
@@ -764,11 +786,11 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		//Enrollment types are ordered by rank. If you are of the same or 
 		//higher rank, then you can add user with rank in request, otherwise 
 		//fail.
-		if(enrollmentValueFromSession == 2){
+		if(enrollmentValueFromSession == teacherDesignerEnrollmentRank){
 			M_log.debug("NON UMICH USER ADD ALLOWED BY TEACHER OR DESIGNER");
 			isCallAllowed = true;
 		}
-		else if(enrollmentValueFromSession == 1 && enrollmentValueFromSession > enrollmentValueFromRequest){
+		else if(enrollmentValueFromSession == taEnrollmentRank && enrollmentValueFromSession > enrollmentValueFromRequest){
 			M_log.debug("NON UMICH USER ADD ALLOWED BY TEACHER OR DESIGNER");
 			isCallAllowed = true;
 		}
@@ -811,8 +833,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		String sisSectionId = null;
 		try{
-		JSONObject crosslistSectionResponse = new JSONObject( sb.toString() );
-		sisSectionId = crosslistSectionResponse.getString("sis_section_id");
+			JSONObject crosslistSectionResponse = new JSONObject( sb.toString() );
+			sisSectionId = crosslistSectionResponse.getString("sis_section_id");
 		}
 		catch(JSONException e){
 			M_log.error("JSONException found attempting to process sectionsCallResponse");
