@@ -338,7 +338,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
         var url = '/canvasCourseManager/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + $scope.friend.id + '&enrollment[enrollment_state]=active&enrollment[type]=' + thisSectionRole;
         Friend.addFriendToSection(url).then(function (resultAddFriendToSection) {
           if(resultAddFriendToSection.data.message){
-            $scope.addErrorClosed = true;
+            $scope.addErrorGeneric = resultAddFriendToSection.data.message;
           }
           else {
             if (resultAddFriendToSection.data.errors) {
@@ -357,13 +357,16 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
                   $scope.coursemodal.resetable = true;
                 }
               }
+              else {
+                errors.push(sectionName);
+              }
             }
           }
         });
       }
     }
     // if a single failure, toggle error message
-    if($scope.addError || $scope.addErrorClosed) {
+    if($scope.addError || $scope.addErrorGeneric) {
       $scope.addSuccess = false;
     } else {
       $scope.addSuccess = true;
