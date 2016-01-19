@@ -574,7 +574,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			sb.append(line);
 		}
 
-		if( originalUrl.substring(url.indexOf("/api")).matches(appExtPropertiesFile.getProperty(CANVAS_API_GET_COURSE_ENROLL)) && request.getSession().getAttribute(LAUNCH_TYPE).equals("lti")){
+		if( originalUrl.substring(originalUrl.indexOf("/api")).matches(appExtPropertiesFile.getProperty(CANVAS_API_GET_COURSE_ENROLL)) && request.getSession().getAttribute(LAUNCH_TYPE).equals("lti")){
 			addEnrollmentsToSession(request, sb);
 		}
 
