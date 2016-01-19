@@ -337,20 +337,28 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
         
         var url = '/canvasCourseManager/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + $scope.friend.id + '&enrollment[enrollment_state]=active&enrollment[type]=' + thisSectionRole;
         Friend.addFriendToSection(url).then(function (resultAddFriendToSection) {
-          if (resultAddFriendToSection.data.errors) {
-            // failed to process this add
-            errors.push(sectionName);
-            $scope.addError = true;
-          } else {
-            if(resultAddFriendToSection.data.course_id) {
-              // was able to process this add
-              successes.push(sectionName);
-              if (checkedSections === sectNumber){
-                // the last request, clean up the scope
-                $scope.newUser = false;
-                $scope.none = false;
-                $scope.userAvailable  = false;
-                $scope.coursemodal.resetable = true;
+          if(resultAddFriendToSection.data.message){
+            $scope.addErrorGeneric = resultAddFriendToSection.data.message;
+          }
+          else {
+            if (resultAddFriendToSection.data.errors) {
+              // failed to process this add
+              errors.push(sectionName);
+              $scope.addError = true;
+            } else {
+              if(resultAddFriendToSection.data.course_id) {
+                // was able to process this add
+                successes.push(sectionName);
+                if (checkedSections === sectNumber){
+                  // the last request, clean up the scope
+                  $scope.newUser = false;
+                  $scope.none = false;
+                  $scope.userAvailable  = false;
+                  $scope.coursemodal.resetable = true;
+                }
+              }
+              else {
+                errors.push(sectionName);
               }
             }
           }
@@ -358,7 +366,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
       }
     }
     // if a single failure, toggle error message
-    if($scope.addError) {
+    if($scope.addError || $scope.addErrorGeneric) {
       $scope.addSuccess = false;
     } else {
       $scope.addSuccess = true;
