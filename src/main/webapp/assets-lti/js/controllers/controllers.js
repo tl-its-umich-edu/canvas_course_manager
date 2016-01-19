@@ -357,6 +357,9 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
                   $scope.coursemodal.resetable = true;
                 }
               }
+              else {
+                errors.push(sectionName);
+              }
             }
           }
         });

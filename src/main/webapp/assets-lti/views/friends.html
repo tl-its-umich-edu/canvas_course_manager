@@ -38,14 +38,14 @@
                             <div role="alert" class="alert alert-danger" ng-show="newUserFail">
                               {{friend_account.detailedMessage}}.
                             </div>
-                            <div role="alert" class="alert alert-success" ng-show="addSuccess && !addError && !addErrorClosed">
+                            <div role="alert" class="alert alert-success" ng-show="addSuccess && !addError && !addErrorGeneric">
                               The following user is now enrolled in this course. In future you can use the People tool to add, delete or modify his/her enrollment in any course section(s). 
                             </div>
                             <div class="alert alert-danger" ng-show="addError">
                               There were some errors.
                             </div>
-                            <div class="alert alert-danger" ng-show="addErrorClosed">
-                              Since this course has concluded, please contact the U-M ITS Service Center (4help@umich.edu) for assistance in adding this user to your course.
+                            <div class="alert alert-danger" ng-show="addErrorGeneric">
+                              {{addErrorGeneric}}
                             </div>
 
                           </div>  

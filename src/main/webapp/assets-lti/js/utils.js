@@ -254,6 +254,7 @@ $(document).on('hidden.bs.modal', '#addUserModal', function(){
     $scope.friend = {};
     $scope.addSuccess= false;
     $scope.failedValidation = false;
+    $scope.addErrorGeneric = false;
   });
 });
 
