@@ -566,6 +566,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		//Retrieve Canvas Data from TC Session Data in order to mask user. 
 		//This API is being masked because a uniqname is considered sensitive data.
+		String originalUrl = url;
 		url = unmaskUrl(url, tc, stringToReplaceUser, stringToReplaceCourse);
 
 		String sessionId = request.getSession().getId();
@@ -588,7 +589,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			sb.append(line);
 		}
 
-		if( url.substring(url.indexOf("/api")).matches(appExtPropertiesFile.getProperty(CANVAS_API_GET_COURSE_ENROLL)) && request.getSession().getAttribute(LAUNCH_TYPE).equals("lti")){
+		if( originalUrl.substring(originalUrl.indexOf("/api")).matches(appExtPropertiesFile.getProperty(CANVAS_API_GET_COURSE_ENROLL)) && request.getSession().getAttribute(LAUNCH_TYPE).equals("lti")){
 			addEnrollmentsToSession(request, sb);
 		}
 
