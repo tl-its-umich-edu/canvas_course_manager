@@ -323,7 +323,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
   // 'Add Friend' buttons. It adds the user to the selected sections
 
   $scope.addUserToSectionsClick = function () {
-    var checkedSections = $('.coursePanel input:checked').length / 2;
+    var checkedSections = _.where($scope.coursemodal.sections, {selected: true}).length;
     var sectNumber = 0;
     var successes = [];
     var errors = [];
