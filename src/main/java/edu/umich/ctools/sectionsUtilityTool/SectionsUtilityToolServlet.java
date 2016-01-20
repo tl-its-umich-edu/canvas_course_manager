@@ -119,12 +119,13 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String PUT = "PUT";
 
 	//Member variables
-	private String canvasToken;
-	private String canvasURL;
-	private String callType;
-	private String ltiUrl;
-	private String ltiKey;
-	private String ltiSecret;
+	private String canvasToken = null;
+	private String canvasURL = null;
+	private String callType = null;
+	private String ltiUrl = null;
+	private String ltiKey = null;
+	private String ltiSecret = null;
+	private boolean isStubTesting = false;
 	private OauthCredentialsFactory oacf;
 
 	protected static Properties appExtSecurePropertiesFile=null;
@@ -182,6 +183,23 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug(" Servlet init(): Called");
 		appExtPropertiesFile = Utils.loadProperties(CCM_PROPERTY_FILE_PATH);
 		appExtSecurePropertiesFile = Utils.loadProperties(CCM_SECURE_PROPERTY_FILE_PATH);
+      
+		if(appExtSecurePropertiesFile!=null) {
+			ltiKey = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_KEY);
+			ltiSecret = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_SECRET);
+			ltiUrl = appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_URL);
+			canvasToken = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_CANVAS_ADMIN);
+			canvasURL = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_CANVAS_URL);
+			isStubTesting = Boolean.valueOf( appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_TEST_STUB) );
+			M_log.debug("ltiKey from props: "	 + ltiKey);
+			M_log.debug("ltiSecret from props: " + ltiSecret);
+			M_log.debug("ltiUrl from props: "	 + ltiUrl);
+			M_log.debug("isStubTesting: " + isStubTesting);
+		}
+		else {	
+			M_log.error("Failed to load system properties(sectionsToolProps.properties) for SectionsTool");
+		}
+      
 		oacf = new OauthCredentialsFactory(appExtSecurePropertiesFile);
 	}
 
@@ -195,8 +213,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	public void storeContext(Context context, HttpServletRequest request) {
 		Map<String, String> ltiValues = new HashMap<String, String>();
-
-		String oauth_consumer_key = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_KEY);
+      
 		ViewToolContext vtc = (ViewToolContext)context;
 		HttpServletResponse response = vtc.getResponse();
 		HttpSession session= request.getSession(true);
@@ -213,7 +230,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		TcSessionData tc = (TcSessionData) session.getAttribute(TC_SESSION_DATA);
 
-		OauthCredentials oac = oacf.getOauthCredentials(oauth_consumer_key);
+		OauthCredentials oac = oacf.getOauthCredentials(ltiKey);
 
 		if (tc == null) {
 			tc = new TcSessionData(request, oac, customValuesMap);
@@ -235,28 +252,30 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			return;
 		}
 
-		// Verify this is an LTI launch request and some of the required parameters.
-		if ( ! SectionUtilityToolFilter.BASIC_LTI_LAUNCH_REQUEST.equals(request.getParameter(SectionUtilityToolFilter.LTI_MESSAGE_TYPE)) ||
-				! LTI_1P0_CONST.equals(request.getParameter(LTI_VERSION)) ||
-				oauth_consumer_key == null) {
-			try {
-				M_log.debug("LTI Message: " + request.getParameter(SectionUtilityToolFilter.LTI_MESSAGE_TYPE));
-				M_log.debug("LTI Version: " + request.getParameter(LTI_VERSION));
-				M_log.debug("LTI Key: " + oauth_consumer_key);
-				doError(request, response, "Missing required parameter:  LTI Message Type, LTI Version, or Consumer Key is incorrect.");
-			} catch (IOException e) {
-				M_log.error("fillContext: IOException: ",e);
+		// Verify this is an LTI launch request and some of the required parameters (if not stub testing)
+		if( !isStubTesting ){
+			if ( ! SectionUtilityToolFilter.BASIC_LTI_LAUNCH_REQUEST.equals(request.getParameter(SectionUtilityToolFilter.LTI_MESSAGE_TYPE)) ||
+				  ! LTI_1P0_CONST.equals(request.getParameter(LTI_VERSION)) ||
+				  ltiKey == null) {
+				try {
+					M_log.debug("LTI request Message: " + request.getParameter(SectionUtilityToolFilter.LTI_MESSAGE_TYPE));
+					M_log.debug("LTI request Version: " + request.getParameter(LTI_VERSION));
+					M_log.debug("LTI Key: " + ltiKey);
+					doError(request, response, "Missing required parameter:	LTI Message Type, LTI Version, or Consumer Key is incorrect.");
+				} catch (IOException e) {
+					M_log.error("fillContext: IOException: ",e);
+				}
+				return;
 			}
-			return;
-		}
-
-		OauthCredentials oc = tc.getOauthCredentials();
-
-		Boolean validMessage = checkForValidMessage(request, oc);
-		if (!validMessage) {
-			String msg = "Launch data does not validate";
-			M_log.error(msg);
-			return;
+			
+			OauthCredentials oc = tc.getOauthCredentials();
+			
+			Boolean validMessage = checkForValidMessage(request, oc);
+			if (!validMessage) {
+				String msg = "Launch data does not validate";
+				M_log.error(msg);
+				return;
+			}
 		}
 
 		// Fill context with the required lti values.
@@ -267,7 +286,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		context.put("ltiValues", ltiValues);
 	}
 
-	public void fillCcmValuesForContext(Map<String, String> ltiValues, HttpServletRequest request) {
+	private void fillCcmValuesForContext(Map<String, String> ltiValues, HttpServletRequest request) {
 		ltiValues.put(CUSTOM_CANVAS_COURSE_ID, request.getParameter(CUSTOM_CANVAS_COURSE_ID));
 		ltiValues.put(CUSTOM_CANVAS_ENROLLMENT_STATE, request.getParameter(CUSTOM_CANVAS_ENROLLMENT_STATE));
 		ltiValues.put(CUSTOM_CANVAS_USER_LOGIN_ID, request.getParameter(CUSTOM_CANVAS_USER_LOGIN_ID));
@@ -283,7 +302,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.info("First Name: " + ltiValues.get(LIS_PERSON_NAME_GIVEN));
 	}
 
-	public Boolean checkForValidMessage(HttpServletRequest request,
+	private Boolean checkForValidMessage(HttpServletRequest request,
 			OauthCredentials oc) {
 		Boolean errorReturn = RequestSignatureUtils.validateMessage(request, oc);
 		return !errorReturn;
@@ -342,7 +361,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}
 	}
 
-	public void processLti(HttpServletRequest request,
+	private void processLti(HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		for (Object e : request.getParameterMap().entrySet()) {
 			Map.Entry<String, String[]> entry = (Map.Entry<String, String[]>) e;
@@ -353,27 +372,18 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 				}
 			}
 		}
-		//Properties appExtSecureProperties = SectionUtilityToolFilter.appExtSecurePropertiesFile;
-		if(appExtSecurePropertiesFile!=null) {
-			ltiKey = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_KEY);
-			ltiSecret = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_SECRET);
-			if(appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_URL) != null){
-				ltiUrl = appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_URL);
-			}
-			else{
-				ltiUrl = request.getRequestURL().toString();
-			}
-			M_log.debug("ltiKey from props: "    + ltiKey);
-			M_log.debug("ltiSecret from props: " + ltiSecret);
-			M_log.debug("ltiUrl from props: "    + ltiUrl);
-		}
-		else {
+       
+		// Verify valid LTI key & secret
+		if( ltiKey == null || ltiSecret == null ) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			M_log.error("Failed to load system properties(sectionsToolProps.properties) for SectionsTool");
+			M_log.error("No LTI key and secret defined in ccmSecure.properties file");
 			return;
 		}
-		//method verifySignature is used to verify LTI oauth authorization
-		if(RequestSignatureUtils.verifySignature(request, ltiKey, ltiSecret, ltiUrl)){
+		if(ltiUrl == null) {
+			ltiUrl = request.getRequestURL().toString();
+		}
+		// if not isStubTesting, call verifySignature to verify LTI oauth authorization 
+		if( isStubTesting || RequestSignatureUtils.verifySignature(request, ltiKey, ltiSecret, ltiUrl)){
 			doRequest(request, response);
 			return;
 		}
@@ -410,12 +420,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug("canvasRestApiCall(): called");
 		PrintWriter out = response.getWriter();
 		response.setContentType("application/json");
-		Properties appExtSecureProperties = SectionUtilityToolFilter.appExtSecureProperties;
-		if(appExtSecureProperties!=null) {
-			canvasToken = appExtSecureProperties.getProperty(SectionUtilityToolFilter.PROPERTY_CANVAS_ADMIN);
-			canvasURL = appExtSecureProperties.getProperty(SectionUtilityToolFilter.PROPERTY_CANVAS_URL);
-		}
-		else {
+		if ( canvasToken == null || canvasURL == null ) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			out = response.getWriter();
 			out.print(appExtPropertiesFile.getProperty("property.file.load.error"));
@@ -457,9 +462,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private void apiConnectionLogic(HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
 		PrintWriter out = response.getWriter();
-		String isStubTesting = appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_TEST_STUB);
-		M_log.debug("isStubTesting: " + isStubTesting);
-		if(Boolean.valueOf(isStubTesting)){
+		if( isStubTesting ){
 			Utils.openFile(request, response, out);
 			return;
 		}
