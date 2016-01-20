@@ -323,7 +323,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
   // 'Add Friend' buttons. It adds the user to the selected sections
 
   $scope.addUserToSectionsClick = function () {
-    var checkedSections = $('.coursePanel input:checked').length;
+    var checkedSections = _.where($scope.coursemodal.sections, {selected: true}).length;
     var sectNumber = 0;
     var successes = [];
     var errors = [];
@@ -336,7 +336,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
         var thisSectionRole = $('li#sect' +sectionId).find('select').val();
         
         var url = '/canvasCourseManager/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + $scope.friend.id + '&enrollment[enrollment_state]=active&enrollment[type]=' + thisSectionRole;
-        Friend.addFriendToSection(url).then(function (resultAddFriendToSection) {
+        Friend.addFriendToSection(url, sectionName, sectNumber).then(function (resultAddFriendToSection) {
           if(resultAddFriendToSection.data.message){
             $scope.addErrorGeneric = resultAddFriendToSection.data.message;
           }
@@ -346,10 +346,10 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
               errors.push(sectionName);
               $scope.addError = true;
             } else {
-              if(resultAddFriendToSection.data.course_id) {
+              if(resultAddFriendToSection.data[1].course_id) {
                 // was able to process this add
-                successes.push(sectionName);
-                if (checkedSections === sectNumber){
+                successes.push(resultAddFriendToSection.data[0].section_name);
+                if (checkedSections === resultAddFriendToSection.data[0].section_number){
                   // the last request, clean up the scope
                   $scope.newUser = false;
                   $scope.none = false;
@@ -372,7 +372,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
       $scope.addSuccess = true;
     }
     // make available to the template what sections succeeded, which not
-    $scope.successes = successes
+    $scope.successes = successes.sort();
     $scope.errors = errors
     // pass the focus to the container of the success and failure message
     $scope.$evalAsync(function() { 
