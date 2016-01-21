@@ -1,0 +1,31 @@
+[{
+	"id": 123456,
+	"name": "John Doe",
+	"sortable_name": "Doe, John",
+	"short_name": "John Doe",
+	"sis_user_id": "12345678",
+	"integration_id": null,
+	"sis_login_id": "dovek",
+	"sis_import_id": 1234,
+	"login_id": "doej"
+},{
+	"id": 123456,
+	"name": "John Doe",
+	"sortable_name": "Doe, John",
+	"short_name": "John Doe",
+	"sis_user_id": "12345678",
+	"integration_id": null,
+	"sis_login_id": "rkcarter",
+	"sis_import_id": 1234,
+	"login_id": "doej"
+},{
+	"id": 123456,
+	"name": "John Doe",
+	"sortable_name": "Doe, John",
+	"short_name": "John Doe",
+	"sis_user_id": "12345678",
+	"integration_id": null,
+	"sis_login_id": "testuser",
+	"sis_import_id": 1234,
+	"login_id": "doej"
+}]
