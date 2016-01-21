@@ -36,6 +36,7 @@ public class Utils {
 	private static final String CANVAS_API_GETALLSECTIONS_PER_COURSE = "canvas.api.getallsections.per.course.regex";
 	private static final String CANVAS_API_TERMS = "canvas.api.terms.regex";
 	private static final String CANVAS_API_GET_COURSE = "canvas.api.get.single.course.regex";
+	private static final String CANVAS_API_SEARCH_USER = "canvas.api.search.user.regex";
 
 	public static Properties loadProperties(String path){
 		String propertiesFilePath = System.getProperty(path);
@@ -62,7 +63,12 @@ public class Utils {
 
 		FileReader fr = null;
 
-		if (url.matches(SectionsUtilityToolServlet.appExtPropertiesFile.getProperty(CANVAS_API_TERMS))){
+		//CANVAS_API_SEARCH_USER
+		if (url.matches(SectionsUtilityToolServlet.appExtPropertiesFile.getProperty(CANVAS_API_SEARCH_USER))){
+			fr = retrieveTestFile(url, fr, "Courses call stub", "/stubs/canvas/users.txt");
+		}
+		
+		else if (url.matches(SectionsUtilityToolServlet.appExtPropertiesFile.getProperty(CANVAS_API_TERMS))){
 			fr = retrieveTestFile(url, fr, "Courses call stub", "/stubs/canvas/termsSample.txt");
 		}
 
