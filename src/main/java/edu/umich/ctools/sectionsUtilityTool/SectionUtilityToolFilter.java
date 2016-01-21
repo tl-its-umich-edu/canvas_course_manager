@@ -12,7 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
+ */
 package edu.umich.ctools.sectionsUtilityTool;
 
 import java.io.IOException;
@@ -63,7 +63,7 @@ public class SectionUtilityToolFilter implements Filter {
 	protected static final String PROPERTY_TEST_STUB = "stub.test";
 	private static final String TEST_USER = "testUser";
 	private static final String LAUNCH_TYPE = "launchType";
-	
+
 	private String providerURL = null;
 	private String mcommunityGroup = null;
 	private boolean isTestUrlEnabled=false;
@@ -81,6 +81,8 @@ public class SectionUtilityToolFilter implements Filter {
 
 	public static final String LTI_PAGE = "/index-lti.vm";
 	public static final String SC_PAGE = "/index-sc.vm";
+	public static final String STATUS_PAGE = "/status.html";
+	public static final String PING_PAGE = "/status/ping.html";
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
@@ -111,7 +113,7 @@ public class SectionUtilityToolFilter implements Filter {
 		}
 
 		HttpSession session= useRequest.getSession(true);
-		M_log.debug("session id: "+session.getId());
+		M_log.debug("session id: " + session.getId());
 
 		//Launch type for for the LTI part will be different from the launch
 		//type for SC because LTI will only be launched within LMS and SC can 
@@ -120,7 +122,7 @@ public class SectionUtilityToolFilter implements Filter {
 
 		M_log.debug("Launch Type: " + session.getAttribute(LAUNCH_TYPE));
 		M_log.debug("Path Info: " + useRequest.getPathInfo() );
-		
+
 		if (session.getAttribute(LAUNCH_TYPE).equals("lti")){
 			if( useRequest.getPathInfo() != null && useRequest.getPathInfo().equals(SC_PAGE)){
 				useRequest.getSession().invalidate();
@@ -130,10 +132,11 @@ public class SectionUtilityToolFilter implements Filter {
 			chain.doFilter(useRequest, response);
 		}
 		else if(session.getAttribute(LAUNCH_TYPE).equals("sc")){
-
-			if(!checkForAuthorization(useRequest)) {
-				useResponse.sendError(403);
-				return;
+			if(!useRequest.getPathInfo().equals(STATUS_PAGE)  && !useRequest.getPathInfo().equals(PING_PAGE)){
+				if(!checkForAuthorization(useRequest)) {
+					useResponse.sendError(403);
+					return;
+				}
 			}
 			chain.doFilter(useRequest, response);
 		}
