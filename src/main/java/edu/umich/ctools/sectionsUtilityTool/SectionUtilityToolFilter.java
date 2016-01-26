@@ -81,8 +81,9 @@ public class SectionUtilityToolFilter implements Filter {
 
 	public static final String LTI_PAGE = "/index-lti.vm";
 	public static final String SC_PAGE = "/index-sc.vm";
-	public static final String STATUS_PAGE = "/status.html";
-	public static final String PING_PAGE = "/status/ping.html";
+	public static final String STATUS_PAGE = "/status";
+	public static final String BUILD_PAGE = "/build.txt";
+	public static final String BOOTSTRAP = "/bootstrap/bootstrap.min.css";
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
@@ -132,11 +133,12 @@ public class SectionUtilityToolFilter implements Filter {
 			chain.doFilter(useRequest, response);
 		}
 		else if(session.getAttribute(LAUNCH_TYPE).equals("sc")){
-			if(!useRequest.getPathInfo().equals(STATUS_PAGE)  && !useRequest.getPathInfo().equals(PING_PAGE)){
-				if(!checkForAuthorization(useRequest)) {
-					useResponse.sendError(403);
-					return;
-				}
+			if(useRequest.getPathInfo() != null && 
+					!useRequest.getPathInfo().startsWith(STATUS_PAGE) && 
+					!useRequest.getPathInfo().equals(BOOTSTRAP) && 
+					!checkForAuthorization(useRequest)){
+				useResponse.sendError(403);
+				return;
 			}
 			chain.doFilter(useRequest, response);
 		}
