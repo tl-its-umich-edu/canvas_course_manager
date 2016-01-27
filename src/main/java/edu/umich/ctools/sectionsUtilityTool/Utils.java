@@ -65,11 +65,11 @@ public class Utils {
 
 		//CANVAS_API_SEARCH_USER
 		if (url.matches(SectionsUtilityToolServlet.appExtPropertiesFile.getProperty(CANVAS_API_SEARCH_USER))){
-			fr = retrieveTestFile(url, fr, "Courses call stub", "/stubs/canvas/users.txt");
+			fr = retrieveTestFile(url, fr, "Users call stub", "/stubs/canvas/users.txt");
 		}
 		
 		else if (url.matches(SectionsUtilityToolServlet.appExtPropertiesFile.getProperty(CANVAS_API_TERMS))){
-			fr = retrieveTestFile(url, fr, "Courses call stub", "/stubs/canvas/termsSample.txt");
+			fr = retrieveTestFile(url, fr, "Courses call stub 1", "/stubs/canvas/termsSample.txt");
 		}
 
 		else if(pathInfo.equalsIgnoreCase("/api/v1/courses/2222/sections")){
@@ -81,7 +81,7 @@ public class Utils {
 		}
 
 		else if(pathInfo.equalsIgnoreCase("/api/v1/courses")){
-			fr = retrieveTestFile(url, fr, "Courses call stub", "/stubs/canvas/coursesSample.txt");
+			fr = retrieveTestFile(url, fr, "Courses call stub 2", "/stubs/canvas/coursesSample.txt");
 		}
 
 		else if(url.matches(SectionsUtilityToolServlet.appExtPropertiesFile.getProperty(CANVAS_API_GET_COURSE))){
@@ -97,11 +97,12 @@ public class Utils {
 		}
 
 		else{
-			M_log.debug("Unrecognized call: " + url);
+			M_log.error("Unrecognized call: " + url);
 		}
 
 		try{
-			BufferedReader rd = new BufferedReader(fr);;
+			M_log.info("fr: " + fr);
+			BufferedReader rd = new BufferedReader(fr);
 			String line = "";
 			StringBuilder sb = new StringBuilder();
 			while ((line = rd.readLine()) != null) {
@@ -113,7 +114,7 @@ public class Utils {
 		}
 		catch(Exception e){
 			M_log.error("FAILURE");
-			M_log.error("Exception: ", e);
+			M_log.error("Exception in openFile call: ", e);
 		}
 	}
 
@@ -126,7 +127,7 @@ public class Utils {
 		}
 		catch(Exception e){
 			M_log.error("Call Failed: " + url);
-			M_log.error("Exception: ", e);
+			M_log.error("Exception in retrieveTestFile call: ", e);
 		}
 		return fr;
 	}
