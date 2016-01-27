@@ -337,8 +337,8 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
         
         var url = '/canvasCourseManager/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + $scope.friend.id + '&enrollment[enrollment_state]=active&enrollment[type]=' + thisSectionRole;
         Friend.addFriendToSection(url, sectionName, sectNumber).then(function (resultAddFriendToSection) {
-          if(resultAddFriendToSection.data.message){
-            $scope.addErrorGeneric = resultAddFriendToSection.data.message;
+          if(resultAddFriendToSection.data[1].message){
+            $scope.addErrorGeneric = resultAddFriendToSection.data[1].message;
           }
           else {
             if (resultAddFriendToSection.data.errors) {
