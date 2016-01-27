@@ -176,7 +176,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	private static final ArrayList<String> allowedRoles = new ArrayList<String>(Arrays.asList("Primary Instructor",
 			"Secondary Instructor",
-			"Faculty grader",
+			"Faculty Grader",
 			"Graduate Student Instructor"));
 
 	public void init() throws ServletException {
@@ -338,7 +338,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 					canvasRestApiCall(request, response);
 				}
 				else{
-					M_log.info("NOT MANAGER");
+					M_log.debug("NOT MANAGER");
 					doRequest(request, response); //doRequest will always call fillContext()
 				}
 			}catch(Exception e) {
