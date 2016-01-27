@@ -113,7 +113,7 @@ public class Utils {
 		}
 		catch(Exception e){
 			M_log.error("FAILURE");
-			M_log.error("Exception: " + e);
+			M_log.error("Exception: ", e);
 		}
 	}
 
@@ -126,7 +126,7 @@ public class Utils {
 		}
 		catch(Exception e){
 			M_log.error("Call Failed: " + url);
-			M_log.error("Exception: " + e);
+			M_log.error("Exception: ", e);
 		}
 		return fr;
 	}
