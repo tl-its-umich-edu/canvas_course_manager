@@ -69,7 +69,7 @@ public class Utils {
 		}
 		
 		else if (url.matches(SectionsUtilityToolServlet.appExtPropertiesFile.getProperty(CANVAS_API_TERMS))){
-			fr = retrieveTestFile(url, fr, "Courses call stub 1", "/stubs/canvas/termsSample.txt");
+			fr = retrieveTestFile(url, fr, "Terms call stub", "/stubs/canvas/termsSample.txt");
 		}
 
 		else if(pathInfo.equalsIgnoreCase("/api/v1/courses/2222/sections")){
@@ -81,7 +81,7 @@ public class Utils {
 		}
 
 		else if(pathInfo.equalsIgnoreCase("/api/v1/courses")){
-			fr = retrieveTestFile(url, fr, "Courses call stub 2", "/stubs/canvas/coursesSample.txt");
+			fr = retrieveTestFile(url, fr, "Courses call stub", "/stubs/canvas/coursesSample.txt");
 		}
 
 		else if(url.matches(SectionsUtilityToolServlet.appExtPropertiesFile.getProperty(CANVAS_API_GET_COURSE))){
