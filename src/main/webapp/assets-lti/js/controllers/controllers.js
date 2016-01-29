@@ -29,7 +29,6 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
             if($scope.currentTermSISID) {
             /* adds to the scope a list of sections (by sis_section_id) that the current user can perform actions on */
             var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?user=self&termid=' + $scope.currentTermSISID;
-            //var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?instructor=' + $rootScope.ltiLaunch.custom_canvas_user_login_id +'&termid=' + $scope.currentTermSISID;
               Course.getMPathwaysCourses(mPathwaysCoursesUrl, $scope.currentTermSISID).then(function (resultMPathData) {  
                 if(!resultMPathData.data) {
                   if(Array.isArray(resultMPathData)) {
@@ -156,7 +155,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     // for each added section call a factory that will do a post
     $scope.course.xLists =[];
     _.each(addedSections, function(section){
-      var xListUrl = 'manager/api/v1/sections/' + section.id + '/crosslist/' + courseId;
+      var xListUrl = 'manager/api/v1/sections/' + section.id + '/crosslist/course_id';
       Course.xListSection(xListUrl).then(function (resultXList) {
         $scope.course.xLists.push(section.name);
         section.course_id = courseId;

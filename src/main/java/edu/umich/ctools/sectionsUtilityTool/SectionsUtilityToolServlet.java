@@ -76,6 +76,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String CANVAS_API_GETSECTION_INFO = "canvas.api.getsection.info.regex";
 	private static final String CANVAS_API_DECROSSLIST = "canvas.api.decrosslist.regex";
 	private static final String CANVAS_API_CROSSLIST = "canvas.api.crosslist.regex";
+	private static final String CANVAS_API_CROSSLIST_MASK = "canvas.api.crosslist.mask.regex";
 	private static final String CANVAS_API_GETCOURSE_INFO = "canvas.api.getcourse.info.regex";
 	private static final String CANVAS_API_RENAME_COURSE = "canvas.api.rename.course.regex";
 	private static final String CANVAS_API_GETCOURSE_BY_UNIQNAME = "canvas.api.getcourse.by.uniqname.regex";
@@ -153,6 +154,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		{			
 			put(CANVAS_API_TERMS, "for terms");
 			put(CANVAS_API_CROSSLIST, "for crosslist");
+			put(CANVAS_API_CROSSLIST_MASK, "for crosslist mask");
 			put(CANVAS_API_RENAME_COURSE, "for rename a course");
 			put(CANVAS_API_GETCOURSE_BY_UNIQNAME, "for getting courses by uniqname");
 			put(CANVAS_API_GETCOURSE_BY_UNIQNAME_MASK, "for getting courses by masked uniqname");
@@ -708,11 +710,21 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			isAllowedRequest=isApiFoundIntheList(url);
 		}
 
-		if( url.matches(appExtPropertiesFile.getProperty(CANVAS_API_CROSSLIST)) && session.getAttribute(LAUNCH_TYPE).equals("lti")){
+		if(!session.getAttribute(LAUNCH_TYPE).equals("lti")){
+			return isAllowedRequest;
+		}
+		
+		//typical crosslist call is not allowed in the LTI version
+		if( url.matches(appExtPropertiesFile.getProperty(CANVAS_API_CROSSLIST))){
+			isAllowedRequest = false;
+		}
+		
+		//only the masked crosslist call is allowed in the LTI version
+		if( url.matches(appExtPropertiesFile.getProperty(CANVAS_API_CROSSLIST_MASK))){
 			isAllowedRequest = isCrosslistAllowed(request, session, url);
 		}
 
-		if( url.matches(appExtPropertiesFile.getProperty(CANVAS_API_ADD_USER)) && request.getSession().getAttribute(LAUNCH_TYPE).equals("lti")){
+		if( url.matches(appExtPropertiesFile.getProperty(CANVAS_API_ADD_USER))){
 			isAllowedRequest = isAddUserAllowed(request, url);
 		}
 
