@@ -710,17 +710,21 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			isAllowedRequest=isApiFoundIntheList(url);
 		}
 
+		if(!session.getAttribute(LAUNCH_TYPE).equals("lti")){
+			return isAllowedRequest;
+		}
+		
 		//typical crosslist call is not allowed in the LTI version
-		if( url.matches(appExtPropertiesFile.getProperty(CANVAS_API_CROSSLIST)) && session.getAttribute(LAUNCH_TYPE).equals("lti")){
+		if( url.matches(appExtPropertiesFile.getProperty(CANVAS_API_CROSSLIST))){
 			isAllowedRequest = false;
 		}
 		
 		//only the masked crosslist call is allowed in the LTI version
-		if( url.matches(appExtPropertiesFile.getProperty(CANVAS_API_CROSSLIST_MASK)) && session.getAttribute(LAUNCH_TYPE).equals("lti")){
+		if( url.matches(appExtPropertiesFile.getProperty(CANVAS_API_CROSSLIST_MASK))){
 			isAllowedRequest = isCrosslistAllowed(request, session, url);
 		}
 
-		if( url.matches(appExtPropertiesFile.getProperty(CANVAS_API_ADD_USER)) && request.getSession().getAttribute(LAUNCH_TYPE).equals("lti")){
+		if( url.matches(appExtPropertiesFile.getProperty(CANVAS_API_ADD_USER))){
 			isAllowedRequest = isAddUserAllowed(request, url);
 		}
 
