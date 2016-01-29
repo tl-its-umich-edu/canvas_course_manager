@@ -156,7 +156,8 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     // for each added section call a factory that will do a post
     $scope.course.xLists =[];
     _.each(addedSections, function(section){
-      var xListUrl = 'manager/api/v1/sections/' + section.id + '/crosslist/' + courseId;
+      //var xListUrl = 'manager/api/v1/sections/' + section.id + '/crosslist/' + courseId;
+      var xListUrl = 'manager/api/v1/sections/' + section.id + '/crosslist/course_id';
       Course.xListSection(xListUrl).then(function (resultXList) {
         $scope.course.xLists.push(section.name);
         section.course_id = courseId;
