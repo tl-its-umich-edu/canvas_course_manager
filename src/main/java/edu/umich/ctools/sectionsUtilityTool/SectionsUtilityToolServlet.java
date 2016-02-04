@@ -12,7 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
+ */
 package edu.umich.ctools.sectionsUtilityTool;
 
 import java.io.BufferedReader;
@@ -185,7 +185,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug(" Servlet init(): Called");
 		appExtPropertiesFile = Utils.loadProperties(CCM_PROPERTY_FILE_PATH);
 		appExtSecurePropertiesFile = Utils.loadProperties(CCM_SECURE_PROPERTY_FILE_PATH);
-      
+
 		if(appExtSecurePropertiesFile!=null) {
 			ltiKey = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_KEY);
 			ltiSecret = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_SECRET);
@@ -201,7 +201,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		else {	
 			M_log.error("Failed to load system properties(sectionsToolProps.properties) for SectionsTool");
 		}
-      
+
 		oacf = new OauthCredentialsFactory(appExtSecurePropertiesFile);
 	}
 
@@ -215,7 +215,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	public void storeContext(Context context, HttpServletRequest request) {
 		Map<String, String> ltiValues = new HashMap<String, String>();
-      
+
 		ViewToolContext vtc = (ViewToolContext)context;
 		HttpServletResponse response = vtc.getResponse();
 		HttpSession session= request.getSession(true);
@@ -257,8 +257,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		// Verify this is an LTI launch request and some of the required parameters (if not stub testing)
 		if( !isStubTesting ){
 			if ( ! SectionUtilityToolFilter.BASIC_LTI_LAUNCH_REQUEST.equals(request.getParameter(SectionUtilityToolFilter.LTI_MESSAGE_TYPE)) ||
-				  ! LTI_1P0_CONST.equals(request.getParameter(LTI_VERSION)) ||
-				  ltiKey == null) {
+					! LTI_1P0_CONST.equals(request.getParameter(LTI_VERSION)) ||
+					ltiKey == null) {
 				try {
 					M_log.debug("LTI request Message: " + request.getParameter(SectionUtilityToolFilter.LTI_MESSAGE_TYPE));
 					M_log.debug("LTI request Version: " + request.getParameter(LTI_VERSION));
@@ -269,9 +269,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 				}
 				return;
 			}
-			
+
 			OauthCredentials oc = tc.getOauthCredentials();
-			
+
 			Boolean validMessage = checkForValidMessage(request, oc);
 			if (!validMessage) {
 				String msg = "Launch data does not validate";
@@ -374,7 +374,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 				}
 			}
 		}
-       
+
 		// Verify valid LTI key & secret
 		if( ltiKey == null || ltiSecret == null ) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -484,6 +484,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			uniqname = (String) tc.getCustomValuesMap().get("custom_canvas_user_login_id");
 		}
 		M_log.debug("WAPI uniqname: " + uniqname);
+		String sessionId = request.getSession().getId();
+		logAction(uniqname, request.getRequestURI(), sessionId);
 		String mpathwaysTermId = request.getParameter(PARAMETER_TERMID);
 		if(uniqname == null || 
 				mpathwaysTermId == null){
@@ -499,14 +501,18 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 				wapiValuesMap.put("key", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_KEY));
 				wapiValuesMap.put("secret", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_SECRET));
 				WAPI wapi = new WAPI(wapiValuesMap);
+				long startTime = System.currentTimeMillis();
 				try {
 					String url = wapi.getApiPrefix() + uniqname + "/Terms/" + mpathwaysTermId + "/Classes";
 					M_log.info("WAPI URL: " + url);
 					wrappedResult = wapi.getRequest(url);
 					addMpathwayDataToSession(request, wrappedResult, mpathwaysTermId);
 				} catch (UnirestException e) {
-					M_log.error("MPathways API call did not complete successfully", e);
-				}	
+					M_log.error("MPATHWAYS API call did not complete successfully", e);
+				}
+				long stopTime = System.currentTimeMillis();
+				long elapsedTime = stopTime - startTime;
+				M_log.info(String.format("MAPATHWAYS API response took %sms",elapsedTime));
 			}
 		}
 		out.print(wrappedResult.toJson());
@@ -559,9 +565,18 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			url = canvasURL+pathInfo;
 		}
 
+		String uniqname = null;
+		String sessionId = request.getSession().getId();
+		
 		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(TC_SESSION_DATA);
 		M_log.debug("TC Session Data: " + tc);
 
+		if( tc != null){
+			uniqname = (String) tc.getCustomValuesMap().get("custom_canvas_user_login_id");
+		}
+
+		logAction(uniqname, url, sessionId);
+		
 		//useful for debugging
 		//displaySessionAttributes(request);
 		//displayKeyValuePairs(tc);
@@ -569,14 +584,12 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		String stringToReplaceUser = "user=self";
 		String stringToReplaceCourse = "course_id";
 
+		String originalUrl = url;
+		
 		//Retrieve Canvas Data from TC Session Data in order to mask user. 
 		//This API is being masked because a uniqname is considered sensitive data.
-		String originalUrl = url;
 		url = unmaskUrl(url, tc, stringToReplaceUser, stringToReplaceCourse);
 
-		String sessionId = request.getSession().getId();
-		String loggingApiWithSessionInfo = String.format("Canvas API request with Session Id \"%s\" for URL \"%s\"", sessionId,url);
-		M_log.info(loggingApiWithSessionInfo);
 		HttpUriRequest clientRequest = null;
 		if(request.getMethod().equals(GET)) {
 			clientRequest = new HttpGet(url);
@@ -602,6 +615,17 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		out.flush();
 	}
 
+	private void logAction(String uniqname, String originalUrl, String sessionId) {
+		String loggingApiWithSessionInfo = null;
+		if( uniqname != null){
+			loggingApiWithSessionInfo = String.format("CANVAS API request with Uniqname \"%s\" for URL \"%s\"", uniqname, originalUrl);
+		}
+		else{
+			loggingApiWithSessionInfo = String.format("CANVAS API request with Session ID \"%s\" for URL \"%s\"", sessionId, originalUrl);
+		}
+		M_log.info(loggingApiWithSessionInfo);
+	}
+
 	private void addEnrollmentsToSession(HttpServletRequest request,
 			StringBuilder sb) {
 		M_log.debug("ENROLLMENTS: " + sb.toString());
@@ -613,7 +637,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			//if the key is already in the map, check and see if the new value is greater for that key
 			//if it is greater then replace, if not then skip.
 
-			if( enrollmentsFound.containsKey(childJSONObject.getInt("course_id"))                          ){
+			if(enrollmentsFound.containsKey(childJSONObject.getInt("course_id"))){
 				String oldType = enrollmentsFound.get(childJSONObject.getInt("course_id"));
 				String newType = childJSONObject.getString("type");
 				M_log.debug("OLD TYPE: " + oldType);
@@ -713,12 +737,12 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		if(!session.getAttribute(LAUNCH_TYPE).equals("lti")){
 			return isAllowedRequest;
 		}
-		
+
 		//typical crosslist call is not allowed in the LTI version
 		if( url.matches(appExtPropertiesFile.getProperty(CANVAS_API_CROSSLIST))){
 			isAllowedRequest = false;
 		}
-		
+
 		//only the masked crosslist call is allowed in the LTI version
 		if( url.matches(appExtPropertiesFile.getProperty(CANVAS_API_CROSSLIST_MASK))){
 			isAllowedRequest = isCrosslistAllowed(request, session, url);
@@ -797,17 +821,17 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		isCallAllowed = compareRanks(enrollmentTypeFromRequest,
 				enrollmentTypeFromSession);
-		
+
 		return isCallAllowed;
 	}
 
 	private boolean compareRanks(String enrollmentTypeFromRequest,
 			String enrollmentTypeFromSession) {
 		boolean isCallAllowed;
-		
+
 		int teacherDesignerEnrollmentRank = 2;
 		int taEnrollmentRank = 1;
-		
+
 		int enrollmentValueFromRequest = enrollmentsMap.get(enrollmentTypeFromRequest);
 		int enrollmentValueFromSession = enrollmentsMap.get(enrollmentTypeFromSession);
 
@@ -842,7 +866,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		//String is built, time to make the call
 		String sessionId = request.getSession().getId();
-		String loggingApiWithSessionInfo = String.format("Canvas API request with Session Id \"%s\" for URL \"%s\"", sessionId,crosslistApiCall);
+		String loggingApiWithSessionInfo = String.format("Canvas API request with Session Id \"%s\" for URL \"%s\"", sessionId, crosslistApiCall);
 		M_log.info(loggingApiWithSessionInfo);
 		HttpUriRequest clientRequest = null;
 

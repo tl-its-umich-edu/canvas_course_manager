@@ -85,7 +85,11 @@ public class FriendServlet extends HttpServlet {
 			M_log.error("Failed to load system properties(sectionsToolProps.properties) for SectionsTool");
 			return;
 		}
+		long startTime = System.currentTimeMillis();
 		friendApiConnectionLogic(request,response, myFriend);
+		long stopTime = System.currentTimeMillis();
+		long elapsedTime = stopTime - startTime;
+		M_log.info(String.format("FRIEND Api response took %sms",elapsedTime));
 	}	
 
 	/*
