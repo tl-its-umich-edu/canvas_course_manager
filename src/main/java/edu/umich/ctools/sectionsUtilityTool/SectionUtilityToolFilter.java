@@ -196,7 +196,7 @@ public class SectionUtilityToolFilter implements Filter {
 		M_log.debug("User: " + user);
 		if  ( !isAuthorized && remoteUser != null ) {
 			user=remoteUser;
-			M_log.info(String.format("The session id \"%s\" of Service Desk Person with uniqname  \"%s\" issuing the request" ,sessionId,remoteUser));
+			M_log.info(String.format("The session id \"%s\" of Service Desk Person with uniqname  \"%s\" issuing the request", sessionId, remoteUser));
 		}
 		isAuthorized=ldapAuthorizationVerification(user); 
 		return isAuthorized;
