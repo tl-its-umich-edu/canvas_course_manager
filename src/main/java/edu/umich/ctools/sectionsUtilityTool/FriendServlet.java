@@ -29,6 +29,8 @@ import javax.json.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import edu.umich.its.lti.TcSessionData;
+
 public class FriendServlet extends HttpServlet {
 
 	private static Log M_log = LogFactory.getLog(FriendServlet.class);
@@ -43,6 +45,7 @@ public class FriendServlet extends HttpServlet {
 	private static final String PARAMETER_INSTRUCTOR_FIRST_NAME = "inst_first_name";
 	private static final String PARAMETER_INSTRUCTOR_LAST_NAME = "inst_last_name";
 	private static final String PARAMETER_NOTIFY_INSTRUCTOR = "notify_instructor";
+	private static final String TC_SESSION_DATA = "tcSessionData";
 
 	private final static String CCM_PROPERTY_FILE_PATH = "ccmPropsPath";
 	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";	
@@ -76,7 +79,8 @@ public class FriendServlet extends HttpServlet {
 		Friend myFriend = new Friend();
 		PrintWriter out = response.getWriter();
 		response.setContentType("application/json");
-		Properties appExtSecureProperties = Friend.appExtSecureProperties; 
+		Properties appExtSecureProperties = Friend.appExtSecureProperties;
+				
 		if(appExtSecureProperties==null) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			out = response.getWriter();
@@ -85,12 +89,43 @@ public class FriendServlet extends HttpServlet {
 			M_log.error("Failed to load system properties(sectionsToolProps.properties) for SectionsTool");
 			return;
 		}
+		logApiCall(request);
 		long startTime = System.currentTimeMillis();
 		friendApiConnectionLogic(request,response, myFriend);
 		long stopTime = System.currentTimeMillis();
 		long elapsedTime = stopTime - startTime;
 		M_log.info(String.format("FRIEND Api response took %sms",elapsedTime));
 	}	
+	
+	private void logApiCall(HttpServletRequest request) {
+		String uniqname = null;
+		String loggingApiWithSessionInfo = null;
+		String queryString = request.getQueryString();
+		String pathInfo = request.getPathInfo();
+		String url = pathInfo;
+		if(queryString!=null) {
+			url = url+"?"+queryString;
+		}
+
+		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(TC_SESSION_DATA);
+		M_log.debug("TC Session Data: " + tc);
+		
+		String baseString = "FRIEND API request with Uniqname \"%s\" for URL \"%s\"";
+
+		if( tc != null){
+			uniqname = (String) tc.getCustomValuesMap().get("custom_canvas_user_login_id");
+		}
+		if( uniqname != null){
+			loggingApiWithSessionInfo = String.format(baseString, uniqname, url);
+		}
+		else if(request.getRemoteUser() != null){
+			loggingApiWithSessionInfo = String.format(baseString, request.getRemoteUser(), url);
+		}
+		else{
+			loggingApiWithSessionInfo = String.format(baseString, request.getSession().getAttribute("testUser"), url);
+		}
+		M_log.info(loggingApiWithSessionInfo);
+	}
 
 	/*
 	 * This function has logic that execute client(i.e., browser) request and get results from the Friend Accounts  
