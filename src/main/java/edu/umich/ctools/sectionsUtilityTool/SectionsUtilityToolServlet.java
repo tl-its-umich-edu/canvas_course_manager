@@ -481,7 +481,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		String uniqname = null;
 		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(TC_SESSION_DATA);
 		if( tc != null){
-			uniqname = (String) tc.getCustomValuesMap().get("custom_canvas_user_login_id");
+			uniqname = (String) tc.getCustomValuesMap().get(CUSTOM_CANVAS_USER_LOGIN_ID);
 		}
 		M_log.debug("WAPI uniqname: " + uniqname);
 		String originalUrl = request.getRequestURI();
@@ -574,7 +574,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug("TC Session Data: " + tc);
 
 		if( tc != null){
-			uniqname = (String) tc.getCustomValuesMap().get("custom_canvas_user_login_id");
+			uniqname = (String) tc.getCustomValuesMap().get(CUSTOM_CANVAS_USER_LOGIN_ID);
 		}
 
 		logApiCall(uniqname, url, request);
@@ -778,7 +778,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		String uniqname = null;
 		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(TC_SESSION_DATA);
 		if( tc != null){
-			uniqname = (String) tc.getCustomValuesMap().get("custom_canvas_user_login_id");
+			uniqname = (String) tc.getCustomValuesMap().get(CUSTOM_CANVAS_USER_LOGIN_ID);
 		}
 		
 		logApiCall(uniqname, sectionsApiCall, request);
@@ -878,7 +878,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		String uniqname = null;
 		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(TC_SESSION_DATA);
 		if( tc != null){
-			uniqname = (String) tc.getCustomValuesMap().get("custom_canvas_user_login_id");
+			uniqname = (String) tc.getCustomValuesMap().get(CUSTOM_CANVAS_USER_LOGIN_ID);
 		}
 		
 		logApiCall(uniqname, url, request);
