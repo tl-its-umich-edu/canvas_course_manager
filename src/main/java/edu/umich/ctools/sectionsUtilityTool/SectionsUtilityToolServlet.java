@@ -775,9 +775,14 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug("SECTIONS API CALL: " + sectionsApiCall);
 
 		//string built, time to make call
-		String sessionId = request.getSession().getId();
-		String loggingApiWithSessionInfo = String.format("Canvas API request with Session Id \"%s\" for URL \"%s\"", sessionId,sectionsApiCall);
-		M_log.info(loggingApiWithSessionInfo);
+		String uniqname = null;
+		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(TC_SESSION_DATA);
+		if( tc != null){
+			uniqname = (String) tc.getCustomValuesMap().get("custom_canvas_user_login_id");
+		}
+		
+		logApiCall(uniqname, sectionsApiCall, request);
+		
 		HttpUriRequest clientRequest = null;
 
 		clientRequest = new HttpGet(sectionsApiCall);
@@ -868,12 +873,15 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		//build api call
 		String crosslistApiCall = canvasURL + url.substring(0, url.indexOf("/crosslist"));
-		M_log.debug("crosslist API call: " + crosslistApiCall);
-
-		//String is built, time to make the call
-		String sessionId = request.getSession().getId();
-		String loggingApiWithSessionInfo = String.format("Canvas API request with Session Id \"%s\" for URL \"%s\"", sessionId, crosslistApiCall);
-		M_log.info(loggingApiWithSessionInfo);
+		M_log.debug("crosslist API call: " + crosslistApiCall);	
+		
+		String uniqname = null;
+		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(TC_SESSION_DATA);
+		if( tc != null){
+			uniqname = (String) tc.getCustomValuesMap().get("custom_canvas_user_login_id");
+		}
+		
+		logApiCall(uniqname, url, request);
 		HttpUriRequest clientRequest = null;
 
 		clientRequest = new HttpGet(crosslistApiCall);
