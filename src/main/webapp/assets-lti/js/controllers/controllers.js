@@ -47,21 +47,14 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
         });
       }
     });
-    var courseEnrollmentUrl ='manager/api/v1/courses/course_id/enrollments?user_id=' + $scope.canvas_user_id + '&_=' + generateCurrentTimestamp();
+    var courseEnrollmentUrl ='manager/api/v1/courses/course_id/enrollments?type[]=TeacherEnrollment&user_id=' + $scope.canvas_user_id + '&_=' + generateCurrentTimestamp();
     
     Course.getCourse(courseEnrollmentUrl).then(function (resultCourseEnrollment) {
-      var extractedRoles =[];
-      _.each(resultCourseEnrollment.data, function(enrollment){
-        extractedRoles.push(enrollment.type)
-      })
-      if(_.contains(extractedRoles, 'TeacherEnrollment') || _.contains(extractedRoles, 'DesignerEnrollment') ) {
+      if(resultCourseEnrollment.data.length > 0){
         $rootScope.courseRole='TeacherEnrollment';
-      } else if(_.contains(extractedRoles, 'TaEnrollment')){
-        $rootScope.courseRole='TAEnrollment';
       } else {
-        $rootScope.courseRole='StudentEnrollment';
+        $rootScope.courseRole='TAEnrollment';
       }
-
     });
   });
 
