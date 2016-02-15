@@ -271,7 +271,6 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
                 $scope.newUser = false;
                 $scope.newUserFound = false;
                 $scope.none = false;
-                $scope.userAvailable  = false;
                 $scope.friendEmailAddress ='';
                 $scope.friend = {};
               }
