@@ -62,6 +62,7 @@ import edu.umich.its.lti.TcSessionData;
 import edu.umich.its.lti.utils.OauthCredentials;
 import edu.umich.its.lti.utils.OauthCredentialsFactory;
 import edu.umich.its.lti.utils.RequestSignatureUtils;
+import edu.umich.its.lti.utils.PropertiesUtilities;
 
 public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
@@ -180,28 +181,53 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			"Secondary Instructor",
 			"Faculty Grader",
 			"Graduate Student Instructor"));
-
+	
 	public void init() throws ServletException {
 		M_log.debug(" Servlet init(): Called");
+		configurePropertyValues();
+		configureOauthCredentials();
+	}
+
+	private void configurePropertyValues() {
 		appExtPropertiesFile = Utils.loadProperties(CCM_PROPERTY_FILE_PATH);
 		appExtSecurePropertiesFile = Utils.loadProperties(CCM_SECURE_PROPERTY_FILE_PATH);
 
 		if(appExtSecurePropertiesFile!=null) {
-			ltiKey = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_KEY);
-			ltiSecret = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_SECRET);
-			ltiUrl = appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_LTI_URL);
 			canvasToken = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_CANVAS_ADMIN);
 			canvasURL = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_CANVAS_URL);
 			isStubTesting = Boolean.valueOf( appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_TEST_STUB) );
-			M_log.debug("ltiKey from props: "	 + ltiKey);
-			M_log.debug("ltiSecret from props: " + ltiSecret);
-			M_log.debug("ltiUrl from props: "	 + ltiUrl);
 			M_log.debug("isStubTesting: " + isStubTesting);
 		}
 		else {	
 			M_log.error("Failed to load system properties(sectionsToolProps.properties) for SectionsTool");
 		}
+	}
+	
+	protected void configureOauthCredentials() {
 
+		// The oauth properties might have been injected on startup, so only set if
+		// the value isn't yet set.
+
+		if (appExtSecurePropertiesFile != null) {
+			M_log.debug("oauthCredentials were injected");
+		}
+
+		//  Try getting the oauth credentials properties file for the URL.  They should
+		// not be in the main properties file they contain secrets.
+		if (appExtSecurePropertiesFile == null) {
+			M_log.debug("try to set oauth credentials from url");
+			appExtSecurePropertiesFile = Utils.loadProperties(CCM_SECURE_PROPERTY_FILE_PATH);
+		}
+
+		// if there there still isn't a properties object then use a default set of properties.
+		if (appExtSecurePropertiesFile == null) {
+			M_log.debug("try to set oauth credentials from default.");
+			appExtSecurePropertiesFile = new Properties();
+			appExtSecurePropertiesFile.put("lmsng.school.edu.secret", "secret");
+		}
+
+		// Now turn the properties in a factory for creating specific
+		// credentials.
 		oacf = new OauthCredentialsFactory(appExtSecurePropertiesFile);
 	}
 
@@ -216,6 +242,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	public void storeContext(Context context, HttpServletRequest request) {
 		Map<String, String> ltiValues = new HashMap<String, String>();
 
+//		resetErrorStrings(context);
+		
 		ViewToolContext vtc = (ViewToolContext)context;
 		HttpServletResponse response = vtc.getResponse();
 		HttpSession session= request.getSession(true);
@@ -287,6 +315,14 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		context.put("ltiValues", ltiValues);
 	}
+	
+	// Setup empty structures for error processing.
+//	public void resetErrorStrings(Context context) {
+//		LtiErrorMsgs lem = new LtiErrorMsgs();
+//		context.put(ALERT_MESSAGES_OBJ,lem);
+//		context.put(ALERT_MESSAGES,lem.toString());
+//	}
+
 
 	private void fillCcmValuesForContext(Map<String, String> ltiValues, HttpServletRequest request) {
 		ltiValues.put(CUSTOM_CANVAS_COURSE_ID, request.getParameter(CUSTOM_CANVAS_COURSE_ID));
@@ -374,6 +410,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 				}
 			}
 		}
+		
+		ltiKey = request.getParameter("oauth_consumer_key");
+		ltiSecret = appExtSecurePropertiesFile.getProperty(ltiKey + ".secret");
 
 		// Verify valid LTI key & secret
 		if( ltiKey == null || ltiSecret == null ) {
