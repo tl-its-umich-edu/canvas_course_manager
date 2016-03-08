@@ -315,14 +315,6 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		context.put("ltiValues", ltiValues);
 	}
-	
-	// Setup empty structures for error processing.
-//	public void resetErrorStrings(Context context) {
-//		LtiErrorMsgs lem = new LtiErrorMsgs();
-//		context.put(ALERT_MESSAGES_OBJ,lem);
-//		context.put(ALERT_MESSAGES,lem.toString());
-//	}
-
 
 	private void fillCcmValuesForContext(Map<String, String> ltiValues, HttpServletRequest request) {
 		ltiValues.put(CUSTOM_CANVAS_COURSE_ID, request.getParameter(CUSTOM_CANVAS_COURSE_ID));
