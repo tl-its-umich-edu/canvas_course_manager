@@ -51,9 +51,6 @@ public class SectionUtilityToolFilter implements Filter {
 	protected static final String PROPERTY_CANVAS_URL = "canvas.url";
 	protected static final String PROPERTY_USE_TEST_URL = "use.test.url";
 	protected static final String PROPERTY_LDAP_SERVER_URL = "ldap.server.url";
-	protected static final String PROPERTY_LTI_URL = "lti.url";
-	protected static final String PROPERTY_LTI_KEY = "lti.key";
-	protected static final String PROPERTY_LTI_SECRET = "lti.secret";
 	protected static final String PROPERTY_CALL_TYPE = "call.type";
 	protected static final String PROPERTY_AUTH_GROUP = "mcomm.group";
 	protected static final String ESB_TOKEN_SERVER = "esb.token.server";
