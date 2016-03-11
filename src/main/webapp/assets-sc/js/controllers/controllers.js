@@ -41,8 +41,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
  $scope.getCoursesForUniqname = function () {
     var uniqname = $.trim($('#uniqname').val().toLowerCase());
     $scope.uniqname = uniqname;
-    var mini='/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher&_='+ generateCurrentTimestamp();
-    var url = '/canvasCourseManager'+mini;
+    var url='/canvasCourseManager/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher&_='+ generateCurrentTimestamp();
     $scope.loadingLookUpCourses = true;
     if (validateUniqname(uniqname)) {
       Courses.getCourses(url).then(function (result) {
@@ -76,15 +75,19 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
           else {
             // all is well - add the courses to the scope, extract the terms represented in course data
             // change scope flags and get the root server from the courses feed (!)
-            $scope.courses = result.data;
-            $scope.termArray = getTermArray(result.data);
-            $scope.error = false;
-            $scope.success = true;
-            $scope.instructions = true;
-            $scope.errorLookup = false;
-            $scope.loadingLookUpCourses = false;
-            $rootScope.server = result.data[0].calendar.ics.split('/feed')[0];
-            $rootScope.user.uniqname = uniqname;
+            var resultTeacher = result.data;
+            var url='/canvasCourseManager/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=200&published=true&with_enrollments=true&enrollment_type=ta&_='+ generateCurrentTimestamp();
+            Courses.getCourses(url).then(function (result) {
+              $scope.courses = _.uniq(resultTeacher.concat(result.data));
+              $scope.termArray = getTermArray(result.data);
+              $scope.error = false;
+              $scope.success = true;
+              $scope.instructions = true;
+              $scope.errorLookup = false;
+              $scope.loadingLookUpCourses = false;
+              $rootScope.server = result.data[0].calendar.ics.split('/feed')[0];
+              $rootScope.user.uniqname = uniqname;
+            });
           }
         }
       });
