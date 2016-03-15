@@ -73,12 +73,15 @@ var filterByRole = function(courseData){
 }
 
 var teacherPrivileges = function(enrollmentData){
-  if( _.findWhere(enrollmentData, {type: 'TeacherEnrollment'})){
-    return 'TeacherEnrollment'
-  } else {
-    return 'TAEnrollment'
-  }  
-}
+  var isTeacher =  _.findWhere(enrollmentData, {type: 'TeacherEnrollment'});
+  var isDesigner = _.findWhere(enrollmentData, {type: 'DesignerEnrollment', role:'Designer'});
+  if(isTeacher || isDesigner){
+    return 'TeacherEnrollment';
+  }
+  else {
+    return 'TAEnrollment';
+  }
+};
 
 
 // specific success reporting, used in the jQuery requests
