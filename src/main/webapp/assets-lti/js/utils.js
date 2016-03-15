@@ -72,6 +72,17 @@ var filterByRole = function(courseData){
   return courseData;
 }
 
+var teacherPrivileges = function(enrollmentData){
+  var isTeacher =  _.findWhere(enrollmentData, {type: 'TeacherEnrollment'});
+  var isDesigner = _.findWhere(enrollmentData, {type: 'DesignerEnrollment', role:'Designer'});
+  if(isTeacher || isDesigner){
+    return 'TeacherEnrollment';
+  }
+  else {
+    return 'TAEnrollment';
+  }
+};
+
 
 // specific success reporting, used in the jQuery requests
 var reportSuccess = function(position, msg){
