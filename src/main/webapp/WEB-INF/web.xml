@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
 	version="2.4">
 	<display-name>CanvasCourseManagerl</display-name>
-	
+
 	<filter>
 		<filter-name>SectionUtilityToolFilter</filter-name>
 		<filter-class>edu.umich.ctools.sectionsUtilityTool.SectionUtilityToolFilter</filter-class>
@@ -41,17 +41,17 @@
 		<servlet-name>default</servlet-name>
 		<url-pattern>*.vm</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>default</servlet-name>
 		<url-pattern>/assets-lti/*</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>default</servlet-name>
 		<url-pattern>/assets-sc/*</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>default</servlet-name>
 		<url-pattern>/vendor/*</url-pattern>
@@ -71,6 +71,15 @@
 	<servlet-mapping>
 		<servlet-name>default</servlet-name>
 		<url-pattern>/build.txt</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>ping</servlet-name>
+		<jsp-file>/ping</jsp-file>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ping</servlet-name>
+		<url-pattern>/status/ping</url-pattern>
 	</servlet-mapping>
 
 </web-app>
