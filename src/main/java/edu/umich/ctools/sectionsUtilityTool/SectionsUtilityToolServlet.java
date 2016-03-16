@@ -181,7 +181,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			"Secondary Instructor",
 			"Faculty Grader",
 			"Graduate Student Instructor"));
-	
+
 	public void init() throws ServletException {
 		M_log.debug(" Servlet init(): Called");
 		configurePropertyValues();
@@ -202,7 +202,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			M_log.error("Failed to load system properties(sectionsToolProps.properties) for SectionsTool");
 		}
 	}
-	
+
 	protected void configureOauthCredentials() {
 
 		// The oauth properties might have been injected on startup, so only set if
@@ -211,15 +211,14 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		if (appExtSecurePropertiesFile != null) {
 			M_log.debug("oauthCredentials were injected");
 		}
-
-		//  Try getting the oauth credentials properties file for the URL.  They should
-		// not be in the main properties file they contain secrets.
-		if (appExtSecurePropertiesFile == null) {
-			M_log.debug("try to set oauth credentials from url");
+		else{
+			// Try getting the oauth credentials properties file for the URL.  They should
+			// not be in the main properties file they contain secrets.
+			M_log.debug("try to set oauth credentials from properties url");
 			appExtSecurePropertiesFile = Utils.loadProperties(CCM_SECURE_PROPERTY_FILE_PATH);
 		}
 
-		// if there there still isn't a properties object then use a default set of properties.
+		// if there still isn't a properties object then use a default set of properties.
 		if (appExtSecurePropertiesFile == null) {
 			M_log.debug("try to set oauth credentials from default.");
 			appExtSecurePropertiesFile = new Properties();
@@ -242,8 +241,6 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	public void storeContext(Context context, HttpServletRequest request) {
 		Map<String, String> ltiValues = new HashMap<String, String>();
 
-//		resetErrorStrings(context);
-		
 		ViewToolContext vtc = (ViewToolContext)context;
 		HttpServletResponse response = vtc.getResponse();
 		HttpSession session= request.getSession(true);
@@ -315,14 +312,6 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		context.put("ltiValues", ltiValues);
 	}
-	
-	// Setup empty structures for error processing.
-//	public void resetErrorStrings(Context context) {
-//		LtiErrorMsgs lem = new LtiErrorMsgs();
-//		context.put(ALERT_MESSAGES_OBJ,lem);
-//		context.put(ALERT_MESSAGES,lem.toString());
-//	}
-
 
 	private void fillCcmValuesForContext(Map<String, String> ltiValues, HttpServletRequest request) {
 		ltiValues.put(CUSTOM_CANVAS_COURSE_ID, request.getParameter(CUSTOM_CANVAS_COURSE_ID));
@@ -410,7 +399,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 				}
 			}
 		}
-		
+
 		ltiKey = request.getParameter("oauth_consumer_key");
 		ltiSecret = appExtSecurePropertiesFile.getProperty(ltiKey + ".secret");
 
@@ -819,9 +808,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		if( tc != null){
 			uniqname = (String) tc.getCustomValuesMap().get(CUSTOM_CANVAS_USER_LOGIN_ID);
 		}
-		
+
 		logApiCall(uniqname, sectionsApiCall, request);
-		
+
 		HttpUriRequest clientRequest = null;
 
 		clientRequest = new HttpGet(sectionsApiCall);
@@ -913,13 +902,13 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		//build api call
 		String crosslistApiCall = canvasURL + url.substring(0, url.indexOf("/crosslist"));
 		M_log.debug("crosslist API call: " + crosslistApiCall);	
-		
+
 		String uniqname = null;
 		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(TC_SESSION_DATA);
 		if( tc != null){
 			uniqname = (String) tc.getCustomValuesMap().get(CUSTOM_CANVAS_USER_LOGIN_ID);
 		}
-		
+
 		logApiCall(uniqname, url, request);
 		HttpUriRequest clientRequest = null;
 
