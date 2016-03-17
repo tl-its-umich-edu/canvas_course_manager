@@ -76,6 +76,9 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
             // all is well - add the courses to the scope, extract the terms represented in course data
             // change scope flags and get the root server from the courses feed (!)
             var resultTeacher = result.data;
+            if(result.data[0]){
+              $rootScope.server = result.data[0].calendar.ics.split('/feed')[0];
+            }
             var url='/canvasCourseManager/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=200&published=true&with_enrollments=true&enrollment_type=ta&_='+ generateCurrentTimestamp();
             Courses.getCourses(url).then(function (result) {
               $scope.courses = _.uniq(resultTeacher.concat(result.data));
@@ -84,8 +87,10 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
               $scope.success = true;
               $scope.instructions = true;
               $scope.errorLookup = false;
+              if(result.data[0]){
+                $rootScope.server = result.data[0].calendar.ics.split('/feed')[0];
+              }
               $scope.loadingLookUpCourses = false;
-              $rootScope.server = result.data[0].calendar.ics.split('/feed')[0];
               $rootScope.user.uniqname = uniqname;
             });
           }
