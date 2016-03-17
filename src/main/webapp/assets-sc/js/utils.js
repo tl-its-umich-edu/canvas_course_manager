@@ -358,24 +358,6 @@ $(document).on('click', '.cancelCourseNameChange', function (e) {
   $('.courseTitleTextContainer').hide();
 });
 
-// if user hits enter while uniqname field has focus, send a click trigger to the button
-$('body').off('keydown').on('keydown','#uniqname', function(event) {
-  var letterOnly = /^[a-z]+$/i;  
-  if (event.keyCode == 13) {
-    $('#uniqnameTrigger').click();
-  }
-  else {
-    if(event.key.match(letterOnly)) {  
-      $('#uniqname').closest('div').removeClass('has-error');
-      $('#uniqnameValidMessage').fadeOut('fast');
-    }
-    else {
-     $('#uniqname').closest('div').addClass('has-error');
-     $('#uniqnameValidMessage').fadeIn('fast');
-    }
-  }
-});
-
 // open a modal where the other instructor's courses are looked up, selected
 $(document).on('click', '#uniqnameOtherTrigger', function (e) {
   $('#useOtherSections').show();
