@@ -117,9 +117,11 @@ canvasSupportApp.factory('Sections', function ($http) {
   return {
     getSectionsForCourseId: function (courseId, context) {
     	if ( context === true){
+        //REGEXINFO: canvas.api.getallsections.per.course.regex
     		var url = '/canvasCourseManager/manager/api/v1/courses/course_id/sections?per_page=100&_='+ generateCurrentTimestamp();
     	} 
     	else{
+        //REGEXINFO: canvas.api.getallsections.per.course.regex
     		var url = '/canvasCourseManager/manager/api/v1/courses/' + courseId + '/sections?per_page=100&_='+ generateCurrentTimestamp();	
     	}
       return $http.get(url, {cache: false}).then(
@@ -144,6 +146,7 @@ canvasSupportApp.factory('Sections', function ($http) {
 canvasSupportApp.factory('Friend', function ($http, $rootScope) {
   return {
     lookUpCanvasFriend: function (friendId) {
+      //REGEXINFO: canvas.api.search.user.regex
       var url = '/canvasCourseManager/manager/api/v1/accounts/self/users?search_term=' + friendId + '&_='+ generateCurrentTimestamp();
       return $http.get(url, {cache: false}).then(
         function success(result) {
@@ -157,6 +160,7 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
     },
 
     createCanvasFriend: function (friendEmailAddress,friendNameFirst, friendNameLast) {
+     //REGEXINFO: canvas.api.create.user.regex
       var url = '/canvasCourseManager/manager/api/v1/accounts/1/users?account_id=1' +
         '&user[name]=' + friendNameFirst + ' ' + friendNameLast +
         '&pseudonym[unique_id]=' + friendEmailAddress.replace('@','%2B') +

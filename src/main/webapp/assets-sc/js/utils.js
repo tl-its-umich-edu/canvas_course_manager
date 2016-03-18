@@ -215,6 +215,7 @@ $(document).on('click', '#postXList', function (e) {
   var $sectionsInModal = $('#listOfSectionsToCrossList').find('li');
   var posts = [];
   $sectionsInModal.each(function( ) {
+    //REGEXINFO: canvas.api.crosslist.regex
     posts.push('/api/v1/sections/' + $(this).attr('data-sectionid') + '/crosslist/' + thisCourse);
   });
 
@@ -241,6 +242,7 @@ $(document).on('click', '.getCourseInfo', function (e) {
   $('#courseInfoInner').empty();
   $('#courseInfoLabel').empty();
   $('#courseInfoLabel').text('Info on ' + thisCourseTitle);
+  //REGEXINFO: canvas.api.getcourse.info.regex
   $.get('manager/api/v1/courses/' + thisCourse + '/activity_stream?as_user_id=sis_login_id:' +uniqname, function(data) {
       if(!data.length) {
         $('#courseInfoInner').text('No course activity detected!');
@@ -274,6 +276,7 @@ $(document).on('click', '#unCrossList', function (e) {
 
   thisSectionEl.css('border','1px solid #000');
   
+  //REGEXINFO: canvas.api.decrosslist.regex
   $.ajax({
     type: 'DELETE',
     url: 'manager/api/v1/sections/' + thisSectionId + '/crosslist'
@@ -301,6 +304,7 @@ $(document).on('click', '.getEnrollements', function (e) {
   $('#courseGetEnrollmentsInner').empty();
   $('#courseGetEnrollmentsLabel').text('Enrollments for ' + thisCourseTitle);
 
+  //REGEXINFO: canvas.api.enrollment.regex
   $.get('manager/api/v1/courses/' + thisCourse +  '/enrollments', function(data) {
       if(!data.length) {
         $('#courseGetEnrollmentsInner').text('No humans detected!');
@@ -335,6 +339,7 @@ $(document).on('click', '.postCourseNameChange', function (e) {
   e.preventDefault();
   var thisCourse = $(this).attr('data-courseid');
   var newCourseName = $(this).closest('.courseTitleTextContainer').find('input.courseTitleText').val();
+  //REGEXINFO: canvas.api.rename.course.regex
   var url = 'manager/api/v1/courses/' + thisCourse + '?course[course_code]=' + newCourseName + '&course[name]=' + newCourseName;
   var $thisCourseCode = $(this).closest('li').find('.courseLink');
   var $thisCourseName = $(this).closest('li').find('.courseName');
@@ -365,6 +370,7 @@ $(document).on('click', '#uniqnameOtherTrigger', function (e) {
   var uniqnameOther = $.trim($('#uniqnameOther').val());
   if(validateUniqname(uniqnameOther)){
     var termId = $.trim($('.canvasTermIdforjQuery').first().text());
+    //REGEXINFO: canvas.api.getcourse.by.uniqname.regex
     var mini='/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqnameOther+ '&include=sections&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher';
     var url = '/canvasCourseManager'+mini;
     $.ajax({
@@ -459,6 +465,7 @@ $(document).on('click', '#courseStringTrigger', function (e) {
   var courseString = $.trim($('#courseString').val());
   var termId = $.trim($('.canvasTermIdforjQuery').first().text());
   
+  //REGEXINFO: canvas.api.search.courses.regex
   var mini='/manager/api/v1/accounts/1/courses?search_term=' + courseString + '&per_page=200';
   var url = '/canvasCourseManager'+mini;
   $.ajax({
@@ -499,7 +506,7 @@ $(document).on('click', '.getSectionsNoInstructor', function (e) {
   e.preventDefault();
   var thisCourseId = $(this).attr('data-id');
   var thisCourseTitle =$(this).closest('li').find('strong').text();
-
+  //REGEXINFO: canvas.api.getallsections.per.course.regex
   var url = '/canvasCourseManager/manager/api/v1/courses/' + thisCourseId + '/sections?per_page=100';
   $.ajax({
     type: 'GET',

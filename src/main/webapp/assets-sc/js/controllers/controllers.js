@@ -7,6 +7,7 @@ canvasSupportApp.controller('termsController', ['Courses', '$rootScope', '$scope
   $scope.selectedTerm = null;
   //reset term scope
   $scope.terms = [];
+  //REGEXINFO: canvas.api.terms.regex
   var termsUrl ='manager/api/v1/accounts/1/terms?per_page=4000&_=' + generateCurrentTimestamp();
   $http.get(termsUrl).success(function (data) {
     if(data.enrollment_terms){
@@ -41,6 +42,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
  $scope.getCoursesForUniqname = function () {
     var uniqname = $.trim($('#uniqname').val().toLowerCase());
     $scope.uniqname = uniqname;
+    //REGEXINFO: canvas.api.getcourse.by.uniqname.regex
     var url='/canvasCourseManager/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher&_='+ generateCurrentTimestamp();
     $scope.loadingLookUpCourses = true;
     if (validateUniqname(uniqname)) {
@@ -79,6 +81,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
             if(result.data[0]){
               $rootScope.server = result.data[0].calendar.ics.split('/feed')[0];
             }
+            //REGEXINFO: canvas.api.getcourse.by.uniqname.no.sections.regex
             var url='/canvasCourseManager/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=200&published=true&with_enrollments=true&enrollment_type=ta&_='+ generateCurrentTimestamp();
             Courses.getCourses(url).then(function (result) {
               $scope.courses = _.uniq(resultTeacher.concat(result.data));
@@ -267,6 +270,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
         var sectionId = $scope.course.sections[e].id;
         var sectionName = $scope.course.sections[e].name;
         var thisSectionRole = $('li[data-sectionid="'+sectionId+'"]').find('select').val();
+        //REGEXINFO: canvas.api.add.user.regex
         var url = '/canvasCourseManager/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + $scope.friend.id + '&enrollment[enrollment_state]=active&enrollment[type]=' + thisSectionRole;
 
         Friend.addFriendToSection(url).then(function (data) {
