@@ -217,6 +217,7 @@ $(document).on('click', '#postXList', function () {
   var $sectionsInModal = $('#listOfSectionsToCrossList').find('li');
   var posts = [];
   $sectionsInModal.each(function( ) {
+    //REGEXINFO: canvas.api.crosslist.regex
     posts.push('/api/v1/sections/' + $(this).attr('data-sectionid') + '/crosslist/' + thisCourse);
   });
 
