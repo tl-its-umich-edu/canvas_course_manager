@@ -118,11 +118,13 @@ canvasSupportApp.factory('Sections', function ($http) {
     getSectionsForCourseId: function (courseId, context) {
     	if ( context === true){
         //REGEXINFO: canvas.api.getallsections.per.course.regex
-    		var url = '/canvasCourseManager/manager/api/v1/courses/course_id/sections?per_page=100&_='+ generateCurrentTimestamp();
+    	//modified per_page query for testing
+    		var url = '/canvasCourseManager/manager/api/v1/courses/course_id/sections?per_page=2&_='+ generateCurrentTimestamp();
     	} 
     	else{
         //REGEXINFO: canvas.api.getallsections.per.course.regex
-    		var url = '/canvasCourseManager/manager/api/v1/courses/' + courseId + '/sections?per_page=100&_='+ generateCurrentTimestamp();	
+    	//modified per_page query for testing
+    		var url = '/canvasCourseManager/manager/api/v1/courses/' + courseId + '/sections?per_page=2&_='+ generateCurrentTimestamp();	
     	}
       return $http.get(url, {cache: false}).then(
         function success(result) {
