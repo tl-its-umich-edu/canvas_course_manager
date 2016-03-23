@@ -493,9 +493,10 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	private void apiConnectionLogic(HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
-		//displayRequestHeaders(request);
+		if(M_log.isDebugEnabled()){
+			displayRequestHeaders(request);
+		}
 		
-
 		PrintWriter out = response.getWriter();
 		if( isStubTesting ){
 			Utils.openFile(request, response, out);
@@ -647,6 +648,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			      + " ,Value : " + header.getValue());
 			if(header.getName().equals("Link")){
 				linkValue = header.getValue();
+				break;
 			}
 		}
 		
@@ -854,7 +856,11 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		} catch (IOException e) {
 			M_log.error("Canvas API call did not complete successfully", e);
 			return false;
+		} catch (NullPointerException e){
+			M_log.error("Canvas API call did not complete successfully", e);
+			return false;
 		}
+		
 
 		String line = "";
 		StringBuilder sb = new StringBuilder();
@@ -958,6 +964,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		try {
 			rd = new BufferedReader(new InputStreamReader(canvasResponse.getEntity().getContent()));
 		} catch (IOException e) {
+			M_log.error("Canvas API call did not complete successfully", e);
+		} catch(NullPointerException e){
 			M_log.error("Canvas API call did not complete successfully", e);
 		}
 
