@@ -665,30 +665,46 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug("ENROLLMENTS: " + sb.toString());
 		HashMap<Integer, String> enrollmentsFound =  new HashMap<Integer, String>();
 		JSONArray enrollmentsArray = new JSONArray(sb.toString());
+
+		//iterate through new enrollments
+		//if enrollment type == teacherEnrollment or DesignerEnrollment with Designer Role then add it to enrollments found and break
+		//Else enrollment type is TAEnrollment
+		//This is because Teachers and Designers can add friends, but not Librarians (a type of Designer)
 		for(int i = 0; i < enrollmentsArray.length(); i++){
 			JSONObject childJSONObject = enrollmentsArray.getJSONObject(i);
 			M_log.debug("ENROLLMENT RECORD: " + childJSONObject.get("course_id") + " " + childJSONObject.get("course_section_id") + " " + childJSONObject.get("type"));
-			//if the key is already in the map, check and see if the new value is greater for that key
-			//if it is greater then replace, if not then skip.
 
-			if(enrollmentsFound.containsKey(childJSONObject.getInt("course_id"))){
-				String oldType = enrollmentsFound.get(childJSONObject.getInt("course_id"));
-				String newType = childJSONObject.getString("type");
-				M_log.debug("OLD TYPE: " + oldType);
-				M_log.debug("NEW TYPE: " + newType);
-				//Only want to overwrite the key,value pair if the value is greater
-				if(enrollmentsMap.get(newType) > enrollmentsMap.get(oldType)){
-					enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString("type"));
-				}
+			String newType = childJSONObject.getString("type");
+			String newRole = childJSONObject.getString("role");
+
+			M_log.debug("NEW TYPE: " + newType);
+			M_log.debug("NEW ROLE: " + newRole);
+
+			boolean isTeacher = false;
+			boolean isDesigner = false;
+			
+			if(newType.equals("DesignerEnrollment") && newRole.equals("DesignerEnrollment")){
+				isDesigner = true;
+			}
+			if(newType.equals("TeacherEnrollment")){
+				isTeacher = true;
+			}
+			if(isTeacher || isDesigner){
+				enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString("type"));
+				M_log.debug("BREAKING");
+				break;
 			}
 			else{
-				enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString("type"));
+				enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString("TAEnrollment"));
 			}
 
 		}
+		M_log.debug("DONE");
 		request.getSession().setAttribute("enrollments", enrollmentsFound);
 		M_log.debug("SESSION ENROLLMENTS: " + request.getSession().getAttribute("enrollments"));
 	}
+
+
 
 	//Canvas adds custom parameters for lti launches. These custom paramerers 
 	//include user_login and course_id. We use these parameters to unmask the
