@@ -55,8 +55,15 @@ var filterOutSections = function(sectionData, mPathArray){
   return sectionData;
 };
 
-var parseResultLookUpCanvasUser = function(userArray, uniqname){
-  var thisUser = _.findWhere(userArray, {sis_login_id: uniqname});
+var parseResultLookUpCanvasUser = function(userArray, uniqname, userIsFriend){
+  //Friend account users will have a "+" in their sis_login_id in place of an "@"
+  //because of this, we opt to use the sis_user_id instead as the sis_user_id leaves the "@" in tact
+  if(!userIsFriend){
+    var thisUser = _.findWhere(userArray, {sis_login_id: uniqname});
+  }
+  else{
+   var thisUser = _.findWhere(userArray, {sis_user_id: uniqname}); 
+  }
   return thisUser.id
 }
 
