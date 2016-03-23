@@ -38,6 +38,8 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
@@ -491,6 +493,10 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	private void apiConnectionLogic(HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
+		if(M_log.isDebugEnabled()){
+			displayRequestHeaders(request);
+		}
+		
 		PrintWriter out = response.getWriter();
 		if( isStubTesting ){
 			Utils.openFile(request, response, out);
@@ -630,7 +636,28 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}else if(request.getMethod().equals(DELETE)) {
 			clientRequest=new HttpDelete(url);
 		}
-		BufferedReader rd = processApiCall(clientRequest);
+
+		HttpResponse canvasResponse = processApiCall(clientRequest);
+		BufferedReader rd = new BufferedReader(new InputStreamReader(canvasResponse.getEntity().getContent()));
+
+		String linkValue = null;
+		
+		Header[] headers = canvasResponse.getAllHeaders();
+		for (Header header : headers) {
+			M_log.debug("Key : " + header.getName() 
+			      + " ,Value : " + header.getValue());
+			if(header.getName().equals("Link")){
+				linkValue = header.getValue();
+				break;
+			}
+		}
+		
+		M_log.debug("LINK VALUE: " + linkValue);
+		
+		if(linkValue != null){
+			response.addHeader("Link", linkValue);
+		}
+
 		String line = "";
 		StringBuilder sb = new StringBuilder();
 		while ((line = rd.readLine()) != null) {
@@ -729,6 +756,13 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}
 	}
 
+	public void displayRequestHeaders(HttpServletRequest request) {
+		Enumeration headerNames = request.getHeaderNames();
+		while(headerNames.hasMoreElements()){
+			M_log.debug("HEADER NAME: " + headerNames.nextElement());
+		}
+	}
+
 	public void testMpathwaysCall(PrintWriter out) {
 		try{
 			M_log.info("MPathways call stub");
@@ -815,7 +849,18 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		clientRequest = new HttpGet(sectionsApiCall);
 
-		BufferedReader rd = processApiCall(clientRequest);
+		HttpResponse canvasResponse = processApiCall(clientRequest);
+		BufferedReader rd = null;
+		try {
+			rd = new BufferedReader(new InputStreamReader(canvasResponse.getEntity().getContent()));
+		} catch (IOException e) {
+			M_log.error("Canvas API call did not complete successfully", e);
+			return false;
+		} catch (NullPointerException e){
+			M_log.error("Canvas API call did not complete successfully", e);
+			return false;
+		}
+		
 
 		String line = "";
 		StringBuilder sb = new StringBuilder();
@@ -914,7 +959,15 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		clientRequest = new HttpGet(crosslistApiCall);
 
-		BufferedReader rd = processApiCall(clientRequest);
+		HttpResponse canvasResponse = processApiCall(clientRequest);
+		BufferedReader rd = null;
+		try {
+			rd = new BufferedReader(new InputStreamReader(canvasResponse.getEntity().getContent()));
+		} catch (IOException e) {
+			M_log.error("Canvas API call did not complete successfully", e);
+		} catch(NullPointerException e){
+			M_log.error("Canvas API call did not complete successfully", e);
+		}
 
 		String line = "";
 		StringBuilder sb = new StringBuilder();
@@ -961,7 +1014,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		return isSectionMatch;
 	}
 
-	private BufferedReader processApiCall(HttpUriRequest clientRequest) {
+	private HttpResponse processApiCall(HttpUriRequest clientRequest) {
 		HttpClient client = new DefaultHttpClient();
 		final ArrayList<NameValuePair> nameValues = new ArrayList<NameValuePair>();
 		nameValues.add(new BasicNameValuePair("Authorization", "Bearer"+ " " +canvasToken));
@@ -970,17 +1023,17 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		{
 			clientRequest.addHeader(h.getName(), h.getValue());
 		}
-		BufferedReader rd = null;
+		HttpResponse response = null;
 		long startTime = System.currentTimeMillis();
 		try {
-			rd = new BufferedReader(new InputStreamReader(client.execute(clientRequest).getEntity().getContent()));
+			response = client.execute(clientRequest);
 		} catch (IOException e) {
 			M_log.error("Canvas API call did not complete successfully", e);
 		}
 		long stopTime = System.currentTimeMillis();
 		long elapsedTime = stopTime - startTime;
 		M_log.info(String.format("CANVAS Api response took %sms",elapsedTime));
-		return rd;
+		return response;
 	}
 	/*
 	 * This helper method iterate through the list of api's that sections tool have and if a match is found then logs associated debug message.

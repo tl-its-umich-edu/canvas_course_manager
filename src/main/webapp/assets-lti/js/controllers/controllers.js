@@ -60,6 +60,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     $scope.loadingOtherCourses = true;
     $rootScope.courseRole
     //REGEXINFO: canvas.api.getcourse.by.uniqname.no.sections.mask.regex
+    //TODO: Remove per page query
     var coursesUrl='/canvasCourseManager/manager/api/v1/courses?user=self&per_page=200&published=true&with_enrollments=true&_='+ generateCurrentTimestamp();
     Courses.getCourses(coursesUrl).then(function (resultCourses) {
       $scope.loadingOtherCourses = false;
