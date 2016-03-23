@@ -524,11 +524,12 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}
 		logApiCall(uniqname, originalUrl, request);
 		String mpathwaysTermId = request.getParameter(PARAMETER_TERMID);
-		if(uniqname == null || 
+		if(uniqname == null || uniqname.contains("+") ||
 				mpathwaysTermId == null){
 			response.setStatus(400);
-			wrappedResult = new WAPIResultWrapper(400, "Parameter missing in Instructors request", new JSONObject());
-			M_log.error("Error in mpathwaysCall(), missing parameter in Instuctors request");
+			wrappedResult = new WAPIResultWrapper(400, "Parameter missing in Instructors request OR you are using a friend account",
+					new JSONObject());
+			M_log.error("Error in mpathwaysCall(), missing parameter in Instuctors request OR user is using a friend account");
 		}
 		else{
 			if(appExtSecurePropertiesFile!=null) {

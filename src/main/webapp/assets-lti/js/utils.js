@@ -55,8 +55,13 @@ var filterOutSections = function(sectionData, mPathArray){
   return sectionData;
 };
 
-var parseResultLookUpCanvasUser = function(userArray, uniqname){
-  var thisUser = _.findWhere(userArray, {sis_login_id: uniqname});
+var parseResultLookUpCanvasUser = function(userArray, uniqname, userIsFriend){
+  if(!userIsFriend){
+    var thisUser = _.findWhere(userArray, {sis_login_id: uniqname});
+  }
+  else{
+   var thisUser = _.findWhere(userArray, {sis_user_id: uniqname}); 
+  }
   return thisUser.id
 }
 
