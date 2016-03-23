@@ -667,9 +667,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		JSONArray enrollmentsArray = new JSONArray(sb.toString());
 
 		//iterate through new enrollments
-		//if enrollment type == teacherEnrollment or DesignerEnrollment with Designer Role then add it to enrollments found and break
+		//if enrollment type == teacherEnrollment or (DesignerEnrollment AND Designer Role) then add it to enrollments found and break
 		//Else enrollment type is TAEnrollment
-		//This is because Teachers and Designers can add friends, but not Librarians (a type of Designer)
+		//This is because Teachers and Designers can add friends at teacher level, but Librarians (a type of Designer) can only add students
 		for(int i = 0; i < enrollmentsArray.length(); i++){
 			JSONObject childJSONObject = enrollmentsArray.getJSONObject(i);
 			M_log.debug("ENROLLMENT RECORD: " + childJSONObject.get("course_id") + " " + childJSONObject.get("course_section_id") + " " + childJSONObject.get("type"));
@@ -680,26 +680,27 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			M_log.debug("NEW TYPE: " + newType);
 			M_log.debug("NEW ROLE: " + newRole);
 
-			boolean isTeacher = false;
-			boolean isDesigner = false;
+			boolean canAddTeacher = false;
 			
-			if(newType.equals("DesignerEnrollment") && newRole.equals("DesignerEnrollment")){
-				isDesigner = true;
+			String designerEnrollment = "DesignerEnrollment";
+			String teacherEnrollment = "TeacherEnrollment";
+			String taEnrollment = "TAEnrollment";
+			
+			if(newType.equals(designerEnrollment) && newRole.equals(designerEnrollment)){
+				canAddTeacher = true;
 			}
-			if(newType.equals("TeacherEnrollment")){
-				isTeacher = true;
+			if(newType.equals(teacherEnrollment)){
+				canAddTeacher = true;
 			}
-			if(isTeacher || isDesigner){
+			if(canAddTeacher){
 				enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString("type"));
-				M_log.debug("BREAKING");
 				break;
 			}
 			else{
-				enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString("TAEnrollment"));
+				enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString(taEnrollment));
 			}
 
 		}
-		M_log.debug("DONE");
 		request.getSession().setAttribute("enrollments", enrollmentsFound);
 		M_log.debug("SESSION ENROLLMENTS: " + request.getSession().getAttribute("enrollments"));
 	}
