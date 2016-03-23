@@ -116,6 +116,10 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";
 
 	private static final String LAUNCH_TYPE = "launchType";
+	
+	private static final String DESIGNER_ENROLLMENT = "DesignerEnrollment";
+	private static final String TEACHER_ENROLLMENT = "TeacherEnrollment";
+	private static final String TA_ENROLLMENT = "TAEnrollment";
 
 	private static final String DELETE = "DELETE";
 	private static final String POST = "POST";
@@ -694,30 +698,45 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug("ENROLLMENTS: " + sb.toString());
 		HashMap<Integer, String> enrollmentsFound =  new HashMap<Integer, String>();
 		JSONArray enrollmentsArray = new JSONArray(sb.toString());
+
+		//iterate through new enrollments
+		//if enrollment type == teacherEnrollment or (DesignerEnrollment AND Designer Role) then add it to enrollments found and break
+		//Else enrollment type is TAEnrollment
+		//This is because Teachers and Designers can add friends at teacher level, but Librarians (a type of Designer) can only add students
 		for(int i = 0; i < enrollmentsArray.length(); i++){
 			JSONObject childJSONObject = enrollmentsArray.getJSONObject(i);
 			M_log.debug("ENROLLMENT RECORD: " + childJSONObject.get("course_id") + " " + childJSONObject.get("course_section_id") + " " + childJSONObject.get("type"));
-			//if the key is already in the map, check and see if the new value is greater for that key
-			//if it is greater then replace, if not then skip.
 
-			if(enrollmentsFound.containsKey(childJSONObject.getInt("course_id"))){
-				String oldType = enrollmentsFound.get(childJSONObject.getInt("course_id"));
-				String newType = childJSONObject.getString("type");
-				M_log.debug("OLD TYPE: " + oldType);
-				M_log.debug("NEW TYPE: " + newType);
-				//Only want to overwrite the key,value pair if the value is greater
-				if(enrollmentsMap.get(newType) > enrollmentsMap.get(oldType)){
-					enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString("type"));
-				}
+			String newType = childJSONObject.getString("type");
+			String newRole = childJSONObject.getString("role");
+
+			M_log.debug("NEW TYPE: " + newType);
+			M_log.debug("NEW ROLE: " + newRole);
+
+			boolean canAddTeacher = false;
+			
+			if(newType.equals(DESIGNER_ENROLLMENT) && newRole.equals(DESIGNER_ENROLLMENT)){
+				canAddTeacher = true;
+			}
+			if(newType.equals(TEACHER_ENROLLMENT)){
+				canAddTeacher = true;
+			}
+			if(canAddTeacher){
+				//Here the user will be given a teacher enrollment status even if the user is a designer with a designer role
+				//as the only time this is consulted is when adding friend accounts
+				enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString(TEACHER_ENROLLMENT));
+				break;
 			}
 			else{
-				enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString("type"));
+				enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString(TA_ENROLLMENT));
 			}
 
 		}
 		request.getSession().setAttribute("enrollments", enrollmentsFound);
 		M_log.debug("SESSION ENROLLMENTS: " + request.getSession().getAttribute("enrollments"));
 	}
+
+
 
 	//Canvas adds custom parameters for lti launches. These custom paramerers 
 	//include user_login and course_id. We use these parameters to unmask the
