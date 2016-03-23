@@ -524,6 +524,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}
 		logApiCall(uniqname, originalUrl, request);
 		String mpathwaysTermId = request.getParameter(PARAMETER_TERMID);
+		//Friend accounts for Canvas will have a "+" in place of an "@" in their uniqnames
 		if(uniqname == null || uniqname.contains("+") ||
 				mpathwaysTermId == null){
 			response.setStatus(400);
