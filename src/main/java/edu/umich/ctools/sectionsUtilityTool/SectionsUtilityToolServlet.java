@@ -114,6 +114,10 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";
 
 	private static final String LAUNCH_TYPE = "launchType";
+	
+	private static final String DESIGNER_ENROLLMENT = "DesignerEnrollment";
+	private static final String TEACHER_ENROLLMENT = "TeacherEnrollment";
+	private static final String TA_ENROLLMENT = "TAEnrollment";
 
 	private static final String DELETE = "DELETE";
 	private static final String POST = "POST";
@@ -682,22 +686,20 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 			boolean canAddTeacher = false;
 			
-			String designerEnrollment = "DesignerEnrollment";
-			String teacherEnrollment = "TeacherEnrollment";
-			String taEnrollment = "TAEnrollment";
-			
-			if(newType.equals(designerEnrollment) && newRole.equals(designerEnrollment)){
+			if(newType.equals(DESIGNER_ENROLLMENT) && newRole.equals(DESIGNER_ENROLLMENT)){
 				canAddTeacher = true;
 			}
-			if(newType.equals(teacherEnrollment)){
+			if(newType.equals(TEACHER_ENROLLMENT)){
 				canAddTeacher = true;
 			}
 			if(canAddTeacher){
-				enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString("type"));
+				//Here the user will be given a teacher enrollment status even if the user is a designer with a designer role
+				//as the only time this is consulted is when adding friend accounts
+				enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString(TEACHER_ENROLLMENT));
 				break;
 			}
 			else{
-				enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString(taEnrollment));
+				enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString(TA_ENROLLMENT));
 			}
 
 		}
