@@ -64,7 +64,7 @@
 		</div>
 
 		<div id="statusPing">
-			Status Ping: <a href="status/ping.html">Here</a>
+			Status Ping: <a href="status/ping">Here</a>
 		</div>
 
 	</div>
