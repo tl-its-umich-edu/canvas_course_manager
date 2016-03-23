@@ -17,14 +17,14 @@ canvasSupportApp.controller('termsController', ['Courses', '$rootScope', '$scope
       $('.canvasTermNameforjQuery').text($scope.$parent.currentTerm.currentTermName);
     }
     else {
-      errorDisplay(termsUrl,status,'Unable to get terms data');  
+      errorDisplay(termsUrl,status,'Unable to get terms data');
     }
   }).error(function () {
     errorDisplay(termsUrl,status,'Unable to get terms data');
   });
 
-  //user selects a term from the dropdown that has been 
-  //populated by $scope.terms 
+  //user selects a term from the dropdown that has been
+  //populated by $scope.terms
   $scope.getTerm = function (termId, termName, termCanvasId) {
     $scope.$parent.currentTerm.currentTermName = termName;
     $scope.$parent.currentTerm.currentTermId = termId;
@@ -84,7 +84,15 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
             //REGEXINFO: canvas.api.getcourse.by.uniqname.no.sections.regex
             var url='/canvasCourseManager/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=200&published=true&with_enrollments=true&enrollment_type=ta&_='+ generateCurrentTimestamp();
             Courses.getCourses(url).then(function (result) {
-              $scope.courses = _.uniq(resultTeacher.concat(result.data));
+              //underscore _.uniq did not unique the concat of the two lists
+              //so examine each of the TA role courses to see if it is already
+              //in the Teacher role list
+              _.each(result.data, function(tacourse){
+                if( !_.findWhere(resultTeacher, {id: tacourse.id}) ) {
+                  resultTeacher.push.tacourse;
+                }
+              });
+              $scope.courses = resultTeacher;
               $scope.termArray = getTermArray(result.data);
               $scope.error = false;
               $scope.success = true;
@@ -164,7 +172,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
 
 /* FRIEND PANEL CONTROLLER */
 canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScope', 'SectionSet', function (Friend, $scope, $rootScope, SectionSet) {
-  
+
   $scope.$on('courseSetChanged', function(event, sectionSet) {
       $scope.course = sectionSet[0];
   });
@@ -181,7 +189,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     $scope.friend = {};
     $scope.loadingLookupFriend = true;
     var friendId = $.trim($('#friendEmailAddress').val());
-    
+
     if(validateEmailAddress(friendId)){
       $scope.failedValidation = false;
       Friend.lookUpCanvasFriend(friendId).then(function (data) {
@@ -225,7 +233,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
           $scope.friend_account = data.data;
           $scope.newUserFound=true;
           $scope.friendDone=true;
-          
+
           Friend.createCanvasFriend(friendEmailAddress,friendNameFirst, friendNameLast).then(function (data) {
             if (data.data.name) {
               // here we add the person to the scope and then use another factory to add them to the sites
@@ -240,7 +248,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
             }
             $scope.loadingCreateUser = false;
           });
-          
+
           //$scope.friend = friendEmailAddress;
           $scope.userAvailable = true;
           $scope.done = true;
@@ -289,7 +297,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
             }
           }
         });
-      
+
         $('#successFullSections').append(' <span class="label label-success">' + sectionName + '</span>');
       }
     }
