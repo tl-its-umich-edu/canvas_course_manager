@@ -11,7 +11,7 @@ $.ajaxSetup({
   cache: false
 });
 
-    
+
 $(document).ajaxStart(function(){
   $(".spinner").show();
   $(".spinner2").show();
@@ -60,7 +60,7 @@ var getTermArray = function(coursesData) {
     }
   });
   termArray = _.uniq(termArray);
-  return termArray;  
+  return termArray;
 };
 
 // provide a timestamp to add to angular GETs to invalidate cache
@@ -75,7 +75,7 @@ var generateCurrentTimestamp = function(){
 var calculateLastActivity = function(last_activity_at) {
   if(last_activity_at) {
     return moment(last_activity_at).fromNow();
-  } 
+  }
   else {
     return 'None';
   }
@@ -95,10 +95,10 @@ var reportError = function(position, msg){
 };
 
 /**
- * Pop a window to display help matters, name allows to pass the 
+ * Pop a window to display help matters, name allows to pass the
  * focus to it if already open and in the background
- * 
- * @param {Object} url 
+ *
+ * @param {Object} url
  * @param {Object} name - window name
  */
 var utilPopWindow = function(url, name){
@@ -112,8 +112,8 @@ var utilPopWindow = function(url, name){
 /*used by modal (other instructor field) */
 var validateUniqname = function (value) {
   var value = $.trim(value)
-  var letterOnly = /^[a-z]+$/i;  
-  if(value.match(letterOnly) && value !=='') {  
+  var letterOnly = /^[a-z]+$/i;
+  if(value.match(letterOnly) && value !=='') {
     return true;
   } else {
     return false;
@@ -126,9 +126,9 @@ var validateUniqname = function (value) {
 var validateEmailAddress = function (value) {
   var value = $.trim(value);
   if(value.indexOf('@') !==-1 &&
-    value.indexOf('umich.edu') ===-1  && 
-    value.split('@').length === 2 && 
-    value.split('@')[0] !== '' && 
+    value.indexOf('umich.edu') ===-1  &&
+    value.split('@').length === 2 &&
+    value.split('@')[0] !== '' &&
     value.split('@')[1] !== '' &&
     value.split('@')[1].split('.').length > 1){
     return true;
@@ -141,7 +141,7 @@ var validateEmailAddress = function (value) {
 
 var xListPostStatus;
 
-// function used in xlist multiple post - returns a referred that the calling 
+// function used in xlist multiple post - returns a referred that the calling
 // function can use to determine success/errors - it also adds labels for each
 // case in the modal
 var doXListPosts = function(posts){
@@ -149,7 +149,7 @@ var doXListPosts = function(posts){
   var xListPosts = [];
   xListPostStatus = {successes: [], failures: []};
   for (index = 0, len = posts.length; index < len; ++index) {
-    var xListUrl ='manager' + posts[index];    
+    var xListUrl ='manager' + posts[index];
     xListPosts.push(
       $.post(xListUrl, function(data) {
         var section = data.id;
@@ -174,7 +174,7 @@ var doXListPosts = function(posts){
 
 //open help doc in new window
 $('#helpLink').click(function(){
-	utilPopWindow('help.html', 'help');
+	utilPopWindow($('#helpLink').attr('data-url'), 'help');
 });
 
 //handler for the Update Course button
@@ -192,14 +192,14 @@ $(document).on('click', '.setSections', function (e) {
   var thisCourseTitle = thisCourseContainer.find('a.courseLink').text();
 
   var $sections = $(this).closest('li').find('ul').find('li');
-  
+
   var posts = [];
   $('#xListInner').empty();
   $('#xListInner').append('<p><strong>' + thisCourseTitle + '</strong></p><ol id="listOfSectionsToCrossList" class="listOfSectionsToCrossList"></ol>');
 
   $('#xListConfirm').attr('href',server + '/courses/' + thisCourse + '/settings#tab-sections');
   $sections.each(function( ) {
-    $('#listOfSectionsToCrossList').append( '<li data-sectionid=\"' + $(this).attr('data-sectionid') + '\" ' + 'id=\"xListSection' + $(this).attr('data-sectionid') + '\">' + 
+    $('#listOfSectionsToCrossList').append( '<li data-sectionid=\"' + $(this).attr('data-sectionid') + '\" ' + 'id=\"xListSection' + $(this).attr('data-sectionid') + '\">' +
       '<span class=\"xListStatus\"></span> ' + $(this).find('div.sectionName span').text() + '</li>');
   });
   return null;
@@ -211,7 +211,7 @@ $(document).on('click', '#postXList', function (e) {
   $('#postXList, #postXListCancel').hide();
 
   var thisCourseContainer = $('li.course[data-course-id="' + thisCourse + '"]');
-  
+
   var $sectionsInModal = $('#listOfSectionsToCrossList').find('li');
   var posts = [];
   $sectionsInModal.each(function( ) {
@@ -231,9 +231,9 @@ $(document).on('click', '#postXList', function (e) {
     $('.activeCourse').removeClass('activeCourse');
     $(thisCourseContainer).find('.setSections').fadeOut().delay(5000).hide();
   });
-});  
+});
 
-// see if there is any activity in the course (used to prevent orphaning a course that is active)  
+// see if there is any activity in the course (used to prevent orphaning a course that is active)
 $(document).on('click', '.getCourseInfo', function (e) {
   var uniqname = $.trim($('#uniqname').val());
   e.preventDefault();
@@ -248,11 +248,11 @@ $(document).on('click', '.getCourseInfo', function (e) {
         $('#courseInfoInner').text('No course activity detected!');
       }
       else {
-        $('#courseInfoInner').text('Course activity detected! Number of events: '  + data.length); 
+        $('#courseInfoInner').text('Course activity detected! Number of events: '  + data.length);
       }
   })
   .fail(function(jqXHR) {
-    $('#courseInfoInner').text('There was an error getting course information'  + ' (' + jqXHR.status + ' ' + jqXHR.statusText + ')'); 
+    $('#courseInfoInner').text('There was an error getting course information'  + ' (' + jqXHR.status + ' ' + jqXHR.statusText + ')');
   });
   return null;
 });
@@ -263,11 +263,11 @@ $(document).on('click', '.sectionCheck', function (e) {
   var thisSection = $(this).closest('li.section');
   var thisSectionId = thisSection.attr('data-sectionid');
   $('#unCrossListInner').empty();
-  $('#unCrossListInner').text('Uncrosslisting will re-associate this section with the previous course.'); 
+  $('#unCrossListInner').text('Uncrosslisting will re-associate this section with the previous course.');
   $('#unCrossList').show();
   $('#unCrossList').attr('data-section-id', thisSectionId);
   return null;
-});  
+});
 
 $(document).on('click', '#unCrossList', function (e) {
   e.preventDefault();
@@ -275,7 +275,7 @@ $(document).on('click', '#unCrossList', function (e) {
   var thisSectionEl = $('.section[data-sectionid="' + thisSectionId + '"]');
 
   thisSectionEl.css('border','1px solid #000');
-  
+
   //REGEXINFO: canvas.api.decrosslist.regex
   $.ajax({
     type: 'DELETE',
@@ -288,13 +288,13 @@ $(document).on('click', '#unCrossList', function (e) {
         thisSectionEl.remove();
       });
     }).fail(function(jqXHR) {
-      $('#unCrossListInner').text('There was an error!'  + ' (' + jqXHR.status + ' ' + jqXHR.statusText + ')'); 
+      $('#unCrossListInner').text('There was an error!'  + ' (' + jqXHR.status + ' ' + jqXHR.statusText + ')');
     });
   return null;
-});  
-  
+});
 
-// see what the enrollements are in a course (used to prevent orphaning a course that is active)  
+
+// see what the enrollements are in a course (used to prevent orphaning a course that is active)
 $(document).on('click', '.getEnrollements', function (e) {
   //var uniqname = $.trim($('#uniqname').val());
   e.preventDefault();
@@ -310,7 +310,7 @@ $(document).on('click', '.getEnrollements', function (e) {
         $('#courseGetEnrollmentsInner').text('No humans detected!');
       }
       else {
-        $('#courseGetEnrollmentsInner').append('<p>Humans detected: '  + data.length + '</p><ul class="container-fluid"></ul></div>'); 
+        $('#courseGetEnrollmentsInner').append('<p>Humans detected: '  + data.length + '</p><ul class="container-fluid"></ul></div>');
           $('#courseGetEnrollmentsInner .container-fluid').append('<li class="row"><small><strong><div class="col-md-4 col-lg-4">Name (and uniqname)</div><div class="col-md-4 col-lg-4">Role / section</div><div class="col-md-4 col-lg-4">Last activity</div></strong></small></li>');
         $.each( data, function() {
           $('#courseGetEnrollmentsInner .container-fluid').append('<li class="row"><small><div class="col-md-4 col-lg-4">'  + this.user.name +  ' (' + this.user.login_id + ')</div><div class="col-md-4 col-lg-4">' + this.type + ' /' + this.course_section_id + '</div><div class="col-md-4 col-lg-4">'+ calculateLastActivity(this.last_activity_at) + '</div></small></li>');
@@ -318,7 +318,7 @@ $(document).on('click', '.getEnrollements', function (e) {
       }
   })
   .fail(function(jqXHR) {
-    $('#courseGetEnrollmentsInner').text('There was an error getting enrollements' + ' (' + jqXHR.status + ' ' + jqXHR.statusText + ')'); 
+    $('#courseGetEnrollmentsInner').text('There was an error getting enrollements' + ' (' + jqXHR.status + ' ' + jqXHR.statusText + ')');
   });
   return null;
 });
@@ -333,7 +333,7 @@ $(document).on('click', '.renameCourse', function (e) {
   return null;
 });
 
-// user has filled in the formish things above and "submits"  them - creating a POST that does the rename of the course name and 
+// user has filled in the formish things above and "submits"  them - creating a POST that does the rename of the course name and
 // the course code
 $(document).on('click', '.postCourseNameChange', function (e) {
   e.preventDefault();
@@ -392,9 +392,9 @@ $(document).on('click', '#uniqnameOtherTrigger', function (e) {
               $.each(this.sections, function() {
                   render = render + '<li class="section row otherSection" data-sectionid="' + this.id + '">' +
                     '<div class="col-md-5 sectionName"><input type="checkbox" class="otherSectionSelection courseOtherPanelChild" id="otherSectionSelection' + course_code + this.id + '">' +
-                    ' <label for="otherSectionSelection' +  course_code + this.id + '" class="courseOtherPanelChild">' + this.name + '</label>' + 
-                    '<span class="coursePanelChild">' + this.name +'</span></div><div class="col-md-7">'+ 
-                    '<span class="coursePanelChild"> Originally from ' + course_code + ' (' + uniqnameOther +')</span>' + 
+                    ' <label for="otherSectionSelection' +  course_code + this.id + '" class="courseOtherPanelChild">' + this.name + '</label>' +
+                    '<span class="coursePanelChild">' + this.name +'</span></div><div class="col-md-7">'+
+                    '<span class="coursePanelChild"> Originally from ' + course_code + ' (' + uniqnameOther +')</span>' +
                     ' <a href="" class="coursePanelChild removeSection">Remove?</a></div></li>';
               });
               render = render + '</ul></li>';
@@ -464,7 +464,7 @@ $(document).on('click', '#courseStringTrigger', function (e) {
   e.preventDefault();
   var courseString = $.trim($('#courseString').val());
   var termId = $.trim($('.canvasTermIdforjQuery').first().text());
-  
+
   //REGEXINFO: canvas.api.search.courses.regex
   var mini='/manager/api/v1/accounts/1/courses?search_term=' + courseString + '&per_page=200';
   var url = '/canvasCourseManager'+mini;
@@ -485,8 +485,8 @@ $(document).on('click', '#courseStringTrigger', function (e) {
           $.each(filteredData, function() {
             render = render + '<li class="clearfix course" data-course-id="' + this.id + '">' +
             '<div class="pull-left"><strong>' + this.course_code + '</strong></div>' +
-            '<div class="btn-group pull-right">' + 
-            '<button type="button" class="getSectionsNoInstructor btn btn-default btn-xs" data-id="' + this.id + '">Get Sections</button>' + 
+            '<div class="btn-group pull-right">' +
+            '<button type="button" class="getSectionsNoInstructor btn btn-default btn-xs" data-id="' + this.id + '">Get Sections</button>' +
             '<button title="Get Enrollments" data-target="#courseGetEnrollmentsModal" data-toggle="modal" data-courseid="' + this.id + '" class="btn btn-default btn-xs instructorsOnly getEnrollements"><span class="sr-only">Get Enrollments</span>' +
             '<i class="glyphicon glyphicon-user"></i></button></div><div class="clearfix"></div></li>'
           });
@@ -496,13 +496,13 @@ $(document).on('click', '#courseStringTrigger', function (e) {
           $('#useNoInstructorSections').hide();
         }
       }
-      
+
     }).fail(function() {
       alert('Could not get courses for ' + courseString);
   });
 });
 
-$(document).on('click', '.getSectionsNoInstructor', function (e) { 
+$(document).on('click', '.getSectionsNoInstructor', function (e) {
   e.preventDefault();
   var thisCourseId = $(this).attr('data-id');
   var thisCourseTitle =$(this).closest('li').find('strong').text();
@@ -517,9 +517,9 @@ $(document).on('click', '.getSectionsNoInstructor', function (e) {
         $.each(data, function() {
             render = render + '<li class="section row otherSection" data-sectionid="' + this.id + '">' +
               '<div class="col-md-5 sectionName"><input type="checkbox" class="otherSectionSelection courseOtherPanelChild" id="otherSectionSelection' + this.id + '">' +
-              ' <label for="otherSectionSelection' + this.id + '" class="courseOtherPanelChild">' + this.name + '</label>' + 
-              '<span class="coursePanelChild">' + this.name +'</span></div><div class="col-md-7">'+ 
-              '<span class="coursePanelChild"> Originally from ' + thisCourseTitle + '</span>' + 
+              ' <label for="otherSectionSelection' + this.id + '" class="courseOtherPanelChild">' + this.name + '</label>' +
+              '<span class="coursePanelChild">' + this.name +'</span></div><div class="col-md-7">'+
+              '<span class="coursePanelChild"> Originally from ' + thisCourseTitle + '</span>' +
               ' <a href="" class="coursePanelChild removeSection">Remove?</a></div></li>';
         });
         render = render + '</ul>';
@@ -527,9 +527,9 @@ $(document).on('click', '.getSectionsNoInstructor', function (e) {
 
       } else {
         alert('Sorry, something happened getting the sections of this course.');
-      }  
-  });      
-});  
+      }
+  });
+});
 $(document).on('click', '#useNoInstructorSections', function () {
   $('#noInstructorModal').find('.otherSectionSelection:checked').closest('li').appendTo('.otherSectionsTarget ul.sectionList');
   $('.otherSectionsTarget').find('.setSections').show();
@@ -538,7 +538,7 @@ $(document).on('click', '#useNoInstructorSections', function () {
 
 
 // user selects to open modal to pick sections from courses with NO instructor
-$(document).on('click', '.openNoInstructorModal', function (e) { 
+$(document).on('click', '.openNoInstructorModal', function (e) {
   $('#useNoInstructorSections').show();
   $('#noInstructorInnerPayload').empty();
   $('#courseString').val('');

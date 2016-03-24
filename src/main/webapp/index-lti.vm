@@ -10,7 +10,7 @@
       <link rel="stylesheet" href="vendor/animate/animate.css">
       <title>U-M Course Manager</title>
       #set($ltiList = ${ltiValues})
-      #set($ltiEntry="")  
+      #set($ltiEntry="")
       <script>
         var ltiLaunch = {
           "custom_canvas_course_id": "$ltiValues.get("custom_canvas_course_id")",
@@ -43,7 +43,7 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-right">
                     <li>
-                        <a href="#" class="collapse-nav" id="helpLink">Help</a>
+                        <a href="#" class="collapse-nav" id="helpLink" data-url="help-lti.html">Help</a>
                     </li>
                 </ul>
             </div>
@@ -68,7 +68,7 @@
     </script>
     <script src="assets-lti/js/app/app.js">
     </script>
-    
+
     <script src="assets-lti/js/controllers/controllers.js">
     </script>
     <script src="assets-lti/js/factories/factories.js">
