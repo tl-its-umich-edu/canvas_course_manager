@@ -724,11 +724,11 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			if(canAddTeacher){
 				//Here the user will be given a teacher enrollment status even if the user is a designer with a designer role
 				//as the only time this is consulted is when adding friend accounts
-				enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString(TEACHER_ENROLLMENT));
+				enrollmentsFound.put(childJSONObject.getInt("course_id"), TEACHER_ENROLLMENT);
 				break;
 			}
 			else{
-				enrollmentsFound.put(childJSONObject.getInt("course_id"), childJSONObject.getString(TA_ENROLLMENT));
+				enrollmentsFound.put(childJSONObject.getInt("course_id"), TA_ENROLLMENT);
 			}
 
 		}
