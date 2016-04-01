@@ -183,8 +183,9 @@ var doXListPosts = function(posts){
 
 //open help doc in new window
 $('#helpLink').click(function(){
-	utilPopWindow('help.html', 'help');
+  utilPopWindow($('#helpLink').attr('data-url'), 'help');
 });
+
 
 //handler for the Update Course button
 $(document).on('click', '.setSections', function (e) {
