@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Help for Canvas Course Manager</title>
+  <script type="text/javascript" src="vendor/jquery/jquery-1.11.0.min.js"></script>
+  <script type="text/javascript">
+  $('document').ready(function() {
+    $buildInfo = $('#buildInfo');
+
+    displayContentOrError = function(response, status, xhr) {
+      if (status == 'error') {
+        var errorMessage = 'Unable to display due to error. (' + xhr.status + ' ' + xhr.statusText + ')';
+        $buildInfo.html(errorMessage);
+      }
+      $buildInfo.show();
+    }
+    $buildInfo.load('build.txt', displayContentOrError);
+  });
+  </script>
+</head>
+
+<body class="container-fluid" style="padding-top:20px;">
+  <p>
+    There are two different versions of the Canvas Course Manager:
+  </p>
+  <ol>
+    <li>This version, which is used by Service Center staff only (to use it you must be a member of its-canvas-sections@umich.edu -- <a href="https://mcommunity.umich.edu/#group/members:its-canvas-sections"> contact an owner to be added)</a>.</li>
+    <li>A separate version for instructors.  To access:  In Canvas, all courses have a U-M Course Manager tab in the left hand navigation visible to instructors and admins only .  Only instructors and admins can see this tab (not students).</li>
+  </ol>
+<p>
+    Note that you should not have the U-M Course Manager open in a Canvas course while using the Service Center version -- you can get unexpected errors.  If you have had the U-M Course Manager open in a course and you get "Access Denied" upon opening the Service Center version reloading the page will clear the error.
+</p>
+<p>
+  Both versions allow users to:
+</p>
+  <ol>
+    <li>Combine sections, rename courses after sections are altered (Service Center only), and uncrosslist sections (included below)</li>
+    <li>Add friend accounts to courses</li>
+  </ol>
+
+
+
+  <p>
+    Now that faculty can add friends/combine sections themselves why might they ask the Service Center to continue to do so?
+  </p>
+  <ol>
+    <li>Instructor preference.</li>
+    <li>The instructor might not be the instructor of record for all the sections s/he wants to combine.  The instructor version ONLY allows instructors to combine sections if their department has assigned the class to them in M-Pathways.  The Service Center version is more flexible.</li>
+  </ol>
+  <p>
+<a href="http://its.umich.edu/projects/canvas/?q=instructor-guide" target="_blank">More information on the instructor version of CCM.</a>
+  </p>
+
+<p>
+  For additional information on the SC version, including step-by-step instructions, search for CCM in the KBs.
+</p>
+
+  <div class="well">
+    <footer>
+      <div id="versionDiv">Build Version:<span id="buildInfo"></span></div>
+    </footer>
+  </div>
+</body>
+
+</html>

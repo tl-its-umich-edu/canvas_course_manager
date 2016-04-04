@@ -29,7 +29,7 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-right">
                     <li>
-                        <a href="#" class="collapse-nav" id="helpLink">Help</a>
+                        <a href="#" class="collapse-nav" id="helpLink" data-url="help-sc.html">Help</a>
                     </li>
                 </ul>
             </div>
@@ -56,7 +56,7 @@
     </script>
     <script src="assets-sc/js/app/app.js">
     </script>
-    
+
     <script src="assets-sc/js/controllers/controllers.js">
     </script>
     <script src="assets-sc/js/factories/factories.js">
