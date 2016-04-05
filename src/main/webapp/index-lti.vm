@@ -16,6 +16,7 @@
           "custom_canvas_course_id": "$ltiValues.get("custom_canvas_course_id")",
           "custom_canvas_enrollment_state": "$ltiValues.get("custom_canvas_enrollment_state")",
           "custom_canvas_user_login_id": "$ltiValues.get("custom_canvas_user_login_id")",
+          "custom_canvas_user_id": "$ltiValues.get("custom_canvas_user_id")",
           "lis_person_contact_email_primary": "$ltiValues.get("lis_person_contact_email_primary")",
           "lis_person_name_family": "$ltiValues.get("lis_person_name_family")",
           "lis_person_name_given": "$ltiValues.get("lis_person_name_given")"
@@ -50,8 +51,8 @@
             <!-- /.navbar-collapse -->
         </div>
     </nav>
-    <div ng-include src="'assets-lti/views/course.html'" style="margin-top:60px"></div>
 
+    <div ng-include src="'assets-lti/views/course.html'" style="margin-top:60px"></div>
     <script src="vendor/jquery/jquery-1.11.0.min.js"></script>
     <script src="vendor/jquery/jquery-ui-1.11.2/jquery-ui.min.js"></script>
     <script src="assets-lti/vendor/angular/angular.min.js">
