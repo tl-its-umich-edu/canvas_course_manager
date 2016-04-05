@@ -274,7 +274,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		session.setAttribute(TC_SESSION_DATA,tc);
 		M_log.debug("TC Session Data: " + tc.getUserId());
 
-		// sanity check the result		
+		// sanity check the result
 		if (tc.getUserId() == null || tc.getUserId().length() == 0) {
 			String msg = "Canvas Course Manager: tc session data is bad - userId is empty.";
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
