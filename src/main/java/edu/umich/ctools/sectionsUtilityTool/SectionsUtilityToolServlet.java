@@ -101,6 +101,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String LIS_PERSON_CONTACT_EMAIL_PRIMARY = "lis_person_contact_email_primary";
 	private static final String LIS_PERSON_NAME_FAMILY = "lis_person_name_family";
 	private static final String LIS_PERSON_NAME_GIVEN = "lis_person_name_given";
+	private static final String CUSTOM_CANVAS_USER_ID = "custom_canvas_user_id";
 
 	private static final String TC_SESSION_DATA = "tcSessionData";
 	private static final String M_PATH_DATA = "mPathData";
@@ -260,6 +261,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		customValuesMap.put(LIS_PERSON_CONTACT_EMAIL_PRIMARY, request.getParameter(LIS_PERSON_CONTACT_EMAIL_PRIMARY));
 		customValuesMap.put(LIS_PERSON_NAME_FAMILY, request.getParameter(LIS_PERSON_NAME_FAMILY));
 		customValuesMap.put(LIS_PERSON_NAME_GIVEN, request.getParameter(LIS_PERSON_NAME_GIVEN));
+		customValuesMap.put(CUSTOM_CANVAS_USER_ID, request.getParameter(CUSTOM_CANVAS_USER_ID));
 
 		TcSessionData tc = (TcSessionData) session.getAttribute(TC_SESSION_DATA);
 
@@ -326,6 +328,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		ltiValues.put(LIS_PERSON_CONTACT_EMAIL_PRIMARY, request.getParameter(LIS_PERSON_CONTACT_EMAIL_PRIMARY));
 		ltiValues.put(LIS_PERSON_NAME_FAMILY, request.getParameter(LIS_PERSON_NAME_FAMILY));
 		ltiValues.put(LIS_PERSON_NAME_GIVEN, request.getParameter(LIS_PERSON_NAME_GIVEN));
+		ltiValues.put(CUSTOM_CANVAS_USER_ID, request.getParameter(CUSTOM_CANVAS_USER_ID));
 
 		M_log.info("Course ID: " + ltiValues.get(CUSTOM_CANVAS_COURSE_ID));
 		M_log.info("Enrollment State: " + ltiValues.get(CUSTOM_CANVAS_ENROLLMENT_STATE));
@@ -333,6 +336,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.info("Primary Email: " + ltiValues.get(LIS_PERSON_CONTACT_EMAIL_PRIMARY));
 		M_log.info("Last Name: " + ltiValues.get(LIS_PERSON_NAME_FAMILY));
 		M_log.info("First Name: " + ltiValues.get(LIS_PERSON_NAME_GIVEN));
+		M_log.info("Custom Canvas User ID: " + ltiValues.get(CUSTOM_CANVAS_USER_ID));
 	}
 
 	private Boolean checkForValidMessage(HttpServletRequest request,
