@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -92,8 +93,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String CANVAS_API_ADD_USER = "canvas.api.add.user.regex";
 	private static final String CANVAS_API_GET_COURSE = "canvas.api.get.single.course.regex";
 	private static final String CANVAS_API_GET_COURSE_ENROLL = "canvas.api.get.single.course.enrollment.regex";
-
 	private static final String MPATHWAYS_API_GNERIC = "mpathways.api.get.generic";
+	private static final String ROLE_CAN_ADD_TEACHER = "role.can.add.teacher";
 
 	private static final String CUSTOM_CANVAS_COURSE_ID = "custom_canvas_course_id";
 	private static final String CUSTOM_CANVAS_ENROLLMENT_STATE = "custom_canvas_enrollment_state";
@@ -116,7 +117,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";
 
 	private static final String LAUNCH_TYPE = "launchType";
-	
+
 	private static final String DESIGNER_ENROLLMENT = "DesignerEnrollment";
 	private static final String TEACHER_ENROLLMENT = "TeacherEnrollment";
 	private static final String TA_ENROLLMENT = "TAEnrollment";
@@ -137,7 +138,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private OauthCredentialsFactory oacf;
 
 	protected static Properties appExtSecurePropertiesFile=null;
-	protected static Properties appExtPropertiesFile=null;	
+	protected static Properties appExtPropertiesFile=null;
+
+	private static List<String> rolesThatCanAddTeacherList = null;
 
 	private static final HashMap<String, Integer> enrollmentsMap = new HashMap<String, Integer>(){
 		private static final long serialVersionUID = -1389517682290891890L;
@@ -500,7 +503,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		if(M_log.isDebugEnabled()){
 			displayRequestHeaders(request);
 		}
-		
+
 		PrintWriter out = response.getWriter();
 		if( isStubTesting ){
 			Utils.openFile(request, response, out);
@@ -647,19 +650,19 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		BufferedReader rd = new BufferedReader(new InputStreamReader(canvasResponse.getEntity().getContent()));
 
 		String linkValue = null;
-		
+
 		Header[] headers = canvasResponse.getAllHeaders();
 		for (Header header : headers) {
 			M_log.debug("Key : " + header.getName() 
-			      + " ,Value : " + header.getValue());
+					+ " ,Value : " + header.getValue());
 			if(header.getName().equals("Link")){
 				linkValue = header.getValue();
 				break;
 			}
 		}
-		
+
 		M_log.debug("LINK VALUE: " + linkValue);
-		
+
 		if(linkValue != null){
 			response.addHeader("Link", linkValue);
 		}
@@ -695,6 +698,10 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	private void addEnrollmentsToSession(HttpServletRequest request,
 			StringBuilder sb) {
+		if(rolesThatCanAddTeacherList == null){
+			rolesThatCanAddTeacherList = generateAuthorizedRolesList();
+		}
+
 		M_log.debug("ENROLLMENTS: " + sb.toString());
 		HashMap<Integer, String> enrollmentsFound =  new HashMap<Integer, String>();
 		JSONArray enrollmentsArray = new JSONArray(sb.toString());
@@ -705,22 +712,22 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		//This is because Teachers and Designers can add friends at teacher level, but Librarians (a type of Designer) can only add students
 		for(int i = 0; i < enrollmentsArray.length(); i++){
 			JSONObject childJSONObject = enrollmentsArray.getJSONObject(i);
-			M_log.debug("ENROLLMENT RECORD: " + childJSONObject.get("course_id") + " " + childJSONObject.get("course_section_id") + " " + childJSONObject.get("type"));
+			M_log.debug("ENROLLMENT RECORD: " + childJSONObject.get("course_id") + " " + childJSONObject.get("course_section_id") + " " + childJSONObject.get("type") + " " + childJSONObject.get("role"));
 
-			String newType = childJSONObject.getString("type");
+			JSONObject enrollmentRecord = new JSONObject();
+			enrollmentRecord.put("role", childJSONObject.get("role"));
+
+			M_log.debug("ENROLLMENT RECORD TO COMPARE: " + enrollmentRecord);
+
 			String newRole = childJSONObject.getString("role");
 
-			M_log.debug("NEW TYPE: " + newType);
-			M_log.debug("NEW ROLE: " + newRole);
-
 			boolean canAddTeacher = false;
-			
-			if(newType.equals(DESIGNER_ENROLLMENT) && newRole.equals(DESIGNER_ENROLLMENT)){
+
+			if(rolesThatCanAddTeacherList.contains(newRole)){
+				M_log.debug("USER ROLE FOUND IN AUTHORIZED ROLES LIST");
 				canAddTeacher = true;
 			}
-			if(newType.equals(TEACHER_ENROLLMENT)){
-				canAddTeacher = true;
-			}
+
 			if(canAddTeacher){
 				//Here the user will be given a teacher enrollment status even if the user is a designer with a designer role
 				//as the only time this is consulted is when adding friend accounts
@@ -736,7 +743,24 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug("SESSION ENROLLMENTS: " + request.getSession().getAttribute("enrollments"));
 	}
 
+	private List<String> generateAuthorizedRolesList() {
+		String roleCanAddTeacherString = appExtPropertiesFile.getProperty(ROLE_CAN_ADD_TEACHER);
 
+		M_log.debug("ROLE CAN ADD TEACHER STRING: " + roleCanAddTeacherString);
+
+		//convert string to json object
+		JSONObject roleCanAddTeacherJson = new JSONObject(roleCanAddTeacherString);
+		M_log.debug("ROLE CAN ADD TEACHER JSON OBJECT: " + roleCanAddTeacherJson);
+
+		JSONArray roleCanAddTeacherJsonArray = roleCanAddTeacherJson.getJSONArray("roles");
+
+		//implement lists to make compare easier
+		List<String> rolesThatCanAddTeacherList = new ArrayList<String>();
+		for(int i = 0; i < roleCanAddTeacherJsonArray.length(); i++){
+			rolesThatCanAddTeacherList.add(roleCanAddTeacherJsonArray.getJSONObject(i).getString("role"));
+		}
+		return rolesThatCanAddTeacherList;
+	}
 
 	//Canvas adds custom parameters for lti launches. These custom paramerers 
 	//include user_login and course_id. We use these parameters to unmask the
@@ -881,7 +905,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			M_log.error("Canvas API call did not complete successfully", e);
 			return false;
 		}
-		
+
 
 		String line = "";
 		StringBuilder sb = new StringBuilder();
