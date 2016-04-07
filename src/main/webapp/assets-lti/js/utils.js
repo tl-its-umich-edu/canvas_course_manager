@@ -81,7 +81,7 @@ var filterByRole = function(courseData){
 
 var teacherPrivileges = function(enrollmentData){
   var isTeacher =  _.findWhere(enrollmentData, {type: 'TeacherEnrollment'});
-  var isDesigner = _.findWhere(enrollmentData, {type: 'DesignerEnrollment', role:'Designer'});
+  var isDesigner = _.findWhere(enrollmentData, {type: 'DesignerEnrollment', role:'DesignerEnrollment'});
   if(isTeacher || isDesigner){
     return 'TeacherEnrollment';
   }
