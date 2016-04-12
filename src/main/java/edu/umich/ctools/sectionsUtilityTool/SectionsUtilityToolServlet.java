@@ -655,20 +655,10 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		String linkValue = null;
 
-		Header[] headers = canvasResponse.getAllHeaders();
-		for (Header header : headers) {
-			M_log.debug("Key : " + header.getName() 
-					+ " ,Value : " + header.getValue());
-			if(header.getName().equals("Link")){
-				linkValue = header.getValue();
-				break;
-			}
-		}
-
-		M_log.debug("LINK VALUE: " + linkValue);
+		linkValue = extractNextLink(canvasResponse, linkValue);
 
 		if(linkValue != null){
-			response.addHeader("Link", linkValue);
+			response.addHeader("Next", linkValue);
 		}
 
 		String line = "";
@@ -683,6 +673,47 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		out.print(sb.toString());
 		out.flush();
+	}
+
+	private String extractNextLink(HttpResponse canvasResponse, String linkValueString) {
+		String linkValueNext = null;
+		String searchPhrase = "rel=\"next\"";
+		M_log.debug("SEARCH PHRASE: " + searchPhrase);
+		HashMap<String, String> links = new HashMap<String, String>();
+		Header[] headers = canvasResponse.getAllHeaders();
+		for (Header header : headers) {
+			M_log.debug("Key : " + header.getName() 
+					+ " ,Value : " + header.getValue());
+			if(header.getName().equals("Link")){
+				linkValueString = header.getValue();
+				String[] strings = linkValueString.split(",");
+				for(String string : strings){
+					M_log.debug("String: " + string);
+					String[] pairs = string.split(";");
+					pairs[0] = pairs[0].replace("<","");
+					pairs[0] = pairs[0].replace(">","");
+					links.put(pairs[1].trim(), pairs[0]);
+				}
+				break;
+			}
+		}
+		
+		if(links.containsKey(searchPhrase)){
+			M_log.debug("LINKS CONTAINS NEXT: " + links.get(searchPhrase));
+			linkValueNext =  links.get(searchPhrase);
+			linkValueNext = linkValueNext.substring(linkValueNext.indexOf("/api"), linkValueNext.length());
+			M_log.debug("NEW VALUE: " + linkValueNext);
+			linkValueNext = "/canvasCourseManager/manager" + linkValueNext;
+			M_log.debug("NEW VALUE: " + linkValueNext);
+			if(linkValueNext.contains("as_user_id")){
+				linkValueNext = linkValueNext.replaceAll("as_user_id=sis_login_id.*?&", "user=self&");
+				M_log.debug("NEW VALUE: " + linkValueNext);
+			}
+		}
+
+		M_log.debug("LINKS; " + links);
+		M_log.debug("NEXT LINK VALUE: " + linkValueNext);
+		return linkValueNext;
 	}
 
 	private void logApiCall(String uniqname, String originalUrl, HttpServletRequest request) {
