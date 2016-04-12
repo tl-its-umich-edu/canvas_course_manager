@@ -89,7 +89,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
               //in the Teacher role list
               _.each(result.data, function(tacourse){
                 if( !_.findWhere(resultTeacher, {id: tacourse.id}) ) {
-                  resultTeacher.push.tacourse;
+                  resultTeacher.push(tacourse);
                 }
               });
               $scope.courses = resultTeacher;
