@@ -655,7 +655,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		String linkValue = null;
 
-		linkValue = extractNextLink(canvasResponse, linkValue);
+		linkValue = extractNextLink(canvasResponse);
 
 		if(linkValue != null){
 			response.addHeader("Next", linkValue);
@@ -675,7 +675,12 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		out.flush();
 	}
 
-	private String extractNextLink(HttpResponse canvasResponse, String linkValueString) {
+	//When there is too much data to retrieve at once data will be paged.
+	//When data is paged Link Headers will be send in http response. We are
+	//only concerned with the Next Link Header. This method will extract header 
+	//if one exists.
+	private String extractNextLink(HttpResponse canvasResponse) {
+		String linkValueString = null;
 		String linkValueNext = null;
 		String searchPhrase = "rel=\"next\"";
 		M_log.debug("SEARCH PHRASE: " + searchPhrase);
@@ -686,13 +691,13 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 					+ " ,Value : " + header.getValue());
 			if(header.getName().equals("Link")){
 				linkValueString = header.getValue();
-				String[] strings = linkValueString.split(",");
-				for(String string : strings){
-					M_log.debug("String: " + string);
-					String[] pairs = string.split(";");
-					pairs[0] = pairs[0].replace("<","");
-					pairs[0] = pairs[0].replace(">","");
-					links.put(pairs[1].trim(), pairs[0]);
+				String[] headerPairs = linkValueString.split(",");
+				for(String headerPair : headerPairs){
+					M_log.debug("String: " + headerPair);
+					String[] splitPairs = headerPair.split(";");
+					splitPairs[0] = splitPairs[0].replace("<","");
+					splitPairs[0] = splitPairs[0].replace(">","");
+					links.put(splitPairs[1].trim(), splitPairs[0]);
 				}
 				break;
 			}
