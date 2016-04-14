@@ -671,20 +671,10 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		String linkValue = null;
 
-		Header[] headers = canvasResponse.getAllHeaders();
-		for (Header header : headers) {
-			M_log.debug("Key : " + header.getName() 
-					+ " ,Value : " + header.getValue());
-			if(header.getName().equals("Link")){
-				linkValue = header.getValue();
-				break;
-			}
-		}
-
-		M_log.debug("LINK VALUE: " + linkValue);
+		linkValue = extractNextLink(canvasResponse);
 
 		if(linkValue != null){
-			response.addHeader("Link", linkValue);
+			response.addHeader("Next", linkValue);
 		}
 
 		String line = "";
@@ -699,6 +689,47 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		out.print(sb.toString());
 		out.flush();
+	}
+
+	//When there is too much data to retrieve at once data will be paged.
+	//When data is paged Link Headers will be send in http response. We are
+	//only concerned with the Next Link Header. This method will extract header 
+	//if one exists.
+	private String extractNextLink(HttpResponse canvasResponse) {		
+		String linkValueString = null;
+		String linkValueNext = null;
+		String searchPhrase = "rel=\"next\"";
+		M_log.debug("SEARCH PHRASE: " + searchPhrase);
+		HashMap<String, String> links = new HashMap<String, String>();
+		Header[] headers = canvasResponse.getHeaders("Link");
+		for (Header header : headers) {
+			M_log.debug("Key : " + header.getName() 
+					+ " ,Value : " + header.getValue());
+			if(header.getName().equals("Link")){
+				linkValueString = header.getValue();
+				String[] headerPairs = linkValueString.split(",");
+				for(String headerPair : headerPairs){
+					M_log.debug("String: " + headerPair);
+					String[] splitPairs = headerPair.split(";");
+					splitPairs[0] = splitPairs[0].replace("<","");
+					splitPairs[0] = splitPairs[0].replace(">","");
+					links.put(splitPairs[1].trim(), splitPairs[0]);
+				}
+				break;
+			}
+		}
+		
+		if(links.containsKey(searchPhrase)){
+			M_log.debug("LINKS CONTAINS NEXT: " + links.get(searchPhrase));
+			linkValueNext = "/canvasCourseManager/manager" + links.get(searchPhrase).substring(links.get(searchPhrase).indexOf("/api"), links.get(searchPhrase).length());
+			if(linkValueNext.contains("as_user_id")){
+				linkValueNext = linkValueNext.replaceAll("as_user_id=sis_login_id.*?&", "user=self&");
+			}
+		}
+
+		M_log.debug("LINKS; " + links);
+		M_log.debug("NEXT LINK VALUE: " + linkValueNext);
+		return linkValueNext;
 	}
 
 	private void logApiCall(String uniqname, String originalUrl, HttpServletRequest request) {
