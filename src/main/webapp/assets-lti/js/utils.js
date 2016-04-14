@@ -79,13 +79,21 @@ var filterByRole = function(courseData){
   return courseData;
 }
 
-var teacherPrivileges = function(enrollmentData){
-  var isTeacher =  _.findWhere(enrollmentData, {type: 'TeacherEnrollment'});
-  var isDesigner = _.findWhere(enrollmentData, {type: 'DesignerEnrollment', role:'DesignerEnrollment'});
-  if(isTeacher || isDesigner){
+var teacherPrivileges = function(enrollmentData, settings){
+  var isTeacherRole =[];
+  //for each role setting, if the role matches the role
+  //value in the enrollment, add that role to the array declared above
+  _.each(settings.roles, function(role) {
+    var role= role.role;
+     if (_.findWhere(enrollmentData, {role: role})) {
+       isTeacherRole.push(role);
+    }
+  });
+  // if the array has any elements, we have a TeacherEnrollment
+  // otherwise a TA
+  if(isTeacherRole.length) {
     return 'TeacherEnrollment';
-  }
-  else {
+  } else {
     return 'TAEnrollment';
   }
 };

@@ -7,6 +7,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     $scope.contextCourseId = $rootScope.ltiLaunch.custom_canvas_course_id;
     $scope.currentUserCanvasId = $rootScope.ltiLaunch.custom_canvas_user_id;
     $scope.currentUserId = $rootScope.ltiLaunch.custom_canvas_user_login_id;
+    $scope.canAddTeachers = JSON.parse($rootScope.ltiLaunch.role_can_add_teacher);
     if($scope.currentUserId.indexOf('+') > -1){
       $scope.currentUserId = $scope.currentUserId.replace('+','@');
       $scope.userIsFriend=true
@@ -56,12 +57,12 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     var courseEnrollmentUrl ='manager/api/v1/courses/course_id/enrollments?user_id=' + $scope.canvas_user_id + '&_=' + generateCurrentTimestamp();
     
     Course.getCourse(courseEnrollmentUrl).then(function (resultCourseEnrollment) {
-      $rootScope.courseRole = teacherPrivileges(resultCourseEnrollment.data);
+      $rootScope.courseRole = teacherPrivileges(resultCourseEnrollment.data, $scope.canAddTeachers);
     });
 
   $scope.getCoursesForTerm = function() {
     $scope.loadingOtherCourses = true;
-    $rootScope.courseRole
+    //$rootScope.courseRole
     //REGEXINFO: canvas.api.getcourse.by.uniqname.no.sections.mask.regex
     //TODO: Remove per page query
     var coursesUrl='/canvasCourseManager/manager/api/v1/courses?user=self&per_page=50&published=true&with_enrollments=true';
