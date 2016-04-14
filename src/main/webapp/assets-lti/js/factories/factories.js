@@ -4,7 +4,6 @@
 
 canvasSupportApp.factory('Courses', function ($http, $q) {
   var getCourses = function(url) {
-    console.log(url)
     var deferred = $q.defer();
     var getNext = function(url) {
       $http.get(url)
