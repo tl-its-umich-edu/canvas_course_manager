@@ -291,6 +291,18 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			}
 			return;
 		}
+		
+		if(customValuesMap.containsValue(null)){
+			String msg = "Canvas Course Manager: Found launch parameters null.";
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			M_log.error(msg);
+			try {
+				doError(request, response, "Canvas Course Manager LTI: null Launch parameter found.");
+			} catch (IOException e) {
+				M_log.error("fillContext: IOException: ",e);
+			}
+			return;
+		}
 
 		// Verify this is an LTI launch request and some of the required parameters (if not stub testing)
 		if( !isStubTesting ){
