@@ -75,6 +75,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	//Constants
 	private static final String CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS = "canvas.api.getcourse.by.uniqname.no.sections.regex";
 	private static final String CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS_MASK = "canvas.api.getcourse.by.uniqname.no.sections.mask.regex";
+	private static final String CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS_MASK_PAGED = "canvas.api.getcourse.by.uniqname.no.sections.mask.paged.regex";
 	private static final String CANVAS_API_GETALLSECTIONS_PER_COURSE = "canvas.api.getallsections.per.course.regex";
 	private static final String CANVAS_API_GETSECTION_PER_COURSE = "canvas.api.getsection.per.course.regex";
 	private static final String CANVAS_API_GETSECTION_INFO = "canvas.api.getsection.info.regex";
@@ -172,6 +173,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			put(CANVAS_API_GETCOURSE_BY_UNIQNAME_MASK, "for getting courses by masked uniqname");
 			put(CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS, "for getting courses by uniqname not including sections");
 			put(CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS_MASK, "for getting courses by masked uniqname not including sections");
+			put(CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS_MASK_PAGED, "for getting pages of courses by masked uniqname not including sections");
 			put(CANVAS_API_ENROLLMENT, "for enrollment");
 			put(CANVAS_API_GETCOURSE_INFO, "for getting course info");
 			put(CANVAS_API_DECROSSLIST,"for decrosslist");
