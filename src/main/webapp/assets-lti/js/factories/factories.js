@@ -1,25 +1,31 @@
 'use strict';
-/* global canvasSupportApp, errorDisplay, generateCurrentTimestamp  */
 
-//COURSES FACTORY - does the request for the courses controller
-canvasSupportApp.factory('Courses', function ($http) {
-  return {
-    getCourses: function (url) {
-      return $http.get(url, {cache: false}).then(
-        function success(result) {
-          // Report Canvas errors
-          if (result.data.errors) {
-            errorDisplay(url, result.status, result.data.errors);
+/* global canvasSupportApp, errorDisplay, generateCurrentTimestamp */
+
+canvasSupportApp.factory('Courses', function ($http, $q) {
+  var getCourses = function(url) {
+    var deferred = $q.defer();
+    var getNext = function(url) {
+      $http.get(url)
+        .then(function(result) {
+          result.data = result.data.concat(result.data);
+          if (result.headers('Next')) {
+            getNext(result.headers('Next'));
+          } else {
+            deferred.resolve(result);
           }
-          else {
-            return result; 
-          }
-        },
-        function error(result) {
+        }, function(result) {
           errorDisplay(url, result.status, 'Unable to get courses');
-          return result;
-        }
-      );
+            deferred.resolve(result);
+        });
+    };
+    getNext(url);
+    return deferred.promise;
+  };
+
+  return {
+    getCourses: function(url) {
+      return getCourses(url);
     }
   };
 });
