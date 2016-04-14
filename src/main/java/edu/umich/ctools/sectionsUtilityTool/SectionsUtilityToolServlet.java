@@ -679,13 +679,13 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	//When data is paged Link Headers will be send in http response. We are
 	//only concerned with the Next Link Header. This method will extract header 
 	//if one exists.
-	private String extractNextLink(HttpResponse canvasResponse) {
+	private String extractNextLink(HttpResponse canvasResponse) {		
 		String linkValueString = null;
 		String linkValueNext = null;
 		String searchPhrase = "rel=\"next\"";
 		M_log.debug("SEARCH PHRASE: " + searchPhrase);
 		HashMap<String, String> links = new HashMap<String, String>();
-		Header[] headers = canvasResponse.getAllHeaders();
+		Header[] headers = canvasResponse.getHeaders("Link");
 		for (Header header : headers) {
 			M_log.debug("Key : " + header.getName() 
 					+ " ,Value : " + header.getValue());
@@ -705,14 +705,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		
 		if(links.containsKey(searchPhrase)){
 			M_log.debug("LINKS CONTAINS NEXT: " + links.get(searchPhrase));
-			linkValueNext =  links.get(searchPhrase);
-			linkValueNext = linkValueNext.substring(linkValueNext.indexOf("/api"), linkValueNext.length());
-			M_log.debug("NEW VALUE: " + linkValueNext);
-			linkValueNext = "/canvasCourseManager/manager" + linkValueNext;
-			M_log.debug("NEW VALUE: " + linkValueNext);
+			linkValueNext = "/canvasCourseManager/manager" + links.get(searchPhrase).substring(links.get(searchPhrase).indexOf("/api"), links.get(searchPhrase).length());
 			if(linkValueNext.contains("as_user_id")){
 				linkValueNext = linkValueNext.replaceAll("as_user_id=sis_login_id.*?&", "user=self&");
-				M_log.debug("NEW VALUE: " + linkValueNext);
 			}
 		}
 
