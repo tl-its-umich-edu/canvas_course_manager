@@ -103,6 +103,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String LIS_PERSON_NAME_FAMILY = "lis_person_name_family";
 	private static final String LIS_PERSON_NAME_GIVEN = "lis_person_name_given";
 	private static final String CUSTOM_CANVAS_USER_ID = "custom_canvas_user_id";
+	private static final String SESSION_ROLES_FOR_ADDING_TEACHER = "session_roles_for_adding_teacher";
 
 	private static final String TC_SESSION_DATA = "tcSessionData";
 	private static final String M_PATH_DATA = "mPathData";
@@ -265,6 +266,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		customValuesMap.put(LIS_PERSON_NAME_FAMILY, request.getParameter(LIS_PERSON_NAME_FAMILY));
 		customValuesMap.put(LIS_PERSON_NAME_GIVEN, request.getParameter(LIS_PERSON_NAME_GIVEN));
 		customValuesMap.put(CUSTOM_CANVAS_USER_ID, request.getParameter(CUSTOM_CANVAS_USER_ID));
+		customValuesMap.put(SESSION_ROLES_FOR_ADDING_TEACHER, appExtPropertiesFile.getProperty(ROLE_CAN_ADD_TEACHER));
 
 		TcSessionData tc = (TcSessionData) session.getAttribute(TC_SESSION_DATA);
 
@@ -284,6 +286,18 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			M_log.error(msg);
 			try {
 				doError(request, response, "Canvas Course Manager LTI: tc session data is bad: userId is empty.");
+			} catch (IOException e) {
+				M_log.error("fillContext: IOException: ",e);
+			}
+			return;
+		}
+		
+		if(customValuesMap.containsValue(null)){
+			String msg = "Canvas Course Manager: Found launch parameters null.";
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			M_log.error(msg);
+			try {
+				doError(request, response, "Canvas Course Manager LTI: null Launch parameter found.");
 			} catch (IOException e) {
 				M_log.error("fillContext: IOException: ",e);
 			}
@@ -332,6 +346,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		ltiValues.put(LIS_PERSON_NAME_FAMILY, request.getParameter(LIS_PERSON_NAME_FAMILY));
 		ltiValues.put(LIS_PERSON_NAME_GIVEN, request.getParameter(LIS_PERSON_NAME_GIVEN));
 		ltiValues.put(CUSTOM_CANVAS_USER_ID, request.getParameter(CUSTOM_CANVAS_USER_ID));
+		ltiValues.put(SESSION_ROLES_FOR_ADDING_TEACHER, appExtPropertiesFile.getProperty(ROLE_CAN_ADD_TEACHER));
 
 		M_log.info("Course ID: " + ltiValues.get(CUSTOM_CANVAS_COURSE_ID));
 		M_log.info("Enrollment State: " + ltiValues.get(CUSTOM_CANVAS_ENROLLMENT_STATE));
@@ -340,6 +355,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.info("Last Name: " + ltiValues.get(LIS_PERSON_NAME_FAMILY));
 		M_log.info("First Name: " + ltiValues.get(LIS_PERSON_NAME_GIVEN));
 		M_log.info("Custom Canvas User ID: " + ltiValues.get(CUSTOM_CANVAS_USER_ID));
+		M_log.info("Session Roles For Adding Teacher: " + ltiValues.get(SESSION_ROLES_FOR_ADDING_TEACHER));
 	}
 
 	private Boolean checkForValidMessage(HttpServletRequest request,
