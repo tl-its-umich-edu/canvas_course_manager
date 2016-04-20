@@ -58,8 +58,8 @@ public class SectionUtilityToolFilter implements Filter {
 	protected static final String ESB_SECRET = "esb.secret";
 	protected static final String ESB_PREFIX = "esb.prefix";
 	protected static final String PROPERTY_TEST_STUB = "stub.test";
-	private static final String TEST_USER = "testUser";
-	private static final String LAUNCH_TYPE = "launchType";
+	protected static final String TEST_USER = "testUser";
+	protected static final String LAUNCH_TYPE = "launchType";
 
 	private String providerURL = null;
 	private String mcommunityGroup = null;
