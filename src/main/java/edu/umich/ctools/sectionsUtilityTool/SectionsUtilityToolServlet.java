@@ -673,7 +673,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		String linkValue = null;
 
-		linkValue = extractNextLink(canvasResponse);
+		linkValue = extractNextLink(canvasResponse, request.getSession());
 
 		if(linkValue != null){
 			response.addHeader("Next", linkValue);
@@ -697,7 +697,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	//When data is paged Link Headers will be send in http response. We are
 	//only concerned with the Next Link Header. This method will extract header 
 	//if one exists.
-	private String extractNextLink(HttpResponse canvasResponse) {		
+	private String extractNextLink(HttpResponse canvasResponse, HttpSession session) {		
 		String linkValueString = null;
 		String linkValueNext = null;
 		String searchPhrase = "rel=\"next\"";
@@ -724,7 +724,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		if(links.containsKey(searchPhrase)){
 			M_log.debug("LINKS CONTAINS NEXT: " + links.get(searchPhrase));
 			linkValueNext = "/canvasCourseManager/manager" + links.get(searchPhrase).substring(links.get(searchPhrase).indexOf("/api"), links.get(searchPhrase).length());
-			if(linkValueNext.contains("as_user_id")){
+			if(linkValueNext.contains("as_user_id") && session.getAttribute(SectionUtilityToolFilter.LAUNCH_TYPE) == "lti"){
 				linkValueNext = linkValueNext.replaceAll("as_user_id=sis_login_id.*?&", "user=self&");
 			}
 		}
