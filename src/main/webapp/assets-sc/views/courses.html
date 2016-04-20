@@ -40,7 +40,7 @@
             <div class="alert alert-info" ng-show="courses.errors">{{courses.errors}}</div>
             <div class="coursePanel well" ng-show="success && !courses.errors">
                 <ul class="container-fluid courseList">
-                    <li data-course-id="{{item.id}}" ng-repeat="item in filtered = (courses  | filter:{enrollment_term_id:currentTerm.currentTermCanvasId}) | orderBy:'name'" class="course" ng-class="item.sections.length === 1 ? 'course onlyOneSection' :'course'">
+                    <li data-course-id="{{item.id}}" ng-repeat="item in filtered = (courses  | filter:{enrollment_term_id:currentTerm.currentTermCanvasId}) | orderBy:'name' track by $index" class="course" ng-class="item.sections.length === 1 ? 'course onlyOneSection' :'course'">
                         <div class="row">
                             <div class="col-md-8">
                                 <strong><a class="courseLink" href="{{server}}/courses/{{item.id}}" target="_blank">{{item.course_code}}</a></strong> <span class="courseName" title="CV-TERM-ID: {{item.enrollment_term_id}}" ng-show="item.name">{{item.name}}</span>

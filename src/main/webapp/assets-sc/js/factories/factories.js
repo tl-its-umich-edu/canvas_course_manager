@@ -2,20 +2,30 @@
 /* global  canvasSupportApp, errorDisplay, generateCurrentTimestamp  */
 
 //COURSES FACTORY - does the request for the courses controller
-canvasSupportApp.factory('Courses', function ($http) {
-  return {
-    getCourses: function (url) {
-      return $http.get(url, {cache: false}).then(
-        function success(result) {
-          //forward the data - let the controller deal with it
-          return result; 
-        },
-        function error(result) {
+canvasSupportApp.factory('Courses', function ($http, $q) {
+  var getCourses = function(url) {
+    var deferred = $q.defer();
+    var getNext = function(url) {
+      $http.get(url)
+        .then(function(result) {
+          result.data = result.data.concat(result.data);
+          if (result.headers('Next')) {
+            getNext(result.headers('Next'));
+          } else {
+            deferred.resolve(result);
+          }
+        }, function(result) {
           errorDisplay(url, result.status, 'Unable to get courses');
-          result.errors.failure = true;    
-          return result;
-        }
-      );
+            deferred.resolve(result);
+        });
+    };
+    getNext(url);
+    return deferred.promise;
+  };
+
+  return {
+    getCourses: function(url) {
+      return getCourses(url);
     }
   };
 });
