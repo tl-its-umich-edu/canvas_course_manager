@@ -43,7 +43,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
     var uniqname = $.trim($('#uniqname').val().toLowerCase());
     $scope.uniqname = uniqname;
     //REGEXINFO: canvas.api.getcourse.by.uniqname.regex
-    var url='/canvasCourseManager/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=200&published=true&with_enrollments=true&enrollment_type=teacher&_='+ generateCurrentTimestamp();
+    var url='/canvasCourseManager/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=100&published=true&with_enrollments=true&enrollment_type=teacher';
     $scope.loadingLookUpCourses = true;
     if (validateUniqname(uniqname)) {
       Courses.getCourses(url).then(function (result) {
@@ -82,7 +82,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
               $rootScope.server = result.data[0].calendar.ics.split('/feed')[0];
             }
             //REGEXINFO: canvas.api.getcourse.by.uniqname.no.sections.regex
-            var url='/canvasCourseManager/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=200&published=true&with_enrollments=true&enrollment_type=ta&_='+ generateCurrentTimestamp();
+            var url='/canvasCourseManager/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=100&published=true&with_enrollments=true&enrollment_type=ta';
             Courses.getCourses(url).then(function (result) {
               //underscore _.uniq did not unique the concat of the two lists
               //so examine each of the TA role courses to see if it is already
