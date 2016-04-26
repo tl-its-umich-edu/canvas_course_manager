@@ -186,6 +186,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
   };
 
   $scope.lookUpCanvasFriendClick = function () {
+    $scope.addSuccess = false;
     $scope.friend = {};
     $scope.loadingLookupFriend = true;
     var friendId = $.trim($('#friendEmailAddress').val());
