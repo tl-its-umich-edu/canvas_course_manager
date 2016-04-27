@@ -93,7 +93,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
                 }
               });
               $scope.courses = _.uniq(resultTeacher);
-              $scope.termArray = getTermArray(result.data);
+              $scope.termArray = getTermArray(resultTeacher);
               $scope.error = false;
               $scope.success = true;
               $scope.instructions = true;
