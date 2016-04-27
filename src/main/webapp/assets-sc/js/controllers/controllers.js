@@ -92,7 +92,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
                   resultTeacher.push(tacourse);
                 }
               });
-              $scope.courses = resultTeacher;
+              $scope.courses = _.uniq(resultTeacher);
               $scope.termArray = getTermArray(result.data);
               $scope.error = false;
               $scope.success = true;
