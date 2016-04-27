@@ -76,6 +76,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
       // filter by enrollment
       // will need to get enrollments and cycle through them, if not teacher or ta, disable section move
       var filteredByRole = filterByRole(filteredByTerm);
+      //remove possible dupes
       $scope.courses = _.uniq(filteredByRole);
 
       $scope.$evalAsync(function() { 
