@@ -8,11 +8,15 @@ canvasSupportApp.factory('Courses', function ($http, $q) {
     var getNext = function(url) {
       $http.get(url)
         .then(function(result) {
-          result.data = result.data.concat(result.data);
-          if (result.headers('Next')) {
-            getNext(result.headers('Next'));
-          } else {
+          if(result.data.errors){
             deferred.resolve(result);
+          } else {
+            result.data = result.data.concat(result.data);
+            if (result.headers('Next')) {
+              getNext(result.headers('Next'));
+            } else {
+              deferred.resolve(result);
+            }
           }
         }, function(result) {
           errorDisplay(url, result.status, 'Unable to get courses');
