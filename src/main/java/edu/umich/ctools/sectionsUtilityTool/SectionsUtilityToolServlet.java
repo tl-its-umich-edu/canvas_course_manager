@@ -157,7 +157,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			//Observer Enrollments.
 			put("ObserverEnrollment", 0);
 			put("StudentEnrollment", 0);
-			put("TaEnrollment", 1);
+			put("TAEnrollment", 1);
 			put("TeacherEnrollment", 2);
 			put("DesignerEnrollment", 2);
 		}
@@ -1007,6 +1007,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		isCallAllowed = compareRanks(enrollmentTypeFromRequest,
 				enrollmentTypeFromSession);
 
+		M_log.debug("IS CALL ALLOWED: " + isCallAllowed);
+		
 		return isCallAllowed;
 	}
 
