@@ -47,11 +47,11 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
     $scope.loadingLookUpCourses = true;
     if (validateUniqname(uniqname)) {
       Courses.getCourses(url).then(function (result) {
-        if (result.data.errors) {
+        if (result.data[0].errors) {
           // the call to CAPI has returned a json with an error node
           if(uniqname) {
             // if the uniqname field had a value, report the problem (bad uniqname)
-            $scope.errorMessage = result.data.errors + ' ' + uniqname;
+            $scope.errorMessage = result.data[0].errors + ' ' + '"' + uniqname + '"';
             $scope.errorLookup = true;
           }
           else {
@@ -78,6 +78,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
             // all is well - add the courses to the scope, extract the terms represented in course data
             // change scope flags and get the root server from the courses feed (!)
             var resultTeacher = result.data;
+            //console.log('total courses where teacher role: ' + resultTeacher.length)
             if(result.data[0]){
               $rootScope.server = result.data[0].calendar.ics.split('/feed')[0];
             }
@@ -92,7 +93,9 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
                   resultTeacher.push(tacourse);
                 }
               });
+              //console.log('total courses where teacher & ta role: ' + resultTeacher.length)
               $scope.courses = _.uniq(resultTeacher);
+              //console.log('total courses where teacher & ta role, dupes removed: ' + $scope.courses.length)
               $scope.termArray = getTermArray(resultTeacher);
               $scope.error = false;
               $scope.success = true;
