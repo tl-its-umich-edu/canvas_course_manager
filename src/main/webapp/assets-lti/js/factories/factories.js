@@ -4,14 +4,16 @@
 
 canvasSupportApp.factory('Courses', function ($http, $q) {
   var getCourses = function(url) {
+    var courses = [];
     var deferred = $q.defer();
     var getNext = function(url) {
       $http.get(url)
         .then(function(result) {
-          result.data = result.data.concat(result.data);
+          courses = courses.concat(result.data);
           if (result.headers('Next')) {
             getNext(result.headers('Next'));
           } else {
+            result.data = courses;
             deferred.resolve(result);
           }
         }, function(result) {
@@ -20,7 +22,9 @@ canvasSupportApp.factory('Courses', function ($http, $q) {
         });
     };
     getNext(url);
+
     return deferred.promise;
+
   };
 
   return {
