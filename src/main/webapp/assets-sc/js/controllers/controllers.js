@@ -47,11 +47,11 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
     $scope.loadingLookUpCourses = true;
     if (validateUniqname(uniqname)) {
       Courses.getCourses(url).then(function (result) {
-        if (result.data.errors) {
+        if (result.data[0].errors) {
           // the call to CAPI has returned a json with an error node
           if(uniqname) {
             // if the uniqname field had a value, report the problem (bad uniqname)
-            $scope.errorMessage = result.data.errors + ' ' + uniqname;
+            $scope.errorMessage = result.data[0].errors + ' ' + '"' + uniqname + '"';
             $scope.errorLookup = true;
           }
           else {

@@ -3,28 +3,30 @@
 
 //COURSES FACTORY - does the request for the courses controller
 canvasSupportApp.factory('Courses', function ($http, $q) {
-  var getCourses = function(url) {
+   var getCourses = function(url) {
+    var courses = [];
     var deferred = $q.defer();
     var getNext = function(url) {
       $http.get(url)
         .then(function(result) {
-          if(result.data.errors){
-            deferred.resolve(result);
+          courses = courses.concat(result.data);
+          if (result.headers('Next')) {
+            getNext(result.headers('Next'));
           } else {
-            result.data = result.data.concat(result.data);
-            if (result.headers('Next')) {
-              getNext(result.headers('Next'));
-            } else {
-              deferred.resolve(result);
-            }
+            result.data = courses;
+            deferred.resolve(result);
           }
         }, function(result) {
           errorDisplay(url, result.status, 'Unable to get courses');
-            deferred.resolve(result);
+          deferred.resolve(result);
         });
     };
     getNext(url);
+
     return deferred.promise;
+
+
+
   };
 
   return {
