@@ -78,7 +78,6 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
             // all is well - add the courses to the scope, extract the terms represented in course data
             // change scope flags and get the root server from the courses feed (!)
             var resultTeacher = result.data;
-            //console.log('total courses where teacher role: ' + resultTeacher.length)
             if(result.data[0]){
               $rootScope.server = result.data[0].calendar.ics.split('/feed')[0];
             }
@@ -93,9 +92,7 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
                   resultTeacher.push(tacourse);
                 }
               });
-              //console.log('total courses where teacher & ta role: ' + resultTeacher.length)
               $scope.courses = _.uniq(resultTeacher);
-              //console.log('total courses where teacher & ta role, dupes removed: ' + $scope.courses.length)
               $scope.termArray = getTermArray(resultTeacher);
               $scope.error = false;
               $scope.success = true;

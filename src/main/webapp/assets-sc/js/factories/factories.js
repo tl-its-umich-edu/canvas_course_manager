@@ -18,7 +18,7 @@ canvasSupportApp.factory('Courses', function ($http, $q) {
           }
         }, function(result) {
           errorDisplay(url, result.status, 'Unable to get courses');
-            deferred.resolve(result);
+          deferred.resolve(result);
         });
     };
     getNext(url);
