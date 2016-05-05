@@ -125,7 +125,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	private static final String DESIGNER_ENROLLMENT = "DesignerEnrollment";
 	private static final String TEACHER_ENROLLMENT = "TeacherEnrollment";
-	private static final String TA_ENROLLMENT = "TAEnrollment";
+	private static final String TA_ENROLLMENT = "TaEnrollment";
 
 	private static final String DELETE = "DELETE";
 	private static final String POST = "POST";
@@ -157,7 +157,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			//Observer Enrollments.
 			put("ObserverEnrollment", 0);
 			put("StudentEnrollment", 0);
-			put("TAEnrollment", 1);
+			put("TaEnrollment", 1);
 			put("TeacherEnrollment", 2);
 			put("DesignerEnrollment", 2);
 		}
@@ -764,7 +764,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		//iterate through new enrollments
 		//if enrollment type == teacherEnrollment or (DesignerEnrollment AND Designer Role) then add it to enrollments found and break
-		//Else enrollment type is TAEnrollment
+		//Else enrollment type is TaEnrollment
 		//This is because Teachers and Designers can add friends at teacher level, but Librarians (a type of Designer) can only add students
 		for(int i = 0; i < enrollmentsArray.length(); i++){
 			JSONObject childJSONObject = enrollmentsArray.getJSONObject(i);
