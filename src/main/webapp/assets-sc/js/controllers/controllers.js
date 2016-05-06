@@ -47,65 +47,56 @@ canvasSupportApp.controller('coursesController', ['Courses', 'Sections', '$rootS
     $scope.loadingLookUpCourses = true;
     if (validateUniqname(uniqname)) {
       Courses.getCourses(url).then(function (result) {
-        if (result.data[0].errors) {
-          // the call to CAPI has returned a json with an error node
-          if(uniqname) {
-            // if the uniqname field had a value, report the problem (bad uniqname)
-            $scope.errorMessage = result.data[0].errors + ' ' + '"' + uniqname + '"';
-            $scope.errorLookup = true;
-          }
-          else {
-            // if the uniqname field had no value ask for it
-            $scope.errorMessage = 'Please supply a uniqname at left.';
-            $scope.instructions = false;
-            $scope.errorLookup = false;
-          }
-          // various error flags in the scope  that do things in the UI
-          $scope.success = false;
-          $scope.error = true;
-          $scope.instructions = false;
-          $scope.loadingLookUpCourses = false;
-        }
-        else {
-          if(result.errors){
-            // catch all error
+        var resultTeacher =[];
+        if (result.data.length)  {
+          if (result.data[0].errors){
+            // the call to CAPI has returned a json with an error node
+            if(uniqname) {
+              // if the uniqname field had a value, report the problem (bad uniqname)
+              $scope.errorMessage = result.data[0].errors + ' ' + '"' + uniqname + '"';
+              $scope.errorLookup = true;
+            }
+            else {
+              // if the uniqname field had no value ask for it
+              $scope.errorMessage = 'Please supply a uniqname at left.';
+              $scope.instructions = false;
+              $scope.errorLookup = false;
+            }
+            // various error flags in the scope  that do things in the UI
             $scope.success = false;
             $scope.error = true;
             $scope.instructions = false;
             $scope.loadingLookUpCourses = false;
-          }
-          else {
-            // all is well - add the courses to the scope, extract the terms represented in course data
-            // change scope flags and get the root server from the courses feed (!)
-            var resultTeacher = result.data;
-            if(result.data[0]){
-              $rootScope.server = result.data[0].calendar.ics.split('/feed')[0];
-            }
-            //REGEXINFO: canvas.api.getcourse.by.uniqname.no.sections.regex
-            var url='/canvasCourseManager/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=100&published=true&with_enrollments=true&enrollment_type=ta';
-            Courses.getCourses(url).then(function (result) {
-              //underscore _.uniq did not unique the concat of the two lists
-              //so examine each of the TA role courses to see if it is already
-              //in the Teacher role list
-              _.each(result.data, function(tacourse){
-                if( !_.findWhere(resultTeacher, {id: tacourse.id}) ) {
-                  resultTeacher.push(tacourse);
-                }
-              });
-              $scope.courses = _.uniq(resultTeacher);
-              $scope.termArray = getTermArray(resultTeacher);
-              $scope.error = false;
-              $scope.success = true;
-              $scope.instructions = true;
-              $scope.errorLookup = false;
-              if(result.data[0]){
-                $rootScope.server = result.data[0].calendar.ics.split('/feed')[0];
-              }
-              $scope.loadingLookUpCourses = false;
-              $rootScope.user.uniqname = uniqname;
-            });
+          } else {
+            // all is well
+            resultTeacher = result.data;
           }
         }
+        //REGEXINFO: canvas.api.getcourse.by.uniqname.no.sections.regex
+        var url='/canvasCourseManager/manager/api/v1/courses?as_user_id=sis_login_id:' +uniqname+ '&per_page=100&published=true&with_enrollments=true&enrollment_type=ta';
+        Courses.getCourses(url).then(function (result) {
+          //underscore _.uniq did not unique the concat of the two lists
+          //so examine each of the TA role courses to see if it is already
+          //in the Teacher role list
+          _.each(result.data, function(tacourse){
+            if( !_.findWhere(resultTeacher, {id: tacourse.id}) ) {
+              resultTeacher.push(tacourse);
+            }
+          });
+          $scope.courses = _.uniq(resultTeacher);
+          //parse the courses to and assign all the possible terms into the menu
+          $scope.termArray = getTermArray(resultTeacher);
+          $scope.error = false;
+          $scope.success = true;
+          $scope.instructions = true;
+          $scope.errorLookup = false;
+          // extract server url to display on banner
+          if($scope.courses.length){
+            $rootScope.server = $scope.courses[0].calendar.ics.split('/feed')[0];
+          }
+          $scope.loadingLookUpCourses = false;
+          $rootScope.user.uniqname = uniqname;
+        });
       });
     }
     else {
