@@ -5,6 +5,25 @@
 The Canvas Course Manager (CCM) is an application that will be able to be used by instructors and the service center alike. The current functionality searches all courses for which a given user has the 'teacher' role within a given semester and allows the combination of sections via drag-and-drop interface for Service Center or point-and-click interface for LTI users. The user can also determine if the course is used before the sections are moved. In addition, the functionality for adding friend accounts is available. Not only can a 'teacher' create friend accounts for non-umich accounts, but it will also be possible to add a created friend account to a course. The service center alone will have the ability to rename a course.
 
 ## Build Directions
+### Dependencies:
+
+<code>git clone https://github.com/tl-its-umich-edu/lti-utils.git</code>
+
+<code>cd lti-utils</code>
+
+<code>$mvn clean install</code>
+
+<code>git clone https://github.com/tl-its-umich-edu/esbUtils.git</code>
+
+<code>cd esbUtils</code>
+
+<code>$mvn clean install</code>
+
+<code>git clone https://github.com/tl-its-umich-edu/canvas_course_manager</code>
+
+<code>cd canvas_course_manager</code>
+
+### Build, deploy run:
 
 1. sectionsTool <code>$mvn clean install</code>
 
