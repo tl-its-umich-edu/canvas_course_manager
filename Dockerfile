@@ -23,7 +23,7 @@ RUN git clone https://github.com/tl-its-umich-edu/lti-utils \
 COPY . /tmp
 
 # Build CCM and place the resulting war in the tomcat dir.
-RUN mvn package \
+RUN mvn clean install \
  && mv ./target/canvasCourseManager.war /usr/local/tomcat/webapps
 
 # Remove unnecessary build dependencies.
