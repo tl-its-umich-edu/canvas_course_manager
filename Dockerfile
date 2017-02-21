@@ -15,7 +15,7 @@ RUN git clone https://github.com/tl-its-umich-edu/esbUtils \
  && mvn clean install
 
 # Build lti-utils, a dependency of the CCM.
-RUN git clone https://github.com/tl-its-umich-edu/lti-utils \
+RUN git clone --branch 1.5 https://github.com/tl-its-umich-edu/lti-utils \
  && cd lti-utils \
  && mvn clean install
 
