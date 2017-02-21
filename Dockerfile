@@ -1,4 +1,4 @@
-FROM tomcat:jre8
+FROM tomcat:7-jre8
 
 MAINTAINER Chris Kretler <ckretler@umich.edu>
 
@@ -48,5 +48,5 @@ EXPOSE 8080
 EXPOSE 8009
 
 # Launch Tomcat
-CMD cp /usr/share/ccm/props/* /usr/local/tomcat/conf/; catalina.sh run
+CMD cp /usr/share/ccm/props/* /usr/local/tomcat/conf/; mkdir -p /usr/local/ctools/app/ctools/tl/home/; cp /usr/share/ccm/props/ctools.pkcs12 /usr/local/ctools/app/ctools/tl/home/; catalina.sh run
 #CMD /bin/bash
