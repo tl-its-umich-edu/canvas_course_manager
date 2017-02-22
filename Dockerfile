@@ -42,6 +42,7 @@ ENV JAVA_OPTS="-server \
 -Dfile.encoding=UTF-8 \
 -DccmPropsPathSecure=ccmPropsPathSecure=$CATALINA_HOME/conf/ccmSecure.properties \
 -DccmPropsPath=ccmPropsPath=$CATALINA_HOME/conf/ccm.properties \
+-Dlog4j.configuration=file:/usr/local/tomcat/conf/log4j.properties \
 "
 
 EXPOSE 8080
