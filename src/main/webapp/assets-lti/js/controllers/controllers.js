@@ -2,7 +2,7 @@
 /* global $, canvasSupportApp, _, generateCurrentTimestamp, angular, validateEmailAddress */
 
 /* SINGLE COURSE CONTROLLER */
-canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', '$scope', '$rootScope', '$filter', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, $scope, $rootScope, $filter) {
+canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', '$scope', '$rootScope', '$filter', '$location', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, $scope, $rootScope, $filter, $location) {
     $scope.userIsFriend=false;
     $scope.contextCourseId = $rootScope.ltiLaunch.custom_canvas_course_id;
     $scope.currentUserCanvasId = $rootScope.ltiLaunch.custom_canvas_user_id;
@@ -30,12 +30,12 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
               $scope.currentTermSISID = $scope.course.sections[0].sis_course_id.substring(0, 4);
             }
             else {
-             $scope.currentTermSISID = $scope.course.sections[0].sis_course_id; 
+             $scope.currentTermSISID = $scope.course.sections[0].sis_course_id;
             }
             if($scope.currentTermSISID) {
             /* adds to the scope a list of sections (by sis_section_id) that the current user can perform actions on */
             var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?user=self&termid=' + $scope.currentTermSISID;
-              Course.getMPathwaysCourses(mPathwaysCoursesUrl, $scope.currentTermSISID).then(function (resultMPathData) {  
+              Course.getMPathwaysCourses(mPathwaysCoursesUrl, $scope.currentTermSISID).then(function (resultMPathData) {
                 if(!resultMPathData.data) {
                   if(Array.isArray(resultMPathData)) {
                     $scope.mpath_courses = resultMPathData;
@@ -49,13 +49,13 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
             else {
               $scope.mpath_courses =[];
             }
-          }  
+          }
         });
       }
     });
     //REGEXINFO: canvas.api.get.single.course.enrollment.regex
     var courseEnrollmentUrl ='manager/api/v1/courses/course_id/enrollments?user_id=' + $scope.canvas_user_id + '&_=' + generateCurrentTimestamp();
-    
+
     Course.getCourse(courseEnrollmentUrl).then(function (resultCourseEnrollment) {
       $rootScope.courseRole = teacherPrivileges(resultCourseEnrollment.data, $scope.canAddTeachers);
     });
@@ -69,8 +69,8 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     Courses.getCourses(coursesUrl).then(function (resultCourses) {
       $scope.loadingOtherCourses = false;
       $scope.course.addingSections = true;
-      // this is not optimal - ideally we should be requesting just this terms' courses, not all of them and then 
-      // filtering them      
+      // this is not optimal - ideally we should be requesting just this terms' courses, not all of them and then
+      // filtering them
       //filter term
       var filteredByTerm = _.where(resultCourses.data, {enrollment_term_id:  $rootScope.termId});
       // filter by enrollment
@@ -79,10 +79,10 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
       //remove possible dupes
       $scope.courses = _.uniq(filteredByRole);
 
-      $scope.$evalAsync(function() { 
+      $scope.$evalAsync(function() {
         focus('otherCourses');
       })
-    });    
+    });
   };
 
   $scope.getSections = function (courseId) {
@@ -93,7 +93,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
       if (resultSections) {
         //append a section object to the course scope
         $scope.courses[coursePos].sections = _.sortBy(filterOutSections(resultSections.data,$scope.mpath_courses), 'name');
-        $scope.$evalAsync(function() { 
+        $scope.$evalAsync(function() {
           focus('sections' + courseId);
         })
 
@@ -144,9 +144,9 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     // hide the "Done" button
     $scope.course.addingSectionsDone = false;
   };
-  
+
   $scope.xListSections = function(courseId){
-    // get the added sections by rejecting all of the original sections 
+    // get the added sections by rejecting all of the original sections
     // and keeping the remainder
     var addedSections = _.reject($scope.course.sections, {course_id : courseId});
     // for each added section call a factory that will do a post
@@ -184,7 +184,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
   $scope.$on('courseSetChanged', function(event, sectionSet) {
       $scope.coursemodal = sectionSet[0];
   });
-  
+
 
   //change handler for section checkboxes - calculates if any checkbox is checked and updates
   // a variable used to enable the 'Add Friend' button
@@ -198,7 +198,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     }
   };
 
-  // handler for 'Add Friend' (the first one), if account exists in Canvas, add to sections, if not 
+  // handler for 'Add Friend' (the first one), if account exists in Canvas, add to sections, if not
   // present a form to create
 
   $scope.lookUpCanvasFriendClick = function () {
@@ -216,7 +216,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
           } else {
             // not an existing user - present interface to add
             $scope.newUser = true;
-            $scope.$evalAsync(function() { 
+            $scope.$evalAsync(function() {
               focus('newUser');
             })
 
@@ -228,14 +228,14 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     else {
       $scope.coursemodal.loadingLookupFriend = false;
       $scope.failedValidation = true;
-      $scope.$evalAsync(function() { 
+      $scope.$evalAsync(function() {
         focus('failedToValidateEmail');
       })
     }
   };
 
   // handler for 'Add Friend' (the second one) - calls Friends endpoint (that does the call to
-  // the external Friend service) - if successful the account is also created in Canvas and 
+  // the external Friend service) - if successful the account is also created in Canvas and
   // the user gets added to the selected sections
 
   $scope.createFriendClick = function () {
@@ -257,7 +257,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
           $scope.friend_account = resultDoFriendAccount.data;
           $scope.newUserFound=true;
           $scope.friendDone=true;
-          
+
           Friend.createCanvasFriend(friendEmailAddress,friendNameFirst, friendNameLast).then(function (resultCreateCanvasFriend) {
             // check for successufull creation of Canvas account
             if (resultCreateCanvasFriend.data.sis_user_id === friendEmailAddress) {
@@ -269,13 +269,13 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
               $scope.addUserToSectionsClick();
             } else {
               // TODO: servlet errors are caught by factory
-              // here we would deal with a 200 that nevertheless was an error, but have been unable to trigger this 
+              // here we would deal with a 200 that nevertheless was an error, but have been unable to trigger this
             }
           });
           $scope.userAvailable = true;
           $scope.done = true;
         } else {
-          // 500 errors are caught and reported by factory, here we 
+          // 500 errors are caught and reported by factory, here we
           // are dealing with incorrect data errors (ie. email address that slipped through validator)
           if(data.data.message !== 'request error') {
             $scope.friend_account = resultCreateCanvasFriend.data;
@@ -287,14 +287,14 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     }
     else {
       $scope.failedValidation = true;
-      $scope.$evalAsync(function() { 
+      $scope.$evalAsync(function() {
         focus('failedToValidateEmailName');
       })
 
     }
   };
 
-  // handler to reset the state in the workflow 
+  // handler to reset the state in the workflow
   // and a allow the user to add another
 
   $scope.addAnother = function() {
@@ -312,10 +312,10 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     for(var e in $scope.coursemodal.sections) {
       $scope.coursemodal.sections[e].selected = false;
     }
-    $scope.coursemodal.sectionSelected = false; 
+    $scope.coursemodal.sectionSelected = false;
   };
 
-  // function used by the event handlers attached to the two 
+  // function used by the event handlers attached to the two
   // 'Add Friend' buttons. It adds the user to the selected sections
 
   $scope.addUserToSectionsClick = function () {
@@ -371,8 +371,18 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     $scope.successes = successes.sort();
     $scope.errors = errors
     // pass the focus to the container of the success and failure message
-    $scope.$evalAsync(function() { 
+    $scope.$evalAsync(function() {
       focus('addMessageContainer');
     })
+  };
+}]);
+
+/* SSA (Affiliate Functions) CONTROLLER */
+canvasSupportApp.controller('ssaController', ['focus', '$scope', '$rootScope', '$filter', '$location', function (focus, $scope, $rootScope, $filter, $location) {
+}]);
+
+canvasSupportApp.controller('navController', ['$scope', '$location', function ($scope, $location) {
+  $scope.changeView = function(view){
+    $scope.view = view;
   };
 }]);

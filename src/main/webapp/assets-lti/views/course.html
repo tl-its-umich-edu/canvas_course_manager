@@ -1,4 +1,4 @@
-<div class="contentWrapper" ng-controller="courseController" ng-cloak>
+<div class="contentWrapper" ng-cloak>
     <div class="alert alert-success reportContainer" id="successContainer" role="alert" style="display:none">
         <div class="msg"></div>
     </div>
@@ -16,8 +16,8 @@
                         <p ng-show="course.addingUser">Specify user, pick sections and roles the user will have, then click "Next".</p>
                     </div>
                     <div class="col-md-6 col-lg-6 col-sm-6 col-xs-6" style="text-align:right;">
-                        <button ng-show="loadingOtherCourses" class="btn btn-link spinner"></button>  
-                        <small ng-cloak ng-show="mpath_courses && (mpath_courses.length === 0 || mpath_courses.length === 1)">Cannot add sections (<a ng-click="showInfo()" href="#">why?</a>)</small>
+                        <button ng-show="loadingOtherCourses" class="btn btn-link spinner"></button>
+                        <small ng-cloak ng-show="mpath_courses && (mpath_courses.length === 0 || mpath_courses.length === 1)">Cannot add sections (<a ng-click="showInfo()" href="">why?</a>)</small>
 
                         <div ng-show="showPop" class="whyPop">
                             <small ng-show="(mpath_courses.length === 0 || mpath_courses.length === 1) && !mpath_courses_error">
@@ -33,7 +33,7 @@
                         <div class="btn-group" role="group">
                             <button ng-disabled="course.addingUser || mpath_courses.length === 0 || mpath_courses.length === 1 || !mpath_courses" ng-hide="course.addingSections" class="btn btn-default" ng-click="getCoursesForTerm()">Add sections</button>
                             <button ng-disabled="course.addingSections" class="btn btn-default" ng-click="addUserModal()" data-toggle="modal"  data-target="#addUserModal">Add non-UM users</button>
-                            
+
                         </div>
                     </div>
                 </div>
@@ -69,7 +69,7 @@
                 </div>
 
 
-            </div>    
+            </div>
         <div class="container-fluid"  ng-show="filteredCourses.length === 0 && course.addingSections === true">
             <p></p>
             <p class="alert alert-info">You have no other course sites to pick sections from.</p>
@@ -90,9 +90,9 @@
                             </span>
                         </div>
                     </div>
-                        
+
                     <ul class="container-fluid sectionList" tabindex="-1" id="sections{{course.id}}">
-                        <li class="row" ng-repeat="section in course.sections | orderBy:'name'" id="{{section.id}}"> 
+                        <li class="row" ng-repeat="section in course.sections | orderBy:'name'" id="{{section.id}}">
                             <div class="col-md-8 col-lg-8 col-sm-8 col-xs-8">{{section.name}}</div>
                             <div class="col-md-4 col-lg-4 col-sm-4 col-xs-4">
                                 <span ng-if="section.enabled"> <a ng-hide="section.moved" href="" ng-click="appendToCourse(section, $index)">Add <span class="sr-only"> {{section.name}} </span>to course</a></span>
