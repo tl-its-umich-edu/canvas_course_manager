@@ -378,12 +378,23 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
 }]);
 
 /* SSA (Affiliate Functions) CONTROLLER */
-canvasSupportApp.controller('ssaController', ['Course','focus', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course,focus, $scope, $rootScope, $filter, $location, $log) {
-
+canvasSupportApp.controller('ssaController', ['Course','SSA','focus', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course, SSA, focus, $scope, $rootScope, $filter, $location, $log) {
   var courseUrl ='manager/api/v1/courses/course_id?include[]=sections&with_enrollments=true&enrollment_type=teacher&_=' + generateCurrentTimestamp();
   Course.getCourse(courseUrl).then(function (resultCourse) {
-    $log.warn($rootScope.ltiLaunch);
     $scope.course = resultCourse.data;
+    $log.info($scope.course);
+    $log.info($rootScope.ltiLaunch);
+    //regex: /api/v1/accounts?as_user_id=sis_login_id:.*&per_page=200
+
+    //below might be ok
+    //^/api/v1/accounts/.*/sub_accounts\\?recursive=true&per_page=200
+    var accountUrl = 'manager/api/v1/accounts?as_user_id=sis_login_id:' + $rootScope.ltiLaunch.custom_canvas_user_login_id;
+      SSA.getAccounts(accountUrl).then(function (resultAccount) {
+        $scope.accounts = resultAccount.data;
+        //then call same for each account id to get the subaccounts, add all ids to an Array
+        // the possibility exists that we can get all the accounts from the get go with
+        // /api/v1/accounts/<account>/sub_accounts?recursive=true
+      });
   });
 
 }]);

@@ -1,8 +1,33 @@
-<br><h3 ng-cloak>SSA</h3>
+<br>
 
-<p>Course vals:</p>
-<p>
-  Course: {{course.name}}({{course.id}})<br> Account ID: {{course.account_id}}
-</p>
-<p>LTI vals:</p>
-Course Id: {{ltiLaunch.custom_canvas_course_id}}<br>ContextId: {{ltiLaunch.custom_canvas_context_id}}
+<h4>Course vals:</h4>
+
+<div class="well">
+  <ul>
+    <li>
+      Course: {{course.name}}({{course.id}})
+    </li>
+    <li>
+      Account ID: {{course.account_id}}
+    </li>
+  </ul>
+</div>
+<h4>Account vals:</h4>
+<div class="well">
+  <ul>
+    <li ng-repeat="account in accounts">
+      Account Name: {{account.name}}<br> Account Id: {{account.id}}<br> Parent Account Id: {{account.parent_account_id}}
+    </li>
+  </ul>
+</div>
+<h4>LTI vals:</h4>
+<div class="well">
+  <ul>
+    <li>
+      Course Id: {{ltiLaunch.custom_canvas_course_id}}
+    </li>
+    <li>
+      ContextId: {{ltiLaunch.custom_canvas_context_id}}
+    </li>
+  </ul>
+</div>
