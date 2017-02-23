@@ -14,6 +14,7 @@
       <script>
         var ltiLaunch = {
           'custom_canvas_course_id': '$ltiValues.get("custom_canvas_course_id")',
+          'custom_canvas_context_id': '$ltiValues.get("custom_canvas_context_id")',
           'custom_canvas_enrollment_state': '$ltiValues.get("custom_canvas_enrollment_state")',
           'custom_canvas_user_login_id': '$ltiValues.get("custom_canvas_user_login_id")',
           'custom_canvas_user_id': '$ltiValues.get("custom_canvas_user_id")',
@@ -21,7 +22,7 @@
           'lis_person_name_family': '$ltiValues.get("lis_person_name_family")',
           'lis_person_name_given': '$ltiValues.get("lis_person_name_given")',
           'role_can_add_teacher':'$ltiValues.get("session_roles_for_adding_teacher")'
-        }
+        };
       </script>
   </head>
   <body>
@@ -60,7 +61,8 @@
             <!-- /.navbar-collapse -->
         </div>
     </nav>
-<br><br>
+<br><br><br>
+
     <div ng-view></div>
 
     <script src="vendor/jquery/jquery-1.11.0.min.js"></script>

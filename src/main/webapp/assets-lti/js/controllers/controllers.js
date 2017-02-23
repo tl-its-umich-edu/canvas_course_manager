@@ -378,7 +378,14 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
 }]);
 
 /* SSA (Affiliate Functions) CONTROLLER */
-canvasSupportApp.controller('ssaController', ['focus', '$scope', '$rootScope', '$filter', '$location', function (focus, $scope, $rootScope, $filter, $location) {
+canvasSupportApp.controller('ssaController', ['Course','focus', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course,focus, $scope, $rootScope, $filter, $location, $log) {
+
+  var courseUrl ='manager/api/v1/courses/course_id?include[]=sections&with_enrollments=true&enrollment_type=teacher&_=' + generateCurrentTimestamp();
+  Course.getCourse(courseUrl).then(function (resultCourse) {
+    $log.warn($rootScope.ltiLaunch);
+    $scope.course = resultCourse.data;
+  });
+
 }]);
 
 canvasSupportApp.controller('navController', ['$scope', '$location', function ($scope, $location) {
