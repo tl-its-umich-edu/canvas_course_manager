@@ -49,7 +49,7 @@
                     <li>
                       <a ng-if="view && view !=='LTI'" class="collapse-nav"  ng-click="changeView('LTI')" href="#ltihome">LTI</a>
                     </li>
-                    <li>
+                    <li ng-if="accounts">
                       <a ng-if="view !=='SSA'" class="collapse-nav" ng-click="changeView('SSA')"  href="#ssa">SSA</a>
                     </li>
 

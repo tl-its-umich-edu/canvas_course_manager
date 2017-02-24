@@ -2,7 +2,7 @@
 /* global $, canvasSupportApp, _, generateCurrentTimestamp, angular, validateEmailAddress */
 
 /* SINGLE COURSE CONTROLLER */
-canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', '$scope', '$rootScope', '$filter', '$location', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, $scope, $rootScope, $filter, $location) {
+canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', 'SSA', '$scope', '$rootScope', '$filter', '$location', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, SSA, $scope, $rootScope, $filter, $location) {
     $scope.userIsFriend=false;
     $scope.contextCourseId = $rootScope.ltiLaunch.custom_canvas_course_id;
     $scope.currentUserCanvasId = $rootScope.ltiLaunch.custom_canvas_user_id;
@@ -22,6 +22,33 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
         $scope.course = resultCourse.data;
         $scope.course.addingSections = false;
         $rootScope.termId = $scope.course.enrollment_term_id;
+
+        $scope.course = resultCourse.data;
+        $rootScope.courseAccount = $scope.course.account_id;
+        var accountUrl = 'manager/api/v1/accounts?as_user_id=sis_login_id:' + $rootScope.ltiLaunch.custom_canvas_user_login_id;
+        SSA.getAccounts(accountUrl).then(function (resultAccount) {
+          $rootScope.accounts ={};
+          if (resultAccount.data.length ===1 && (resultAccount.data[0].id === $rootScope.courseAccount)){
+            $rootScope.accounts.enabled = true;
+            $rootScope.accounts.user = resultAccount.data[0].id;
+            $rootScope.accounts.message = 'Course account ' + $rootScope.courseAccount + ' found in user account';
+          } else {
+            var subAccountsUrl = 'manager/api/v1/accounts/' + resultAccount.data[0].id  + '/sub_accounts?recursive=true&per_page=200';
+            SSA.getAccounts(subAccountsUrl).then(function (resultSubAccounts) {
+              var accountArray = _.pluck(resultSubAccounts.data, 'id');
+              if(_.indexOf(accountArray,$rootScope.courseAccount ) !==-1) {
+                $rootScope.accounts.enabled = true;
+                $rootScope.accounts.user = resultAccount.data[0].id;
+                $rootScope.accounts.message = 'Course account ' + $rootScope.courseAccount + ' found in SUBACCOUNT of user account  ' + resultAccount.data[0].id;
+                console.log( 'Course account ' + $rootScope.courseAccount + ' found in SUBACCOUNT of user account  ' + resultAccount.data[0].id)
+              }
+            });
+          }
+        });
+
+
+
+
         Sections.getSectionsForCourseId('', true).then(function (resultSections) {
           $scope.loadingSections = false;
           if(!resultSections.data.errors) {
@@ -381,27 +408,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
 canvasSupportApp.controller('ssaController', ['Course','SSA','focus', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course, SSA, focus, $scope, $rootScope, $filter, $location, $log) {
   var courseUrl ='manager/api/v1/courses/course_id?include[]=sections&with_enrollments=true&enrollment_type=teacher&_=' + generateCurrentTimestamp();
   Course.getCourse(courseUrl).then(function (resultCourse) {
-    $scope.course = resultCourse.data;
-    $rootScope.courseAccount = $scope.course.account_id;
-    var accountUrl = 'manager/api/v1/accounts?as_user_id=sis_login_id:' + $rootScope.ltiLaunch.custom_canvas_user_login_id;
-    SSA.getAccounts(accountUrl).then(function (resultAccount) {
-      $scope.accounts ={};
-      if (resultAccount.data.length ===1 && (resultAccount.data[0].id === $rootScope.courseAccount)){
-        $scope.accounts.enabled = true;
-        $scope.accounts.user = resultAccount.data[0].id;
-        $scope.accounts.message = 'Course account ' + $rootScope.courseAccount + ' found in user account';
-      } else {
-        var subAccountsUrl = 'manager/api/v1/accounts/' + resultAccount.data[0].id  + '/sub_accounts?recursive=true&per_page=200';
-        SSA.getAccounts(subAccountsUrl).then(function (resultSubAccounts) {
-          var accountArray = _.pluck(resultSubAccounts.data, 'id');
-          if(_.indexOf(accountArray,$rootScope.courseAccount ) !==-1) {
-            $scope.accounts.enabled = true;
-            $scope.accounts.user = resultAccount.data[0].id;
-            $scope.accounts.message = 'Course account ' + $rootScope.courseAccount + ' found in SUBACCOUNT of user account  ' + resultAccount.data[0].id;
-          }
-        });
-      }
-    });
+     $scope.course = resultCourse.data;
   });
 }]);
 
