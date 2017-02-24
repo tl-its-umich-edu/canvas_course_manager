@@ -7,17 +7,23 @@
     <li>
       Course: {{course.name}}({{course.id}})
     </li>
-    <li>
-      Account ID: {{course.account_id}}
-    </li>
   </ul>
 </div>
 <h4>Account vals:</h4>
 <div class="well">
   <ul>
-    <li ng-repeat="account in accounts">
-      Account Name: {{account.name}}<br> Account Id: {{account.id}}<br> Parent Account Id: {{account.parent_account_id}}
+    <li>
+      Course acccount: {{course.account_id}}
     </li>
+
+    <li>
+      User account: {{accounts.user}}
+    </li>
+    <li>{{accounts.message}}</li>
+    <li>
+      Account enabled: <strong>{{accounts.enabled}}</strong>
+    </li>
+
   </ul>
 </div>
 <h4>LTI vals:</h4>
