@@ -238,7 +238,7 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
 
 
 //SSA FACTORY - does the requests for the SSA controller
-canvasSupportApp.factory('SSA', function ($http, $rootScope) {
+canvasSupportApp.factory('SAA', function ($http, $rootScope) {
   return {
     getAccounts: function (accountsUrl) {
       return $http.get(accountsUrl, {cache: false}).then(

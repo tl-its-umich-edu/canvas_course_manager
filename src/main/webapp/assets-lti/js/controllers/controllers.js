@@ -2,7 +2,7 @@
 /* global $, canvasSupportApp, _, generateCurrentTimestamp, angular, validateEmailAddress */
 
 /* SINGLE COURSE CONTROLLER */
-canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', 'SSA', '$scope', '$rootScope', '$filter', '$location', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, SSA, $scope, $rootScope, $filter, $location) {
+canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', 'SAA', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, SAA, $scope, $rootScope, $filter, $location, $log) {
     $scope.userIsFriend=false;
     $scope.contextCourseId = $rootScope.ltiLaunch.custom_canvas_course_id;
     $scope.currentUserCanvasId = $rootScope.ltiLaunch.custom_canvas_user_id;
@@ -10,7 +10,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     $scope.canAddTeachers = JSON.parse($rootScope.ltiLaunch.role_can_add_teacher);
     if($scope.currentUserId.indexOf('+') > -1){
       $scope.currentUserId = $scope.currentUserId.replace('+','@');
-      $scope.userIsFriend=true
+      $scope.userIsFriend=true;
     }
     //get the current user id from launch params
     $scope.canvas_user_id = $scope.currentUserCanvasId;
@@ -25,29 +25,29 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
 
         $scope.course = resultCourse.data;
         $rootScope.courseAccount = $scope.course.account_id;
+        $rootScope.account ={};
+        $rootScope.account.enabled = false;
         var accountUrl = 'manager/api/v1/accounts?as_user_id=sis_login_id:' + $rootScope.ltiLaunch.custom_canvas_user_login_id;
-        SSA.getAccounts(accountUrl).then(function (resultAccount) {
-          $rootScope.accounts ={};
+        SAA.getAccounts(accountUrl).then(function (resultAccount) {
+
           if (resultAccount.data.length ===1 && (resultAccount.data[0].id === $rootScope.courseAccount)){
-            $rootScope.accounts.enabled = true;
-            $rootScope.accounts.user = resultAccount.data[0].id;
-            $rootScope.accounts.message = 'Course account ' + $rootScope.courseAccount + ' found in user account';
+            $rootScope.account.enabled = true;
+            $rootScope.account.rootAccountId = resultAccount.data[0].id;
+            $rootScope.account.rootAccountName = resultAccount.data[0].name;
           } else {
             var subAccountsUrl = 'manager/api/v1/accounts/' + resultAccount.data[0].id  + '/sub_accounts?recursive=true&per_page=200';
-            SSA.getAccounts(subAccountsUrl).then(function (resultSubAccounts) {
-              var accountArray = _.pluck(resultSubAccounts.data, 'id');
-              if(_.indexOf(accountArray,$rootScope.courseAccount ) !==-1) {
-                $rootScope.accounts.enabled = true;
-                $rootScope.accounts.user = resultAccount.data[0].id;
-                $rootScope.accounts.message = 'Course account ' + $rootScope.courseAccount + ' found in SUBACCOUNT of user account  ' + resultAccount.data[0].id;
-                console.log( 'Course account ' + $rootScope.courseAccount + ' found in SUBACCOUNT of user account  ' + resultAccount.data[0].id)
+            SAA.getAccounts(subAccountsUrl).then(function (resultSubAccounts) {
+              var goodAccount =_.findWhere(resultSubAccounts.data, {id: $rootScope.courseAccount});
+              if(goodAccount) {
+                $rootScope.account.enabled = true;
+                $rootScope.account.rootAccountId = resultAccount.data[0].id;
+                $rootScope.account.rootAccountName = resultAccount.data[0].name;
+                $rootScope.account.subAccountId = goodAccount.id;
+                $rootScope.account.subAccountName = goodAccount.name;
               }
             });
           }
         });
-
-
-
 
         Sections.getSectionsForCourseId('', true).then(function (resultSections) {
           $scope.loadingSections = false;
@@ -405,8 +405,10 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
 }]);
 
 /* SSA (Affiliate Functions) CONTROLLER */
-canvasSupportApp.controller('ssaController', ['Course','SSA','focus', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course, SSA, focus, $scope, $rootScope, $filter, $location, $log) {
+canvasSupportApp.controller('saaController', ['Course','SAA','focus', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course, SAA, focus, $scope, $rootScope, $filter, $location, $log) {
   var courseUrl ='manager/api/v1/courses/course_id?include[]=sections&with_enrollments=true&enrollment_type=teacher&_=' + generateCurrentTimestamp();
+  // ideally we should be using a service instead of duplicating this request
+  $log.info('SAA user in play');
   Course.getCourse(courseUrl).then(function (resultCourse) {
      $scope.course = resultCourse.data;
   });

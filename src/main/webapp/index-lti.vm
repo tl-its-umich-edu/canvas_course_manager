@@ -49,10 +49,9 @@
                     <li>
                       <a ng-if="view && view !=='LTI'" class="collapse-nav"  ng-click="changeView('LTI')" href="#ltihome">LTI</a>
                     </li>
-                    <li ng-if="accounts">
-                      <a ng-if="view !=='SSA'" class="collapse-nav" ng-click="changeView('SSA')"  href="#ssa">SSA</a>
+                    <li ng-if="account">
+                      <a ng-if="view !=='SAA'" class="collapse-nav" ng-click="changeView('SAA')"  href="#saa">SAA</a>
                     </li>
-
                     <li>
                       <a href="" class="collapse-nav" id="helpLink" data-url="help-lti.html">Help</a>
                     </li>

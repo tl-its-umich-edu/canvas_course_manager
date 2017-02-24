@@ -1,0 +1,79 @@
+<br>
+
+<h4>Course vals:</h4>
+
+<div class="well">
+  <ul>
+    <li>
+      Course: {{course.name}}({{course.id}})
+    </li>
+  </ul>
+</div>
+<h4>Account vals:</h4>
+<div class="well">
+  <table class="table">
+    <tbody>
+      <tr>
+        <td>
+          Course account
+        </td>
+        <td>
+          {{course.account_id}}
+        </td>
+
+      </tr>
+      <tr>
+        <td>
+          User root account
+        </td>
+        <td>
+          {{account.rootAccountId}}
+        </td>
+      </tr>
+      <tr>
+        <td>
+          User root account name:
+        </td>
+        <td>
+          {{account.rootAccountName}}
+        </td>
+      </tr>
+      <tr>
+        <td>
+          User matching sub account:
+        </td>
+        <td>
+          {{account.subAccountId}}
+        </td>
+      </tr>
+      <tr>
+        <td>
+          User matching sub account name:
+        </td>
+        <td>
+          {{account.subAccountName}}
+        </td>
+      </tr>
+      <tr>
+        <td>
+            User able to function:
+        </td>
+        <td>
+          <span ng-class="account.enabled?'label label-success': 'label label-danger'">{{account.enabled}}</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+<h4>LTI vals:</h4>
+<div class="well">
+  <ul>
+    <li>
+      Course Id: {{ltiLaunch.custom_canvas_course_id}}
+    </li>
+    <li>
+      ContextId: {{ltiLaunch.custom_canvas_context_id}}
+    </li>
+  </ul>
+</div>

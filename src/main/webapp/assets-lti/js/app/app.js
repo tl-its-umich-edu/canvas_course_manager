@@ -23,9 +23,9 @@ canvasSupportApp.config(['$routeProvider',
       templateUrl: 'assets-lti/views/course.html',
       controller: 'courseController'
     }).
-    when('/ssa', {
-      templateUrl: 'assets-lti/views/ssa.html',
-      controller: 'ssaController'
+    when('/saa', {
+      templateUrl: 'assets-lti/views/saa.html',
+      controller: 'saaController'
     }).
     otherwise({
       redirectTo: '/'
