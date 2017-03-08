@@ -70,6 +70,21 @@ canvasSupportApp.factory('Course', function ($http) {
         }
       );
     },
+    getGroups: function (url) {
+      return $http.get(url, {cache: false}).then(
+        function success(result) {
+          // Report Canvas errors
+          if (result.data.errors) {
+            errorDisplay(url, result.status, result.data.errors[0].message);
+          }
+          return result;
+        },
+        function error(result) {
+          errorDisplay(url, result.status, 'Unable to get groups');
+          return result;
+        }
+      );
+    },
     getMPathwaysCourses: function (url, sis_term_id) {
       return $http.get(url, {cache: false}).then(
         function success(result) {

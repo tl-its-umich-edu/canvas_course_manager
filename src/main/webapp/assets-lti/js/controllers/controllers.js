@@ -19,6 +19,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     Course.getCourse(courseUrl).then(function (resultCourse) {
       if(!resultCourse.data.errors) {
         $scope.loadingSections = true;
+        $rootScope.course = resultCourse.data;
         $scope.course = resultCourse.data;
         $scope.course.addingSections = false;
         $rootScope.termId = $scope.course.enrollment_term_id;
@@ -50,6 +51,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
         });
 
         Sections.getSectionsForCourseId('', true).then(function (resultSections) {
+          $rootScope.sections = resultSections.data;
           $scope.loadingSections = false;
           if(!resultSections.data.errors) {
             $scope.course.sections =_.sortBy(resultSections.data, 'name');
@@ -404,18 +406,127 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
   };
 }]);
 
-/* SSA (Affiliate Functions) CONTROLLER */
-canvasSupportApp.controller('saaController', ['Course','SAA','focus', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course, SAA, focus, $scope, $rootScope, $filter, $location, $log) {
-  var courseUrl ='manager/api/v1/courses/course_id?include[]=sections&with_enrollments=true&enrollment_type=teacher&_=' + generateCurrentTimestamp();
-  // ideally we should be using a service instead of duplicating this request
-  $log.info('SAA user in play');
-  Course.getCourse(courseUrl).then(function (resultCourse) {
-     $scope.course = resultCourse.data;
-  });
-}]);
 
 canvasSupportApp.controller('navController', ['$scope', '$location', function ($scope, $location) {
   $scope.changeView = function(view){
     $scope.view = view;
   };
+}]);
+
+/* SSA (Affiliate Functions) CONTROLLER */
+canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '$rootScope', 'fileUpload', '$timeout', '$log', '$http', function(Course, SectionSet, $scope, $rootScope, fileUpload, $timeout, $log, $http) {
+  $scope.course = $rootScope.course;
+  $scope.availableSections = _.pluck($rootScope.sections, 'sis_section_id');
+
+  var groupUrl = 'manager/api/v1/courses/' + $scope.course.id + '/groups';
+  Course.getGroups(groupUrl).then(function (resultGroups){
+
+    $scope.availableGroups = resultGroups.data;
+  });
+
+  $http.get('assets-lti/settings/functions.json').success(function(data) {
+    $scope.functions = data;
+  });
+
+  $scope.changeSelectedFunction = function() {
+    $rootScope.selectedFunction = value;
+  };
+
+
+  $scope.content = false;
+  $scope.gridRowNumber = 25;
+  $scope.getNumber = function(num) {
+    return new Array(num);
+  };
+
+  $scope.$watch('csvfile', function(newFileObj) {
+    if (newFileObj) {
+      $scope.content = false;
+      $scope.loading = true;
+      var reader = new FileReader();
+      reader.readAsText(newFileObj);
+      reader.onload = function(e) {
+        var CSVPreview = function() {
+          $scope.headers = $scope.selectedFunction.fields;
+          $scope.content = parseCSV(reader.result, $scope.headers, $scope.headers.length);
+        };
+        $timeout(CSVPreview, 100);
+      };
+      $scope.filename = newFileObj.name;
+    }
+  });
+
+  $scope.changeSelectedFunction = function() {
+    $scope.content = [];
+  };
+
+
+  $scope.uploadForm = function() {
+    var file = $scope.users_in_sections;
+    var uploadUrl = "/formUpload";
+    var fields = {
+      "name": "filename",
+      "user": "gsilver",
+      "request": "users_to_sections",
+      "account": 12,
+      "data": $scope.filename
+    };
+    fileUpload.uploadFileAndFieldsToUrl(file, fields, uploadUrl);
+  };
+
+  var parseCSV = function(CSVdata, headers, colCount) {
+    var lines = CSVdata.split("\n");
+    var result = [];
+    $scope.errors = [];
+    for (var i = 0; i < lines.length; i++) {
+      var lineArray = lines[i].split(',');
+      var obj = {};
+      obj.data = [];
+      var number_pattern = /^\d+$/;
+      _.each(headers, function(header, index) {
+        var validation = header.validation;
+        if (lineArray[index]) {
+          if (lineArray[index].split(' ').length !== 1 && !validation.spaces) {
+            $log.warn(lineArray[index] + ' has spaces');
+            obj.invalid = true;
+          }
+          if (lineArray[index].length > validation.max) {
+            $log.warn(lineArray[index] + ' too many chars');
+            obj.invalid = true;
+          }
+          if (lineArray[index].length < validation.min) {
+            $log.warn(lineArray[index] + ' too few chars');
+            obj.invalid = true;
+          }
+          if (!number_pattern.test(lineArray[index]) && validation.chars === 'num') {
+            $log.warn(lineArray[index] + ' not a number');
+            obj.invalid = true;
+          }
+          if (validation.choices) {
+            if (_.indexOf(validation.choices, lineArray[index]) === -1) {
+              $log.warn(lineArray[index] + ' is not one of the choices in ' + validation.choices);
+              obj.invalid = true;
+            }
+          }
+        }
+        obj.data.push(lineArray[index]);
+      });
+      if (lineArray.length !== colCount && lineArray !== ['']) {
+        obj.invalid = true;
+      }
+
+      if (lineArray.length === 1 && lineArray[0] === '') {
+
+      } else {
+        result.push(obj);
+      }
+    }
+    if (_.where(result, {invalid: true}).length) {
+      $scope.errors = _.where(result, {invalid: true});
+    }
+    $scope.loading = false;
+    return result;
+
+  };
+
 }]);

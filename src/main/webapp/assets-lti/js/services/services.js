@@ -1,5 +1,5 @@
 'use strict';
-/* global  canvasSupportApp  */
+/* global  canvasSupportApp, FormData, angular,alert  */
 
 canvasSupportApp.service('SectionSet', function($rootScope) {
   var sectionSet = [];
@@ -32,3 +32,42 @@ canvasSupportApp.directive('eventFocus', function(focus) {
     });
   };
 });
+
+
+canvasSupportApp.service('fileUpload', ['$http', function($http) {
+  this.uploadFileAndFieldsToUrl = function(file, fields, uploadUrl) {
+    var fd = new FormData();
+    fd.append('file', file);
+    angular.forEach(fields, function(value, key) {
+      fd.append(key, value);
+    });
+
+    $http.post(uploadUrl, fd, {
+        transformRequest: angular.identity,
+        headers: {
+          'Content-Type': undefined
+        }
+      })
+      .success(function() {})
+      .error(function() {
+        alert('Sorry, I can\'t do this Dave');
+      });
+  };
+}]);
+
+
+canvasSupportApp.directive('fileModel', ['$parse', function($parse) {
+  return {
+    restrict: 'A',
+    link: function(scope, element, attrs) {
+      var model = $parse(attrs.fileModel);
+      var modelSetter = model.assign;
+
+      element.bind('change', function() {
+        scope.$apply(function() {
+          modelSetter(scope, element[0].files[0]);
+        });
+      });
+    }
+  };
+}]);

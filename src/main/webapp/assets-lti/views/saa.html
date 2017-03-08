@@ -1,79 +1,206 @@
-<br>
 
-<h4>Course vals:</h4>
 
-<div class="well">
-  <ul>
-    <li>
-      Course: {{course.name}}({{course.id}})
-    </li>
-  </ul>
+<div class="container-fluid">
+  <h2 style="font-size:130%">Sub-Account Administrator Utilities</h2>
+  <div class="panel panel-default">
+    <div class="panel-body form-inline">
+      <label for="selectFunction" class="sr-only">Select a task</label>
+      <select id="selectFunction"
+        ng-model="selectedFunction"
+        ng-options="function.name for function in functions"
+        ng-change="changeSelectedFunction()"
+        class="form-control">
+      <option style="display:none" value="">Select a task</option>
+    </select>
+    <span ng-show="availableSections.length">{{availableSections.length}} available sections.</span>
+    <span ng-show="!availableSections.length">No available sections.</span>
+    <span ng-show="availableGroups.length">{{availableGroups.length}} available groups.</span>
+    <span ng-show="!availableGroups.length">No available groups.</span>
+    </div>
+  </div>
+  <h4 style="font-size:110%">{{selectedFunction.name}}</h4>
+  <p>{{selectedFunction.notes}}</p>
+  <div class="" ng-show="selectedFunction">
+    <p  ng-hide="csv_fields"><a href="" ng-click="csv_fields=true">Show {{selectedFunction.type}} fields</a></p>
+    <p  ng-hide="!csv_fields"><a href="" ng-click="csv_fields=false">Hide {{selectedFunction.type}} fields</a></p>
+    <div class="well" ng-show="csv_fields">
+      <table class="table" style="width:auto">
+        <caption>{{selectedFunction.type | uppercase}} Fields </caption>
+        <tr>
+          <th ng-repeat="field in selectedFunction.fields">
+            {{field.name}}
+          </th>
+        <tr>
+          <td ng-repeat="field in selectedFunction.fields">
+              <p ng-repeat="(key, value) in field.validation"><span class="label label-info">{{key}}: {{value}}</span> </p>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="" ng-show="selectedFunction.type==='csv'">
+    <form class="form-inline well">
+      <div class="form-group">
+        <div class="input-group">
+          Upload a CSV file
+          <label class="btn btn-primary btn-file" for="uploadCSV">
+            Browse <input id="uploadCSV" type="file" type="file" file-model="csvfile" style="display:none">
+          </label>
+        </div>
+      </div>
+      <span  ng-show="loading"class="alert-info alert-inline">Loading...</span>
+      <button ng-show="content" class="btn btn-default" type="reset" ng-click="content=[]" name="reset-file-input">Reset</button>
+      <div class="pull-right" ng-show="content && errors.length ===0">
+          No errors detected <button class="btn btn-primary" ng-click="uploadForm()">Upload</button>
+      </div>
+
+
+    </form>
+    <div class="alert alert-danger" ng-show="errors.length && content.length">
+      <span ng-if="errors.length >1">There were {{errors.length}} errors</span><span ng-if="errors.length ===1">There was {{errors.length}} error</span>, highlighted below. <input type="checkbox" id="showErrors" name="" value="" ng-model="showErrors">        <label for="showErrors">Show errors only</label>
+    </div>
+    <table class="table" ng-show="content.length">
+      <thead>
+        <tr>
+          <th>
+          </th>
+          <th ng-repeat="header in headers">
+            {{header.name}}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-hide="showErrors && !contentline.invalid" ng-class="{ 'table-danger': contentline.invalid}" ng-repeat="contentline in content track by $index">
+          <td>{{$index + 1}}</td>
+          <td ng-repeat="item in contentline.data track by $index">
+            {{item}}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="alert alert-danger" ng-show="selectedFunction.id==='users_to_groups_grid' && !availableGroups.length">
+    No groups available in the course.
+  </div>
+  <div class="alert alert-danger" ng-show="selectedFunction.id==='users_to_sections_grid' && !availableSections.length">
+    No sections available in the course.
+  </div>
+  <div ng-show="(selectedFunction.id==='users_to_groups_grid' && availableGroups.length) ||(selectedFunction.id==='users_to_sections_grid' && availableSections.length)">
+    <table class="table table-striped  table-hover" style="width:auto">
+      <tr ng-repeat="i in getNumber(gridRowNumber) track by $index">
+        <td ng-repeat="field in selectedFunction.fields track by $index">
+          <input ng-if="!field.validation.choices && field.name !=='section_id' && field.name !=='group_id'" type="text" class="form-control" name="" value="" placeholder="{{field.name}}">
+          <select ng-if="field.validation.choices" class="form-control" name="">
+            <option ng-if="field.validation.choices" value="" ng-repeat="choice in field.validation.choices">{{choice}}</option>
+          </select>
+          <select ng-if="field.name==='section_id'" class="form-control">
+            <option ng-if="!field.validation.choices" value="" ng-repeat="section in availableSections">{{section}}</option>
+          </select>
+          <select ng-if="field.name==='group_id'"  class="form-control">
+            <option ng-if="!field.validation.choices" value="" ng-repeat="group in availableGroups">{{group}}</option>
+          </select>
+        </td>
+      </tr>
+    </table>
+    <button type="button" class="btn btn-primary" ng-click="gridRowNumber = gridRowNumber + 10">
+      + Add 10 more rows
+    </button>
+  </div>
 </div>
-<h4>Account vals:</h4>
-<div class="well">
-  <table class="table">
-    <tbody>
-      <tr>
-        <td>
-          Course account
-        </td>
-        <td>
-          {{course.account_id}}
-        </td>
 
-      </tr>
-      <tr>
-        <td>
-          User root account
-        </td>
-        <td>
-          {{account.rootAccountId}}
-        </td>
-      </tr>
-      <tr>
-        <td>
-          User root account name:
-        </td>
-        <td>
-          {{account.rootAccountName}}
-        </td>
-      </tr>
-      <tr>
-        <td>
-          User matching sub account:
-        </td>
-        <td>
-          {{account.subAccountId}}
-        </td>
-      </tr>
-      <tr>
-        <td>
-          User matching sub account name:
-        </td>
-        <td>
-          {{account.subAccountName}}
-        </td>
-      </tr>
-      <tr>
-        <td>
-            User able to function:
-        </td>
-        <td>
-          <span ng-class="account.enabled?'label label-success': 'label label-danger'">{{account.enabled}}</span>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-
+<div  class="container-fluid">
+<a href="" ng-click="debug=!debug">Toggle context debug panels</a>
 </div>
-<h4>LTI vals:</h4>
-<div class="well">
-  <ul>
-    <li>
-      Course Id: {{ltiLaunch.custom_canvas_course_id}}
-    </li>
-    <li>
-      ContextId: {{ltiLaunch.custom_canvas_context_id}}
-    </li>
-  </ul>
+<div ng-show="debug" class="container-fluid">
+
+  <h4>Course vals:</h4>
+
+  <div class="well">
+    <ul>
+      <li>
+        Course: {{course.name}}({{course.id}})
+      </li>
+    </ul>
+  </div>
+  <h4>Account vals:</h4>
+  <div class="well">
+    <table class="table">
+      <tbody>
+        <tr>
+          <td>
+            Course account
+          </td>
+          <td>
+            {{course.account_id}}
+          </td>
+
+        </tr>
+        <tr>
+          <td>
+            Course sections (SIS_IDs)
+          </td>
+          <td>
+            <span ng-repeat="section in availableSections"><span class="label label-default">{{section}}</span> </span>
+          </td>
+
+        </tr>
+
+
+        <tr>
+          <td>
+            User root account
+          </td>
+          <td>
+            {{account.rootAccountId}}
+          </td>
+        </tr>
+        <tr>
+          <td>
+            User root account name:
+          </td>
+          <td>
+            {{account.rootAccountName}}
+          </td>
+        </tr>
+        <tr>
+          <td>
+            User matching sub account:
+          </td>
+          <td>
+            {{account.subAccountId}}
+          </td>
+        </tr>
+        <tr>
+          <td>
+            User matching sub account name:
+          </td>
+          <td>
+            {{account.subAccountName}}
+          </td>
+        </tr>
+        <tr>
+          <td>
+              User able to function:
+          </td>
+          <td>
+            <span ng-class="account.enabled?'label label-success': 'label label-danger'">{{account.enabled}}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+  <h4>LTI vals:</h4>
+  <div class="well">
+    <ul>
+      <li>
+        Course Id: {{ltiLaunch.custom_canvas_course_id}}
+      </li>
+      <li>
+        ContextId: {{ltiLaunch.custom_canvas_context_id}}
+      </li>
+    </ul>
+  </div>
+
 </div>

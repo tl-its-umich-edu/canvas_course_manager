@@ -110,6 +110,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	// CCM3
 	private static final String GET_ACCOUNTS_FOR_USER = "get.accounts.for.user.regex";
 	private static final String GET_SUBACCOUNTS= "get.subaccounts.regex";
+	private static final String GET_GROUPS= "get.groups.regex";
 
 
 	private static final String TC_SESSION_DATA = "tcSessionData";
@@ -197,6 +198,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			put(MPATHWAYS_API_GNERIC, "for mpathways calls");
 			put(GET_ACCOUNTS_FOR_USER, "for getting the accounts of the current user");
 			put(GET_SUBACCOUNTS, "for getting the subacccounts of the current user");
+			put(GET_GROUPS, "for getting the groups of the current course");
 			
 		}
 	};
