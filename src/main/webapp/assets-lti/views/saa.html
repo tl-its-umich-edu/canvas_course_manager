@@ -94,12 +94,12 @@
           <select ng-if="field.validation.choices" class="form-control" name="">
             <option ng-if="field.validation.choices" value="" ng-repeat="choice in field.validation.choices">{{choice}}</option>
           </select>
-          <select ng-if="field.name==='section_id'" class="form-control">
+          <!-- <select ng-if="field.name==='section_id'" class="form-control">
             <option ng-if="!field.validation.choices" value="" ng-repeat="section in availableSections">{{section}}</option>
           </select>
           <select ng-if="field.name==='group_id'"  class="form-control">
             <option ng-if="!field.validation.choices" value="" ng-repeat="group in availableGroups">{{group}}</option>
-          </select>
+          </select> -->
         </td>
       </tr>
     </table>
