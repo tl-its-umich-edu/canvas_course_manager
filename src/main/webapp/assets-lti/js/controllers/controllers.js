@@ -419,16 +419,13 @@ canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '
   $scope.availableSections = _.pluck($rootScope.sections, 'sis_section_id');
 
   var groupUrl = 'manager/api/v1/courses/' + $scope.course.id + '/groups';
-  Course.getGroups(groupUrl).then(function (resultGroups){
-
-    $scope.availableGroups = resultGroups.data;
-  });
+  // Course.getGroups(groupUrl).then(function (resultGroups){
+  //   console.log(resultGroups);
+  //   $scope.availableGroups = resultGroups.data;
+  // });
 
   $http.get('assets-lti/settings/functions.json').success(function(data) {
     $scope.functions = data;
-
-    $scope.availableSections = _.pluck($rootScope.sections, 'sis_section_id');
-    // add choices key to $scope.functions[id=users_to_sections] and $scope.functions[id=users_to_sections_grid]
     var functCSVSect = _.findWhere($scope.functions, {id: "users_in_sections"});
     var fieldCSVSect = _.findWhere(functCSVSect.fields, {name: "section_id"});
     fieldCSVSect.validation.choices = $scope.availableSections;
@@ -441,10 +438,10 @@ canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '
       $scope.availableGroups = resultGroups.data;
       var functCSVGrp = _.findWhere($scope.functions, {id: "users_to_groups"});
       var fieldCSVGrp = _.findWhere(functCSVGrp.fields, {name: "group_id"});
-      fieldCSVGrp.validation.choices = $scope.availableSections;
+      fieldCSVGrp.validation.choices = $scope.availableGroups;
       var functGrpGrid = _.findWhere($scope.functions, {id: "users_to_groups_grid"});
       var fieldGrpGrid = _.findWhere(functGrpGrid.fields, {name: "group_id"});
-      fieldGrpGrid.validation.choices = $scope.availableSections;
+      fieldGrpGrid.validation.choices = $scope.availableGroups;
     });
   });
 

@@ -10,20 +10,24 @@
         ng-options="function.name for function in functions"
         ng-change="changeSelectedFunction()"
         class="form-control">
-      <option style="display:none" value="">Select a task</option>
-    </select>
-    <span ng-show="availableSections.length">{{availableSections.length}} available sections.</span>
-    <span ng-show="!availableSections.length">No available sections.</span>
-    <span ng-show="availableGroups.length">{{availableGroups.length}} available groups.</span>
-    <span ng-show="!availableGroups.length">No available groups.</span>
+        <option style="display:none" value="">Select a task</option>
+      </select>
+      <span ng-show="availableSections.length">{{availableSections.length}} available sections.</span>
+      <span ng-show="!availableSections.length">No available sections.</span>
+      <span ng-show="availableGroups.length">{{availableGroups.length}} available groups.</span>
+      <span ng-show="!availableGroups.length">No available groups.</span>
+    </div>
+    <div class="pull-right" ng-show="selectedFunction" style="margin:-45px 10px 0 0px">
+      <div ng-hide="csv_fields"><a href="" ng-click="csv_fields=true">Show {{selectedFunction.type}} info</a></div>
+      <div ng-hide="!csv_fields"><a href="" ng-click="csv_fields=false">Hide {{selectedFunction.type}} info</a></div>
     </div>
   </div>
   <h4 style="font-size:110%">{{selectedFunction.name}}</h4>
-  <p>{{selectedFunction.notes}}</p>
+
   <div class="" ng-show="selectedFunction">
-    <p  ng-hide="csv_fields"><a href="" ng-click="csv_fields=true">Show {{selectedFunction.type}} fields</a></p>
-    <p  ng-hide="!csv_fields"><a href="" ng-click="csv_fields=false">Hide {{selectedFunction.type}} fields</a></p>
+
     <div class="well" ng-show="csv_fields">
+      <p>{{selectedFunction.notes}}</p>
       <table class="table" style="width:auto">
         <caption>{{selectedFunction.type | uppercase}} Fields </caption>
         <tr>
@@ -38,8 +42,11 @@
       </table>
     </div>
   </div>
-
-  <div class="" ng-show="selectedFunction.type==='csv'">
+  <div class="alert alert-danger" ng-show="(selectedFunction.id ==='users_to_groups' && !availableGroups.length) || (selectedFunction.id==='users_to_groups_grid' && !availableGroups.length)">
+    There are no groups available in the course.
+  </div>
+  <div ng-hide="selectedFunction.id ==='users_to_groups' && !availableGroups.length">
+    <div class="" ng-show="selectedFunction.type==='csv'">
     <form class="form-inline well">
       <div class="form-group">
         <div class="input-group">
@@ -80,8 +87,6 @@
       </tbody>
     </table>
   </div>
-  <div class="alert alert-danger" ng-show="selectedFunction.id==='users_to_groups_grid' && !availableGroups.length">
-    No groups available in the course.
   </div>
   <div class="alert alert-danger" ng-show="selectedFunction.id==='users_to_sections_grid' && !availableSections.length">
     No sections available in the course.
