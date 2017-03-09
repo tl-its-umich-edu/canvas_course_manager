@@ -4,6 +4,10 @@ to get WACG 2 AAA contrast, preserving the background colors*/
     color:#000 !important;
 }
 
+input:invalid {
+  border: 1px solid red !important;
+}
+
 .mastHead {
     color:#fff;
 }

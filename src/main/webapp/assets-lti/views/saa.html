@@ -87,22 +87,25 @@
     No sections available in the course.
   </div>
   <div ng-show="(selectedFunction.id==='users_to_groups_grid' && availableGroups.length) ||(selectedFunction.id==='users_to_sections_grid' && availableSections.length)">
-    <table class="table table-striped  table-hover" style="width:auto">
-      <tr ng-repeat="i in getNumber(gridRowNumber) track by $index">
-        <td ng-repeat="field in selectedFunction.fields track by $index">
-          <input ng-if="!field.validation.choices && field.name !=='section_id' && field.name !=='group_id'" type="text" class="form-control" name="" value="" placeholder="{{field.name}}">
-          <select ng-if="field.validation.choices" class="form-control" name="">
-            <option ng-if="field.validation.choices" value="" ng-repeat="choice in field.validation.choices">{{choice}}</option>
-          </select>
-          <!-- <select ng-if="field.name==='section_id'" class="form-control">
-            <option ng-if="!field.validation.choices" value="" ng-repeat="section in availableSections">{{section}}</option>
-          </select>
-          <select ng-if="field.name==='group_id'"  class="form-control">
-            <option ng-if="!field.validation.choices" value="" ng-repeat="group in availableGroups">{{group}}</option>
-          </select> -->
-        </td>
-      </tr>
-    </table>
+    <form class="" action="index.html" method="post">
+      <table class="table table-striped  table-hover" style="width:auto">
+        <thead>
+          <tr>
+            <th ng-repeat="header in selectedFunction.descriptors" scole="col">{{header}}</th>
+          </tr>
+        </thead>
+        <tr ng-repeat="i in getNumber(gridRowNumber) track by $index">
+          <td ng-repeat="field in selectedFunction.fields track by $index">
+            <input title="{{field.validation.val_message}}" ng-if="!field.validation.choices" type="text" class="form-control"  pattern="{{field.validation.pattern}}"  name="{{field.name}}{{$index}}" maxlength="{{field.validation.max}}" id="{{field.name}}{{$index}}" value="" placeholder="{{field.name}}">
+            <select ng-if="field.validation.choices" class="form-control" name="">
+              <option ng-if="field.validation.choices" value="" ng-repeat="choice in field.validation.choices">{{choice}}</option>
+            </select>
+          </td>
+        </tr>
+      </table>
+      <input type="submit" name="" value="Submit">
+    </form>
+
     <button type="button" class="btn btn-primary" ng-click="gridRowNumber = gridRowNumber + 10">
       + Add 10 more rows
     </button>
@@ -145,8 +148,15 @@
           </td>
 
         </tr>
-
-
+        <tr>
+          <td>
+            Course groups (SIS_IDs)
+          </td>
+          <td>
+            <span ng-repeat="group in availableGroups"><span class="label label-default">{{group}}</span> </span>
+            <span ng-show="!availableGroups.length">None</span>
+          </td>
+        </tr>
         <tr>
           <td>
             User root account

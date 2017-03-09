@@ -8,9 +8,11 @@
       "name": "user_id",
       "validation": {
         "spaces": false,
-        "chars": "mix",
-        "max": 100,
-        "min": 2
+        "chars": "num",
+        "pattern":"\\d{8,8}",
+        "val_message":"Please use an 8 digit number",
+        "max": 8,
+        "min": 8
       }
     }, {
       "name": "role",
@@ -36,7 +38,7 @@
         "spaces": false,
         "chars": "alpha",
         "choices": ["active", "deleted", "completed", " inactive"],
-        "max": 20000,
+        "max": 2000,
         "min": 1
       }
     }
@@ -107,9 +109,11 @@
     "name": "user_id",
     "validation": {
       "spaces": false,
-      "chars": "mix",
-      "max": 100,
-      "min": 2
+      "chars": "num",
+      "pattern":"\\d{8,8}",
+      "val_message":"Please use an 8 digit number",
+      "max": 8,
+      "min": 8
     }
   },{
     "name": "status",
@@ -131,9 +135,11 @@
     "name": "user_id",
     "validation": {
       "spaces": false,
-      "chars": "mix",
-      "max": 100,
-      "min": 2
+      "chars": "num",
+      "pattern":"\\d{8,8}",
+      "val_message":"Please use an 8 digit number",
+      "max": 8,
+      "min": 8
     }
   }, {
     "name": "section_id",
@@ -152,6 +158,16 @@
       "max": 2000,
       "min": 1
     }
+  },
+  {
+    "name": "status",
+    "validation": {
+      "spaces": false,
+      "chars": "alpha",
+      "choices": ["active", "deleted", "completed", " inactive"],
+      "max": 2000,
+      "min": 1
+    }
   }]
 }, {
   "name": "Add multiple users to Canvas groups through data grid",
@@ -162,9 +178,11 @@
     "name": "user_id",
     "validation": {
       "spaces": false,
-      "chars": "mix",
-      "max": 100,
-      "min": 2
+      "chars": "num",
+      "pattern":"\\d{8,8}",
+      "val_message":"Please use an 8 digit number",
+      "max": 8,
+      "min": 8
     }
   },{
     "name": "group_id",
