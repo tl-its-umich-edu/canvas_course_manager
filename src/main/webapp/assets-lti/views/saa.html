@@ -50,19 +50,17 @@
     <form class="form-inline well">
       <div class="form-group">
         <div class="input-group">
-          Upload a CSV file
-          <label class="btn btn-primary btn-file" for="uploadCSV">
-            Browse <input id="uploadCSV" type="file" type="file" file-model="csvfile" style="display:none">
-          </label>
+          <label class="sr-only" for="uploadCSV">Upload a CSV file</label>
+          <input id="uploadCSV" class="btn btn-primary" type="file" type="file" file-model="csvfile">
         </div>
       </div>
-      <span  ng-show="loading"class="alert-info alert-inline">Loading...</span>
-      <button ng-show="content" class="btn btn-default" type="reset" ng-click="content=[]" name="reset-file-input">Reset</button>
-      <div class="pull-right" ng-show="content && errors.length ===0">
-          No errors detected <button class="btn btn-primary" ng-click="uploadForm()">Upload</button>
+      <div class="input-group">
+        <span  ng-show="loading"class="alert-info alert-inline">Loading...</span>
+        <button ng-show="csvfile && content.length" class="btn btn-default" type="reset" ng-click="content=[];errors=[]" name="reset-file-input">Reset</button>
       </div>
-
-
+      <div class="pull-right" ng-show="content.length !==0 && errors.length ===0">
+          No errors detected <button class="btn btn-primary" ng-click="submitCSV()">Upload</button>
+      </div>
     </form>
     <div class="alert alert-danger" ng-show="errors.length && content.length">
       <span ng-if="errors.length >1">There were {{errors.length}} errors</span><span ng-if="errors.length ===1">There was {{errors.length}} error</span>, highlighted below. <input type="checkbox" id="showErrors" name="" value="" ng-model="showErrors">        <label for="showErrors">Show errors only</label>
@@ -108,18 +106,22 @@
           </td>
         </tr>
       </table>
-      <input type="submit" name="" value="Submit">
+      <div>
+        <input class="btn btn-primary" name="" ng-click="submitGrid()">Submit</button>
+        <button type="button" class="btn btn-default" ng-click="gridRowNumber = gridRowNumber + 10" style="margin-left:50px">
+          + Add 10 more rows
+        </button>
+      </div>
     </form>
-
-    <button type="button" class="btn btn-primary" ng-click="gridRowNumber = gridRowNumber + 10">
-      + Add 10 more rows
-    </button>
   </div>
 </div>
 
-<div  class="container-fluid">
-<a href="" ng-click="debug=!debug">Toggle context debug panels</a>
-</div>
+
+
+<p  class="container-fluid">
+  <br>
+  <a href="" ng-click="debug=!debug">Toggle context debug panels</a>
+</p>
 <div ng-show="debug" class="container-fluid">
 
   <h4>Course vals:</h4>

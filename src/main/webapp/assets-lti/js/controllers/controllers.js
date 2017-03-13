@@ -416,13 +416,7 @@ canvasSupportApp.controller('navController', ['$scope', '$location', function ($
 /* SSA (Affiliate Functions) CONTROLLER */
 canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '$rootScope', 'fileUpload', '$timeout', '$log', '$http', function(Course, SectionSet, $scope, $rootScope, fileUpload, $timeout, $log, $http) {
   $scope.course = $rootScope.course;
-  $scope.availableSections = _.pluck($rootScope.sections, 'sis_section_id');
-
-  var groupUrl = 'manager/api/v1/courses/' + $scope.course.id + '/groups';
-  // Course.getGroups(groupUrl).then(function (resultGroups){
-  //   console.log(resultGroups);
-  //   $scope.availableGroups = resultGroups.data;
-  // });
+  $scope.availableSections = _.map(_.pluck($rootScope.sections, 'sis_section_id'), function(val){ return String(val); });
 
   $http.get('assets-lti/settings/functions.json').success(function(data) {
     $scope.functions = data;
@@ -435,7 +429,7 @@ canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '
 
     var groupUrl = 'manager/api/v1/courses/' + $scope.course.id + '/groups';
     Course.getGroups(groupUrl).then(function (resultGroups){
-      $scope.availableGroups = resultGroups.data;
+      $scope.availableGroups = _.map(_.pluck(resultGroups.data, 'id'), function(val){ return String(val); });
       var functCSVGrp = _.findWhere($scope.functions, {id: "users_to_groups"});
       var fieldCSVGrp = _.findWhere(functCSVGrp.fields, {name: "group_id"});
       fieldCSVGrp.validation.choices = $scope.availableGroups;
@@ -478,8 +472,20 @@ canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '
   };
 
 
-  $scope.uploadForm = function() {
-    var file = $scope.users_in_sections;
+  $scope.submitCSV = function() {
+    var file = $scope.csvfile;
+    var uploadUrl = "/api/v1/accounts/1/sis_imports?override_sis_stickiness=false&batch_mode=false&import_type=instructure_csv&extension=csv&attachment=" + $scope.filename;
+    // var fields = {
+    //   "name": "filename",
+    //   "user": "gsilver",
+    //   "request": "users_to_sections",
+    //   "account": 12,
+    //   "data": $scope.filename
+    // };
+    fileUpload.uploadFileAndFieldsToUrl(file, uploadUrl);
+  };
+
+  $scope.submitGrid = function() {
     var uploadUrl = "/formUpload";
     var fields = {
       "name": "filename",
@@ -488,8 +494,11 @@ canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '
       "account": 12,
       "data": $scope.filename
     };
-    fileUpload.uploadFileAndFieldsToUrl(file, fields, uploadUrl);
+
   };
+
+
+
 
   var parseCSV = function(CSVdata, headers, colCount) {
     var lines = CSVdata.split("\n");

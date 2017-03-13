@@ -35,23 +35,25 @@ canvasSupportApp.directive('eventFocus', function(focus) {
 
 
 canvasSupportApp.service('fileUpload', ['$http', function($http) {
-  this.uploadFileAndFieldsToUrl = function(file, fields, uploadUrl) {
+  this.uploadFileAndFieldsToUrl = function(file, uploadUrl) {
+    console.log(file);
+    console.log(uploadUrl);
     var fd = new FormData();
     fd.append('file', file);
-    angular.forEach(fields, function(value, key) {
-      fd.append(key, value);
-    });
 
-    $http.post(uploadUrl, fd, {
-        transformRequest: angular.identity,
-        headers: {
-          'Content-Type': undefined
-        }
-      })
-      .success(function() {})
-      .error(function() {
-        alert('Sorry, I can\'t do this Dave');
-      });
+    //alert('Posting (not really) to: ' + uploadUrl);
+    console.log(fd);
+
+    // $http.post(uploadUrl, fd, {
+    //     transformRequest: angular.identity,
+    //     headers: {
+    //       'Content-Type': undefined
+    //     }
+    //   })
+    //   .success(function() {})
+    //   .error(function() {
+    //     alert('Sorry, I can\'t do this Dave');
+    //   });
   };
 }]);
 
