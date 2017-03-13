@@ -474,7 +474,8 @@ canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '
 
   $scope.submitCSV = function() {
     var file = $scope.csvfile;
-    var uploadUrl = "/api/v1/accounts/1/sis_imports?override_sis_stickiness=false&batch_mode=false&import_type=instructure_csv&extension=csv&attachment=" + $scope.filename;
+    //var uploadUrl = "/api/v1/accounts/1/sis_imports?override_sis_stickiness=false&batch_mode=false&import_type=instructure_csv&extension=csv&attachment=" + $scope.filename;
+    var uploadUrl = '/uploadCSV';
     // var fields = {
     //   "name": "filename",
     //   "user": "gsilver",

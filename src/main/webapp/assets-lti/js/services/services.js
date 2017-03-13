@@ -44,16 +44,16 @@ canvasSupportApp.service('fileUpload', ['$http', function($http) {
     //alert('Posting (not really) to: ' + uploadUrl);
     console.log(fd);
 
-    // $http.post(uploadUrl, fd, {
-    //     transformRequest: angular.identity,
-    //     headers: {
-    //       'Content-Type': undefined
-    //     }
-    //   })
-    //   .success(function() {})
-    //   .error(function() {
-    //     alert('Sorry, I can\'t do this Dave');
-    //   });
+    $http.post(uploadUrl, fd, {
+        transformRequest: angular.identity,
+        headers: {
+          'Content-Type': undefined
+        }
+      })
+      .success(function() {})
+      .error(function() {
+        alert('Sorry, I can\'t do this Dave');
+      });
   };
 }]);
 

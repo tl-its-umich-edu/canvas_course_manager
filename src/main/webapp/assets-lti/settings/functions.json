@@ -2,7 +2,6 @@
   "name": "Add multiple users to Canvas sections through CSV",
   "id": "users_in_sections",
   "type": "csv",
-  "descriptors":["User ID", "User Role", "Section ID", "User Status"],
   "notes":"Servlet supplies course_id, SAA supplies rest",
   "fields": [{
       "name": "user_id",
@@ -47,7 +46,6 @@
   "name": "Add multiple new sections to Canvas through CSV",
   "id": "sections_to_canvas",
   "type": "csv",
-  "descriptors":["Section Name", "Section Status"],
   "notes":"Servlet supplies course_id, section_id, SAA supplies rest",
   "fields": [{
     "name": "name",
@@ -71,7 +69,6 @@
   "name": "Add multiple new groups to Canvas through CSV",
   "id": "groups_to_sections",
   "type": "csv",
-  "descriptors":["Group Name", "Group Status"],
   "notes":"Servlet supplies group_id, SAA supplies rest",
   "fields": [{
     "name": "name",
@@ -95,7 +92,6 @@
   "name": "Add multiple users to Canvas groups through CSV",
   "id": "users_to_groups",
   "type": "csv",
-  "descriptors":["User ID", "Group ID", "User Status"],
   "notes":"SAA supplies all",
   "fields": [ {
     "name": "group_id",
@@ -129,7 +125,6 @@
   "name": "Add multiple users to Canvas sections through data grid",
   "id": "users_to_sections_grid",
   "type": "grid",
-  "descriptors":["User ID", "User Role", "Section ID", "User Status"],
   "notes":"SAA suplies all. Front end populates enumerations based on available section_ids and roles in the context",
   "fields": [{
     "name": "user_id",
