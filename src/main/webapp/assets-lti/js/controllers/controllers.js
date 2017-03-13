@@ -503,14 +503,27 @@ canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '
 
   var parseCSV = function(CSVdata, headers, colCount) {
     var lines = CSVdata.split("\n");
-    var result = [];
+    var linesHeaders = lines[0].split(',');
+    var linesValues = _.rest(lines,1);
+
+    var result = {};
+    result.data =[];
     $scope.errors = [];
-    for (var i = 0; i < lines.length; i++) {
-      var lineArray = lines[i].split(',');
+
+    var sortedHeaders =[];
+    _.each (linesHeaders, function(lineHeader, index){
+      var header = _.findWhere(headers, {name:lineHeader});
+       sortedHeaders.push(header);
+    });
+
+    for (var i = 0; i < linesValues.length; i++) {
+      var lineArray = linesValues[i].split(',');
+
       var obj = {};
       obj.data = [];
       var number_pattern = /^\d+$/;
-      _.each(headers, function(header, index) {
+
+      _.each(sortedHeaders, function(header, index) {
         var validation = header.validation;
         if (lineArray[index]) {
           if (lineArray[index].split(' ').length !== 1 && !validation.spaces) {
@@ -545,13 +558,14 @@ canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '
       if (lineArray.length === 1 && lineArray[0] === '') {
 
       } else {
-        result.push(obj);
+        result.data.push(obj);
       }
     }
     if (_.where(result, {invalid: true}).length) {
       $scope.errors = _.where(result, {invalid: true});
     }
     $scope.loading = false;
+    result.headers = linesHeaders;
     return result;
 
   };

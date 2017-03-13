@@ -56,7 +56,7 @@
       </div>
       <div class="input-group">
         <span  ng-show="loading"class="alert-info alert-inline">Loading...</span>
-        <button ng-show="csvfile && content.length" class="btn btn-default" type="reset" ng-click="content=[];errors=[]" name="reset-file-input">Reset</button>
+        <button ng-show="csvfile && content.data.length" class="btn btn-default" type="reset" ng-click="content=[];errors=[]" name="reset-file-input">Reset</button>
       </div>
       <div class="pull-right" ng-show="content.length !==0 && errors.length ===0">
           No errors detected <button class="btn btn-primary" ng-click="submitCSV()">Upload</button>
@@ -65,18 +65,19 @@
     <div class="alert alert-danger" ng-show="errors.length && content.length">
       <span ng-if="errors.length >1">There were {{errors.length}} errors</span><span ng-if="errors.length ===1">There was {{errors.length}} error</span>, highlighted below. <input type="checkbox" id="showErrors" name="" value="" ng-model="showErrors">        <label for="showErrors">Show errors only</label>
     </div>
-    <table class="table" ng-show="content.length">
+
+    <table class="table" ng-show="content.data.length">
       <thead>
         <tr>
           <th>
           </th>
-          <th ng-repeat="header in headers">
-            {{header.name}}
+          <th ng-repeat="header in content.headers">
+            {{header}}
           </th>
         </tr>
       </thead>
       <tbody>
-        <tr ng-hide="showErrors && !contentline.invalid" ng-class="{ 'table-danger': contentline.invalid}" ng-repeat="contentline in content track by $index">
+        <tr ng-hide="showErrors && !contentline.invalid" ng-class="{ 'table-danger': contentline.invalid}" ng-repeat="contentline in content.data track by $index">
           <td>{{$index + 1}}</td>
           <td ng-repeat="item in contentline.data track by $index">
             {{item}}
