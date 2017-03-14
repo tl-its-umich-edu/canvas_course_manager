@@ -21,7 +21,7 @@ canvasSupportApp.service('SectionSet', function($rootScope) {
 
 });
 
-
+//directive to pass the focus on to a specific the model item
 canvasSupportApp.directive('eventFocus', function(focus) {
   return function(scope, elem, attr) {
     elem.on(attr.eventFocus, function() {
@@ -33,7 +33,7 @@ canvasSupportApp.directive('eventFocus', function(focus) {
   };
 });
 
-
+// directive to upload a file
 canvasSupportApp.service('fileUpload', ['$http', function($http) {
   this.uploadFileAndFieldsToUrl = function(file, uploadUrl) {
     var fd = new FormData();
@@ -53,7 +53,7 @@ canvasSupportApp.service('fileUpload', ['$http', function($http) {
   };
 }]);
 
-
+//directive to read a file in a file[type:input]
 canvasSupportApp.directive('fileModel', ['$parse', function($parse) {
   return {
     restrict: 'A',

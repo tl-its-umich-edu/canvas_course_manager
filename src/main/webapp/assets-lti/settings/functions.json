@@ -1,6 +1,7 @@
 [{
   "name": "Add multiple users to Canvas sections through CSV",
   "id": "users_in_sections",
+  "url":"addUsersToSections",
   "type": "csv",
   "notes":"Servlet supplies course_id, SAA supplies rest",
   "fields": [{
@@ -45,6 +46,7 @@
 }, {
   "name": "Add multiple new sections to Canvas through CSV",
   "id": "sections_to_canvas",
+  "url": "addSections",
   "type": "csv",
   "notes":"Servlet supplies course_id, section_id, SAA supplies rest",
   "fields": [{
@@ -68,6 +70,7 @@
 }, {
   "name": "Add multiple new groups to Canvas through CSV",
   "id": "groups_to_sections",
+  "url": "addGroups",
   "type": "csv",
   "notes":"Servlet supplies group_id, SAA supplies rest",
   "fields": [{
@@ -91,6 +94,7 @@
 }, {
   "name": "Add multiple users to Canvas groups through CSV",
   "id": "users_to_groups",
+  "url": "addUsersToGroups",
   "type": "csv",
   "notes":"SAA supplies all",
   "fields": [ {
@@ -124,6 +128,7 @@
 }, {
   "name": "Add multiple users to Canvas sections through data grid",
   "id": "users_to_sections_grid",
+  "url": "addUsersToSectionsGrid",
   "type": "grid",
   "notes":"SAA suplies all. Front end populates enumerations based on available section_ids and roles in the context",
   "fields": [{
@@ -167,6 +172,7 @@
 }, {
   "name": "Add multiple users to Canvas groups through data grid",
   "id": "users_to_groups_grid",
+  "url": "addUsersToGroupsGrid",
   "type": "grid",
   "notes":"SAA suplies all. Front end populates enumerations (group_id) based on available group_ids in the context",
   "fields": [{

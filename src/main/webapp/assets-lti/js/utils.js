@@ -62,7 +62,7 @@ var parseResultLookUpCanvasUser = function(userArray, uniqname, userIsFriend){
     var thisUser = _.findWhere(userArray, {sis_login_id: uniqname});
   }
   else{
-   var thisUser = _.findWhere(userArray, {sis_user_id: uniqname}); 
+   var thisUser = _.findWhere(userArray, {sis_user_id: uniqname});
   }
   return thisUser.id
 }
@@ -71,10 +71,10 @@ var filterByRole = function(courseData){
   $.each(courseData, function(index, course) {
     if( _.findWhere(course.enrollments, {type: "ta"})){
       course.enabled = true;
-    }  
+    }
     if( _.findWhere(course.enrollments, {type: "teacher"})){
       course.enabled = true;
-    }  
+    }
   });
   return courseData;
 }
@@ -113,10 +113,10 @@ var reportError = function(position, msg){
 };
 
 /**
- * Pop a window to display help matters, name allows to pass the 
+ * Pop a window to display help matters, name allows to pass the
  * focus to it if already open and in the background
- * 
- * @param {Object} url 
+ *
+ * @param {Object} url
  * @param {Object} name - window name
  */
 var utilPopWindow = function(url, name){
@@ -130,8 +130,8 @@ var utilPopWindow = function(url, name){
 /*used by modal (other instructor field) */
 var validateUniqname = function (value) {
   var value = $.trim(value);
-  var letterOnly = /^[a-z]+$/i;  
-  if(value.match(letterOnly) && value !=='') {  
+  var letterOnly = /^[a-z]+$/i;
+  if(value.match(letterOnly) && value !=='') {
     return true;
   } else {
     return false;
@@ -145,9 +145,9 @@ var validateUniqname = function (value) {
 var validateEmailAddress = function (value) {
   var value = $.trim(value);
   if(value.indexOf('@') !==-1 &&
-    value.indexOf('umich.edu') ===-1  && 
-    value.split('@').length === 2 && 
-    value.split('@')[0] !== '' && 
+    value.indexOf('umich.edu') ===-1  &&
+    value.split('@').length === 2 &&
+    value.split('@')[0] !== '' &&
     value.split('@')[1] !== '' &&
     value.split('@')[1].split('.').length > 1){
     return true;
@@ -158,7 +158,7 @@ var validateEmailAddress = function (value) {
 
 var xListPostStatus;
 
-// function used in xlist multiple post - returns a referred that the calling 
+// function used in xlist multiple post - returns a referred that the calling
 // function can use to determine success/errors - it also adds labels for each
 // case in the modal
 var doXListPosts = function(posts){
@@ -166,7 +166,7 @@ var doXListPosts = function(posts){
   var xListPosts = [];
   xListPostStatus = {successes: [], failures: []};
   for (index = 0, len = posts.length; index < len; ++index) {
-    var xListUrl ='manager' + posts[index];    
+    var xListUrl ='manager' + posts[index];
     xListPosts.push(
       $.post(xListUrl, function(data) {
         var section = data.id;
@@ -210,14 +210,14 @@ $(document).on('click', '.setSections', function (e) {
   var thisCourseTitle = thisCourseContainer.find('a.courseLink').text();
 
   var $sections = $(this).closest('li').find('ul').find('li');
-  
+
   var posts = [];
   $('#xListInner').empty();
   $('#xListInner').append('<p><strong>' + thisCourseTitle + '</strong></p><ol id="listOfSectionsToCrossList" class="listOfSectionsToCrossList"></ol>');
 
   $('#xListConfirm').attr('href',server + '/courses/' + thisCourse + '/settings#tab-sections');
   $sections.each(function( ) {
-    $('#listOfSectionsToCrossList').append( '<li data-sectionid=\"' + $(this).attr('data-sectionid') + '\" ' + 'id=\"xListSection' + $(this).attr('data-sectionid') + '\">' + 
+    $('#listOfSectionsToCrossList').append( '<li data-sectionid=\"' + $(this).attr('data-sectionid') + '\" ' + 'id=\"xListSection' + $(this).attr('data-sectionid') + '\">' +
       '<span class=\"xListStatus\"></span> ' + $(this).find('div.sectionName span').text() + '</li>');
   });
   return null;
@@ -229,7 +229,7 @@ $(document).on('click', '#postXList', function () {
   $('#postXList, #postXListCancel').hide();
 
   var thisCourseContainer = $('li.course[data-course-id="' + thisCourse + '"]');
-  
+
   var $sectionsInModal = $('#listOfSectionsToCrossList').find('li');
   var posts = [];
   $sectionsInModal.each(function( ) {
@@ -249,18 +249,18 @@ $(document).on('click', '#postXList', function () {
     $('.activeCourse').removeClass('activeCourse');
     $(thisCourseContainer).find('.setSections').fadeOut().delay(5000).hide();
   });
-});  
+});
 
 $(document).on('click', '.sectionCheck', function (e) {
   e.preventDefault();
   var thisSection = $(this).closest('li.section');
   var thisSectionId = thisSection.attr('data-sectionid');
   $('#unCrossListInner').empty();
-  $('#unCrossListInner').text('Uncrosslisting will re-associate this section with the previous course.'); 
+  $('#unCrossListInner').text('Uncrosslisting will re-associate this section with the previous course.');
   $('#unCrossList').show();
   $('#unCrossList').attr('data-section-id', thisSectionId);
   return null;
-});  
+});
 
 //cleaning up scope of adding friend panel
 $(document).on('hidden.bs.modal', '#addUserModal', function(){
@@ -285,4 +285,3 @@ $(document).on('hidden.bs.modal', '#addUserModal', function(){
     $scope.addErrorGeneric = false;
   });
 });
-

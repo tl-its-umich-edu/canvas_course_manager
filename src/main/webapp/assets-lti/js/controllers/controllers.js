@@ -29,8 +29,8 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
         $rootScope.account ={};
         $rootScope.account.enabled = false;
         var accountUrl = 'manager/api/v1/accounts?as_user_id=sis_login_id:' + $rootScope.ltiLaunch.custom_canvas_user_login_id;
+        //TODO: remove nested requests when  "can use SAA functions is coming from LTI launch params"
         SAA.getAccounts(accountUrl).then(function (resultAccount) {
-
           if (resultAccount.data.length ===1 && (resultAccount.data[0].id === $rootScope.courseAccount)){
             $rootScope.account.enabled = true;
             $rootScope.account.rootAccountId = resultAccount.data[0].id;
@@ -418,8 +418,10 @@ canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '
   $scope.course = $rootScope.course;
   $scope.availableSections = _.map(_.pluck($rootScope.sections, 'sis_section_id'), function(val){ return String(val); });
 
+  // functions.json contain the model (name, url, field list, validation rules for fields) for all interactions, CSV or form based
   $http.get('assets-lti/settings/functions.json').success(function(data) {
     $scope.functions = data;
+    //add to the model for sections the actual sections available in the course
     var functCSVSect = _.findWhere($scope.functions, {id: "users_in_sections"});
     var fieldCSVSect = _.findWhere(functCSVSect.fields, {name: "section_id"});
     fieldCSVSect.validation.choices = $scope.availableSections;
@@ -429,6 +431,7 @@ canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '
 
     var groupUrl = 'manager/api/v1/courses/' + $scope.course.id + '/groups';
     Course.getGroups(groupUrl).then(function (resultGroups){
+      //add to the model for groups the actual groups available in the course
       $scope.availableGroups = _.map(_.pluck(resultGroups.data, 'id'), function(val){ return String(val); });
       var functCSVGrp = _.findWhere($scope.functions, {id: "users_to_groups"});
       var fieldCSVGrp = _.findWhere(functCSVGrp.fields, {name: "group_id"});
@@ -439,17 +442,24 @@ canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '
     });
   });
 
-  $scope.changeSelectedFunction = function() {
-    $rootScope.selectedFunction = value;
-  };
+  //listn for changes to the function chosen and
+  //assign it to rootscope so that it is available everywhere in the app
+  // $scope.changeSelectedFunction = function() {
+  //   $rootScope.selectedFunction = value;
+  // };
 
 
+  // on page load set content to fals
   $scope.content = false;
+  //grinds will load 25 rows by default
   $scope.gridRowNumber = 25;
+  // used by template
   $scope.getNumber = function(num) {
     return new Array(num);
   };
 
+  // watch for changes to input[type:file]
+  //read and parse the file
   $scope.$watch('csvfile', function(newFileObj) {
     if (newFileObj) {
       $scope.content = false;
@@ -467,29 +477,27 @@ canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '
     }
   });
 
-  $scope.changeSelectedFunction = function() {
-    $scope.content = [];
-  };
 
+  // $scope.changeSelectedFunction = function() {
+  //   $scope.content = [];
+  // };
 
+  // event handler for clicking on the Upload CSV button
   $scope.submitCSV = function() {
     var file = $scope.csvfile;
     $log.info($scope.selectedFunction.url);
     fileUpload.uploadFileAndFieldsToUrl(file, $scope.selectedFunction.url);
   };
 
+
+  //event handler for submitting a grid form
+  // just a stub, not sure if going to get to it
   $scope.submitGrid = function() {
     var uploadUrl = "/formUpload";
-    var fields = {
-      "name": "filename",
-      "user": "gsilver",
-      "request": "users_to_sections",
-      "account": 12,
-      "data": $scope.filename
-    };
   };
 
 
+  //parse attached CSV and validate it against functions model
   var parseCSV = function(CSVdata, headers, colCount) {
     var lines = CSVdata.split("\n");
     var linesHeaders = lines[0].split(',');
@@ -512,6 +520,7 @@ canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '
       var obj = {};
       obj.data = [];
       var number_pattern = /^\d+$/;
+
 
       _.each(sortedHeaders, function(header, index) {
         var validation = header.validation;
