@@ -36,14 +36,10 @@ canvasSupportApp.directive('eventFocus', function(focus) {
 
 canvasSupportApp.service('fileUpload', ['$http', function($http) {
   this.uploadFileAndFieldsToUrl = function(file, uploadUrl) {
-    console.log(file);
-    console.log(uploadUrl);
     var fd = new FormData();
     fd.append('file', file);
 
     //alert('Posting (not really) to: ' + uploadUrl);
-    console.log(fd);
-
     $http.post(uploadUrl, fd, {
         transformRequest: angular.identity,
         headers: {
@@ -52,7 +48,7 @@ canvasSupportApp.service('fileUpload', ['$http', function($http) {
       })
       .success(function() {})
       .error(function() {
-        alert('Sorry, I can\'t do this Dave');
+        alert('Posting to: /' + uploadUrl);
       });
   };
 }]);
