@@ -1,0 +1,197 @@
+[{
+  "name": "Add multiple users to Canvas sections through CSV",
+  "id": "users_in_sections",
+  "url":"addUsersToSections",
+  "type": "csv",
+  "notes":"Servlet supplies course_id, SAA supplies rest",
+  "fields": [{
+      "name": "user_id",
+      "validation": {
+        "spaces": false,
+        "chars": "num",
+        "pattern":"\\d{8,8}",
+        "val_message":"Please use an 8 digit number",
+        "max": 8,
+        "min": 8
+      }
+    }, {
+      "name": "role",
+      "validation": {
+        "spaces": false,
+        "chars": "alpha",
+        "choices": ["student", "teacher", "ta", "observer", "designer"],
+        "max": 2000,
+        "min": 1
+      }
+    }, {
+      "name": "section_id",
+      "validation": {
+        "spaces": false,
+        "chars": "num",
+        "max": 300,
+        "min": 1
+      }
+    },
+    {
+      "name": "status",
+      "validation": {
+        "spaces": false,
+        "chars": "alpha",
+        "choices": ["active", "deleted", "completed", " inactive"],
+        "max": 2000,
+        "min": 1
+      }
+    }
+  ]
+}, {
+  "name": "Add multiple new sections to Canvas through CSV",
+  "id": "sections_to_canvas",
+  "url": "addSections",
+  "type": "csv",
+  "notes":"Servlet supplies course_id, section_id, SAA supplies rest",
+  "fields": [{
+    "name": "name",
+    "validation": {
+      "spaces": true,
+      "chars": "alpha",
+      "max": 300,
+      "min": 5
+    }
+  }, {
+    "name": "status",
+    "validation": {
+      "spaces": false,
+      "chars": "alpha",
+      "choices": ["active", "deleted"],
+      "max": 3000,
+      "min": 1
+    }
+  }]
+}, {
+  "name": "Add multiple new groups to Canvas through CSV",
+  "id": "groups_to_sections",
+  "url": "addGroups",
+  "type": "csv",
+  "notes":"Servlet supplies group_id, SAA supplies rest",
+  "fields": [{
+    "name": "name",
+    "validation": {
+      "spaces": true,
+      "chars": "alpha",
+      "max": 300,
+      "min": 5
+    }
+  }, {
+    "name": "status",
+    "validation": {
+      "spaces": true,
+      "chars": "alpha",
+      "choices": ["available", "deleted"],
+      "max": 3000,
+      "min": 1
+    }
+  }]
+}, {
+  "name": "Add multiple users to Canvas groups through CSV",
+  "id": "users_to_groups",
+  "url": "addUsersToGroups",
+  "type": "csv",
+  "notes":"SAA supplies all",
+  "fields": [ {
+    "name": "group_id",
+    "validation": {
+      "spaces": false,
+      "chars": "alpha",
+      "max": 30,
+      "min": 2
+    }
+  }, {
+    "name": "user_id",
+    "validation": {
+      "spaces": false,
+      "chars": "num",
+      "pattern":"\\d{8,8}",
+      "val_message":"Please use an 8 digit number",
+      "max": 8,
+      "min": 8
+    }
+  },{
+    "name": "status",
+    "validation": {
+      "spaces": false,
+      "chars": "alpha",
+      "choices": ["accepted", "deleted"],
+      "max": 2000,
+      "min": 1
+    }
+  }]
+}, {
+  "name": "Add multiple users to Canvas sections through data grid",
+  "id": "users_to_sections_grid",
+  "url": "addUsersToSectionsGrid",
+  "type": "grid",
+  "notes":"SAA suplies all. Front end populates enumerations based on available section_ids and roles in the context",
+  "fields": [{
+    "name": "user_id",
+    "validation": {
+      "spaces": false,
+      "chars": "num",
+      "pattern":"\\d{8,8}",
+      "val_message":"Please use an 8 digit number",
+      "max": 8,
+      "min": 8
+    }
+  }, {
+    "name": "section_id",
+    "validation": {
+      "spaces": false,
+      "chars": "num",
+      "max": 300,
+      "min": 1
+    }
+  },{
+    "name": "role",
+    "validation": {
+      "spaces": false,
+      "chars": "alpha",
+      "choices": ["student", "teacher", "ta", "observer", "designer"],
+      "max": 2000,
+      "min": 1
+    }
+  },
+  {
+    "name": "status",
+    "validation": {
+      "spaces": false,
+      "chars": "alpha",
+      "choices": ["active", "deleted", "completed", " inactive"],
+      "max": 2000,
+      "min": 1
+    }
+  }]
+}, {
+  "name": "Add multiple users to Canvas groups through data grid",
+  "id": "users_to_groups_grid",
+  "url": "addUsersToGroupsGrid",
+  "type": "grid",
+  "notes":"SAA suplies all. Front end populates enumerations (group_id) based on available group_ids in the context",
+  "fields": [{
+    "name": "user_id",
+    "validation": {
+      "spaces": false,
+      "chars": "num",
+      "pattern":"\\d{8,8}",
+      "val_message":"Please use an 8 digit number",
+      "max": 8,
+      "min": 8
+    }
+  },{
+    "name": "group_id",
+    "validation": {
+      "spaces": false,
+      "chars": "alpha",
+      "max": 300,
+      "min": 5
+    }
+  }]
+}]

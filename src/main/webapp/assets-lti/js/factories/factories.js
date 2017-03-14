@@ -62,10 +62,25 @@ canvasSupportApp.factory('Course', function ($http) {
           if (result.data.errors) {
             errorDisplay(url, result.status, result.data.errors[0].message);
           }
-          return result; 
+          return result;
         },
         function error(result) {
           errorDisplay(url, result.status, 'Unable to get course');
+          return result;
+        }
+      );
+    },
+    getGroups: function (url) {
+      return $http.get(url, {cache: false}).then(
+        function success(result) {
+          // Report Canvas errors
+          if (result.data.errors) {
+            errorDisplay(url, result.status, result.data.errors[0].message);
+          }
+          return result;
+        },
+        function error(result) {
+          errorDisplay(url, result.status, 'Unable to get groups');
           return result;
         }
       );
@@ -80,27 +95,27 @@ canvasSupportApp.factory('Course', function ($http) {
           //Malformed request (because sis_course_id is bogus)
           if (result.data.Meta.httpStatus === 404) {
             return [];
-          } 
+          }
           //Malformed request (because sis_course_id is bogus)
           if (result.data.Meta.httpStatus === 400) {
             return [];
-          } 
+          }
           //MPath not available
           if (result.data.Meta.httpStatus === 666) {
             return result;
-          } 
+          }
           // ESB down
           if (result.data.Meta.httpStatus === 503) {
             return result;
-          } 
-          
+          }
+
           if(result.data.Result.getInstrClassListResponse.InstructedClass) {
             return prepareMPathData(result.data, sis_term_id);
           }
           else {
             return [];
           }
-          
+
         },
         function error(result) {
           return result;
@@ -110,7 +125,7 @@ canvasSupportApp.factory('Course', function ($http) {
     xListSection: function (url) {
       return $http.post(url).then(
         function success(result) {
-          return result;  
+          return result;
         },
         function error(result) {
           errorDisplay(url, result.status, 'Unable to cross list');
@@ -130,11 +145,11 @@ canvasSupportApp.factory('Sections', function ($http) {
         //REGEXINFO: canvas.api.getallsections.per.course.regex
     		//TODO: modify per page to default to 100 using property
     		var url = '/canvasCourseManager/manager/api/v1/courses/course_id/sections?per_page=100&_='+ generateCurrentTimestamp();
-    	} 
+    	}
     	else{
         //REGEXINFO: canvas.api.getallsections.per.course.regex
     	//TODO: modify per page to default to 100 using property
-    		var url = '/canvasCourseManager/manager/api/v1/courses/' + courseId + '/sections?per_page=100&_='+ generateCurrentTimestamp();	
+    		var url = '/canvasCourseManager/manager/api/v1/courses/' + courseId + '/sections?per_page=100&_='+ generateCurrentTimestamp();
     	}
       return $http.get(url, {cache: false}).then(
         function success(result) {
@@ -182,7 +197,7 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
         '&communication_channel[address]=' + friendEmailAddress +
         '&communication_channel[skip_confirmation]=true' +
         '&force_validations=false';
-      
+
       return $http.post(url).then(
         function success(result) {
           return result;
@@ -205,7 +220,7 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
        '&inst_first_name=' + requestorFirst +
        '&inst_last_name='  + requestorLast +
        '&notify_instructor='  + notifyInstructor;
-       
+
       return $http.post(url, {cache: false}).then(
         function success(result) {
           return result;
@@ -234,6 +249,27 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
     },
   };
 });
+
+
+
+//SSA FACTORY - does the requests for the SSA controller
+//TODO: remove when "can use SAA functions is coming from LTI launch params"
+canvasSupportApp.factory('SAA', function ($http, $rootScope) {
+  return {
+    getAccounts: function (accountsUrl) {
+      return $http.get(accountsUrl, {cache: false}).then(
+        function success(result) {
+          return result;
+        },
+        function error(result) {
+          errorDisplay(accountsUrl, result.status, result.data.errors);
+          return result;
+        }
+      );
+    }
+  };
+});
+
 
 canvasSupportApp.factory('focus', function($timeout, $window) {
   return function(id) {
