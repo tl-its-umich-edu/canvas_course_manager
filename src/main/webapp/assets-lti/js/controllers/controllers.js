@@ -495,10 +495,7 @@ canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '
       "account": 12,
       "data": $scope.filename
     };
-
   };
-
-
 
 
   var parseCSV = function(CSVdata, headers, colCount) {
@@ -509,6 +506,7 @@ canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '
     var result = {};
     result.data =[];
     $scope.errors = [];
+    $scope.log =[];
 
     var sortedHeaders =[];
     _.each (linesHeaders, function(lineHeader, index){
@@ -527,24 +525,24 @@ canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '
         var validation = header.validation;
         if (lineArray[index]) {
           if (lineArray[index].split(' ').length !== 1 && !validation.spaces) {
-            $log.warn(lineArray[index] + ' has spaces');
+            $scope.log.push(i+1 + ' - "' + lineArray[index] + '" has spaces');
             obj.invalid = true;
           }
           if (lineArray[index].length > validation.max) {
-            $log.warn(lineArray[index] + ' too many chars');
+            $scope.log.push(i+1 + ' - "' + lineArray[index] + '" too many chars');
             obj.invalid = true;
           }
           if (lineArray[index].length < validation.min) {
-            $log.warn(lineArray[index] + ' too few chars');
+            $scope.log.push(i+1 + ' - "' + lineArray[index] + '" too few chars');
             obj.invalid = true;
           }
           if (!number_pattern.test(lineArray[index]) && validation.chars === 'num') {
-            $log.warn(lineArray[index] + ' not a number');
+            $scope.log.push(i+1 + ' - "' + lineArray[index] + '" not a number');
             obj.invalid = true;
           }
           if (validation.choices) {
             if (_.indexOf(validation.choices, lineArray[index]) === -1) {
-              $log.warn(lineArray[index] + ' is not one of the choices in ' + validation.choices);
+              $scope.log.push(i+1 + ' - "' + lineArray[index] + '" is not one of the choices in [' + validation.choices + ']');
               obj.invalid = true;
             }
           }
@@ -561,13 +559,11 @@ canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '
         result.data.push(obj);
       }
     }
-    if (_.where(result, {invalid: true}).length) {
-      $scope.errors = _.where(result, {invalid: true});
+    if (_.where(result.data, {invalid: true}).length) {
+      $scope.errors = _.where(result.data, {invalid: true});
     }
     $scope.loading = false;
     result.headers = linesHeaders;
     return result;
-
   };
-
 }]);

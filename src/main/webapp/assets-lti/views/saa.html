@@ -58,27 +58,35 @@
         <span  ng-show="loading"class="alert-info alert-inline">Loading...</span>
         <button ng-show="csvfile && content.data.length" class="btn btn-default" type="reset" ng-click="content=[];errors=[]" name="reset-file-input">Reset</button>
       </div>
-      <div class="pull-right" ng-show="content.length !==0 && errors.length ===0">
+      <div class="pull-right" ng-show="content.data.length !==0 && errors.length ===0">
           No errors detected <button class="btn btn-primary" ng-click="submitCSV()">Upload</button>
       </div>
     </form>
-    <div class="alert alert-danger" ng-show="errors.length && content.length">
+    <div class="alert alert-danger" ng-show="errors.length && content.data.length">
       <span ng-if="errors.length >1">There were {{errors.length}} errors</span><span ng-if="errors.length ===1">There was {{errors.length}} error</span>, highlighted below. <input type="checkbox" id="showErrors" name="" value="" ng-model="showErrors">        <label for="showErrors">Show errors only</label>
     </div>
+
+    <ul ng-show="showErrors">
+      <li ng-repeat="message in log track by $index">{{message}}</li>
+    </ul>
+
 
     <table class="table" ng-show="content.data.length">
       <thead>
         <tr>
           <th>
           </th>
-          <th ng-repeat="header in content.headers">
+          <th ng-repeat="header in content.headers" scope="col">
             {{header}}
           </th>
         </tr>
       </thead>
       <tbody>
-        <tr ng-hide="showErrors && !contentline.invalid" ng-class="{ 'table-danger': contentline.invalid}" ng-repeat="contentline in content.data track by $index">
-          <td>{{$index + 1}}</td>
+        <tr ng-hide="showErrors && !contentline.invalid" ng-class="{ 'table-danger': contentline.invalid}"
+          ng-repeat="contentline in content.data track by $index">
+          <td>
+            {{$index+1}}
+          </td>
           <td ng-repeat="item in contentline.data track by $index">
             {{item}}
           </td>
@@ -222,3 +230,9 @@
   </div>
 
 </div>
+<script type="text/javascript">
+
+$(function () {
+  $('[data-toggle="popover"]').popover();
+});
+</script>
