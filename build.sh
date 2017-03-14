@@ -18,4 +18,3 @@ else
 btemp="local"
 fi
 mv ${targetFilename}.war ${targetFilename}.${btemp}.${timestamp}.war
-

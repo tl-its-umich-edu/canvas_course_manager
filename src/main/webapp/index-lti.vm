@@ -11,6 +11,8 @@
       <title>U-M Course Manager</title>
       #set($ltiList = ${ltiValues})
       #set($ltiEntry="")
+      #set ($name_family = $ltiValues.get("lis_person_name_family").replace("'",""))
+      #set ($name_given = $ltiValues.get("lis_person_name_given").replace("'",""))
       <script>
         var ltiLaunch = {
           'custom_canvas_course_id': '$ltiValues.get("custom_canvas_course_id")',
@@ -19,8 +21,8 @@
           'custom_canvas_user_login_id': '$ltiValues.get("custom_canvas_user_login_id")',
           'custom_canvas_user_id': '$ltiValues.get("custom_canvas_user_id")',
           'lis_person_contact_email_primary': '$ltiValues.get("lis_person_contact_email_primary")',
-          'lis_person_name_family': '$ltiValues.get("lis_person_name_family")',
-          'lis_person_name_given': '$ltiValues.get("lis_person_name_given")',
+          'lis_person_name_family': '$name_family',
+          'lis_person_name_given': '$name_given',
           'role_can_add_teacher':'$ltiValues.get("session_roles_for_adding_teacher")'
         };
       </script>
