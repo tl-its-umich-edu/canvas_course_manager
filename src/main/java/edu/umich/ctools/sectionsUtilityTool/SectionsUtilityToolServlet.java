@@ -15,41 +15,24 @@ limitations under the License.
  */
 package edu.umich.ctools.sectionsUtilityTool;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
+import com.mashape.unirest.http.exceptions.UnirestException;
+import edu.umich.ctools.esb.utils.WAPI;
+import edu.umich.ctools.esb.utils.WAPIResultWrapper;
+import edu.umich.its.lti.TcSessionData;
+import edu.umich.its.lti.utils.OauthCredentials;
+import edu.umich.its.lti.utils.OauthCredentialsFactory;
+import edu.umich.its.lti.utils.RequestSignatureUtils;
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.client.methods.*;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.tools.view.VelocityViewServlet;
 import org.apache.velocity.tools.view.ViewToolContext;
@@ -57,15 +40,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.mashape.unirest.http.exceptions.UnirestException;
-
-import edu.umich.ctools.esb.utils.WAPI;
-import edu.umich.ctools.esb.utils.WAPIResultWrapper;
-import edu.umich.its.lti.TcSessionData;
-import edu.umich.its.lti.utils.OauthCredentials;
-import edu.umich.its.lti.utils.OauthCredentialsFactory;
-import edu.umich.its.lti.utils.RequestSignatureUtils;
-import edu.umich.its.lti.utils.PropertiesUtilities;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.*;
+import java.net.URLEncoder;
+import java.util.*;
 
 public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
@@ -98,16 +79,6 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String MPATHWAYS_API_GNERIC = "mpathways.api.get.generic";
 	private static final String ROLE_CAN_ADD_TEACHER = "role.can.add.teacher";
 
-	private static final String CUSTOM_CANVAS_COURSE_ID = "custom_canvas_course_id";
-	private static final String CUSTOM_CANVAS_ENROLLMENT_STATE = "custom_canvas_enrollment_state";
-	private static final String CUSTOM_CANVAS_USER_LOGIN_ID = "custom_canvas_user_login_id";
-	private static final String LIS_PERSON_CONTACT_EMAIL_PRIMARY = "lis_person_contact_email_primary";
-	private static final String LIS_PERSON_NAME_FAMILY = "lis_person_name_family";
-	private static final String LIS_PERSON_NAME_GIVEN = "lis_person_name_given";
-	private static final String CUSTOM_CANVAS_USER_ID = "custom_canvas_user_id";
-	private static final String SESSION_ROLES_FOR_ADDING_TEACHER = "session_roles_for_adding_teacher";
-
-	private static final String TC_SESSION_DATA = "tcSessionData";
 	private static final String M_PATH_DATA = "mPathData";
 	private static final String LTI_1P0_CONST = "LTI-1p0";
 	private static final String LTI_VERSION = "lti_version";
@@ -151,9 +122,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		private static final long serialVersionUID = -1389517682290891890L;
 
 		{
-			//Those who have a TeacherEnrollment or a DesignerEnrollment can 
-			//add anyone. Those users with a TaEnrollment type can only add 
-			//users with type lower that TaEnrollment, i.e. Student and 
+			//Those who have a TeacherEnrollment or a DesignerEnrollment can
+			//add anyone. Those users with a TaEnrollment type can only add
+			//users with type lower that TaEnrollment, i.e. Student and
 			//Observer Enrollments.
 			put("ObserverEnrollment", 0);
 			put("StudentEnrollment", 0);
@@ -166,7 +137,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final HashMap<String,String> apiListRegexWithDebugMsg = new HashMap<String,String>(){
 		private static final long serialVersionUID = -1389517682290891890L;
 
-		{			
+		{
 			put(CANVAS_API_TERMS, "for terms");
 			put(CANVAS_API_CROSSLIST, "for crosslist");
 			put(CANVAS_API_CROSSLIST_MASK, "for crosslist mask");
@@ -214,7 +185,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			isStubTesting = Boolean.valueOf( appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_TEST_STUB) );
 			M_log.debug("isStubTesting: " + isStubTesting);
 		}
-		else {	
+		else {
 			M_log.error("Failed to load system properties(sectionsToolProps.properties) for SectionsTool");
 		}
 	}
@@ -261,19 +232,25 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		HttpServletResponse response = vtc.getResponse();
 		HttpSession session= request.getSession(true);
 		M_log.debug("session id: "+session.getId());
+		boolean admin = isAccountAdmin(request);
+		if (admin) {
+			M_log.info(String.format("The user \"%s\" is account admin in the course %s",
+					request.getParameter(Utils.LTI_PARAM_UNIQNAME), request.getParameter(Utils.LTI_PARAM_CANVAS_COURSE_ID)));
+		}
 
-		HashMap<String, Object> customValuesMap = new HashMap<String, Object>();
+		HashMap<String, Object> customValuesMap = new HashMap<>();
 
-		customValuesMap.put(CUSTOM_CANVAS_COURSE_ID, request.getParameter(CUSTOM_CANVAS_COURSE_ID));
-		customValuesMap.put(CUSTOM_CANVAS_ENROLLMENT_STATE, request.getParameter(CUSTOM_CANVAS_ENROLLMENT_STATE));
-		customValuesMap.put(CUSTOM_CANVAS_USER_LOGIN_ID, request.getParameter(CUSTOM_CANVAS_USER_LOGIN_ID));
-		customValuesMap.put(LIS_PERSON_CONTACT_EMAIL_PRIMARY, request.getParameter(LIS_PERSON_CONTACT_EMAIL_PRIMARY));
-		customValuesMap.put(LIS_PERSON_NAME_FAMILY, request.getParameter(LIS_PERSON_NAME_FAMILY));
-		customValuesMap.put(LIS_PERSON_NAME_GIVEN, request.getParameter(LIS_PERSON_NAME_GIVEN));
-		customValuesMap.put(CUSTOM_CANVAS_USER_ID, request.getParameter(CUSTOM_CANVAS_USER_ID));
-		customValuesMap.put(SESSION_ROLES_FOR_ADDING_TEACHER, appExtPropertiesFile.getProperty(ROLE_CAN_ADD_TEACHER));
+		customValuesMap.put(Utils.LTI_PARAM_CANVAS_COURSE_ID, request.getParameter(Utils.LTI_PARAM_CANVAS_COURSE_ID));
+		customValuesMap.put(Utils.LTI_PARAM_CANVAS_ENROLLMENT_STATE, request.getParameter(Utils.LTI_PARAM_CANVAS_ENROLLMENT_STATE));
+		customValuesMap.put(Utils.LTI_PARAM_UNIQNAME, request.getParameter(Utils.LTI_PARAM_UNIQNAME));
+		customValuesMap.put(Utils.LTI_PARAM_CONTACT_EMAIL_PRIMARY, request.getParameter(Utils.LTI_PARAM_CONTACT_EMAIL_PRIMARY));
+		customValuesMap.put(Utils.LTI_PARAM_LAST_NAME, request.getParameter(Utils.LTI_PARAM_LAST_NAME));
+		customValuesMap.put(Utils.LTI_PARAM_FIRST_NAME, request.getParameter(Utils.LTI_PARAM_FIRST_NAME));
+		customValuesMap.put(Utils.LTI_PARAM_CANVAS_USER_ID, request.getParameter(Utils.LTI_PARAM_CANVAS_USER_ID));
+		customValuesMap.put(Utils.SESSION_ROLES_FOR_ADDING_TEACHER, appExtPropertiesFile.getProperty(ROLE_CAN_ADD_TEACHER));
+		customValuesMap.put(Utils.IS_ACCOUNT_ADMIN, String.valueOf(admin));
 
-		TcSessionData tc = (TcSessionData) session.getAttribute(TC_SESSION_DATA);
+		TcSessionData tc = (TcSessionData) session.getAttribute(Utils.TC_SESSION_DATA);
 
 		OauthCredentials oac = oacf.getOauthCredentials(ltiKey);
 
@@ -281,7 +258,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			tc = new TcSessionData(request, oac, customValuesMap);
 		}
 
-		session.setAttribute(TC_SESSION_DATA,tc);
+		session.setAttribute(Utils.TC_SESSION_DATA,tc);
 		M_log.debug("TC Session Data: " + tc.getUserId());
 
 		// sanity check the result
@@ -296,7 +273,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			}
 			return;
 		}
-		
+
 		if(customValuesMap.containsValue(null)){
 			String msg = "Canvas Course Manager: Found launch parameters null.";
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -338,30 +315,151 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		// Fill context with the required lti values.
 		// The VelocityViewServlet will take care of sending the processing on
 		// to the proper velocity template.
-		fillCcmValuesForContext(ltiValues, request);
+		fillCcmValuesForContext(ltiValues,tc);
 
 		context.put("ltiValues", ltiValues);
 	}
 
-	private void fillCcmValuesForContext(Map<String, String> ltiValues, HttpServletRequest request) {
-		ltiValues.put(CUSTOM_CANVAS_COURSE_ID, request.getParameter(CUSTOM_CANVAS_COURSE_ID));
-		ltiValues.put(CUSTOM_CANVAS_ENROLLMENT_STATE, request.getParameter(CUSTOM_CANVAS_ENROLLMENT_STATE));
-		ltiValues.put(CUSTOM_CANVAS_USER_LOGIN_ID, request.getParameter(CUSTOM_CANVAS_USER_LOGIN_ID));
-		ltiValues.put(LIS_PERSON_CONTACT_EMAIL_PRIMARY, request.getParameter(LIS_PERSON_CONTACT_EMAIL_PRIMARY));
-		ltiValues.put(LIS_PERSON_NAME_FAMILY, request.getParameter(LIS_PERSON_NAME_FAMILY));
-		ltiValues.put(LIS_PERSON_NAME_GIVEN, request.getParameter(LIS_PERSON_NAME_GIVEN));
-		ltiValues.put(CUSTOM_CANVAS_USER_ID, request.getParameter(CUSTOM_CANVAS_USER_ID));
-		ltiValues.put(SESSION_ROLES_FOR_ADDING_TEACHER, appExtPropertiesFile.getProperty(ROLE_CAN_ADD_TEACHER));
+	private boolean isAccountAdmin(HttpServletRequest request) {
+		M_log.debug("isAdmin() call");
+		String courseId = request.getParameter(Utils.LTI_PARAM_CANVAS_COURSE_ID);
+		int userId = Integer.parseInt(request.getParameter(Utils.LTI_PARAM_CANVAS_USER_ID));
 
-		M_log.info("Course ID: " + ltiValues.get(CUSTOM_CANVAS_COURSE_ID));
-		M_log.info("Enrollment State: " + ltiValues.get(CUSTOM_CANVAS_ENROLLMENT_STATE));
-		M_log.info("Login ID: " + ltiValues.get(CUSTOM_CANVAS_USER_LOGIN_ID));
-		M_log.info("Primary Email: " + ltiValues.get(LIS_PERSON_CONTACT_EMAIL_PRIMARY));
-		M_log.info("Last Name: " + ltiValues.get(LIS_PERSON_NAME_FAMILY));
-		M_log.info("First Name: " + ltiValues.get(LIS_PERSON_NAME_GIVEN));
-		M_log.info("Custom Canvas User ID: " + ltiValues.get(CUSTOM_CANVAS_USER_ID));
-		M_log.info("Session Roles For Adding Teacher: " + ltiValues.get(SESSION_ROLES_FOR_ADDING_TEACHER));
+		int courseAccountId= getCourseAccountId(courseId);
+		if(courseAccountId == 0){
+			return false;
+		}
+		M_log.debug("************** " + courseAccountId);
+		return determineIfUserIsAdminInHierarchy(userId,courseAccountId);
 	}
+
+	private boolean determineIfUserIsAdminInHierarchy(int userCanvasId, int courseAccountId){
+		M_log.debug("determineIfUserIsAdminInHierarchy() call");
+		String url = makeCanvasURL("/accounts/" + courseAccountId + "/admins/?user_id[]=" + userCanvasId);
+		HttpResponse response = processApiCall(new HttpGet(url));
+
+		if (response == null) {
+			M_log.error(String.format("check user %s is an admin in the course account %s had null response"
+					, userCanvasId, courseAccountId));
+			return false;
+		}
+
+		int statusCode = response.getStatusLine().getStatusCode();
+		if (statusCode != HttpStatus.SC_OK) {
+			M_log.error(String.format("check user %s is an admin in the course account %s returned status %s " +
+					"with error message", userCanvasId, statusCode, response.toString()));
+			return false;
+		}
+
+		String errMsg = "check user %s is an admin in the course account %s failed due to";
+		String subAccountAdminsResponse = null;
+		try {
+			subAccountAdminsResponse = EntityUtils.toString(response.getEntity(), "UTF-8");
+		} catch (IOException e) {
+			M_log.error(String.format(errMsg, userCanvasId, statusCode, e.getMessage()));
+			return false;
+		} catch (Exception e) {
+			M_log.error(String.format(errMsg, userCanvasId, statusCode, e.getMessage()));
+			return false;
+		}
+
+		JSONArray subAccountAdminsJson = new JSONArray(subAccountAdminsResponse);
+		if (subAccountAdminsJson.length() > 0) {
+			//user is a some kind of admin in the course
+			return true;
+		}
+		//find out if the user is a subaccount admin one level up in the hierarchy
+		int parentAccount = getParentAccount(courseAccountId);
+		// 0 means cannot get the desired response or trying to get parent of root account which is not applicable
+		if (parentAccount == 0) {
+			return false;
+		}
+		return determineIfUserIsAdminInHierarchy(userCanvasId, parentAccount);
+	}
+
+	public int getParentAccount(int accountId){
+		M_log.debug("getParentAccount() call");
+		// https://umich.test.instructure.com:443/api/v1/accounts/78
+		String url = makeCanvasURL("/accounts/" + accountId);
+		HttpResponse response = processApiCall(new HttpGet(url));
+		if (response == null) {
+			M_log.error(String.format("getting parent for account %s for SubAccountAdmin check failed due " +
+					"to null response", accountId));
+			return 0;
+		}
+		int statusCode = response.getStatusLine().getStatusCode();
+		if (statusCode != HttpStatus.SC_OK) {
+			M_log.error(String.format("getting parent for account %s for SubAccountAdmin check failed " +
+					"with status %s and " + "with error message", accountId, statusCode, response.toString()));
+			return 0;
+		}
+
+		String parentAccountResponse;
+		int parentAccountId = 0;
+		String errMsg = "As part of SubAccountAdmin check, couldn't get " +
+				"the ParentId for account %s due to %s";
+		try {
+			parentAccountResponse = EntityUtils.toString(response.getEntity(), "UTF-8");
+			JSONObject parentAccountJson = new JSONObject(parentAccountResponse);
+			if (!parentAccountJson.isNull("parent_account_id")) {
+				parentAccountId = (int) parentAccountJson.get("parent_account_id");
+			}
+		} catch (IOException e) {
+			M_log.error(String.format(errMsg, accountId, e.getMessage()));
+			return 0;
+		} catch (Exception e) {
+			M_log.error(String.format(errMsg, accountId, e.getMessage()));
+			return 0;
+		}
+		return parentAccountId;
+
+	}
+
+	private int getCourseAccountId(String courseId){
+		M_log.debug("getCourseAccountId() call");
+		int course_account_id = 0;
+		String url = makeCanvasURL("/courses/" + courseId);
+		HttpResponse response = processApiCall(new HttpGet(url));
+		if (response == null) {
+			return 0;
+		}
+		int statusCode = response.getStatusLine().getStatusCode();
+		if (statusCode != HttpStatus.SC_OK) {
+			return course_account_id;
+		}
+		String courseData = null;
+		String errMsg = "As part of SubAccountAdmin check, couldn't get accountId the course %s belong to";
+		try {
+			courseData = EntityUtils.toString(response.getEntity(), "UTF-8");
+		} catch (IOException e) {
+			M_log.error(String.format(errMsg, courseId));
+			return 0;
+		} catch (Exception e) {
+			M_log.error(String.format(errMsg, courseId));
+			return 0;
+		}
+		JSONObject courseJson = new JSONObject(courseData);
+		if (!courseJson.isNull("account_id")) {
+			course_account_id = (int) courseJson.get("account_id");
+		}
+		return course_account_id;
+	}
+
+	private String makeCanvasURL(String url){
+		url = canvasURL+Utils.CANVAS_API_VERSION+url;
+		M_log.info("API call "+url);
+		return url;
+	}
+
+	private void fillCcmValuesForContext(Map<String, String> ltiValues, TcSessionData tc) {
+		HashMap<String, Object> customValuesMap = tc.getCustomValuesMap();
+		M_log.info("**** CCM Values in Context are ****");
+		for (String ltiparam : customValuesMap.keySet()) {
+			ltiValues.put(ltiparam,(String)customValuesMap.get(ltiparam));
+			M_log.info(String.format(ltiparam + "=" + customValuesMap.get(ltiparam)));
+		}
+	}
+
 
 	private Boolean checkForValidMessage(HttpServletRequest request,
 			OauthCredentials oc) {
@@ -382,9 +480,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}
 		PrintWriter out = response.getWriter();
 		out.println(s);
-	}	
+	}
 
-	public void doGet(HttpServletRequest request,HttpServletResponse response) 
+	public void doGet(HttpServletRequest request,HttpServletResponse response)
 			throws IOException{
 		M_log.debug("doGet: Called");
 		M_log.info("request.getPathInfo(): " + request.getPathInfo());
@@ -446,7 +544,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		if(ltiUrl == null) {
 			ltiUrl = request.getRequestURL().toString();
 		}
-		// if not isStubTesting, call verifySignature to verify LTI oauth authorization 
+		// if not isStubTesting, call verifySignature to verify LTI oauth authorization
 		if( isStubTesting || RequestSignatureUtils.verifySignature(request, ltiKey, ltiSecret, ltiUrl)){
 			doRequest(request, response);
 			return;
@@ -476,7 +574,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	/*
 	 * This method is handling all the different Api request like PUT, POST etc to canvas.
-	 * We are using canvas admin token stored in the secure properties file to handle the request. 
+	 * We are using canvas admin token stored in the secure properties file to handle the request.
 	 */
 	private void canvasRestApiCall(HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
@@ -513,10 +611,10 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug("esbRestApiCall() called");
 		return;
 		//Stub: to be implemented later when ESB to canvas call is ready
-	}	
+	}
 
 	/*
-	 * This function has logic that execute client(i.e., browser) request and get results from the canvas  
+	 * This function has logic that execute client(i.e., browser) request and get results from the canvas
 	 * using Apache Http client library
 	 * If the property for stub testing is set to true, stub testing will be performed. Stub testing may
 	 * be done during load testing or other kinds of testing. The reason for stubbing is so that we load
@@ -545,16 +643,16 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private void mpathwaysCall(HttpServletRequest request, HttpServletResponse response, PrintWriter out){
 		WAPIResultWrapper wrappedResult = null;
 		String uniqname = null;
-		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(TC_SESSION_DATA);
+		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(Utils.TC_SESSION_DATA);
 		if( tc != null){
-			uniqname = (String) tc.getCustomValuesMap().get(CUSTOM_CANVAS_USER_LOGIN_ID);
+			uniqname = (String) tc.getCustomValuesMap().get(Utils.LTI_PARAM_UNIQNAME);
 		}
 		M_log.debug("WAPI uniqname: " + uniqname);
 		String originalUrl = request.getRequestURI();
 		if(request.getQueryString() != null){
 			originalUrl = originalUrl + "?" + request.getQueryString();
 		}
-		logApiCall(uniqname, originalUrl, request);
+		Utils.logApiCall(uniqname, originalUrl, request);
 		String mpathwaysTermId = request.getParameter(PARAMETER_TERMID);
 		//Friend accounts for Canvas will have a "+" in place of an "@" in their uniqnames
 		if(uniqname == null || uniqname.contains("+") ||
@@ -638,14 +736,14 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		String uniqname = null;
 
-		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(TC_SESSION_DATA);
+		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(Utils.TC_SESSION_DATA);
 		M_log.debug("TC Session Data: " + tc);
 
 		if( tc != null){
-			uniqname = (String) tc.getCustomValuesMap().get(CUSTOM_CANVAS_USER_LOGIN_ID);
+			uniqname = (String) tc.getCustomValuesMap().get(Utils.LTI_PARAM_UNIQNAME);
 		}
 
-		logApiCall(uniqname, url, request);
+		Utils.logApiCall(uniqname, url, request);
 
 		//useful for debugging
 		//displaySessionAttributes(request);
@@ -656,7 +754,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		String originalUrl = url;
 
-		//Retrieve Canvas Data from TC Session Data in order to mask user. 
+		//Retrieve Canvas Data from TC Session Data in order to mask user.
 		//This API is being masked because a uniqname is considered sensitive data.
 		url = unmaskUrl(url, tc, stringToReplaceUser, stringToReplaceCourse);
 
@@ -698,9 +796,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	//When there is too much data to retrieve at once data will be paged.
 	//When data is paged Link Headers will be send in http response. We are
-	//only concerned with the Next Link Header. This method will extract header 
+	//only concerned with the Next Link Header. This method will extract header
 	//if one exists.
-	private String extractNextLink(HttpResponse canvasResponse, HttpSession session) {		
+	private String extractNextLink(HttpResponse canvasResponse, HttpSession session) {
 		String linkValueString = null;
 		String linkValueNext = null;
 		String searchPhrase = "rel=\"next\"";
@@ -708,7 +806,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		HashMap<String, String> links = new HashMap<String, String>();
 		Header[] headers = canvasResponse.getHeaders("Link");
 		for (Header header : headers) {
-			M_log.debug("Key : " + header.getName() 
+			M_log.debug("Key : " + header.getName()
 					+ " ,Value : " + header.getValue());
 			if(header.getName().equals("Link")){
 				linkValueString = header.getValue();
@@ -723,7 +821,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 				break;
 			}
 		}
-		
+
 		if(links.containsKey(searchPhrase)){
 			M_log.debug("LINKS CONTAINS NEXT: " + links.get(searchPhrase));
 			linkValueNext = "/canvasCourseManager/manager" + links.get(searchPhrase).substring(links.get(searchPhrase).indexOf("/api"), links.get(searchPhrase).length());
@@ -735,21 +833,6 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug("LINKS; " + links);
 		M_log.debug("NEXT LINK VALUE: " + linkValueNext);
 		return linkValueNext;
-	}
-
-	private void logApiCall(String uniqname, String originalUrl, HttpServletRequest request) {
-		String loggingApiWithSessionInfo = null;
-		String baseString = "CANVAS API request with Uniqname \"%s\" for URL \"%s\"";
-		if( uniqname != null){
-			loggingApiWithSessionInfo = String.format(baseString, uniqname, originalUrl);
-		}
-		else if(request.getRemoteUser() != null){
-			loggingApiWithSessionInfo = String.format(baseString, request.getRemoteUser(), originalUrl);
-		}
-		else{
-			loggingApiWithSessionInfo = String.format(baseString, request.getSession().getAttribute("testUser"), originalUrl);
-		}
-		M_log.info(loggingApiWithSessionInfo);
 	}
 
 	private void addEnrollmentsToSession(HttpServletRequest request,
@@ -818,7 +901,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		return rolesThatCanAddTeacherList;
 	}
 
-	//Canvas adds custom parameters for lti launches. These custom paramerers 
+	//Canvas adds custom parameters for lti launches. These custom paramerers
 	//include user_login and course_id. We use these parameters to unmask the
 	//API calls.
 	public String unmaskUrl(String url, TcSessionData tc,
@@ -827,8 +910,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			return url;
 		}
 
-		String uniqname = (String) tc.getCustomValuesMap().get(CUSTOM_CANVAS_USER_LOGIN_ID);
-		String courseId = (String) tc.getCustomValuesMap().get(CUSTOM_CANVAS_COURSE_ID);
+		String uniqname = (String) tc.getCustomValuesMap().get(Utils.LTI_PARAM_UNIQNAME);
+		String courseId = (String) tc.getCustomValuesMap().get(Utils.LTI_PARAM_CANVAS_COURSE_ID);
 		M_log.debug("uniqname: " + uniqname);
 		String replaceUserIdValue = "as_user_id=sis_login_id:" + uniqname;
 		if(url.toLowerCase().contains(stringToReplaceUser.toLowerCase())){
@@ -837,7 +920,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		if(url.toLowerCase().contains(stringToReplaceCourse.toLowerCase())){
 			url = url.replace(stringToReplaceCourse.toLowerCase(), courseId);
 		}
-		M_log.debug("New URL: " + url);			
+		M_log.debug("New URL: " + url);
 
 		return url;
 	}
@@ -869,7 +952,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			M_log.info("MPathways call stub");
 			//Sample File for strict use of testing esb calls made from front end application
 			File testFile = new File( this.getClass().getResource("/mpathwaysSample.txt").toURI() );
-			FileReader fr = new FileReader(testFile);  
+			FileReader fr = new FileReader(testFile);
 			BufferedReader rd = new BufferedReader(fr);;
 			String line = "";
 			StringBuilder sb = new StringBuilder();
@@ -926,7 +1009,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	private boolean isAddUserAllowed(HttpServletRequest request, String url) {
 		boolean isCallAllowed = false;
-		//when using the substring method, the +9, +17, +x, the int is the 
+		//when using the substring method, the +9, +17, +x, the int is the
 		//number of characters in the length of the string to skip.
 		String sectionString = url.substring(url.indexOf("sections/")+9, url.indexOf("/enrollments"));
 		String enrollmentTypeFromRequest = url.substring(url.indexOf("enrollment[type]=")+17, url.length());
@@ -939,12 +1022,12 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		//string built, time to make call
 		String uniqname = null;
-		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(TC_SESSION_DATA);
+		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(Utils.TC_SESSION_DATA);
 		if( tc != null){
-			uniqname = (String) tc.getCustomValuesMap().get(CUSTOM_CANVAS_USER_LOGIN_ID);
+			uniqname = (String) tc.getCustomValuesMap().get(Utils.LTI_PARAM_UNIQNAME);
 		}
 
-		logApiCall(uniqname, sectionsApiCall, request);
+		Utils.logApiCall(uniqname, sectionsApiCall, request);
 
 		HttpUriRequest clientRequest = null;
 
@@ -1008,7 +1091,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 				enrollmentTypeFromSession);
 
 		M_log.debug("IS CALL ALLOWED: " + isCallAllowed);
-		
+
 		return isCallAllowed;
 	}
 
@@ -1025,8 +1108,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug("ENROLLMENT TYPE VALUE: " + enrollmentValueFromRequest);
 		M_log.debug("ENROLLMENT FOUND VALUE: " + enrollmentValueFromSession);
 
-		//Enrollment types are ordered by rank. If you are of the same or 
-		//higher rank, then you can add user with rank in request, otherwise 
+		//Enrollment types are ordered by rank. If you are of the same or
+		//higher rank, then you can add user with rank in request, otherwise
 		//fail.
 		if(enrollmentValueFromSession == teacherDesignerEnrollmentRank){
 			M_log.debug("NON UMICH USER ADD ALLOWED BY TEACHER OR DESIGNER");
@@ -1049,15 +1132,15 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		//build api call
 		String crosslistApiCall = canvasURL + url.substring(0, url.indexOf("/crosslist"));
-		M_log.debug("crosslist API call: " + crosslistApiCall);	
+		M_log.debug("crosslist API call: " + crosslistApiCall);
 
 		String uniqname = null;
-		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(TC_SESSION_DATA);
+		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(Utils.TC_SESSION_DATA);
 		if( tc != null){
-			uniqname = (String) tc.getCustomValuesMap().get(CUSTOM_CANVAS_USER_LOGIN_ID);
+			uniqname = (String) tc.getCustomValuesMap().get(Utils.LTI_PARAM_UNIQNAME);
 		}
 
-		logApiCall(uniqname, url, request);
+		Utils.logApiCall(uniqname, url, request);
 		HttpUriRequest clientRequest = null;
 
 		clientRequest = new HttpGet(crosslistApiCall);
@@ -1118,7 +1201,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	}
 
 	private HttpResponse processApiCall(HttpUriRequest clientRequest) {
-		HttpClient client = new DefaultHttpClient();
+		HttpClient client = HttpClients.createDefault();
 		final ArrayList<NameValuePair> nameValues = new ArrayList<NameValuePair>();
 		nameValues.add(new BasicNameValuePair("Authorization", "Bearer"+ " " +canvasToken));
 		nameValues.add(new BasicNameValuePair("content-type", "application/json"));
