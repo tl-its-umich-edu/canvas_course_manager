@@ -30,25 +30,6 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
         $rootScope.account.enabled = false;
         var accountUrl = 'manager/api/v1/accounts?as_user_id=sis_login_id:' + $rootScope.ltiLaunch.custom_canvas_user_login_id;
         //TODO: remove nested requests when  "can use SAA functions is coming from LTI launch params"
-        SAA.getAccounts(accountUrl).then(function (resultAccount) {
-          if (resultAccount.data.length ===1 && (resultAccount.data[0].id === $rootScope.courseAccount)){
-            $rootScope.account.enabled = true;
-            $rootScope.account.rootAccountId = resultAccount.data[0].id;
-            $rootScope.account.rootAccountName = resultAccount.data[0].name;
-          } else {
-            var subAccountsUrl = 'manager/api/v1/accounts/' + resultAccount.data[0].id  + '/sub_accounts?recursive=true&per_page=200';
-            SAA.getAccounts(subAccountsUrl).then(function (resultSubAccounts) {
-              var goodAccount =_.findWhere(resultSubAccounts.data, {id: $rootScope.courseAccount});
-              if(goodAccount) {
-                $rootScope.account.enabled = true;
-                $rootScope.account.rootAccountId = resultAccount.data[0].id;
-                $rootScope.account.rootAccountName = resultAccount.data[0].name;
-                $rootScope.account.subAccountId = goodAccount.id;
-                $rootScope.account.subAccountName = goodAccount.name;
-              }
-            });
-          }
-        });
 
         Sections.getSectionsForCourseId('', true).then(function (resultSections) {
           $rootScope.sections = resultSections.data;

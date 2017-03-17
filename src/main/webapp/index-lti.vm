@@ -16,14 +16,14 @@
       <script>
         var ltiLaunch = {
           'custom_canvas_course_id': '$ltiValues.get("custom_canvas_course_id")',
-          'custom_canvas_context_id': '$ltiValues.get("custom_canvas_context_id")',
           'custom_canvas_enrollment_state': '$ltiValues.get("custom_canvas_enrollment_state")',
           'custom_canvas_user_login_id': '$ltiValues.get("custom_canvas_user_login_id")',
           'custom_canvas_user_id': '$ltiValues.get("custom_canvas_user_id")',
           'lis_person_contact_email_primary': '$ltiValues.get("lis_person_contact_email_primary")',
           'lis_person_name_family': '$name_family',
           'lis_person_name_given': '$name_given',
-          'role_can_add_teacher':'$ltiValues.get("session_roles_for_adding_teacher")'
+          'role_can_add_teacher':'$ltiValues.get("session_roles_for_adding_teacher")',
+          'role_is_account_admin':'$ltiValues.get("isAccountAdmin")'
         };
       </script>
   </head>
@@ -45,13 +45,14 @@
                 </button>
                 <h1 class="navbar-brand collapse-nav">U-M Course Manager</h1>
             </div>
+
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" ng-controller="navController">
                 <ul class="nav navbar-nav navbar-right">
                     <li>
                       <a ng-if="view && view !=='LTI'" class="collapse-nav"  ng-click="changeView('LTI')" href="#ltihome">LTI</a>
                     </li>
-                    <li ng-if="account">
+                    <li ng-if="ltiLaunch.role_is_account_admin ==='true'">
                       <a ng-if="view !=='SAA'" class="collapse-nav" ng-click="changeView('SAA')"  href="#saa">SAA</a>
                     </li>
                     <li>
@@ -65,7 +66,6 @@
 <br><br><br>
 
     <div ng-view></div>
-
     <script src="vendor/jquery/jquery-1.11.0.min.js"></script>
     <script src="vendor/jquery/jquery-ui-1.11.2/jquery-ui.min.js"></script>
     <script src="assets-lti/vendor/angular/angular.min.js">

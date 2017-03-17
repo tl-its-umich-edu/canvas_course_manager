@@ -182,42 +182,10 @@
         </tr>
         <tr>
           <td>
-            User root account
-          </td>
-          <td>
-            {{account.rootAccountId}}
-          </td>
-        </tr>
-        <tr>
-          <td>
-            User root account name:
-          </td>
-          <td>
-            {{account.rootAccountName}}
-          </td>
-        </tr>
-        <tr>
-          <td>
-            User matching sub account:
-          </td>
-          <td>
-            {{account.subAccountId}}
-          </td>
-        </tr>
-        <tr>
-          <td>
-            User matching sub account name:
-          </td>
-          <td>
-            {{account.subAccountName}}
-          </td>
-        </tr>
-        <tr>
-          <td>
               User able to function:
           </td>
           <td>
-            <span ng-class="account.enabled?'label label-success': 'label label-danger'">{{account.enabled}}</span>
+            <span ng-class="ltiLaunch.role_is_account_admin === 'true'?'label label-success': 'label label-danger'">{{ltiLaunch.role_is_account_admin}}</span>
           </td>
         </tr>
       </tbody>
@@ -226,13 +194,14 @@
   </div>
   <h4>LTI vals:</h4>
   <div class="well">
-    <ul>
-      <li>
-        Course Id: {{ltiLaunch.custom_canvas_course_id}}
-      </li>
-      <li>
-        ContextId: {{ltiLaunch.custom_canvas_context_id}}
-      </li>
-    </ul>
+    <table class="table table-stripped">
+      <tr ng-repeat="(key, value) in ltiLaunch">
+        <td>
+          {{key}}
+        </td>
+        <td>
+          {{value}}
+        </td>
+      </table>
   </div>
 </div>
