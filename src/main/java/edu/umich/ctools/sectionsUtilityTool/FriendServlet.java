@@ -15,21 +15,19 @@ limitations under the License.
 */
 package edu.umich.ctools.sectionsUtilityTool;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Properties;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import javax.json.Json;
+import javax.json.JsonObject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.json.*;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import edu.umich.its.lti.TcSessionData;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Properties;
 
 public class FriendServlet extends HttpServlet {
 
@@ -45,7 +43,6 @@ public class FriendServlet extends HttpServlet {
 	private static final String PARAMETER_INSTRUCTOR_FIRST_NAME = "inst_first_name";
 	private static final String PARAMETER_INSTRUCTOR_LAST_NAME = "inst_last_name";
 	private static final String PARAMETER_NOTIFY_INSTRUCTOR = "notify_instructor";
-	private static final String TC_SESSION_DATA = "tcSessionData";
 
 	private final static String CCM_PROPERTY_FILE_PATH = "ccmPropsPath";
 	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";	
@@ -89,7 +86,7 @@ public class FriendServlet extends HttpServlet {
 			M_log.error("Failed to load system properties(sectionsToolProps.properties) for SectionsTool");
 			return;
 		}
-		logApiCall(request);
+		Utils.logApiCall(request);
 		long startTime = System.currentTimeMillis();
 		friendApiConnectionLogic(request,response, myFriend);
 		long stopTime = System.currentTimeMillis();
@@ -97,36 +94,6 @@ public class FriendServlet extends HttpServlet {
 		M_log.info(String.format("FRIEND Api response took %sms",elapsedTime));
 	}	
 	
-	private void logApiCall(HttpServletRequest request) {
-		String uniqname = null;
-		String loggingApiWithSessionInfo = null;
-		String queryString = request.getQueryString();
-		String pathInfo = request.getPathInfo();
-		String url = pathInfo;
-		if(queryString!=null) {
-			url = url+"?"+queryString;
-		}
-
-		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(TC_SESSION_DATA);
-		M_log.debug("TC Session Data: " + tc);
-		
-		String baseString = "FRIEND API request with Uniqname \"%s\" for URL \"%s\"";
-
-		if( tc != null){
-			uniqname = (String) tc.getCustomValuesMap().get("custom_canvas_user_login_id");
-		}
-		if( uniqname != null){
-			loggingApiWithSessionInfo = String.format(baseString, uniqname, url);
-		}
-		else if(request.getRemoteUser() != null){
-			loggingApiWithSessionInfo = String.format(baseString, request.getRemoteUser(), url);
-		}
-		else{
-			loggingApiWithSessionInfo = String.format(baseString, request.getSession().getAttribute("testUser"), url);
-		}
-		M_log.info(loggingApiWithSessionInfo);
-	}
-
 	/*
 	 * This function has logic that execute client(i.e., browser) request and get results from the Friend Accounts  
 	 */
