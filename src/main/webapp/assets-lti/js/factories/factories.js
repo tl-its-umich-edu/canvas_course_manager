@@ -251,26 +251,6 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
 });
 
 
-
-//SSA FACTORY - does the requests for the SSA controller
-//TODO: remove when "can use SAA functions is coming from LTI launch params"
-canvasSupportApp.factory('SAA', function ($http, $rootScope) {
-  return {
-    getAccounts: function (accountsUrl) {
-      return $http.get(accountsUrl, {cache: false}).then(
-        function success(result) {
-          return result;
-        },
-        function error(result) {
-          errorDisplay(accountsUrl, result.status, result.data.errors);
-          return result;
-        }
-      );
-    }
-  };
-});
-
-
 canvasSupportApp.factory('focus', function($timeout, $window) {
   return function(id) {
     $timeout(function() {

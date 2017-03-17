@@ -2,7 +2,7 @@
 /* global $, canvasSupportApp, _, generateCurrentTimestamp, angular, validateEmailAddress */
 
 /* SINGLE COURSE CONTROLLER */
-canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', 'SAA', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, SAA, $scope, $rootScope, $filter, $location, $log) {
+canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, $scope, $rootScope, $filter, $location, $log) {
     $scope.userIsFriend=false;
     $scope.contextCourseId = $rootScope.ltiLaunch.custom_canvas_course_id;
     $scope.currentUserCanvasId = $rootScope.ltiLaunch.custom_canvas_user_id;
@@ -20,17 +20,10 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
       if(!resultCourse.data.errors) {
         $scope.loadingSections = true;
         $rootScope.course = resultCourse.data;
+        $rootScope.termId = $scope.course.enrollment_term_id;
         $scope.course = resultCourse.data;
         $scope.course.addingSections = false;
-        $rootScope.termId = $scope.course.enrollment_term_id;
-
-        $scope.course = resultCourse.data;
         $rootScope.courseAccount = $scope.course.account_id;
-        $rootScope.account ={};
-        $rootScope.account.enabled = false;
-        var accountUrl = 'manager/api/v1/accounts?as_user_id=sis_login_id:' + $rootScope.ltiLaunch.custom_canvas_user_login_id;
-        //TODO: remove nested requests when  "can use SAA functions is coming from LTI launch params"
-
         Sections.getSectionsForCourseId('', true).then(function (resultSections) {
           $rootScope.sections = resultSections.data;
           $scope.loadingSections = false;
@@ -395,7 +388,7 @@ canvasSupportApp.controller('navController', ['$scope', '$location', function ($
 }]);
 
 /* SSA (Affiliate Functions) CONTROLLER */
-canvasSupportApp.controller('saaController', ['Course','SectionSet', '$scope', '$rootScope', 'fileUpload', '$timeout', '$log', '$http', function(Course, SectionSet, $scope, $rootScope, fileUpload, $timeout, $log, $http) {
+canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 'fileUpload', '$timeout', '$log', '$http', function(Course, $scope, $rootScope, fileUpload, $timeout, $log, $http) {
   $scope.course = $rootScope.course;
   $scope.availableSections = _.map(_.pluck($rootScope.sections, 'sis_section_id'), function(val){ return String(val); });
 
