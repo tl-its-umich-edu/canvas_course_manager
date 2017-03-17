@@ -2,7 +2,7 @@
 /* global $, canvasSupportApp, _, generateCurrentTimestamp, angular, validateEmailAddress */
 
 /* SINGLE COURSE CONTROLLER */
-canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', '$scope', '$rootScope', '$filter', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, $scope, $rootScope, $filter) {
+canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, $scope, $rootScope, $filter, $location, $log) {
     $scope.userIsFriend=false;
     $scope.contextCourseId = $rootScope.ltiLaunch.custom_canvas_course_id;
     $scope.currentUserCanvasId = $rootScope.ltiLaunch.custom_canvas_user_id;
@@ -10,7 +10,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     $scope.canAddTeachers = JSON.parse($rootScope.ltiLaunch.role_can_add_teacher);
     if($scope.currentUserId.indexOf('+') > -1){
       $scope.currentUserId = $scope.currentUserId.replace('+','@');
-      $scope.userIsFriend=true
+      $scope.userIsFriend=true;
     }
     //get the current user id from launch params
     $scope.canvas_user_id = $scope.currentUserCanvasId;
@@ -19,10 +19,13 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     Course.getCourse(courseUrl).then(function (resultCourse) {
       if(!resultCourse.data.errors) {
         $scope.loadingSections = true;
+        $rootScope.course = resultCourse.data;
+        $rootScope.termId = $scope.course.enrollment_term_id;
         $scope.course = resultCourse.data;
         $scope.course.addingSections = false;
-        $rootScope.termId = $scope.course.enrollment_term_id;
+        $rootScope.courseAccount = $scope.course.account_id;
         Sections.getSectionsForCourseId('', true).then(function (resultSections) {
+          $rootScope.sections = resultSections.data;
           $scope.loadingSections = false;
           if(!resultSections.data.errors) {
             $scope.course.sections =_.sortBy(resultSections.data, 'name');
@@ -30,12 +33,12 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
               $scope.currentTermSISID = $scope.course.sections[0].sis_course_id.substring(0, 4);
             }
             else {
-             $scope.currentTermSISID = $scope.course.sections[0].sis_course_id; 
+             $scope.currentTermSISID = $scope.course.sections[0].sis_course_id;
             }
             if($scope.currentTermSISID) {
             /* adds to the scope a list of sections (by sis_section_id) that the current user can perform actions on */
             var mPathwaysCoursesUrl = 'manager/mpathways/Instructors?user=self&termid=' + $scope.currentTermSISID;
-              Course.getMPathwaysCourses(mPathwaysCoursesUrl, $scope.currentTermSISID).then(function (resultMPathData) {  
+              Course.getMPathwaysCourses(mPathwaysCoursesUrl, $scope.currentTermSISID).then(function (resultMPathData) {
                 if(!resultMPathData.data) {
                   if(Array.isArray(resultMPathData)) {
                     $scope.mpath_courses = resultMPathData;
@@ -49,13 +52,13 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
             else {
               $scope.mpath_courses =[];
             }
-          }  
+          }
         });
       }
     });
     //REGEXINFO: canvas.api.get.single.course.enrollment.regex
     var courseEnrollmentUrl ='manager/api/v1/courses/course_id/enrollments?user_id=' + $scope.canvas_user_id + '&_=' + generateCurrentTimestamp();
-    
+
     Course.getCourse(courseEnrollmentUrl).then(function (resultCourseEnrollment) {
       $rootScope.courseRole = teacherPrivileges(resultCourseEnrollment.data, $scope.canAddTeachers);
     });
@@ -69,8 +72,8 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     Courses.getCourses(coursesUrl).then(function (resultCourses) {
       $scope.loadingOtherCourses = false;
       $scope.course.addingSections = true;
-      // this is not optimal - ideally we should be requesting just this terms' courses, not all of them and then 
-      // filtering them      
+      // this is not optimal - ideally we should be requesting just this terms' courses, not all of them and then
+      // filtering them
       //filter term
       var filteredByTerm = _.where(resultCourses.data, {enrollment_term_id:  $rootScope.termId});
       // filter by enrollment
@@ -79,10 +82,10 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
       //remove possible dupes
       $scope.courses = _.uniq(filteredByRole);
 
-      $scope.$evalAsync(function() { 
+      $scope.$evalAsync(function() {
         focus('otherCourses');
       })
-    });    
+    });
   };
 
   $scope.getSections = function (courseId) {
@@ -93,7 +96,7 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
       if (resultSections) {
         //append a section object to the course scope
         $scope.courses[coursePos].sections = _.sortBy(filterOutSections(resultSections.data,$scope.mpath_courses), 'name');
-        $scope.$evalAsync(function() { 
+        $scope.$evalAsync(function() {
           focus('sections' + courseId);
         })
 
@@ -144,9 +147,9 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     // hide the "Done" button
     $scope.course.addingSectionsDone = false;
   };
-  
+
   $scope.xListSections = function(courseId){
-    // get the added sections by rejecting all of the original sections 
+    // get the added sections by rejecting all of the original sections
     // and keeping the remainder
     var addedSections = _.reject($scope.course.sections, {course_id : courseId});
     // for each added section call a factory that will do a post
@@ -184,7 +187,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
   $scope.$on('courseSetChanged', function(event, sectionSet) {
       $scope.coursemodal = sectionSet[0];
   });
-  
+
 
   //change handler for section checkboxes - calculates if any checkbox is checked and updates
   // a variable used to enable the 'Add Friend' button
@@ -198,7 +201,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     }
   };
 
-  // handler for 'Add Friend' (the first one), if account exists in Canvas, add to sections, if not 
+  // handler for 'Add Friend' (the first one), if account exists in Canvas, add to sections, if not
   // present a form to create
 
   $scope.lookUpCanvasFriendClick = function () {
@@ -216,7 +219,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
           } else {
             // not an existing user - present interface to add
             $scope.newUser = true;
-            $scope.$evalAsync(function() { 
+            $scope.$evalAsync(function() {
               focus('newUser');
             })
 
@@ -228,14 +231,14 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     else {
       $scope.coursemodal.loadingLookupFriend = false;
       $scope.failedValidation = true;
-      $scope.$evalAsync(function() { 
+      $scope.$evalAsync(function() {
         focus('failedToValidateEmail');
       })
     }
   };
 
   // handler for 'Add Friend' (the second one) - calls Friends endpoint (that does the call to
-  // the external Friend service) - if successful the account is also created in Canvas and 
+  // the external Friend service) - if successful the account is also created in Canvas and
   // the user gets added to the selected sections
 
   $scope.createFriendClick = function () {
@@ -257,7 +260,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
           $scope.friend_account = resultDoFriendAccount.data;
           $scope.newUserFound=true;
           $scope.friendDone=true;
-          
+
           Friend.createCanvasFriend(friendEmailAddress,friendNameFirst, friendNameLast).then(function (resultCreateCanvasFriend) {
             // check for successufull creation of Canvas account
             if (resultCreateCanvasFriend.data.sis_user_id === friendEmailAddress) {
@@ -269,13 +272,13 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
               $scope.addUserToSectionsClick();
             } else {
               // TODO: servlet errors are caught by factory
-              // here we would deal with a 200 that nevertheless was an error, but have been unable to trigger this 
+              // here we would deal with a 200 that nevertheless was an error, but have been unable to trigger this
             }
           });
           $scope.userAvailable = true;
           $scope.done = true;
         } else {
-          // 500 errors are caught and reported by factory, here we 
+          // 500 errors are caught and reported by factory, here we
           // are dealing with incorrect data errors (ie. email address that slipped through validator)
           if(data.data.message !== 'request error') {
             $scope.friend_account = resultCreateCanvasFriend.data;
@@ -287,14 +290,14 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     }
     else {
       $scope.failedValidation = true;
-      $scope.$evalAsync(function() { 
+      $scope.$evalAsync(function() {
         focus('failedToValidateEmailName');
       })
 
     }
   };
 
-  // handler to reset the state in the workflow 
+  // handler to reset the state in the workflow
   // and a allow the user to add another
 
   $scope.addAnother = function() {
@@ -312,10 +315,10 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     for(var e in $scope.coursemodal.sections) {
       $scope.coursemodal.sections[e].selected = false;
     }
-    $scope.coursemodal.sectionSelected = false; 
+    $scope.coursemodal.sectionSelected = false;
   };
 
-  // function used by the event handlers attached to the two 
+  // function used by the event handlers attached to the two
   // 'Add Friend' buttons. It adds the user to the selected sections
 
   $scope.addUserToSectionsClick = function () {
@@ -371,8 +374,171 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     $scope.successes = successes.sort();
     $scope.errors = errors
     // pass the focus to the container of the success and failure message
-    $scope.$evalAsync(function() { 
+    $scope.$evalAsync(function() {
       focus('addMessageContainer');
     })
+  };
+}]);
+
+
+canvasSupportApp.controller('navController', ['$scope', '$location', function ($scope, $location) {
+  $scope.changeView = function(view){
+    $scope.view = view;
+  };
+}]);
+
+/* SSA (Affiliate Functions) CONTROLLER */
+canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 'fileUpload', '$timeout', '$log', '$http', function(Course, $scope, $rootScope, fileUpload, $timeout, $log, $http) {
+  $scope.course = $rootScope.course;
+  $scope.availableSections = _.map(_.pluck($rootScope.sections, 'sis_section_id'), function(val){ return String(val); });
+
+  // functions.json contain the model (name, url, field list, validation rules for fields) for all interactions, CSV or form based
+  $http.get('assets-lti/settings/functions.json').success(function(data) {
+    $scope.functions = data;
+    //add to the model for sections the actual sections available in the course
+    var functCSVSect = _.findWhere($scope.functions, {id: "users_in_sections"});
+    var fieldCSVSect = _.findWhere(functCSVSect.fields, {name: "section_id"});
+    fieldCSVSect.validation.choices = $scope.availableSections;
+    var functCSVGrid = _.findWhere($scope.functions, {id: "users_to_sections_grid"});
+    var fieldCSVGrid = _.findWhere(functCSVGrid.fields, {name: "section_id"});
+    fieldCSVGrid.validation.choices = $scope.availableSections;
+
+    var groupUrl = 'manager/api/v1/courses/' + $scope.course.id + '/groups';
+    Course.getGroups(groupUrl).then(function (resultGroups){
+      //add to the model for groups the actual groups available in the course
+      $scope.availableGroups = _.map(_.pluck(resultGroups.data, 'id'), function(val){ return String(val); });
+      var functCSVGrp = _.findWhere($scope.functions, {id: "users_to_groups"});
+      var fieldCSVGrp = _.findWhere(functCSVGrp.fields, {name: "group_id"});
+      fieldCSVGrp.validation.choices = $scope.availableGroups;
+      var functGrpGrid = _.findWhere($scope.functions, {id: "users_to_groups_grid"});
+      var fieldGrpGrid = _.findWhere(functGrpGrid.fields, {name: "group_id"});
+      fieldGrpGrid.validation.choices = $scope.availableGroups;
+    });
+  });
+
+  //listn for changes to the function chosen and
+  //assign it to rootscope so that it is available everywhere in the app
+  // $scope.changeSelectedFunction = function() {
+  //   $rootScope.selectedFunction = value;
+  // };
+
+
+  // on page load set content to fals
+  $scope.content = false;
+  //grinds will load 25 rows by default
+  $scope.gridRowNumber = 25;
+  // used by template
+  $scope.getNumber = function(num) {
+    return new Array(num);
+  };
+
+  // watch for changes to input[type:file]
+  //read and parse the file
+  $scope.$watch('csvfile', function(newFileObj) {
+    if (newFileObj) {
+      $scope.content = false;
+      $scope.loading = true;
+      var reader = new FileReader();
+      reader.readAsText(newFileObj);
+      reader.onload = function(e) {
+        var CSVPreview = function() {
+          $scope.headers = $scope.selectedFunction.fields;
+          $scope.content = parseCSV(reader.result, $scope.headers, $scope.headers.length);
+        };
+        $timeout(CSVPreview, 100);
+      };
+      $scope.filename = newFileObj.name;
+    }
+  });
+
+
+  // $scope.changeSelectedFunction = function() {
+  //   $scope.content = [];
+  // };
+
+  // event handler for clicking on the Upload CSV button
+  $scope.submitCSV = function() {
+    var file = $scope.csvfile;
+    $log.info($scope.selectedFunction.url);
+    fileUpload.uploadFileAndFieldsToUrl(file, $scope.selectedFunction.url);
+  };
+
+
+  //event handler for submitting a grid form
+  // just a stub, not sure if going to get to it
+  $scope.submitGrid = function() {
+    var uploadUrl = "/formUpload";
+  };
+
+
+  //parse attached CSV and validate it against functions model
+  var parseCSV = function(CSVdata, headers, colCount) {
+    var lines = CSVdata.split("\n");
+    var linesHeaders = lines[0].split(',');
+    var linesValues = _.rest(lines,1);
+
+    var result = {};
+    result.data =[];
+    $scope.errors = [];
+    $scope.log =[];
+
+    var sortedHeaders =[];
+    _.each (linesHeaders, function(lineHeader, index){
+      var header = _.findWhere(headers, {name:lineHeader});
+       sortedHeaders.push(header);
+    });
+
+    for (var i = 0; i < linesValues.length; i++) {
+      var lineArray = linesValues[i].split(',');
+
+      var obj = {};
+      obj.data = [];
+      var number_pattern = /^\d+$/;
+
+
+      _.each(sortedHeaders, function(header, index) {
+        var validation = header.validation;
+        if (lineArray[index]) {
+          if (lineArray[index].split(' ').length !== 1 && !validation.spaces) {
+            $scope.log.push(i+1 + ' - "' + lineArray[index] + '" has spaces');
+            obj.invalid = true;
+          }
+          if (lineArray[index].length > validation.max) {
+            $scope.log.push(i+1 + ' - "' + lineArray[index] + '" too many chars');
+            obj.invalid = true;
+          }
+          if (lineArray[index].length < validation.min) {
+            $scope.log.push(i+1 + ' - "' + lineArray[index] + '" too few chars');
+            obj.invalid = true;
+          }
+          if (!number_pattern.test(lineArray[index]) && validation.chars === 'num') {
+            $scope.log.push(i+1 + ' - "' + lineArray[index] + '" not a number');
+            obj.invalid = true;
+          }
+          if (validation.choices) {
+            if (_.indexOf(validation.choices, lineArray[index]) === -1) {
+              $scope.log.push(i+1 + ' - "' + lineArray[index] + '" is not one of the choices in [' + validation.choices + ']');
+              obj.invalid = true;
+            }
+          }
+        }
+        obj.data.push(lineArray[index]);
+      });
+      if (lineArray.length !== colCount && lineArray !== ['']) {
+        obj.invalid = true;
+      }
+
+      if (lineArray.length === 1 && lineArray[0] === '') {
+
+      } else {
+        result.data.push(obj);
+      }
+    }
+    if (_.where(result.data, {invalid: true}).length) {
+      $scope.errors = _.where(result.data, {invalid: true});
+    }
+    $scope.loading = false;
+    result.headers = linesHeaders;
+    return result;
   };
 }]);

@@ -22,11 +22,13 @@
           'lis_person_contact_email_primary': '$ltiValues.get("lis_person_contact_email_primary")',
           'lis_person_name_family': '$name_family',
           'lis_person_name_given': '$name_given',
-          'role_can_add_teacher':'$ltiValues.get("session_roles_for_adding_teacher")'
+          'role_can_add_teacher':'$ltiValues.get("session_roles_for_adding_teacher")',
+          'role_is_account_admin':'$ltiValues.get("isAccountAdmin")'
         };
       </script>
   </head>
   <body>
+
     <div class="alert alert-danger debugPanel alert-dismissible" id="debugPanel" role="alert" style="z-index:1051">
       <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       <div id="debugPanelBody"></div>
@@ -43,22 +45,32 @@
                 </button>
                 <h1 class="navbar-brand collapse-nav">U-M Course Manager</h1>
             </div>
+
             <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" ng-controller="navController">
                 <ul class="nav navbar-nav navbar-right">
                     <li>
-                      <a href="#" class="collapse-nav" id="helpLink" data-url="help-lti.html">Help</a>
+                      <a ng-if="view && view !=='LTI'" class="collapse-nav"  ng-click="changeView('LTI')" href="#ltihome">LTI</a>
+                    </li>
+                    <li ng-if="ltiLaunch.role_is_account_admin ==='true'">
+                      <a ng-if="view !=='SAA'" class="collapse-nav" ng-click="changeView('SAA')"  href="#saa">SAA</a>
+                    </li>
+                    <li>
+                      <a href="" class="collapse-nav" id="helpLink" data-url="help-lti.html">Help</a>
                     </li>
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
         </div>
     </nav>
+<br><br><br>
 
-    <div ng-include src="'assets-lti/views/course.html'" style="margin-top:60px"></div>
+    <div ng-view></div>
     <script src="vendor/jquery/jquery-1.11.0.min.js"></script>
     <script src="vendor/jquery/jquery-ui-1.11.2/jquery-ui.min.js"></script>
     <script src="assets-lti/vendor/angular/angular.min.js">
+    </script>
+    <script src="vendor/angular/angular-route.js">
     </script>
     <script src="assets-lti/vendor/angular/angular-animate.min.js">
     </script>

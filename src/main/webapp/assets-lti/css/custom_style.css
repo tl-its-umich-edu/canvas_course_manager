@@ -4,6 +4,10 @@ to get WACG 2 AAA contrast, preserving the background colors*/
     color:#000 !important;
 }
 
+input:invalid {
+  border: 1px solid red !important;
+}
+
 .mastHead {
     color:#fff;
 }
@@ -65,7 +69,7 @@ ul {
 }
 .sectionList li:hover {
     cursor:move;
-    cursor: -webkit-grab; 
+    cursor: -webkit-grab;
     cursor: -moz-grab;
 }
 .nograb .sectionList li:hover {
@@ -74,7 +78,7 @@ ul {
 }
 .sectionListAddFriend li:hover {
     cursor:default;
-    cursor: default; 
+    cursor: default;
     cursor: default;
 
 }
@@ -82,7 +86,7 @@ ul {
     background-color:#eee;
     cursor: -webkit-grabbing;
     cursor: -moz-grabbing;
-}        
+}
 
 .debugPanel {
     display:none;
@@ -157,7 +161,7 @@ li.addedSection {
     background:#eee;
 }
 .coursePanelOther .coursePanelChild, .coursePanel .courseOtherPanelChild  {
-    display:none !important; 
+    display:none !important;
 }
 
 .otherInstructorInner {
@@ -181,22 +185,67 @@ li.addedSection {
 .alert-inline.ng-enter {
     -webkit-animation:slideInRight 2s both ease, fadeIn 1s both ease 2s;
     -moz-animation:slideInRight 2s both ease, fadeIn 1s both ease 2s;
-    animation:slideInRight 2s both ease, fadeIn 1s both ease 2s; 
+    animation:slideInRight 2s both ease, fadeIn 1s both ease 2s;
 }
 
 
 #otherCourses:focus, .sectionList:focus, #newUser:focus, #failedToValidateEmail:focus, #failedToValidateEmailName:focus,#addMessageContainer:focus {outline:none};
 
 /* leave animation */
-.alert-inline.ng-leave            { 
+.alert-inline.ng-leave {
     -webkit-animation:slideOutLeft 2s both ease 1s, fadeOut 1s both ease;
     -moz-animation:slideOutLeft 2s both ease 1s, fadeOut 1s both ease;
-    animation:slideOutLeft 2s both ease 1s, fadeOut 1s both ease;   
+    animation:slideOutLeft 2s both ease 1s, fadeOut 1s both ease;
 }
 
 [ng-cloak] {
   display: none !important;
 }
+
+tr.table-danger, tr.table-danger>td, tr.table-danger>th {
+    background-color: #f2dede;
+}
+
+
+.alert-danger {
+  color:#000
+}
+
+.table.ng-hide-remove {
+  -webkit-animation:1s show;
+  animation:1s show;
+}
+
+@keyframes show {
+  0% {
+    opacity:0;
+    transform: scale(0.5);
+  }
+  70% {
+    transform: scale(1.02);
+  }
+  100% {
+    opacity:1;
+    transform: scale(1);
+  }
+}
+
+@-webkit-keyframes show {
+  0% {
+    opacity:0;
+    transform: scale(0.5);
+  }
+  70% {
+    transform: scale(1.02);
+  }
+  100% {
+    opacity:1;
+    transform: scale(1);
+  }
+}
+
+
+
 @media (max-width: 480px) {
     .col1, .col2, .col3 {
         padding:0
