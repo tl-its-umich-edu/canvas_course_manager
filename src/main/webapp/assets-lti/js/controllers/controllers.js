@@ -468,6 +468,29 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
   // just a stub, not sure if going to get to it
   $scope.submitGrid = function() {
     var uploadUrl = "/formUpload";
+    $( "form" ).on( "submit", function( event ) {
+
+      event.preventDefault();
+      //console.log($scope.selectedFunction.fields.length);
+      var result = document.getElementsByClassName("formRow");
+      var wrappedResult = angular.element(result);
+      var csv = [];
+      _.each (wrappedResult, function(thisRow, index){
+        //console.log($(thisRow).find('.select').length);
+        var thisRowArr = [];
+         _.each($(thisRow).find('.select'), function(thisField, index){
+           if(thisField.value !==''){
+             thisRowArr.push(thisField.value);
+           }
+        });
+        if (thisRowArr.length === $scope.selectedFunction.fields.length){
+          csv = csv + thisRowArr.join(',') + '\n';
+        }
+      });
+      console.log(csv);
+    });
+
+
   };
 
 

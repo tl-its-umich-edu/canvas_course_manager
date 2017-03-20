@@ -113,11 +113,11 @@
             <th ng-repeat="field in selectedFunction.fields" scope="col">{{field.name}}</th>
           </tr>
         </thead>
-        <tr ng-repeat="i in getNumber(gridRowNumber) track by $index">
+        <tr ng-repeat="i in getNumber(gridRowNumber) track by $index" class="formRow">
           <td ng-repeat="field in selectedFunction.fields track by $index">
-            <input title="{{field.validation.val_message}}" ng-if="!field.validation.choices" type="text" class="form-control"  pattern="{{field.validation.pattern}}"  name="{{field.name}}{{$index}}" maxlength="{{field.validation.max}}" id="{{field.name}}{{$index}}" value="" placeholder="{{field.name}}">
-            <select ng-if="field.validation.choices" class="form-control" name="">
-              <option ng-if="field.validation.choices" value="" ng-repeat="choice in field.validation.choices">{{choice}}</option>
+            <input title="{{field.validation.val_message}}" ng-if="!field.validation.choices" type="text" class="form-control select" pattern="{{field.validation.pattern}}"  name="{{field.name}}{{$index}}" maxlength="{{field.validation.max}}" id="{{field.name}}{{$index}}" value="" placeholder="{{field.name}}" ng-class="{'first': $first, 'last': $last}">
+            <select ng-if="field.validation.choices" class="form-control select" name="" ng-class="{'first': $first, 'last': $last}">
+              <option ng-if="field.validation.choices" value="{{choice}}" ng-repeat="choice in field.validation.choices">{{choice}}</option>
             </select>
           </td>
         </tr>
