@@ -49,15 +49,18 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" ng-controller="navController">
                 <ul class="nav navbar-nav navbar-right">
-                    <li>
-                      <a ng-if="view && view !=='LTI'" class="collapse-nav"  ng-click="changeView('LTI')" href="#ltihome">LTI</a>
-                    </li>
-                    <li ng-if="ltiLaunch.role_is_account_admin ==='true'">
-                      <a ng-if="view !=='SAA'" class="collapse-nav" ng-click="changeView('SAA')"  href="#saa">SAA</a>
-                    </li>
-                    <li>
-                      <a href="" class="collapse-nav" id="helpLink" data-url="help-lti.html">Help</a>
-                    </li>
+                  <li>
+                    <a ng-if="view && view !=='LTI'" class="collapse-nav"  ng-click="changeView('LTI')" href="#ltihome">LTI</a>
+                  </li>
+                  <li ng-if="ltiLaunch.role_is_account_admin ==='true'">
+                    <a ng-if="view !=='Sub Account Administrator Utils'" class="collapse-nav" ng-click="changeView('Sub Account Administrator Utils')"  href="#saa">SAA</a>
+                  </li>
+                  <li ng-if="view !=='Grades'">
+                    <a  class="collapse-nav" ng-click="changeView('Grades')"  href="#grades">Grades</a>
+                  </li>
+                  <li>
+                    <a href="" class="collapse-nav" id="helpLink" data-url="help-lti.html">Help</a>
+                  </li>
                 </ul>
             </div>
             <!-- /.navbar-collapse -->

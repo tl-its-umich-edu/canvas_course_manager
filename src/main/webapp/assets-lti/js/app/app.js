@@ -23,6 +23,10 @@ canvasSupportApp.config(['$routeProvider',
       templateUrl: 'assets-lti/views/course.html',
       controller: 'courseController'
     }).
+    when('/grades', {
+      templateUrl: 'assets-lti/views/grades.html',
+      controller: 'gradesController'
+    }).
     when('/saa', {
       templateUrl: 'assets-lti/views/saa.html',
       controller: 'saaController'

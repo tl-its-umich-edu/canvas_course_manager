@@ -573,3 +573,7 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
     return result;
   };
 }]);
+
+canvasSupportApp.controller('gradesController', ['$scope', '$location', function ($scope, $location) {
+
+}]);
