@@ -50,6 +50,14 @@
   "type": "csv",
   "notes":"Servlet supplies course_id, section_id, SAA supplies rest",
   "fields": [{
+    "name": "seed",
+    "validation": {
+      "spaces": false,
+      "chars": "alpha",
+      "max": 300,
+      "min": 3
+    }
+  },{
     "name": "name",
     "validation": {
       "spaces": true,
@@ -74,6 +82,14 @@
   "type": "csv",
   "notes":"Servlet supplies group_id, SAA supplies rest",
   "fields": [{
+    "name": "seed",
+    "validation": {
+      "spaces": false,
+      "chars": "alpha",
+      "max": 300,
+      "min": 3
+    }
+  },{
     "name": "name",
     "validation": {
       "spaces": true,
