@@ -425,8 +425,8 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
 
   // on page load set content to fals
   $scope.content = false;
-  //grinds will load 25 rows by default
-  $scope.gridRowNumber = 25;
+  //grids will load 5 rows by default for development, later change to 25
+  $scope.gridRowNumber = 5;
   // used by template
   $scope.getNumber = function(num) {
     return new Array(num);
@@ -467,7 +467,38 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
   //event handler for submitting a grid form
   // just a stub, not sure if going to get to it
   $scope.submitGrid = function() {
-    var uploadUrl = "/formUpload";
+      var result = document.getElementsByClassName("formRow");
+      var wrappedResult = angular.element(result);
+      var csv = _.pluck($scope.selectedFunction.fields,'name') + '\n';
+      _.each (wrappedResult, function(thisRow, index){
+        //console.log($(thisRow).find('.select').length);
+        var thisRowArr = [];
+         _.each($(thisRow).find('.select'), function(thisField, index){
+           if(thisField.value !==''){
+             thisRowArr.push(thisField.value);
+           }
+        });
+        if (thisRowArr.length === $scope.selectedFunction.fields.length){
+          csv = csv + thisRowArr.join(',') + '\n';
+        }
+      });
+
+      var filename = 'grid_data.csv';
+      var formData = new FormData();
+      formData.append('file', new File([new Blob([csv])],  filename));
+      $.ajax({
+          url: '/' + $scope.selectedFunction.url,
+          data: formData,
+          processData: false,
+          contentType: false,
+          type: 'POST',
+          success: function () {
+
+          },
+          error: function () {
+
+          }
+      });
   };
 
 
