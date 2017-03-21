@@ -425,7 +425,7 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
 
   // on page load set content to fals
   $scope.content = false;
-  //grinds will load 25 rows by default
+  //grids will load 5 rows by default for development, later change to 25
   $scope.gridRowNumber = 5;
   // used by template
   $scope.getNumber = function(num) {
