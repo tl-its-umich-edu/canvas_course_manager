@@ -18,6 +18,13 @@
       <span ng-show="!availableSections.length">No available sections.</span>
       <span ng-show="availableGroups.length">{{availableGroups.length}} available groups.</span>
       <span ng-show="!availableGroups.length">No available groups.</span>
+      <span ng-show="availableGroupSets.length">Available group categories <em ng-repeat="set in availableGroupSets">set</em></span>
+      <span ng-show="!availableGroupSets.length && !creatingGroupSet">No available group sets. <a href="" ng-click="creatingGroupSet=true;">Create one?</span>
+      <span ng-show="creatingGroupSet" class="form-inline">
+        <label for="newGroupSet" class="sr-only">New group set name</label>
+        <input id="newGroupSet" type="text" name="" value="" placeholder="Group Set Name" ng-model="newGroupSet" class="form-control">
+        <button type="button" name="button" class="btn btn-primary" ng-click="createGroupSet()">Create</button>
+      </span>
     </div>
     <div class="pull-right" ng-show="selectedFunction" style="margin:-45px 10px 0 0px">
       <!-- shows field information on current function -->

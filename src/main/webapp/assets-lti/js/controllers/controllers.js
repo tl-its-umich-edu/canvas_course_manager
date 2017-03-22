@@ -392,6 +392,12 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
   $scope.course = $rootScope.course;
   $scope.availableSections = _.map(_.pluck($rootScope.sections, 'sis_section_id'), function(val){ return String(val); });
 
+  var groupSetUrl = 'manager/api/v1/courses/' + $scope.course.id + '/group_categories';
+  Course.getGroups(groupSetUrl).then(function (resultGroupsSets){
+    $scope.availableGroupSets = resultGroupsSets.data;
+  });
+
+
   // functions.json contain the model (name, url, field list, validation rules for fields) for all interactions, CSV or form based
   $http.get('assets-lti/settings/functions.json').success(function(data) {
     $scope.functions = data;
@@ -416,6 +422,10 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
     });
   });
 
+$scope.createGroupSet = function(){
+  var createGroupSetUrl = 'manager/api/v1/courses/' + $scope.course.id + '/group_categories?name=' + $scope.newGroupSet;
+  $log.info(createGroupSetUrl);
+};
   //listn for changes to the function chosen and
   //assign it to rootscope so that it is available everywhere in the app
   // $scope.changeSelectedFunction = function() {
@@ -423,7 +433,7 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
   // };
 
 
-  // on page load set content to fals
+  // on page load set content to false
   $scope.content = false;
   //grids will load 5 rows by default for development, later change to 25
   $scope.gridRowNumber = 5;
