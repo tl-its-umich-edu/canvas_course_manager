@@ -46,7 +46,7 @@
 }, {
   "name": "Add multiple new sections to Canvas through CSV",
   "id": "sections_to_canvas",
-  "url": "addSections",
+  "url": "sisImports/addSections",
   "type": "csv",
   "notes":"Servlet supplies course_id, section_id, SAA supplies rest",
   "fields": [{
