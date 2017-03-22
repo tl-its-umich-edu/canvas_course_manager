@@ -425,6 +425,11 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
 $scope.createGroupSet = function(){
   var createGroupSetUrl = 'manager/api/v1/courses/' + $scope.course.id + '/group_categories?name=' + $scope.newGroupSet;
   $log.info(createGroupSetUrl);
+  Course.postGroupSet(createGroupSetUrl).then(function (resultGroupsSets){
+    $log.info(resultGroupsSets.data);
+    $scope.availableGroupSets = [resultGroupsSets.data];
+    $log.info($scope.availableGroupSets);
+  });
 };
   //listn for changes to the function chosen and
   //assign it to rootscope so that it is available everywhere in the app
