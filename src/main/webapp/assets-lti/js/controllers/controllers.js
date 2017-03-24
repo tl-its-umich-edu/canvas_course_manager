@@ -431,10 +431,10 @@ $scope.createGroupSet = function(){
     $log.info($scope.availableGroupSets);
   });
 };
-  //listn for changes to the function chosen and
+  //listen for changes to the function chosen and
   //assign it to rootscope so that it is available everywhere in the app
   // $scope.changeSelectedFunction = function() {
-  //   $rootScope.selectedFunction = value;
+  //   $log.info($scope.selectedFunction);
   // };
 
 
@@ -467,9 +467,6 @@ $scope.createGroupSet = function(){
   });
 
 
-  // $scope.changeSelectedFunction = function() {
-  //   $scope.content = [];
-  // };
 
   // event handler for clicking on the Upload CSV button
   $scope.submitCSV = function() {
