@@ -29,8 +29,8 @@ The Canvas Course Manager (CCM) is an application that will be able to be used b
 
 2. Copy to tomcat/webapp
 
-3. Add the property files on linux box <code>ccm.properties</code> and <code>ccmSecure.properties</code>, then in JAVA_OPTS add the  
-<code>-DccmPropsPathSecure=file:/file-path/ccmSecure.properties</code>  
+3. Add the property files on linux box <code>ccm.properties</code> and <code>ccm-secure.properties</code>, then in JAVA_OPTS add the  
+<code>-DccmPropsPathSecure=file:/file-path/ccm-secure.properties</code>  
 <code>-DccmPropsPath=file:/file-path/ccm.properties</code>
 
 4. Add the following properties to ccm.properties:  
@@ -48,7 +48,7 @@ The Canvas Course Manager (CCM) is an application that will be able to be used b
 	* <code>call.type= Either 'canvas' or 'esb'</code>
 	* <code>stub.test= 'true' or 'false'</code>
     
-5. Add the following 9 properties to ccmSecure.properties:<br/> 
+5. Add the following 9 properties to ccm-secure.properties:<br/> 
 	* <code>canvas.admin.token= Canvas Token </code>
 	* <code>canvas.url= Canvas URL</code>
 	* <code>use.test.url= Test user authentication </code>
@@ -95,6 +95,7 @@ The Canvas Course Manager (CCM) is an application that will be able to be used b
 	  echo "$JOB_NAME | Build: $BUILD_NUMBER | $GIT_URL | $GIT_COMMIT | $GIT_BRANCH | $BUILD_ID" >> build.txt
 	```
 
+9. In order to remote debug ccm application from Openshift, do `oc port-forward' <pod-name> 5009`. 5009 is the debug port opened for doing this. More Info https://docs.openshift.com/container-platform/3.4/dev_guide/port_forwarding.html
 ## Notes
 
 If <code>use.test.url</code> is true, users will be able to execute the tool as if authenticated as the user specified in the URL parameter <code>?testUser=uniqname</code>. In Production this variable is  false. Based on this property property testUser is not allowed in Production.
