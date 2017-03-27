@@ -85,6 +85,21 @@ canvasSupportApp.factory('Course', function ($http) {
         }
       );
     },
+    postGroupSet: function (url) {
+      return $http.post(url).then(
+        function success(result) {
+          // Report Canvas errors
+          if (result.data.errors) {
+            errorDisplay(url, result.status, result.data.errors[0].message);
+          }
+          return result;
+        },
+        function error(result) {
+          errorDisplay(url, result.status, 'Unable to create group set');
+          return result;
+        }
+      );
+    },
     getMPathwaysCourses: function (url, sis_term_id) {
       return $http.get(url, {cache: false}).then(
         function success(result) {
