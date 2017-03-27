@@ -56,8 +56,8 @@ public class Utils {
 	public static final String TC_SESSION_DATA = "tcSessionData";
 	public static final String IS_ACCOUNT_ADMIN = "isAccountAdmin" ;
 	public static final String CANVAS_API_VERSION = "/api/v1" ;
-	public static String canvasURL;
-	public static String canvasToken;
+	public static String canvasURL = null;
+	public static String canvasToken = null;
 
 	public static Properties loadProperties(String path){
 		String propertiesFilePath = System.getProperty(path);
@@ -196,10 +196,10 @@ public class Utils {
 	public static String makeApiCall(String... urlChunks){
 		String url = canvasURL + CANVAS_API_VERSION;
 		for (String chunk : urlChunks) {
-			url = url + chunk;
+			url += chunk;
 		}
 		M_log.info("API call: " + url);
-		HttpResponse response = Utils.processApiCall(new HttpGet(url));
+		HttpResponse response = Utils.executeApiCall(new HttpGet(url));
 		if (response == null) {
 			M_log.error(String.format("The Api call %s failed with errors", url));
 			return null;
@@ -224,7 +224,7 @@ public class Utils {
 		return apiResponse;
 	}
 
-	public static HttpResponse processApiCall(HttpUriRequest clientRequest) {
+	public static HttpResponse executeApiCall(HttpUriRequest clientRequest) {
 		HttpClient client = HttpClients.createDefault();
 		final ArrayList<NameValuePair> nameValues = new ArrayList<NameValuePair>();
 		nameValues.add(new BasicNameValuePair("Authorization", "Bearer" + " " + canvasToken));
@@ -234,14 +234,18 @@ public class Utils {
 		}
 		HttpResponse response = null;
 		long startTime = System.currentTimeMillis();
+		String errMsg = "Canvas API call did not complete successfully due to %s";
 		try {
 			response = client.execute(clientRequest);
 		} catch (IOException e) {
-			M_log.error("Canvas API call did not complete successfully" + e.getMessage());
+			M_log.error(String.format(errMsg, e.getMessage()));
+		} catch (Exception e) {
+			M_log.error(String.format(errMsg, e.getMessage()));
+		} finally {
+			long stopTime = System.currentTimeMillis();
+			long elapsedTime = stopTime - startTime;
+			M_log.info(String.format("CANVAS Api response took %sms", elapsedTime));
 		}
-		long stopTime = System.currentTimeMillis();
-		long elapsedTime = stopTime - startTime;
-		M_log.info(String.format("CANVAS Api response took %sms", elapsedTime));
 		return response;
 	}
 

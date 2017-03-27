@@ -103,8 +103,6 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String PUT = "PUT";
 
 	//Member variables
-	private String canvasToken = null;
-	private String canvasURL = null;
 	private String callType = null;
 	private String ltiUrl = null;
 	private String ltiKey = null;
@@ -182,11 +180,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		appExtSecurePropertiesFile = Utils.loadProperties(CCM_SECURE_PROPERTY_FILE_PATH);
 
 		if(appExtSecurePropertiesFile!=null) {
-			canvasToken = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_CANVAS_ADMIN);
-			canvasURL = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_CANVAS_URL);
-			isStubTesting = Boolean.valueOf( appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_TEST_STUB));
-            Utils.canvasToken = canvasToken;
-            Utils.canvasURL = canvasURL;
+			Utils.canvasToken = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_CANVAS_ADMIN);
+			Utils.canvasURL = appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_CANVAS_URL);
+			isStubTesting = Boolean.valueOf(appExtPropertiesFile.getProperty(SectionUtilityToolFilter.PROPERTY_TEST_STUB));
 			M_log.debug("isStubTesting: " + isStubTesting);
 		}
 		else {
@@ -333,7 +329,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		if(courseAccountId == 0){
 			return false;
 		}
-        M_log.debug("*** Course Account ID " + courseAccountId);
+		M_log.debug("*** Course Account ID " + courseAccountId);
 		return determineIfUserIsAdminInHierarchy(userId,courseAccountId);
 	}
 
@@ -569,7 +565,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug("canvasRestApiCall(): called");
 		PrintWriter out = response.getWriter();
 		response.setContentType("application/json");
-		if ( canvasToken == null || canvasURL == null ) {
+		if ( Utils.canvasToken == null || Utils.canvasURL == null ) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			out = response.getWriter();
 			out.print(appExtPropertiesFile.getProperty("property.file.load.error"));
@@ -716,9 +712,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		String pathInfo = request.getPathInfo();
 		String url;
 		if(queryString!=null) {
-			url = canvasURL+pathInfo+"?"+queryString;
+			url = Utils.canvasURL+pathInfo+"?"+queryString;
 		}else {
-			url = canvasURL+pathInfo;
+			url = Utils.canvasURL+pathInfo;
 		}
 
 		String uniqname = null;
@@ -756,7 +752,11 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			clientRequest=new HttpDelete(url);
 		}
 
-		HttpResponse canvasResponse = Utils.processApiCall(clientRequest);
+		HttpResponse canvasResponse = Utils.executeApiCall(clientRequest);
+		if(canvasResponse == null){
+			M_log.error(String.format("The Api call %s failed with errors", url));
+			return;
+		}
 		BufferedReader rd = new BufferedReader(new InputStreamReader(canvasResponse.getEntity().getContent()));
 
 		String linkValue = null;
@@ -1004,7 +1004,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug("ENROLLMENT_TYPE: " + enrollmentTypeFromRequest);
 
 		//build api call
-		String sectionsApiCall = canvasURL + "/api/v1/sections/" + sectionString;
+		String sectionsApiCall = Utils.canvasURL + "/api/v1/sections/" + sectionString;
 		M_log.debug("SECTIONS API CALL: " + sectionsApiCall);
 
 		//string built, time to make call
@@ -1020,7 +1020,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		clientRequest = new HttpGet(sectionsApiCall);
 
-		HttpResponse canvasResponse = Utils.processApiCall(clientRequest);
+		HttpResponse canvasResponse = Utils.executeApiCall(clientRequest);
 		BufferedReader rd = null;
 		try {
 			rd = new BufferedReader(new InputStreamReader(canvasResponse.getEntity().getContent()));
@@ -1118,7 +1118,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		boolean isSectionMatch = false;
 
 		//build api call
-		String crosslistApiCall = canvasURL + url.substring(0, url.indexOf("/crosslist"));
+		String crosslistApiCall = Utils.canvasURL + url.substring(0, url.indexOf("/crosslist"));
 		M_log.debug("crosslist API call: " + crosslistApiCall);
 
 		String uniqname = null;
@@ -1132,7 +1132,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		clientRequest = new HttpGet(crosslistApiCall);
 
-		HttpResponse canvasResponse = Utils.processApiCall(clientRequest);
+		HttpResponse canvasResponse = Utils.executeApiCall(clientRequest);
 		BufferedReader rd = null;
 		try {
 			rd = new BufferedReader(new InputStreamReader(canvasResponse.getEntity().getContent()));
