@@ -73,6 +73,10 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String MPATHWAYS_API_GNERIC = "mpathways.api.get.generic";
 	private static final String ROLE_CAN_ADD_TEACHER = "role.can.add.teacher";
 	private static final String GET_GROUPS= "get.groups.regex";
+	private static final String GET_GROUPSET= "get.groupset.regex";
+	private static final String POST_GROUPSET= "post.groupset.regex";
+
+
 
 	private static final String M_PATH_DATA = "mPathData";
 	private static final String LTI_1P0_CONST = "LTI-1p0";
@@ -157,7 +161,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			put(CANVAS_API_GET_COURSE_ENROLL,"for getting the enrollments of a user in a course");
 			put(MPATHWAYS_API_GNERIC, "for mpathways calls");
 			put(GET_GROUPS, "for getting the groups of the current course");
-
+			put(GET_GROUPSET, "for getting the groupset of the current course");
+			put(POST_GROUPSET, "for creating a groupset in the current course");
 		}
 	};
 

@@ -3,7 +3,7 @@ FROM tomcat:7-jre8
 MAINTAINER Chris Kretler <ckretler@umich.edu>
 
 RUN apt-get update \
- && apt-get install -y maven openjdk-8-jdk git
+ && apt-get install -y vim maven openjdk-8-jdk git
 
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 
@@ -40,14 +40,18 @@ ENV JAVA_OPTS="-server \
 -Djava.awt.headless=true -Dcom.sun.management.jmxremote \
 -Dsun.lang.ClassLoader.allowArraySyntax=true \
 -Dfile.encoding=UTF-8 \
--DccmPropsPathSecure=file:$CATALINA_HOME/conf/ccmSecure.properties \
+-DccmPropsPathSecure=file:$CATALINA_HOME/conf/ccm-secure.properties \
 -DccmPropsPath=file:$CATALINA_HOME/conf/ccm.properties \
 -Dlog4j.configuration=file:/usr/local/tomcat/conf/log4j.properties \
 "
-
+#tomcat port
 EXPOSE 8080
+#apache port
 EXPOSE 8009
+#debug port
+EXPOSE 5009
+ENV JPDA_ADDRESS="5009"
+ENV JPDA_TRANSPORT="dt_socket"
 
 # Launch Tomcat
-CMD cp /usr/share/ccm/props/* /usr/local/tomcat/conf/; mkdir -p /usr/local/ctools/app/ctools/tl/home/; cp /usr/share/ccm/props/ctools.pkcs12 /usr/local/ctools/app/ctools/tl/home/; catalina.sh run
-#CMD /bin/bash
+CMD cp /usr/share/ccm-props/* /usr/local/tomcat/conf/; catalina.sh jpda run
