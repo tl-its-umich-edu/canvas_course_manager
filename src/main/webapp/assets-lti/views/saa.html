@@ -18,7 +18,6 @@
         <span ng-hide="csv_fields || !selectedFunction"><a href="" ng-click="csv_fields=true">Show {{selectedFunction.type}} info</a></span>
         <span ng-hide="!csv_fields || !selectedFunction"><a href="" ng-click="csv_fields=false">Hide {{selectedFunction.type}} info</a></span>
       </span>
-        <!-- following is populated with info we have requested for the course -->
       <br><br>
       <div class="panel panel-default">
         <div class="panel-body">
@@ -31,7 +30,8 @@
           <span ng-show="creatingGroupSet && !availableGroupSets.length" class="form-inline">
             <label for="newGroupSet" class="sr-only">New group set name</label>
             <input id="newGroupSet" type="text" name="" value="" placeholder="Group Set Name" ng-model="newGroupSet" class="form-control">
-            <button type="button" name="button" class="btn btn-primary" ng-click="createGroupSet()">Create</button>
+            <button type="button" class="btn btn-primary" ng-click="createGroupSet()">Create</button>
+            <button type="button" class="btn btn-default" ng-click="creatingGroupSet = false;newGroupSet=''">Cancel</button>
           </span>
         </div>
       </div>
