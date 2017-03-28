@@ -17,15 +17,22 @@ package edu.umich.ctools.sectionsUtilityTool;
 
 import edu.umich.its.lti.TcSessionData;
 import edu.umich.its.lti.utils.PropertiesUtilities;
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.PrintWriter;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.Properties;
 
 public class Utils {
@@ -38,6 +45,8 @@ public class Utils {
 	public static final String LTI_PARAM_FIRST_NAME = "lis_person_name_given";
 	public static final String LTI_PARAM_CANVAS_USER_ID = "custom_canvas_user_id";
 	public static final String SESSION_ROLES_FOR_ADDING_TEACHER = "session_roles_for_adding_teacher";
+	public static final String SIS_IMPORTS = "sisImports";
+	public static final String SIS_UPLOAD_ADDING_SECTIONS = "addSections";
 	private static Log M_log = LogFactory.getLog(Utils.class);
 
 	private static final String CANVAS_API_GETALLSECTIONS_PER_COURSE = "canvas.api.getallsections.per.course.regex";
@@ -47,6 +56,8 @@ public class Utils {
 	public static final String TC_SESSION_DATA = "tcSessionData";
 	public static final String IS_ACCOUNT_ADMIN = "isAccountAdmin" ;
 	public static final String CANVAS_API_VERSION = "/api/v1" ;
+	public static String canvasURL = null;
+	public static String canvasToken = null;
 
 	public static Properties loadProperties(String path){
 		String propertiesFilePath = System.getProperty(path);
@@ -180,6 +191,62 @@ public class Utils {
 			user = testUser;
 		}
 		M_log.info(String.format(baseString, user, originalUrl));
+	}
+
+	public static String makeApiCall(String... urlChunks){
+		String url = canvasURL + CANVAS_API_VERSION;
+		for (String chunk : urlChunks) {
+			url += chunk;
+		}
+		M_log.info("API call: " + url);
+		HttpResponse response = Utils.executeApiCall(new HttpGet(url));
+		if (response == null) {
+			M_log.error(String.format("The Api call %s failed with errors", url));
+			return null;
+		}
+		int statusCode = response.getStatusLine().getStatusCode();
+		if (statusCode != HttpStatus.SC_OK) {
+			M_log.error(String.format("The Api call %s has failed with status code %s", url, statusCode));
+			return null;
+		}
+		String apiResponse;
+		String errMsg = "The API call %s has failed to extract the response due to %s";
+		try {
+			apiResponse = EntityUtils.toString(response.getEntity(), "UTF-8");
+		} catch (IOException e) {
+			M_log.error(String.format(errMsg, url, e.getMessage()));
+			return null;
+		} catch (Exception e) {
+			M_log.error(String.format(errMsg, url, e.getMessage()));
+			return null;
+		}
+
+		return apiResponse;
+	}
+
+	public static HttpResponse executeApiCall(HttpUriRequest clientRequest) {
+		HttpClient client = HttpClients.createDefault();
+		final ArrayList<NameValuePair> nameValues = new ArrayList<NameValuePair>();
+		nameValues.add(new BasicNameValuePair("Authorization", "Bearer" + " " + canvasToken));
+		nameValues.add(new BasicNameValuePair("content-type", "application/json"));
+		for (final NameValuePair h : nameValues) {
+			clientRequest.addHeader(h.getName(), h.getValue());
+		}
+		HttpResponse response = null;
+		long startTime = System.currentTimeMillis();
+		String errMsg = "Canvas API call did not complete successfully due to %s";
+		try {
+			response = client.execute(clientRequest);
+		} catch (IOException e) {
+			M_log.error(String.format(errMsg, e.getMessage()));
+		} catch (Exception e) {
+			M_log.error(String.format(errMsg, e.getMessage()));
+		} finally {
+			long stopTime = System.currentTimeMillis();
+			long elapsedTime = stopTime - startTime;
+			M_log.info(String.format("CANVAS Api response took %sms", elapsedTime));
+		}
+		return response;
 	}
 
 }
