@@ -392,9 +392,22 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
   $scope.course = $rootScope.course;
   $scope.availableSections = _.map(_.pluck($rootScope.sections, 'sis_section_id'), function(val){ return String(val); });
 
+  $scope.availableSectionsGrid = _.map(
+    $rootScope.sections,
+    function(section) {
+        return { 'name': section.name, 'id': section.sis_section_id };
+    }
+  );
+
   var groupSetUrl = 'manager/api/v1/courses/' + $scope.course.id + '/group_categories';
   Course.getGroups(groupSetUrl).then(function (resultGroupsSets){
-    $scope.availableGroupSets = resultGroupsSets.data;
+    $scope.availableGroupSets =
+    _.map(
+      resultGroupsSets.data,
+      function(set) {
+          return { 'name': set.name, 'id': set.id };
+      }
+    );
   });
 
 
@@ -408,17 +421,27 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
     var functCSVGrid = _.findWhere($scope.functions, {id: "users_to_sections_grid"});
     var fieldCSVGrid = _.findWhere(functCSVGrid.fields, {name: "section_id"});
     fieldCSVGrid.validation.choices = $scope.availableSections;
+    fieldCSVGrid.validation.grid_choices = $scope.availableSectionsGrid;
 
     var groupUrl = 'manager/api/v1/courses/' + $scope.course.id + '/groups';
     Course.getGroups(groupUrl).then(function (resultGroups){
       //add to the model for groups the actual groups available in the course
       $scope.availableGroups = _.map(_.pluck(resultGroups.data, 'id'), function(val){ return String(val); });
+
+      $scope.availableGroupsGrid = _.map(
+        resultGroups.data,
+        function(group) {
+            return { 'name': group.name, 'id': group.id };
+        }
+      );
+
       var functCSVGrp = _.findWhere($scope.functions, {id: "users_to_groups"});
       var fieldCSVGrp = _.findWhere(functCSVGrp.fields, {name: "group_id"});
       fieldCSVGrp.validation.choices = $scope.availableGroups;
       var functGrpGrid = _.findWhere($scope.functions, {id: "users_to_groups_grid"});
       var fieldGrpGrid = _.findWhere(functGrpGrid.fields, {name: "group_id"});
       fieldGrpGrid.validation.choices = $scope.availableGroups;
+      fieldGrpGrid.validation.grid_choices = $scope.availableGroupsGrid;
     });
   });
 
@@ -431,11 +454,13 @@ $scope.createGroupSet = function(){
     $log.info($scope.availableGroupSets);
   });
 };
-  //listen for changes to the function chosen and
-  //assign it to rootscope so that it is available everywhere in the app
-  // $scope.changeSelectedFunction = function() {
-  //   $log.info($scope.selectedFunction);
-  // };
+  //listen for changes to the function chosen
+  $scope.changeSelectedFunction = function() {
+    $('#gridTable input').val('');
+    $scope.content={};
+    $scope.errors=[];
+    $('#fileForm')[0].reset();
+  };
 
 
   // on page load set content to false
@@ -475,15 +500,13 @@ $scope.createGroupSet = function(){
     fileUpload.uploadFileAndFieldsToUrl(file, $scope.selectedFunction.url);
   };
 
-
   //event handler for submitting a grid form
-  // just a stub, not sure if going to get to it
+  // read values, construct a blob and post it as a file
   $scope.submitGrid = function() {
       var result = document.getElementsByClassName("formRow");
       var wrappedResult = angular.element(result);
       var csv = _.pluck($scope.selectedFunction.fields,'name') + '\n';
       _.each (wrappedResult, function(thisRow, index){
-        //console.log($(thisRow).find('.select').length);
         var thisRowArr = [];
          _.each($(thisRow).find('.select'), function(thisField, index){
            if(thisField.value !==''){
@@ -527,10 +550,10 @@ $scope.createGroupSet = function(){
 
     var sortedHeaders =[];
     _.each (linesHeaders, function(lineHeader, index){
+
       var header = _.findWhere(headers, {name:lineHeader});
        sortedHeaders.push(header);
     });
-
     for (var i = 0; i < linesValues.length; i++) {
       var lineArray = linesValues[i].split(',');
 

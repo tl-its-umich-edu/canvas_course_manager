@@ -1,4 +1,4 @@
-seed,name,status
+id_prefix,name,status
 seed123,Group 1,available
 seed123,Group 2 too long really - very very long name,available
 seed123,Group 3,available
