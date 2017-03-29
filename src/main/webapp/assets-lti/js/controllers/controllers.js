@@ -401,6 +401,7 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
 
   var groupSetUrl = 'manager/api/v1/courses/' + $scope.course.id + '/group_categories';
   Course.getGroups(groupSetUrl).then(function (resultGroupsSets){
+    $scope.availableGroupSetsFlat = _.map(_.pluck(resultGroupsSets.data, 'id'), function(val){ return String(val); });
     $scope.availableGroupSets =
     _.map(
       resultGroupsSets.data,
@@ -435,6 +436,9 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
         }
       );
 
+      var functCSVGrpSet = _.findWhere($scope.functions, {id: "groups_to_sections"});
+      var fieldCSVGrpSet = _.findWhere(functCSVGrpSet.fields, {name: "groupset"});
+      fieldCSVGrpSet.validation.choices = $scope.availableGroupSetsFlat;
       var functCSVGrp = _.findWhere($scope.functions, {id: "users_to_groups"});
       var fieldCSVGrp = _.findWhere(functCSVGrp.fields, {name: "group_id"});
       fieldCSVGrp.validation.choices = $scope.availableGroups;
