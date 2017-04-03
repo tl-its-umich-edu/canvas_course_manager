@@ -388,7 +388,7 @@ canvasSupportApp.controller('navController', ['$scope', '$location', function ($
 }]);
 
 /* SSA (Affiliate Functions) CONTROLLER */
-canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 'fileUpload', '$timeout', '$log', '$http', function(Course, $scope, $rootScope, fileUpload, $timeout, $log, $http) {
+canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 'fileUpload', '$timeout', '$log', '$http', '$filter', function(Course, $scope, $rootScope, fileUpload, $timeout, $log, $http, $filter) {
   $scope.course = $rootScope.course;
   $scope.availableSections = _.map(_.pluck($rootScope.sections, 'sis_section_id'), function(val){ return String(val); });
 

@@ -4,6 +4,7 @@
   "url":"addUsersToSections",
   "type": "csv",
   "notes":"Servlet supplies course_id, SAA supplies rest",
+  "info":"First row is column names: 'user_id,role, section_id, status' - see csv info for rules.",
   "fields": [{
       "name": "user_id",
       "validation": {
@@ -49,6 +50,7 @@
   "url": "sisImports/addSections",
   "type": "csv",
   "notes":"Servlet supplies course_id, section_id, SAA supplies rest",
+  "info":"First row is column names: 'id_prefix, name, status' - id-prefix will be used to create a section SIS-ID - see csv info for rules.",
   "fields": [{
     "name": "id_prefix",
     "validation": {
@@ -81,6 +83,7 @@
   "url": "addGroups",
   "type": "csv",
   "notes":"Servlet supplies group_id, SAA supplies rest",
+  "info":"First row is column names: 'id_prefix, name, groupset, status' - id-prefix will be used to create a group SIS-ID - see csv info for rules.",
   "fields": [{
     "name": "id_prefix",
     "validation": {
@@ -121,6 +124,7 @@
   "url": "addUsersToGroups",
   "type": "csv",
   "notes":"SAA supplies all",
+  "info":"First row is column names: 'group_id, user_id, status' - see csv info for rules.",
   "fields": [ {
     "name": "group_id",
     "validation": {
