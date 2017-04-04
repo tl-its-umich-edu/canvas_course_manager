@@ -540,13 +540,18 @@ $scope.createGroupSet = function(){
       });
   };
 
-
   //parse attached CSV and validate it against functions model
   var parseCSV = function(CSVdata, headers, colCount) {
+    //remove certain line break chars
+    CSVdata = CSVdata.replace(/\r/g, '');
     var lines = CSVdata.split("\n");
-    var linesHeaders = lines[0].split(',');
-    var linesValues = _.rest(lines,1);
 
+    var linesHeaders = lines[0].split(',');
+    //remove leading and trailing spaces
+    for (var i = 0; i < linesHeaders.length; i++) {
+      linesHeaders[i] = linesHeaders[i].trim();
+    }
+    var linesValues = _.rest(lines,1);
     var result = {};
     result.data =[];
     $scope.errors = [];
@@ -554,7 +559,6 @@ $scope.createGroupSet = function(){
 
     var sortedHeaders =[];
     _.each (linesHeaders, function(lineHeader, index){
-
       var header = _.findWhere(headers, {name:lineHeader});
        sortedHeaders.push(header);
     });
@@ -565,29 +569,30 @@ $scope.createGroupSet = function(){
       obj.data = [];
       var number_pattern = /^\d+$/;
 
-
       _.each(sortedHeaders, function(header, index) {
         var validation = header.validation;
         if (lineArray[index]) {
-          if (lineArray[index].split(' ').length !== 1 && !validation.spaces) {
-            $scope.log.push(i+1 + ' - "' + lineArray[index] + '" has spaces');
+          //remove leading and trailing spaces
+          var thisVal = lineArray[index].trim();
+          if (thisVal.split(' ').length !== 1 && !validation.spaces) {
+            $scope.log.push(i+1 + ' - "' + thisVal + '" has spaces');
             obj.invalid = true;
           }
-          if (lineArray[index].length > validation.max) {
-            $scope.log.push(i+1 + ' - "' + lineArray[index] + '" too many chars');
+          if (thisVal.length > validation.max) {
+            $scope.log.push(i+1 + ' - "' + thisVal + '" too many chars');
             obj.invalid = true;
           }
-          if (lineArray[index].length < validation.min) {
-            $scope.log.push(i+1 + ' - "' + lineArray[index] + '" too few chars');
+          if (thisVal.length < validation.min) {
+            $scope.log.push(i+1 + ' - "' + thisVal + '" too few chars');
             obj.invalid = true;
           }
-          if (!number_pattern.test(lineArray[index]) && validation.chars === 'num') {
-            $scope.log.push(i+1 + ' - "' + lineArray[index] + '" not a number');
+          if (!number_pattern.test(thisVal) && validation.chars === 'num') {
+            $scope.log.push(i+1 + ' - "' + thisVal + '" not a number');
             obj.invalid = true;
           }
           if (validation.choices) {
-            if (_.indexOf(validation.choices, lineArray[index]) === -1) {
-              $scope.log.push(i+1 + ' - "' + lineArray[index] + '" is not one of the choices in [' + validation.choices + ']');
+            if (_.indexOf(validation.choices, thisVal) === -1) {
+              $scope.log.push(i+1 + ' - "' + thisVal + '" is not one of the choices in [' + validation.choices + ']');
               obj.invalid = true;
             }
           }
