@@ -1,5 +1,5 @@
 [{
-  "name": "Add multiple users to Canvas sections through CSV",
+  "name": "Add multiple users to course sections through CSV",
   "id": "users_in_sections",
   "url":"addUsersToSections",
   "type": "csv",
@@ -27,7 +27,7 @@
       "name": "section_id",
       "validation": {
         "spaces": false,
-        "chars": "num",
+        "chars": "alpha",
         "max": 300,
         "min": 1
       }
@@ -44,13 +44,13 @@
     }
   ]
 }, {
-  "name": "Add multiple new sections to Canvas through CSV",
+  "name": "Add multiple new sections to course through CSV",
   "id": "sections_to_canvas",
   "url": "sisImports/addSections",
   "type": "csv",
   "notes":"Servlet supplies course_id, section_id, SAA supplies rest",
   "fields": [{
-    "name": "seed",
+    "name": "id_prefix",
     "validation": {
       "spaces": false,
       "chars": "alpha",
@@ -76,13 +76,13 @@
     }
   }]
 }, {
-  "name": "Add multiple new groups to Canvas through CSV",
+  "name": "Add multiple new groups to course through CSV",
   "id": "groups_to_sections",
   "url": "addGroups",
   "type": "csv",
   "notes":"Servlet supplies group_id, SAA supplies rest",
   "fields": [{
-    "name": "seed",
+    "name": "id_prefix",
     "validation": {
       "spaces": false,
       "chars": "alpha",
@@ -97,6 +97,14 @@
       "max": 300,
       "min": 5
     }
+  },{
+      "name": "groupset",
+      "validation": {
+        "spaces": false,
+        "chars": "alpha",
+        "max": 300,
+        "min": 1
+      }
   }, {
     "name": "status",
     "validation": {
@@ -108,7 +116,7 @@
     }
   }]
 }, {
-  "name": "Add multiple users to Canvas groups through CSV",
+  "name": "Add multiple users to course groups through CSV",
   "id": "users_to_groups",
   "url": "addUsersToGroups",
   "type": "csv",
@@ -142,7 +150,7 @@
     }
   }]
 }, {
-  "name": "Add multiple users to Canvas sections through data grid",
+  "name": "Add multiple users to course sections through data grid",
   "id": "users_to_sections_grid",
   "url": "addUsersToSectionsGrid",
   "type": "grid",
@@ -161,7 +169,7 @@
     "name": "section_id",
     "validation": {
       "spaces": false,
-      "chars": "num",
+      "chars": "alpha",
       "max": 300,
       "min": 1
     }
@@ -186,7 +194,7 @@
     }
   }]
 }, {
-  "name": "Add multiple users to Canvas groups through data grid",
+  "name": "Add multiple users to course groups through data grid",
   "id": "users_to_groups_grid",
   "url": "addUsersToGroupsGrid",
   "type": "grid",

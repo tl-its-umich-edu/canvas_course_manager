@@ -71,7 +71,7 @@
     && !availableGroups.length)
     || (selectedFunction.id ==='groups_to_sections' && !availableGroupSets.length)">
     <div class="" ng-show="selectedFunction.type==='csv'">
-    <form class="form-inline well">
+    <form class="form-inline well" id="fileForm">
       <div class="form-group">
         <div class="input-group">
           <label class="sr-only" for="uploadCSV">Upload a CSV file</label>
@@ -126,7 +126,7 @@
   </div>
   <!-- form table presentation for adding users in a grid to sections of groups -->
   <div ng-show="(selectedFunction.id==='users_to_groups_grid' && availableGroups.length) ||(selectedFunction.id==='users_to_sections_grid' && availableSections.length)">
-    <table class="table table-striped  table-hover" style="width:auto">
+    <table class="table table-striped  table-hover" style="width:auto" id="gridTable">
       <thead>
         <tr>
           <th ng-repeat="field in selectedFunction.fields" scope="col">{{field.name}}</th>
@@ -134,10 +134,15 @@
       </thead>
       <tr ng-repeat="i in getNumber(gridRowNumber) track by $index" class="formRow">
         <td ng-repeat="field in selectedFunction.fields track by $index">
-          <input title="{{field.validation.val_message}}" ng-if="!field.validation.choices" type="text" class="form-control select" pattern="{{field.validation.pattern}}"  name="{{field.name}}{{$index}}" maxlength="{{field.validation.max}}" id="{{field.name}}{{$index}}" value="" placeholder="{{field.name}}" ng-class="{'first': $first, 'last': $last}">
-          <select ng-if="field.validation.choices" class="form-control select" name="" ng-class="{'first': $first, 'last': $last}">
+          <input title="{{field.validation.val_message}}" ng-if="!field.validation.grid_choices && !field.validation.choices" type="text" class="form-control select" pattern="{{field.validation.pattern}}"  name="{{field.name}}{{$index}}" maxlength="{{field.validation.max}}" id="{{field.name}}{{$index}}" value="" placeholder="{{field.name}}" ng-class="{'first': $first, 'last': $last}">
+          <select ng-if="field.validation.grid_choices" class="form-control select" name="" ng-class="{'first': $first, 'last': $last}">
+            <option ng-if="field.validation.grid_choices" value="{{choice.id}}" ng-repeat="choice in field.validation.grid_choices">{{choice.name}}</option>
+          </select>
+          <select ng-if="field.validation.choices && !field.validation.grid_choices" class="form-control select" name="" ng-class="{'first': $first, 'last': $last}">
             <option ng-if="field.validation.choices" value="{{choice}}" ng-repeat="choice in field.validation.choices">{{choice}}</option>
           </select>
+
+
         </td>
       </tr>
     </table>
