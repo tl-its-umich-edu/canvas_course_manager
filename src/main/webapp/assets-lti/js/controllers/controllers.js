@@ -463,6 +463,7 @@ $scope.createGroupSet = function(){
     $('#gridTable input').val('');
     $scope.content={};
     $scope.errors=[];
+    $scope.globalParseError=null;
     $('#fileForm')[0].reset();
   };
 
@@ -542,16 +543,27 @@ $scope.createGroupSet = function(){
 
   //parse attached CSV and validate it against functions model
   var parseCSV = function(CSVdata, headers, colCount) {
+    $scope.content={};$scope.errors=[];$scope.globalParseError=null;
     //remove certain line break chars
     CSVdata = CSVdata.replace(/\r/g, '');
     var lines = CSVdata.split("\n");
-
+    if(lines.length === 1){
+      $log.warn('only 1 line');
+      $scope.loading = false;
+      $scope.globalParseError ="Something is wrong with your file. Line endings?"
+    }
     var linesHeaders = lines[0].split(',');
     //remove leading and trailing spaces
     for (var i = 0; i < linesHeaders.length; i++) {
       linesHeaders[i] = linesHeaders[i].trim();
     }
     var linesValues = _.rest(lines,1);
+    $log.info(' error check 2 ' + linesValues.length);
+    if(linesValues.length === 0){
+      $log.warn('only 1 line');
+      $scope.loading = false;
+      $scope.globalParseError ="Something is wrong with your file. Line endings?"
+    }
     var result = {};
     result.data =[];
     $scope.errors = [];
@@ -560,7 +572,8 @@ $scope.createGroupSet = function(){
     var sortedHeaders =[];
     _.each (linesHeaders, function(lineHeader, index){
       var header = _.findWhere(headers, {name:lineHeader});
-       sortedHeaders.push(header);
+      $log.info(' error check 3 ' + lineHeader);
+      sortedHeaders.push(header);
     });
     for (var i = 0; i < linesValues.length; i++) {
       var lineArray = linesValues[i].split(',');
@@ -570,6 +583,12 @@ $scope.createGroupSet = function(){
       var number_pattern = /^\d+$/;
 
       _.each(sortedHeaders, function(header, index) {
+        $log.info(' error check 4 ' + header);
+        if(header===undefined){
+          $scope.loading =false;
+          $scope.globalParseError = "Something is wrong with your file";
+        }
+
         var validation = header.validation;
         if (lineArray[index]) {
           //remove leading and trailing spaces
