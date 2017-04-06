@@ -463,6 +463,7 @@ $scope.createGroupSet = function(){
     $('#gridTable input').val('');
     $scope.content={};
     $scope.errors=[];
+    $scope.showErrors=false;
     $scope.globalParseError=null;
     $('#fileForm')[0].reset();
   };
