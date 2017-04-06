@@ -202,11 +202,9 @@ li.addedSection {
   display: none !important;
 }
 
-tr.table-danger, tr.table-danger>td, tr.table-danger>th {
-    background-color: #f2dede;
+td.table-danger {
+  background-color: #f1dddd;
 }
-
-
 .alert-danger {
   color:#000
 }

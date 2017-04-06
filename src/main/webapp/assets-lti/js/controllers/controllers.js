@@ -548,9 +548,8 @@ $scope.createGroupSet = function(){
     CSVdata = CSVdata.replace(/\r/g, '');
     var lines = CSVdata.split("\n");
     if(lines.length === 1){
-      $log.warn('only 1 line');
       $scope.loading = false;
-      $scope.globalParseError ="Something is wrong with your file. Line endings?"
+      $scope.globalParseError ='Something is wrong with your file. Line endings?';
     }
     var linesHeaders = lines[0].split(',');
     //remove leading and trailing spaces
@@ -558,11 +557,9 @@ $scope.createGroupSet = function(){
       linesHeaders[i] = linesHeaders[i].trim();
     }
     var linesValues = _.rest(lines,1);
-    $log.info(' error check 2 ' + linesValues.length);
     if(linesValues.length === 0){
-      $log.warn('only 1 line');
       $scope.loading = false;
-      $scope.globalParseError ="Something is wrong with your file. Line endings?"
+      $scope.globalParseError ='Something is wrong with your file. Line endings?';
     }
     var result = {};
     result.data =[];
@@ -572,67 +569,80 @@ $scope.createGroupSet = function(){
     var sortedHeaders =[];
     _.each (linesHeaders, function(lineHeader, index){
       var header = _.findWhere(headers, {name:lineHeader});
-      $log.info(' error check 3 ' + lineHeader);
       sortedHeaders.push(header);
     });
     for (var i = 0; i < linesValues.length; i++) {
       var lineArray = linesValues[i].split(',');
 
-      var obj = {};
-      obj.data = [];
+      var lineObj = {};
+      lineObj.data = [];
       var number_pattern = /^\d+$/;
 
       _.each(sortedHeaders, function(header, index) {
-        $log.info(' error check 4 ' + header);
+        var obj = {};
+        obj.invalid = false;
+        obj.message='';
         if(header===undefined){
           $scope.loading =false;
           $scope.globalParseError = "Something is wrong with your file";
         }
-
         var validation = header.validation;
+
         if (lineArray[index]) {
           //remove leading and trailing spaces
           var thisVal = lineArray[index].trim();
           if (thisVal.split(' ').length !== 1 && !validation.spaces) {
             $scope.log.push(i+1 + ' - "' + thisVal + '" has spaces');
+            obj.message = obj.message + thisVal + ' has spaces';
             obj.invalid = true;
+            lineObj.invalid=true;
           }
           if (thisVal.length > validation.max) {
-            $scope.log.push(i+1 + ' - "' + thisVal + '" too many chars');
+            $scope.log.push(i+1 + ' - "' + thisVal + '" has too many chars');
+            obj.message = obj.message + thisVal + ' has too many chars';
             obj.invalid = true;
+            lineObj.invalid=true;
           }
           if (thisVal.length < validation.min) {
-            $scope.log.push(i+1 + ' - "' + thisVal + '" too few chars');
+            $scope.log.push(i+1 + ' - "' + thisVal + '" has too few chars');
+            obj.message = obj.message + thisVal + ' has too few chars';
             obj.invalid = true;
+            lineObj.invalid=true;
           }
           if (!number_pattern.test(thisVal) && validation.chars === 'num') {
-            $scope.log.push(i+1 + ' - "' + thisVal + '" not a number');
+            $scope.log.push(i+1 + ' - "' + thisVal + '" is not a number');
+            obj.message = obj.message + thisVal + ' is not a number';
             obj.invalid = true;
+            lineObj.invalid=true;
           }
           if (validation.choices) {
             if (_.indexOf(validation.choices, thisVal) === -1) {
               $scope.log.push(i+1 + ' - "' + thisVal + '" is not one of the choices in [' + validation.choices + ']');
+              obj.message = obj.message + thisVal + '  is not one of the choices in [' + validation.choices + ']';
               obj.invalid = true;
+              lineObj.invalid=true;
             }
           }
         }
-        obj.data.push(lineArray[index]);
+
+        lineObj.data.push({'value':lineArray[index],'error':obj.invalid,'message':obj.message});
       });
       if (lineArray.length !== colCount && lineArray !== ['']) {
-        obj.invalid = true;
+        lineObj.invalid = true;
       }
+
+
 
       if (lineArray.length === 1 && lineArray[0] === '') {
 
       } else {
-        result.data.push(obj);
+
+        result.data.push(lineObj);
       }
-    }
-    if (_.where(result.data, {invalid: true}).length) {
-      $scope.errors = _.where(result.data, {invalid: true});
     }
     $scope.loading = false;
     result.headers = linesHeaders;
+
     return result;
   };
 }]);
