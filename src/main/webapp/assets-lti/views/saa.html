@@ -19,6 +19,7 @@
         <span ng-hide="!csv_fields || !selectedFunction"><a href="" ng-click="csv_fields=false">Hide {{selectedFunction.type}} info</a></span>
       </span>
       <br><br>
+      <p ng-show="selectedFunction && selectedFunction.type==='csv'"><strong>CSV Format:</strong> {{selectedFunction.info}}</p>
       <div class="panel panel-default">
         <div class="panel-body">
           <span ng-show="availableSections.length">{{availableSections.length}} available sections.</span>
@@ -43,7 +44,7 @@
     <!-- current function field listing, including validation rules, available by toggling link above -->
     <div class="well" ng-show="csv_fields">
       <p>{{selectedFunction.notes}}</p>
-      <table class="table" style="width:auto">
+      <table class="table">
         <caption>{{selectedFunction.type | uppercase}} Fields </caption>
         <tr>
           <th ng-repeat="field in selectedFunction.fields">
@@ -51,7 +52,7 @@
           </th>
         <tr>
           <td ng-repeat="field in selectedFunction.fields">
-              <p ng-repeat="(key, value) in field.validation"><span class="label label-info">{{key}}: {{value}}</span> </p>
+            <p ng-hide="key==='grid_choices'" ng-repeat="(key, value) in field.validation"><strong>{{key}}</strong><br> <span ng-show="key==='choices'"><span ng-repeat="val in value track by $index">{{val}}<span ng-if="!$last">, </span></span></span><span ng-show="key!=='choices'">{{value}}</span></p>
           </td>
         </tr>
       </table>
