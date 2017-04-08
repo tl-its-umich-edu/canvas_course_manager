@@ -81,22 +81,23 @@
       <div class="input-group">
         <span  ng-show="loading"class="alert-info alert-inline">Loading...</span>
         <span  ng-show="globalParseError"class="alert-danger alert-inline">{{globalParseError}}</span>
-        <button ng-show="csvfile && content.data.length" class="btn btn-default" type="reset" ng-click="content={};errors=[];globalParseError=null;" name="reset-file-input">Reset</button>
+        <button ng-show="csvfile && content.data.length" class="btn btn-default" type="reset" ng-click="content={};errors=[];showErrors=false;log=[];globalParseError=null;" name="reset-file-input">Reset</button>
       </div>
       <!-- either there were errors in the CSV or there were no errors, in which case the user gets an upload control -->
-      <div class="pull-right" ng-show="(content.data && content.data.length !==0) && (errors  && errors.length ===0)">
+      <div class="pull-right" ng-show="(content.data && content.data.length !==0) && (log  && log.length ===0)">
           No errors detected <button class="btn btn-primary" ng-click="submitCSV()">Upload</button>
       </div>
     </form>
-    <div class="alert alert-danger" ng-show="errors.length && content.data.length">
-      <span ng-if="errors.length >1">There were {{errors.length}} errors</span><span ng-if="errors.length ===1">There was {{errors.length}} error</span>, highlighted below. <input type="checkbox" id="showErrors" name="" value="" ng-model="showErrors">        <label for="showErrors">Show errors only</label>
+    <div class="alert alert-danger" ng-show="log.length && content.data.length">
+      <span ng-if="log.length >1">There were {{log.length}} errors</span><span ng-if="log.length ===1">There was {{log.length}} error</span>, highlighted below. <input type="checkbox" id="showErrors" name="" value="" ng-model="showErrors">        <label for="showErrors">Show error log and lines with errors only</label>
     </div>
 
     <!-- list of errors with line numbers -->
-    <ul ng-show="showErrors">
-      <li ng-repeat="message in log track by $index">{{message}}</li>
-    </ul>
-
+    <div class="panel panel-default"  ng-show="showErrors">
+      <ul class="panel-body">
+        <li ng-repeat="message in log track by $index">{{message}}</li>
+      </ul>
+    </div>
     <!-- tabled presentation of attached CSV file, error rows marked -->
     <table class="table" ng-show="content.data.length">
       <thead>
@@ -109,13 +110,14 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-hide="showErrors && !contentline.invalid" ng-class="{ 'table-danger': contentline.invalid}"
+        <tr ng-class="{ 'table-danger': contentline.invalid}"
+          ng-hide="showErrors && !contentline.invalid"
           ng-repeat="contentline in content.data track by $index">
           <td>
             {{$index+1}}
           </td>
-          <td ng-repeat="item in contentline.data track by $index">
-            {{item}}
+          <td ng-repeat="item in contentline.data track by $index"  ng-class="{ 'table-danger': item.error}">
+            {{item.value}} <a class="pull-right" href="" ng-show="item.error" title="{{item.message}}"><strong><i class="glyphicon glyphicon-question-sign"></i></strong></a>
           </td>
         </tr>
       </tbody>
