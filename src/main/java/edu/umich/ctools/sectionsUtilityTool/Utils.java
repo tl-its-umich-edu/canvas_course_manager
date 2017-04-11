@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -33,7 +32,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Properties;
+import java.util.Random;
 
 public class Utils {
 
@@ -45,8 +46,26 @@ public class Utils {
 	public static final String LTI_PARAM_FIRST_NAME = "lis_person_name_given";
 	public static final String LTI_PARAM_CANVAS_USER_ID = "custom_canvas_user_id";
 	public static final String SESSION_ROLES_FOR_ADDING_TEACHER = "session_roles_for_adding_teacher";
-	public static final String SIS_IMPORTS = "sisImports";
-	public static final String SIS_UPLOAD_ADDING_SECTIONS = "addSections";
+	public static final String DELETE = "DELETE";
+	public static final String POST = "POST";
+	public static final String GET = "GET";
+	public static final String PUT = "PUT";
+	public static final String CSV_HEADERS_SECTIONS = "section_id,name,status,course_id";
+	public static final String CONSTANT_MIME_TEXT_CSV = "text/csv";
+	protected static final String MAIL_SMTP_HOST = "mail.smtp.host";
+	protected static final String MAIL_SMTP_AUTH = "mail.smtp.auth";
+	protected static final String MAIL_SMTP_STARTTLS = "mail.smtp.starttls.enable";
+	protected static final String MAIL_DEBUG = "mail.debug";
+	protected static final String MAIL_HOST = "umich.friend.mailhost";
+	protected static final String FRIEND_CONTACT_EMAIL = "umich.friend.contactemail";
+	protected static final String SIS_REPORT_CC_ADDRESS = "sis.report.cc.address";
+	protected static final String SIS_POLLING_ATTEMPTS = "sis.polling.attempts";
+	protected static final String SIS_POLLING_FREQUENCY = "sis.polling.frequency";
+	protected static final String IS_MAIL_DEBUG_ENABLED = "mail.debug.enabled";
+	protected static final String JSON_PARAM_WORKFLOW_STATE = "workflow_state";
+	protected static final String JSON_PARAM_FAILED_WITH_MESSAGES = "failed_with_messages";
+	protected static final String JSON_PARAM_IMPORTED_WITH_MESSAGES = "imported_with_messages";
+	protected static final String JSON_PARAM_IMPORTED = "imported";
 	private static Log M_log = LogFactory.getLog(Utils.class);
 
 	private static final String CANVAS_API_GETALLSECTIONS_PER_COURSE = "canvas.api.getallsections.per.course.regex";
@@ -58,6 +77,8 @@ public class Utils {
 	public static final String CANVAS_API_VERSION = "/api/v1" ;
 	public static String canvasURL = null;
 	public static String canvasToken = null;
+	public final static int API_UNKNOWN_ERROR = 666;
+	public final static int API_EXCEPTION_ERROR = 667;
 
 	public static Properties loadProperties(String path){
 		String propertiesFilePath = System.getProperty(path);
@@ -193,35 +214,39 @@ public class Utils {
 		M_log.info(String.format(baseString, user, originalUrl));
 	}
 
-	public static String makeApiCall(String... urlChunks){
+	public static ApiResultWrapper makeApiCall(HttpUriRequest clientRequest){
+		HttpResponse response;
+		response = Utils.executeApiCall(clientRequest);
+
+		if (response == null) {
+			String errMsg = String.format("{\"errorMsg\":\"The request %s failed with errors\"}",
+					clientRequest.getURI().toString());
+			return new ApiResultWrapper(Utils.API_UNKNOWN_ERROR, errMsg, "");
+		}
+
+		int statusCode = response.getStatusLine().getStatusCode();
+
+		String apiResponse = "";
+		String errMsg = "{\"errorMsg\":\"The request %s has failed to extract the response due to %s\"}";
+		try {
+			apiResponse = EntityUtils.toString(response.getEntity(), "UTF-8");
+		} catch (IOException e) {
+			return new ApiResultWrapper(Utils.API_EXCEPTION_ERROR,
+					String.format(errMsg, clientRequest.getURI().toString(), e.getMessage()), "");
+		} catch (Exception e) {
+			return new ApiResultWrapper(Utils.API_EXCEPTION_ERROR,
+					String.format(errMsg, clientRequest.getURI().toString(), e.getMessage()), "");
+		}
+
+		return new ApiResultWrapper(statusCode, "", apiResponse);
+	}
+
+	public static String urlConstructor(String... urlChunks) {
 		String url = canvasURL + CANVAS_API_VERSION;
 		for (String chunk : urlChunks) {
 			url += chunk;
 		}
-		M_log.info("API call: " + url);
-		HttpResponse response = Utils.executeApiCall(new HttpGet(url));
-		if (response == null) {
-			M_log.error(String.format("The Api call %s failed with errors", url));
-			return null;
-		}
-		int statusCode = response.getStatusLine().getStatusCode();
-		if (statusCode != HttpStatus.SC_OK) {
-			M_log.error(String.format("The Api call %s has failed with status code %s", url, statusCode));
-			return null;
-		}
-		String apiResponse;
-		String errMsg = "The API call %s has failed to extract the response due to %s";
-		try {
-			apiResponse = EntityUtils.toString(response.getEntity(), "UTF-8");
-		} catch (IOException e) {
-			M_log.error(String.format(errMsg, url, e.getMessage()));
-			return null;
-		} catch (Exception e) {
-			M_log.error(String.format(errMsg, url, e.getMessage()));
-			return null;
-		}
-
-		return apiResponse;
+		return url;
 	}
 
 	public static HttpResponse executeApiCall(HttpUriRequest clientRequest) {
@@ -234,13 +259,13 @@ public class Utils {
 		}
 		HttpResponse response = null;
 		long startTime = System.currentTimeMillis();
-		String errMsg = "Canvas API call did not complete successfully due to %s";
+		String errMsg = "Canvas API %s call did not complete successfully due to %s";
 		try {
 			response = client.execute(clientRequest);
 		} catch (IOException e) {
-			M_log.error(String.format(errMsg, e.getMessage()));
+			M_log.error(String.format(errMsg, clientRequest.getURI().toString(),e.getMessage()));
 		} catch (Exception e) {
-			M_log.error(String.format(errMsg, e.getMessage()));
+			M_log.error(String.format(errMsg, clientRequest.getURI().toString(),e.getMessage()));
 		} finally {
 			long stopTime = System.currentTimeMillis();
 			long elapsedTime = stopTime - startTime;
@@ -249,4 +274,39 @@ public class Utils {
 		return response;
 	}
 
+	public static boolean didApiReturedWithOutErrors(String errMsg, ApiResultWrapper arw) {
+        if (arw.getStatus() != HttpStatus.SC_OK) {
+            M_log.error(errMsg);
+			return false;
+        }
+		return true;
+    }
+
+	public static String getLTICustomParam(HttpServletRequest request, String ltiParam){
+		HashMap<String, Object> customValuesMap = getLTICustomParams(request);
+		for (String LtiParamKey : customValuesMap.keySet()) {
+			if (LtiParamKey == ltiParam) {
+				return (String) customValuesMap.get(ltiParam);
+			}
+		}
+		return null;
+	}
+
+	public static String generateSisCourseId() {
+        Random rand = new Random();
+        int ranNum = rand.nextInt(40) + 1;
+        long epoch = System.currentTimeMillis();
+        String courseSisId="ccm"+epoch+"-"+ranNum;
+        return courseSisId;
+    }
+
+	public static String getSisSectionIDChunk(HttpServletRequest request){
+        String courseId = getLTICustomParam(request, LTI_PARAM_CANVAS_COURSE_ID);
+        return "ccmS"+courseId+"-";
+    }
+
+	private static HashMap<String, Object> getLTICustomParams(HttpServletRequest request) {
+		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(Utils.TC_SESSION_DATA);
+		return tc.getCustomValuesMap();
+	}
 }

@@ -1,0 +1,39 @@
+{
+  "created_at": "2017-03-14T15:17:19Z",
+  "started_at": "2017-03-14T15:17:20Z",
+  "ended_at": "2017-03-14T15:17:20Z",
+  "updated_at": "2017-03-14T15:17:20Z",
+  "progress": 100,
+  "id": 2451,
+  "workflow_state": "failed_with_messages",
+  "data": {
+    "import_type": "instructure_csv",
+    "counts": {
+      "accounts": 0,
+      "terms": 0,
+      "abstract_courses": 0,
+      "courses": 0,
+      "sections": 0,
+      "xlists": 0,
+      "users": 0,
+      "user_observers": 0,
+      "enrollments": 0,
+      "groups": 0,
+      "group_memberships": 0,
+      "grade_publishing_results": 0
+    }
+  },
+  "batch_mode": null,
+  "batch_mode_term_id": null,
+  "override_sis_stickiness": null,
+  "add_sis_stickiness": null,
+  "clear_sis_stickiness": null,
+  "diffing_data_set_identifier": null,
+  "diffed_against_import_id": null,
+  "processing_errors": [
+    [
+      "",
+      "Error while importing CSV. Please contact support. (Error report 17700006984800188)"
+    ]
+  ]
+}

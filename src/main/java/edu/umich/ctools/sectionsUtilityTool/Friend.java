@@ -15,9 +15,17 @@ limitations under the License.
 */
 package edu.umich.ctools.sectionsUtilityTool;
 
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.HashMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.xmlrpc.client.XmlRpcClient;
+import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
+import org.apache.xmlrpc.client.XmlRpcSun15HttpTransportFactory;
+
+import javax.mail.Message;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -25,15 +33,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
-import javax.mail.*;
-import javax.mail.internet.*;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.xmlrpc.client.XmlRpcClient;
-import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
-import org.apache.xmlrpc.client.XmlRpcSun15HttpTransportFactory;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Properties;
 
 public class Friend 
 {
@@ -51,6 +53,7 @@ public class Friend
 	protected static String requesterEmailFile = null;
 	protected static String mailHost = null;
 	protected static String subjectLine = null;
+	protected static boolean mailDebug = false;
 
 	protected static final String KEYSTORETYPE_PKCS12 = "pkcs12";
 	protected static final String TRUSTSTORETYPE_JKS = "jks";
@@ -61,29 +64,19 @@ public class Friend
 	protected static final String INSTRUCTOR_NAME_TAG = "<instructor>";
 	protected static final String CONTACT_EMAIL_TAG = "<contactEmail>";
 
-	protected static final String FRIEND_PROPERTY_FILE_PATH = "sectionsToolFriendPropsPath";
-	protected static final String FRIEND_PROPERTY_FILE_PATH_SECURE = "sectionsToolFriendPropsPathSecure";
-
 	protected static final String FRIEND_URL = "umich.friend.url";
-	protected static final String FRIEND_CONTACT_EMAIL = "umich.friend.contactemail"; 
 	protected static final String FRIEND_REFERRER = "umich.friend.referrer";
 	protected static final String FRIEND_FRIEND_EMAIL = "umich.friend.friendemail";
 	protected static final String FRIEND_REQUESTER_EMAIL = "umich.friend.requesteremail";
-	protected static final String FRIEND_MAIL_HOST = "umich.friend.mailhost";
 	protected static final String FRIEND_SUBJECT_LINE = "umich.friend.subjectline";
 	protected static final String FRIEND_KS_FILENAME = "umich.friend.ksfilename";
 	protected static final String FRIEND_KS_PASSWORD = "umich.friend.kspassword";
 
-	protected static final String MAIL_SMTP_AUTH = "mail.smtp.auth";
-	protected static final String MAIL_SMTP_STARTTLS = "mail.smtp.starttls.enable";
-	protected static final String MAIL_SMTP_HOST = "mail.smtp.host";
-	protected static final String MAIL_DEBUG = "mail.debug";
-
 	private final static String CCM_PROPERTY_FILE_PATH = "ccmPropsPath";
-	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";	
+	private final static String CCM_SECURE_PROPERTY_FILE_PATH = "ccmPropsPathSecure";
 
 	protected static Properties appExtSecureProperties=null;
-	protected static Properties appExtProperties=null;	
+	protected static Properties appExtProperties=null;
 
 	private XmlRpcClient Xclient;
 
@@ -106,11 +99,12 @@ public class Friend
 		if(appExtSecureProperties!=null) {
 			//PropertiesFile information
 			friendUrl = appExtProperties.getProperty(FRIEND_URL);
-			contactEmail = appExtProperties.getProperty(FRIEND_CONTACT_EMAIL);
+			contactEmail = appExtProperties.getProperty(Utils.FRIEND_CONTACT_EMAIL);
 			referrerUrl = appExtProperties.getProperty(FRIEND_REFERRER);
 			friendEmailFile = appExtProperties.getProperty(FRIEND_FRIEND_EMAIL);
 			requesterEmailFile = appExtProperties.getProperty(FRIEND_REQUESTER_EMAIL);
-			mailHost = appExtProperties.getProperty(FRIEND_MAIL_HOST);
+			mailHost = appExtProperties.getProperty(Utils.MAIL_HOST);
+			mailDebug = Boolean.valueOf(appExtProperties.getProperty(Utils.IS_MAIL_DEBUG_ENABLED));
 			subjectLine = appExtProperties.getProperty(FRIEND_SUBJECT_LINE);
 			ksFileName = appExtSecureProperties.getProperty(FRIEND_KS_FILENAME);
 			ksPwd = appExtSecureProperties.getProperty(FRIEND_KS_PASSWORD);
@@ -325,10 +319,10 @@ public class Friend
 		M_log.info("Setting up mailProps");
 
 		Properties properties = System.getProperties();
-		properties.put(MAIL_SMTP_AUTH, "false");
-		properties.put(MAIL_SMTP_STARTTLS, "true"); //Put to false, if no https is needed
-		properties.put(MAIL_SMTP_HOST, host);
-		properties.put(MAIL_DEBUG, "true");
+		properties.put(Utils.MAIL_SMTP_AUTH, "false");
+		properties.put(Utils.MAIL_SMTP_STARTTLS, "true"); //Put to false, if no https is needed
+		properties.put(Utils.MAIL_SMTP_HOST, host);
+		properties.put(Utils.MAIL_DEBUG, mailDebug);
 
 		M_log.debug("Initiating Session for sendMail");
 		Session session = Session.getInstance(properties);
