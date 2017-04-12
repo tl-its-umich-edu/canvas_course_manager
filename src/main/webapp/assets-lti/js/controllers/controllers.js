@@ -610,6 +610,16 @@ $scope.createGroupSet = function(){
             obj.invalid = true;
             lineObj.invalid=true;
           }
+          if(validation.pattern){
+            var pat = new RegExp(validation.pattern);
+            if (!pat.test(thisVal)) {
+              $scope.log.push(i+1 + ' - "' + thisVal + ' ' + validation.val_message);
+              obj.message = obj.message + thisVal + ' ' + validation.val_message;
+              obj.invalid = true;
+              lineObj.invalid=true;
+            }
+          }
+
           if (!number_pattern.test(thisVal) && validation.chars === 'num') {
             $scope.log.push(i+1 + ' - "' + thisVal + '" is not a number');
             obj.message = obj.message + thisVal + ' is not a number';
