@@ -8,11 +8,11 @@
       "name": "user_id",
       "validation": {
         "spaces": false,
-        "chars": "num",
-        "pattern":"\\d{8,8}",
-        "val_message":"Please use an 8 digit number",
-        "max": 8,
-        "min": 8
+        "chars": "alpha",
+        "pattern":"^\\d{8,8}$|.*@.*",
+        "val_message":"Please use an 8 digit number or an email address",
+        "max": 100,
+        "min": 3
       }
     }, {
       "name": "role",
@@ -133,11 +133,11 @@
     "name": "user_id",
     "validation": {
       "spaces": false,
-      "chars": "num",
-      "pattern":"\\d{8,8}",
-      "val_message":"Please use an 8 digit number",
-      "max": 8,
-      "min": 8
+      "chars": "alpha",
+      "pattern":"^\\d{8,8}$|.*@.*",
+      "val_message":"Please use an 8 digit number or an email address",
+      "max": 100,
+      "min": 3
     }
   },{
     "name": "status",
@@ -159,11 +159,11 @@
     "name": "user_id",
     "validation": {
       "spaces": false,
-      "chars": "num",
-      "pattern":"\\d{8,8}",
-      "val_message":"Please use an 8 digit number",
-      "max": 8,
-      "min": 8
+      "chars": "alpha",
+      "pattern":"^\\d{8,8}$|.*@.*",
+      "val_message":"Please use an 8 digit number or an email address",
+      "max": 100,
+      "min": 3
     }
   }, {
     "name": "section_id",
@@ -203,11 +203,11 @@
     "name": "user_id",
     "validation": {
       "spaces": false,
-      "chars": "num",
-      "pattern":"\\d{8,8}",
-      "val_message":"Please use an 8 digit number",
-      "max": 8,
-      "min": 8
+      "chars": "alpha",
+      "pattern":"^\\d{8,8}$|.*@.*",
+      "val_message":"Please use an 8 digit number or an email address",
+      "max": 100,
+      "min": 3
     }
   },{
     "name": "group_id",
