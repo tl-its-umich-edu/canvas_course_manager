@@ -4,6 +4,7 @@
   "url":"addUsersToSections",
   "type": "csv",
   "notes":"Servlet supplies course_id, SAA supplies rest",
+  "field_array":["user_id","role","section_id","status"],
   "fields": [{
       "name": "user_id",
       "validation": {
@@ -49,6 +50,7 @@
   "url": "sisImports/addSections",
   "type": "csv",
   "notes":"Servlet supplies course_id, section_id, SAA supplies rest",
+  "field_array":["id_prefix","name","status"],
   "fields": [{
     "name": "id_prefix",
     "validation": {
@@ -81,6 +83,7 @@
   "url": "addGroups",
   "type": "csv",
   "notes":"Servlet supplies group_id, SAA supplies rest",
+  "field_array":["id_prefix","name","groupset","status"],
   "fields": [{
     "name": "id_prefix",
     "validation": {
@@ -121,6 +124,7 @@
   "url": "addUsersToGroups",
   "type": "csv",
   "notes":"SAA supplies all",
+  "field_array":["group_id","user_id","status"],
   "fields": [ {
     "name": "group_id",
     "validation": {
