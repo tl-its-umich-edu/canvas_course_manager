@@ -21,11 +21,11 @@
       <br><br>
       <div class="panel panel-default">
         <div class="panel-body">
-          <span ng-show="availableSections.length">{{availableSections.length}} available sections.</span>
+          <span ng-show="availableSections.length">{{availableSections.length}} available section(s).</span>
           <span ng-show="!availableSections.length">No available sections.</span>
-          <span ng-show="availableGroups.length">{{availableGroups.length}} available groups.</span>
+          <span ng-show="availableGroups.length">{{availableGroups.length}} available group(s).</span>
           <span ng-show="!availableGroups.length">No available groups.</span>
-          <span ng-show="availableGroupSets.length">Available group categories: <strong ng-repeat="set in availableGroupSets">{{set.name}}<span ng-if="!$last">,</span></strong></span>
+          <span ng-show="availableGroupSets.length">Available group categories: <strong ng-repeat="set in availableGroupSets">{{set.name}} ({{set.id}})<span ng-if="!$last">, </span></strong></span>
           <span ng-show="!availableGroupSets.length">No available group sets. <a href="" ng-click="creatingGroupSet=true" ng-show="!creatingGroupSet">Create one?</a></span>
           <span ng-show="creatingGroupSet && !availableGroupSets.length" class="form-inline">
             <label for="newGroupSet" class="sr-only">New group set name</label>

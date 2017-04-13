@@ -19,7 +19,7 @@
       "validation": {
         "spaces": false,
         "chars": "alpha",
-        "choices": ["student", "teacher", "ta", "observer", "designer"],
+        "choices": ["student", "teacher", "ta", "observer", "designer","Participant", "Grader", "Librarian", "Assistant"],
         "max": 2000,
         "min": 1
       }
@@ -29,16 +29,6 @@
         "spaces": false,
         "chars": "alpha",
         "max": 300,
-        "min": 1
-      }
-    },
-    {
-      "name": "status",
-      "validation": {
-        "spaces": false,
-        "chars": "alpha",
-        "choices": ["active", "deleted", "completed", " inactive"],
-        "max": 2000,
         "min": 1
       }
     }
@@ -64,15 +54,6 @@
       "chars": "alpha",
       "max": 300,
       "min": 5
-    }
-  }, {
-    "name": "status",
-    "validation": {
-      "spaces": false,
-      "chars": "alpha",
-      "choices": ["active", "deleted"],
-      "max": 3000,
-      "min": 1
     }
   }]
 }, {
@@ -105,15 +86,6 @@
         "max": 300,
         "min": 1
       }
-  }, {
-    "name": "status",
-    "validation": {
-      "spaces": true,
-      "chars": "alpha",
-      "choices": ["available", "deleted"],
-      "max": 3000,
-      "min": 1
-    }
   }]
 }, {
   "name": "Add multiple users to course groups through CSV",
@@ -138,15 +110,6 @@
       "val_message":"Please use an 8 digit number or an email address",
       "max": 100,
       "min": 3
-    }
-  },{
-    "name": "status",
-    "validation": {
-      "spaces": false,
-      "chars": "alpha",
-      "choices": ["accepted", "deleted"],
-      "max": 2000,
-      "min": 1
     }
   }]
 }, {
@@ -178,17 +141,7 @@
     "validation": {
       "spaces": false,
       "chars": "alpha",
-      "choices": ["student", "teacher", "ta", "observer", "designer"],
-      "max": 2000,
-      "min": 1
-    }
-  },
-  {
-    "name": "status",
-    "validation": {
-      "spaces": false,
-      "chars": "alpha",
-      "choices": ["active", "deleted", "completed", " inactive"],
+      "choices": ["student", "teacher", "ta", "observer", "designer","Participant", "Grader", "Librarian", "Assistant"],
       "max": 2000,
       "min": 1
     }
