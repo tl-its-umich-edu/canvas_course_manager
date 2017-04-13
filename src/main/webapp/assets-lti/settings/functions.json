@@ -3,7 +3,8 @@
   "id": "users_in_sections",
   "url":"addUsersToSections",
   "type": "csv",
-  "notes":"Servlet supplies course_id, SAA supplies rest",
+  "notes":"Tool supplies course_id. user_id is either the UMID or an email address for non-UM users. See CSV info for rules.",
+  "field_array":["user_id","role","section_id"],
   "fields": [{
       "name": "user_id",
       "validation": {
@@ -38,7 +39,8 @@
   "id": "sections_to_canvas",
   "url": "sisImports/addSections",
   "type": "csv",
-  "notes":"Servlet supplies course_id, section_id, SAA supplies rest",
+  "notes":"Tool supplies course_id. The id_prefix  will be used to construct a unique section sis_id. You may want to use a prefix that is meaningful. See CSV info for rules.",
+  "field_array":["id_prefix","name"],
   "fields": [{
     "name": "id_prefix",
     "validation": {
@@ -61,7 +63,8 @@
   "id": "groups_to_sections",
   "url": "addGroups",
   "type": "csv",
-  "notes":"Servlet supplies group_id, SAA supplies rest",
+  "notes":"Tool supplies course_id. The id_prefix  will be used to construct a unique section sis_id. You may want to use a prefix that is meaningful. See CSV info for rules.",
+  "field_array":["id_prefix","name","groupset"],
   "fields": [{
     "name": "id_prefix",
     "validation": {
@@ -92,7 +95,8 @@
   "id": "users_to_groups",
   "url": "addUsersToGroups",
   "type": "csv",
-  "notes":"SAA supplies all",
+  "notes":"See CSV info for rules.  user_id is either the UMID or an email address for non-UM users.",
+  "field_array":["group_id","user_id"],
   "fields": [ {
     "name": "group_id",
     "validation": {

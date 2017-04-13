@@ -14,10 +14,6 @@
         <option style="display:none" value="">Select a task</option>
       </select>
       <!-- shows field information on current function -->
-      <span style="padding-left:20px">
-        <span ng-hide="csv_fields || !selectedFunction"><a href="" ng-click="csv_fields=true">Show {{selectedFunction.type}} info</a></span>
-        <span ng-hide="!csv_fields || !selectedFunction"><a href="" ng-click="csv_fields=false">Hide {{selectedFunction.type}} info</a></span>
-      </span>
       <br><br>
       <div class="panel panel-default">
         <div class="panel-body">
@@ -37,26 +33,48 @@
       </div>
     </div>
   </div>
-  <h4 style="font-size:110%">{{selectedFunction.name}}</h4>
+  <h4 style="font-size:110%">{{selectedFunction.name}}
+    <span style="padding-left:20px">
+      <span ng-hide="csv_fields || !selectedFunction"><a href="" ng-click="csv_fields=true">Show {{selectedFunction.type}} info</a></span>
+      <span ng-hide="!csv_fields || !selectedFunction"><a href="" ng-click="csv_fields=false">Hide {{selectedFunction.type}} info</a></span>
+    </span>
+  </h4>
 
   <div class="" ng-show="selectedFunction">
     <!-- current function field listing, including validation rules, available by toggling link above -->
     <div class="well" ng-show="csv_fields">
-      <p>{{selectedFunction.notes}}</p>
       <table class="table" style="width:auto">
-        <caption>{{selectedFunction.type | uppercase}} Fields </caption>
+        <caption >{{selectedFunction.type | uppercase}} Fields </caption>
         <tr>
           <th ng-repeat="field in selectedFunction.fields">
             {{field.name}}
           </th>
         <tr>
           <td ng-repeat="field in selectedFunction.fields">
-              <p ng-repeat="(key, value) in field.validation"><span class="label label-info">{{key}}: {{value}}</span> </p>
+            <div ng-repeat="(key, value) in field.validation" ng-hide="key==='val_message' || key==='grid_choices'">
+              <strong>{{key}}: </strong>
+              <span ng-hide="key==='choices' || key==='grid_choices'">{{value}}</span>
+              <p ng-show="key==='choices'">
+                <span style="padding-left:10px;font-size:90%" ng-repeat="val in value track by $index">{{val}}
+                  <span ng-if="!$last"><br></span>
+                </span>
+              </p>
+            </div>
           </td>
         </tr>
       </table>
     </div>
   </div>
+
+  <p ng-show="selectedFunction.notes">
+      {{selectedFunction.notes}}
+  </p>
+  <p ng-show="selectedFunction.type==='csv'">
+    Your file must include these headers in the first row: <strong ng-repeat="field in selectedFunction.field_array">{{field}}<span ng-if="!$last">, </span></strong>
+  </p>
+
+
+
   <div class="alert alert-danger" ng-show="(selectedFunction.id ==='users_to_groups'
     && !availableGroups.length)
     ||(selectedFunction.id==='users_to_groups_grid'
