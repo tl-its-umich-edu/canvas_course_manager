@@ -41,7 +41,6 @@
   </h4>
 
   <div class="" ng-show="selectedFunction">
-    <p ng-show="selectedFunction.type==='csv'">CSV Headers required:<strong> <span ng-repeat="field in selectedFunction.field_array">{{field}}<span ng-if="!$last">, </span></span></strong></p>
     <!-- current function field listing, including validation rules, available by toggling link above -->
     <div class="well" ng-show="csv_fields">
       <table class="table" style="width:auto">
