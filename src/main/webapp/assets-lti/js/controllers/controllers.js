@@ -551,8 +551,16 @@ $scope.createGroupSet = function(){
     if(lines.length === 1){
       $scope.loading = false;
       $scope.globalParseError ='Something is wrong with your file. Line endings?';
+      return null;
     }
     var linesHeaders = lines[0].split(',');
+
+    if((_.difference(linesHeaders, $scope.selectedFunction.field_array).length)){
+       $scope.globalParseError ='Something is wrong with your file. Bad or missing headers? Should be: \"' + $scope.selectedFunction.field_array.join(', ') + '\"';
+       $scope.loading = false;
+       return null;
+    }
+
     //remove leading and trailing spaces
     for (var i = 0; i < linesHeaders.length; i++) {
       linesHeaders[i] = linesHeaders[i].trim();
@@ -561,6 +569,7 @@ $scope.createGroupSet = function(){
     if(linesValues.length === 0){
       $scope.loading = false;
       $scope.globalParseError ='Something is wrong with your file. Line endings?';
+      return null;
     }
     var result = {};
     result.data =[];
@@ -586,6 +595,7 @@ $scope.createGroupSet = function(){
         if(header===undefined){
           $scope.loading =false;
           $scope.globalParseError = "Something is wrong with your file";
+          return null;
         }
         var validation = header.validation;
 
