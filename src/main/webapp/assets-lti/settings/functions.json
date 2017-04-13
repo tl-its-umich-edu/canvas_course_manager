@@ -3,24 +3,24 @@
   "id": "users_in_sections",
   "url":"addUsersToSections",
   "type": "csv",
-  "notes":"Servlet supplies course_id, SAA supplies rest",
-  "field_array":["user_id","role","section_id","status"],
+  "notes":"Tool supplies course_id. user_id is either the UMID or an email address for non-UM users. See CSV info for rules.",
+  "field_array":["user_id","role","section_id"],
   "fields": [{
       "name": "user_id",
       "validation": {
         "spaces": false,
-        "chars": "num",
-        "pattern":"\\d{8,8}",
-        "val_message":"Please use an 8 digit number",
-        "max": 8,
-        "min": 8
+        "chars": "alpha",
+        "pattern":"^\\d{8,8}$|.*@.*",
+        "val_message":"Please use an 8 digit number or an email address",
+        "max": 100,
+        "min": 3
       }
     }, {
       "name": "role",
       "validation": {
         "spaces": false,
         "chars": "alpha",
-        "choices": ["student", "teacher", "ta", "observer", "designer"],
+        "choices": ["student", "teacher", "ta", "observer", "designer","Participant", "Grader", "Librarian", "Assistant"],
         "max": 2000,
         "min": 1
       }
@@ -32,16 +32,6 @@
         "max": 300,
         "min": 1
       }
-    },
-    {
-      "name": "status",
-      "validation": {
-        "spaces": false,
-        "chars": "alpha",
-        "choices": ["active", "deleted", "completed", " inactive"],
-        "max": 2000,
-        "min": 1
-      }
     }
   ]
 }, {
@@ -49,8 +39,8 @@
   "id": "sections_to_canvas",
   "url": "sisImports/addSections",
   "type": "csv",
-  "notes":"Servlet supplies course_id, section_id, SAA supplies rest",
-  "field_array":["id_prefix","name","status"],
+  "notes":"Tool supplies course_id. The id_prefix  will be used to construct a unique section sis_id. You may want to use a prefix that is meaningful. See CSV info for rules.",
+  "field_array":["id_prefix","name"],
   "fields": [{
     "name": "id_prefix",
     "validation": {
@@ -67,23 +57,14 @@
       "max": 300,
       "min": 5
     }
-  }, {
-    "name": "status",
-    "validation": {
-      "spaces": false,
-      "chars": "alpha",
-      "choices": ["active", "deleted"],
-      "max": 3000,
-      "min": 1
-    }
   }]
 }, {
   "name": "Add multiple new groups to course through CSV",
   "id": "groups_to_sections",
   "url": "addGroups",
   "type": "csv",
-  "notes":"Servlet supplies group_id, SAA supplies rest",
-  "field_array":["id_prefix","name","groupset","status"],
+  "notes":"Tool supplies course_id. The id_prefix  will be used to construct a unique section sis_id. You may want to use a prefix that is meaningful. See CSV info for rules.",
+  "field_array":["id_prefix","name","groupset"],
   "fields": [{
     "name": "id_prefix",
     "validation": {
@@ -108,23 +89,14 @@
         "max": 300,
         "min": 1
       }
-  }, {
-    "name": "status",
-    "validation": {
-      "spaces": true,
-      "chars": "alpha",
-      "choices": ["available", "deleted"],
-      "max": 3000,
-      "min": 1
-    }
   }]
 }, {
   "name": "Add multiple users to course groups through CSV",
   "id": "users_to_groups",
   "url": "addUsersToGroups",
   "type": "csv",
-  "notes":"SAA supplies all",
-  "field_array":["group_id","user_id","status"],
+  "notes":"See CSV info for rules.  user_id is either the UMID or an email address for non-UM users.",
+  "field_array":["group_id","user_id"],
   "fields": [ {
     "name": "group_id",
     "validation": {
@@ -137,20 +109,11 @@
     "name": "user_id",
     "validation": {
       "spaces": false,
-      "chars": "num",
-      "pattern":"\\d{8,8}",
-      "val_message":"Please use an 8 digit number",
-      "max": 8,
-      "min": 8
-    }
-  },{
-    "name": "status",
-    "validation": {
-      "spaces": false,
       "chars": "alpha",
-      "choices": ["accepted", "deleted"],
-      "max": 2000,
-      "min": 1
+      "pattern":"^\\d{8,8}$|.*@.*",
+      "val_message":"Please use an 8 digit number or an email address",
+      "max": 100,
+      "min": 3
     }
   }]
 }, {
@@ -163,11 +126,11 @@
     "name": "user_id",
     "validation": {
       "spaces": false,
-      "chars": "num",
-      "pattern":"\\d{8,8}",
-      "val_message":"Please use an 8 digit number",
-      "max": 8,
-      "min": 8
+      "chars": "alpha",
+      "pattern":"^\\d{8,8}$|.*@.*",
+      "val_message":"Please use an 8 digit number or an email address",
+      "max": 100,
+      "min": 3
     }
   }, {
     "name": "section_id",
@@ -182,17 +145,7 @@
     "validation": {
       "spaces": false,
       "chars": "alpha",
-      "choices": ["student", "teacher", "ta", "observer", "designer"],
-      "max": 2000,
-      "min": 1
-    }
-  },
-  {
-    "name": "status",
-    "validation": {
-      "spaces": false,
-      "chars": "alpha",
-      "choices": ["active", "deleted", "completed", " inactive"],
+      "choices": ["student", "teacher", "ta", "observer", "designer","Participant", "Grader", "Librarian", "Assistant"],
       "max": 2000,
       "min": 1
     }
@@ -207,11 +160,11 @@
     "name": "user_id",
     "validation": {
       "spaces": false,
-      "chars": "num",
-      "pattern":"\\d{8,8}",
-      "val_message":"Please use an 8 digit number",
-      "max": 8,
-      "min": 8
+      "chars": "alpha",
+      "pattern":"^\\d{8,8}$|.*@.*",
+      "val_message":"Please use an 8 digit number or an email address",
+      "max": 100,
+      "min": 3
     }
   },{
     "name": "group_id",
