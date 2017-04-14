@@ -34,15 +34,12 @@
     </div>
   </div>
   <h4 style="font-size:110%">{{selectedFunction.name}}
-    <span style="padding-left:20px">
-      <span ng-hide="csv_fields || !selectedFunction"><a href="" ng-click="csv_fields=true">Show {{selectedFunction.type}} info</a></span>
-      <span ng-hide="!csv_fields || !selectedFunction"><a href="" ng-click="csv_fields=false">Hide {{selectedFunction.type}} info</a></span>
-    </span>
   </h4>
 
   <div class="" ng-show="selectedFunction">
     <!-- current function field listing, including validation rules, available by toggling link above -->
     <div class="well" ng-show="csv_fields">
+      <a href="" ng-click="csv_fields=false" class="pull-right" style="font-size:18px">&times;</a>
       <table class="table" style="width:auto">
         <caption >{{selectedFunction.type | uppercase}} Fields </caption>
         <tr>
@@ -67,7 +64,7 @@
   </div>
 
   <p ng-show="selectedFunction.notes">
-      {{selectedFunction.notes}}
+      {{selectedFunction.notes}} <span ng-show="selectedFunction.type==='csv'"> See <strong><a href="" ng-click="csv_fields=true">CSV Info</a></strong> for data validation rules.</span>
   </p>
   <p ng-show="selectedFunction.type==='csv'">
     Your file must include these headers in the first row: <strong ng-repeat="field in selectedFunction.field_array">{{field}}<span ng-if="!$last">, </span></strong>
