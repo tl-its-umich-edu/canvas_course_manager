@@ -95,7 +95,7 @@
   "id": "users_to_groups",
   "url": "addUsersToGroups",
   "type": "csv",
-  "notes":"See CSV info for rules.  user_id is either the UMID or an email address for non-UM users.",
+  "notes":"See CSV info for rules.  user_id is either the UMID or an email address for non-UM users. Important: users need to be in course already.",
   "field_array":["group_id","user_id"],
   "fields": [ {
     "name": "group_id",
