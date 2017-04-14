@@ -274,13 +274,13 @@ public class Utils {
 		return response;
 	}
 
-	public static boolean didApiReturedWithOutErrors(String errMsg, ApiResultWrapper arw) {
-        if (arw.getStatus() != HttpStatus.SC_OK) {
-            M_log.error(errMsg);
+	public static boolean didApiReturnedWithOutErrors(String errMsg, ApiResultWrapper arw) {
+		if (arw.getStatus() != HttpStatus.SC_OK) {
+			M_log.error(errMsg);
 			return false;
-        }
+		}
 		return true;
-    }
+	}
 
 	public static String getLTICustomParam(HttpServletRequest request, String ltiParam){
 		HashMap<String, Object> customValuesMap = getLTICustomParams(request);
@@ -293,17 +293,24 @@ public class Utils {
 	}
 
 	public static String generateSisCourseId() {
-        Random rand = new Random();
-        int ranNum = rand.nextInt(40) + 1;
-        long epoch = System.currentTimeMillis();
-        String courseSisId="ccm"+epoch+"-"+ranNum;
-        return courseSisId;
-    }
+		Random rand = new Random();
+		int ranNum = rand.nextInt(40) + 1;
+		long epoch = System.currentTimeMillis();
+		String courseSisId = "ccmC" + epoch + "-" + ranNum;
+		return courseSisId;
+	}
 
-	public static String getSisSectionIDChunk(HttpServletRequest request){
-        String courseId = getLTICustomParam(request, LTI_PARAM_CANVAS_COURSE_ID);
-        return "ccmS"+courseId+"-";
-    }
+	public static String getSisSectionIDChunk(HttpServletRequest request) {
+		String courseId = getLTICustomParam(request, LTI_PARAM_CANVAS_COURSE_ID);
+		//ideally this is not the case but if at all that happens we just want some name that goes as part of sis_section_id
+		//as not hard rule that applies
+		if(courseId==null){
+			M_log.warn("Course id could not be found for making a SIS Section Id");
+			long epoch = System.currentTimeMillis();
+			courseId = String.valueOf(epoch);
+		}
+		return "ccmS" + courseId + "-";
+	}
 
 	private static HashMap<String, Object> getLTICustomParams(HttpServletRequest request) {
 		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(Utils.TC_SESSION_DATA);

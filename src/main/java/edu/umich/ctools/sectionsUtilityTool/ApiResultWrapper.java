@@ -7,26 +7,26 @@ package edu.umich.ctools.sectionsUtilityTool;
 
 public class ApiResultWrapper {
 
-    private int status;
-    private String message;
-    private String apiResp;
+	private int status;
+	private String message;
+	private String apiResp;
 
-    public String getApiResp() {
-        return apiResp;
-    }
+	public String getApiResp() {
+		return apiResp;
+	}
 
-    public String getMessage() {
-        return message;
-    }
+	public String getMessage() {
+		return message;
+	}
 
-    public int getStatus() {
-        return status;
-    }
+	public int getStatus() {
+		return status;
+	}
 
-    public ApiResultWrapper(int status, String message, String apiResp) {
-        this.status = status;
-        this.message = message;
-        this.apiResp = apiResp;
-    }
+	public ApiResultWrapper(int status, String message, String apiResp) {
+		this.status = status;
+		this.message = message;
+		this.apiResp = apiResp;
+	}
 
 }

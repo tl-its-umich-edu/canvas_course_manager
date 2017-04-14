@@ -14,18 +14,14 @@
         <option style="display:none" value="">Select a task</option>
       </select>
       <!-- shows field information on current function -->
-      <span style="padding-left:20px">
-        <span ng-hide="csv_fields || !selectedFunction"><a href="" ng-click="csv_fields=true">Show {{selectedFunction.type}} info</a></span>
-        <span ng-hide="!csv_fields || !selectedFunction"><a href="" ng-click="csv_fields=false">Hide {{selectedFunction.type}} info</a></span>
-      </span>
       <br><br>
       <div class="panel panel-default">
         <div class="panel-body">
-          <span ng-show="availableSections.length">{{availableSections.length}} available sections.</span>
+          <span ng-show="availableSections.length">{{availableSections.length}} available section(s).</span>
           <span ng-show="!availableSections.length">No available sections.</span>
-          <span ng-show="availableGroups.length">{{availableGroups.length}} available groups.</span>
+          <span ng-show="availableGroups.length">{{availableGroups.length}} available group(s).</span>
           <span ng-show="!availableGroups.length">No available groups.</span>
-          <span ng-show="availableGroupSets.length">Available group categories: <strong ng-repeat="set in availableGroupSets">{{set.name}}<span ng-if="!$last">,</span></strong></span>
+          <span ng-show="availableGroupSets.length">Available group categories: <strong ng-repeat="set in availableGroupSets">{{set.name}} ({{set.id}})<span ng-if="!$last">, </span></strong></span>
           <span ng-show="!availableGroupSets.length">No available group sets. <a href="" ng-click="creatingGroupSet=true" ng-show="!creatingGroupSet">Create one?</a></span>
           <span ng-show="creatingGroupSet && !availableGroupSets.length" class="form-inline">
             <label for="newGroupSet" class="sr-only">New group set name</label>
@@ -37,26 +33,45 @@
       </div>
     </div>
   </div>
-  <h4 style="font-size:110%">{{selectedFunction.name}}</h4>
+  <h4 style="font-size:110%">{{selectedFunction.name}}
+  </h4>
 
   <div class="" ng-show="selectedFunction">
     <!-- current function field listing, including validation rules, available by toggling link above -->
     <div class="well" ng-show="csv_fields">
-      <p>{{selectedFunction.notes}}</p>
+      <a href="" ng-click="csv_fields=false" class="pull-right" style="font-size:18px">&times;</a>
       <table class="table" style="width:auto">
-        <caption>{{selectedFunction.type | uppercase}} Fields </caption>
+        <caption >{{selectedFunction.type | uppercase}} Fields </caption>
         <tr>
           <th ng-repeat="field in selectedFunction.fields">
             {{field.name}}
           </th>
         <tr>
           <td ng-repeat="field in selectedFunction.fields">
-              <p ng-repeat="(key, value) in field.validation"><span class="label label-info">{{key}}: {{value}}</span> </p>
+            <div ng-repeat="(key, value) in field.validation" ng-hide="key==='val_message' || key==='grid_choices'">
+              <strong>{{key}}: </strong>
+              <span ng-hide="key==='choices' || key==='grid_choices'">{{value}}</span>
+              <p ng-show="key==='choices'">
+                <span style="padding-left:10px;font-size:90%" ng-repeat="val in value track by $index">{{val}}
+                  <span ng-if="!$last"><br></span>
+                </span>
+              </p>
+            </div>
           </td>
         </tr>
       </table>
     </div>
   </div>
+
+  <p ng-show="selectedFunction.notes">
+      {{selectedFunction.notes}} <span ng-show="selectedFunction.type==='csv'"> See <strong><a href="" ng-click="csv_fields=true">CSV Info</a></strong> for data validation rules.</span>
+  </p>
+  <p ng-show="selectedFunction.type==='csv'">
+    Your file must include these headers in the first row: <strong ng-repeat="field in selectedFunction.field_array">{{field}}<span ng-if="!$last">, </span></strong>
+  </p>
+
+
+
   <div class="alert alert-danger" ng-show="(selectedFunction.id ==='users_to_groups'
     && !availableGroups.length)
     ||(selectedFunction.id==='users_to_groups_grid'
@@ -80,41 +95,44 @@
       </div>
       <div class="input-group">
         <span  ng-show="loading"class="alert-info alert-inline">Loading...</span>
-        <button ng-show="csvfile && content.data.length" class="btn btn-default" type="reset" ng-click="content={};errors=[]" name="reset-file-input">Reset</button>
+        <span  ng-show="globalParseError"class="alert-danger alert-inline">{{globalParseError}}</span>
+        <button ng-show="csvfile && content.data.length" class="btn btn-default" type="reset" ng-click="content={};errors=[];showErrors=false;log=[];globalParseError=null;" name="reset-file-input">Reset</button>
       </div>
       <!-- either there were errors in the CSV or there were no errors, in which case the user gets an upload control -->
-      <div class="pull-right" ng-show="(content.data && content.data.length !==0) && (errors  && errors.length ===0)">
+      <div class="pull-right" ng-show="(content.data && content.data.length !==0) && (log  && log.length ===0)">
           No errors detected <button class="btn btn-primary" ng-click="submitCSV()">Upload</button>
       </div>
     </form>
-    <div class="alert alert-danger" ng-show="errors.length && content.data.length">
-      <span ng-if="errors.length >1">There were {{errors.length}} errors</span><span ng-if="errors.length ===1">There was {{errors.length}} error</span>, highlighted below. <input type="checkbox" id="showErrors" name="" value="" ng-model="showErrors">        <label for="showErrors">Show errors only</label>
+    <div class="alert alert-danger" ng-show="log.length && content.data.length">
+      <span ng-if="log.length >1">There were {{log.length}} errors</span><span ng-if="log.length ===1">There was {{log.length}} error</span>, highlighted below. <input type="checkbox" id="showErrors" name="" value="" ng-model="showErrors">        <label for="showErrors">Show error log and lines with errors only</label>
     </div>
 
     <!-- list of errors with line numbers -->
-    <ul ng-show="showErrors">
-      <li ng-repeat="message in log track by $index">{{message}}</li>
-    </ul>
-
+    <div class="panel panel-default"  ng-show="showErrors">
+      <ul class="panel-body">
+        <li ng-repeat="message in log track by $index">{{message}}</li>
+      </ul>
+    </div>
     <!-- tabled presentation of attached CSV file, error rows marked -->
     <table class="table" ng-show="content.data.length">
       <thead>
         <tr>
           <th>
           </th>
-          <th ng-repeat="header in content.headers" scope="col">
+          <th ng-repeat="header in content.headers track by $index" scope="col">
             {{header}}
           </th>
         </tr>
       </thead>
       <tbody>
-        <tr ng-hide="showErrors && !contentline.invalid" ng-class="{ 'table-danger': contentline.invalid}"
+        <tr ng-class="{ 'table-danger': contentline.invalid}"
+          ng-hide="showErrors && !contentline.invalid"
           ng-repeat="contentline in content.data track by $index">
           <td>
             {{$index+1}}
           </td>
-          <td ng-repeat="item in contentline.data track by $index">
-            {{item}}
+          <td ng-repeat="item in contentline.data track by $index"  ng-class="{ 'table-danger': item.error}">
+            {{item.value}} <a class="pull-right" href="" ng-show="item.error" title="{{item.message}}"><strong><i class="glyphicon glyphicon-question-sign"></i></strong></a>
           </td>
         </tr>
       </tbody>
@@ -129,7 +147,7 @@
     <table class="table table-striped  table-hover" style="width:auto" id="gridTable">
       <thead>
         <tr>
-          <th ng-repeat="field in selectedFunction.fields" scope="col">{{field.name}}</th>
+          <th ng-repeat="field in selectedFunction.fields  track by $index" scope="col">{{field.name}}</th>
         </tr>
       </thead>
       <tr ng-repeat="i in getNumber(gridRowNumber) track by $index" class="formRow">
