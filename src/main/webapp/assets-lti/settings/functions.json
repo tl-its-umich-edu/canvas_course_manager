@@ -10,8 +10,8 @@
       "validation": {
         "spaces": false,
         "chars": "alpha",
-        "pattern":"^\\d{8,8}$|.*@.*",
-        "val_message":"Please use an 8 digit number or an email address",
+        "pattern":"^\\d{8,8}$|.*@(?!umich\\.edu).*",
+        "val_message":"Please use an 8 digit number or a non umich email address",
         "max": 100,
         "min": 3
       }
@@ -110,8 +110,8 @@
     "validation": {
       "spaces": false,
       "chars": "alpha",
-      "pattern":"^\\d{8,8}$|.*@.*",
-      "val_message":"Please use an 8 digit number or an email address",
+      "pattern":"^\\d{8,8}$|.*@(?!umich\\.edu).*",
+      "val_message":"Please use an 8 digit number or a non umich email address",
       "max": 100,
       "min": 3
     }
@@ -127,8 +127,8 @@
     "validation": {
       "spaces": false,
       "chars": "alpha",
-      "pattern":"^\\d{8,8}$|.*@.*",
-      "val_message":"Please use an 8 digit number or an email address",
+      "pattern":"^\\d{8,8}$|.*@(?!umich\\.edu).*",
+      "val_message":"Please use an 8 digit number or a non umich email address",
       "max": 100,
       "min": 3
     }
@@ -161,8 +161,8 @@
     "validation": {
       "spaces": false,
       "chars": "alpha",
-      "pattern":"^\\d{8,8}$|.*@.*",
-      "val_message":"Please use an 8 digit number or an email address",
+      "pattern":"^\\d{8,8}$|.*@(?!umich\\.edu).*",
+      "val_message":"Please use an 8 digit number or a non umich email address",
       "max": 100,
       "min": 3
     }
