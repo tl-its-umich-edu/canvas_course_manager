@@ -550,13 +550,13 @@ $scope.createGroupSet = function(){
     var lines = CSVdata.split("\n");
     if(lines.length === 1){
       $scope.loading = false;
-      $scope.globalParseError ='Something is wrong with your file. Line endings?';
+      $scope.globalParseError ='Something is wrong with your file. Is it standard CSV format?';
       return null;
     }
     var linesHeaders = lines[0].split(',');
 
     if((_.difference(linesHeaders, $scope.selectedFunction.field_array).length)){
-       $scope.globalParseError ='Something is wrong with your file. Bad or missing headers? Should be: \"' + $scope.selectedFunction.field_array.join(', ') + '\"';
+       $scope.globalParseError ='Something is wrong with your file.  Bad or missing headers? Should be: \"' + $scope.selectedFunction.field_array.join(', ') + '\"';
        $scope.loading = false;
        return null;
     }
@@ -594,7 +594,7 @@ $scope.createGroupSet = function(){
         obj.message='';
         if(header===undefined){
           $scope.loading =false;
-          $scope.globalParseError = "Something is wrong with your file";
+          $scope.globalParseError = "Something is wrong with your file. Is it standard CSV format?";
           return null;
         }
         var validation = header.validation;
