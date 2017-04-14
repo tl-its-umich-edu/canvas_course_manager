@@ -3,7 +3,7 @@
   "id": "users_in_sections",
   "url":"addUsersToSections",
   "type": "csv",
-  "notes":"Tool supplies course_id. user_id is either the UMID or an email address for non-UM users. See CSV info for rules.",
+  "notes":"Tool supplies course_id. user_id is either the UMID or an email address for non-UM users.",
   "field_array":["user_id","role","section_id"],
   "fields": [{
       "name": "user_id",
@@ -39,7 +39,7 @@
   "id": "sections_to_canvas",
   "url": "sisImports/addSections",
   "type": "csv",
-  "notes":"Tool supplies course_id. The id_prefix  will be used to construct a unique section sis_id. You may want to use a prefix that is meaningful. See CSV info for rules.",
+  "notes":"Tool supplies course_id. The id_prefix  will be used to construct a unique section sis_id. You may want to use a prefix that is meaningful.",
   "field_array":["id_prefix","name"],
   "fields": [{
     "name": "id_prefix",
@@ -63,7 +63,7 @@
   "id": "groups_to_sections",
   "url": "addGroups",
   "type": "csv",
-  "notes":"Tool supplies course_id. The id_prefix  will be used to construct a unique section sis_id. You may want to use a prefix that is meaningful. See CSV info for rules.",
+  "notes":"Tool supplies course_id. The id_prefix  will be used to construct a unique section sis_id. You may want to use a prefix that is meaningful.",
   "field_array":["id_prefix","name","groupset"],
   "fields": [{
     "name": "id_prefix",
