@@ -17,11 +17,11 @@
       <br><br>
       <div class="panel panel-default">
         <div class="panel-body">
-          <span ng-show="availableSections.length">{{availableSections.length}} available section(s).</span>
+          <span ng-show="availableSections.length">{{availableSections.length}} available <a href="" data-toggle="modal"  data-target="#listThingsModal" ng-click="selectedListName='Sections';selectedList = availableSectionsGrid"> section(s).</a></span>
           <span ng-show="!availableSections.length">No available sections.</span>
-          <span ng-show="availableGroups.length">{{availableGroups.length}} available group(s).</span>
+          <span ng-show="availableGroups.length">{{availableGroups.length}} available <a href="" data-toggle="modal"  data-target="#listThingsModal" ng-click="selectedListName='Groups';selectedList = availableGroupsGrid">group(s).</a></span>
           <span ng-show="!availableGroups.length">No available groups.</span>
-          <span ng-show="availableGroupSets.length">Available group categories: <strong ng-repeat="set in availableGroupSets">{{set.name}} ({{set.id}})<span ng-if="!$last">, </span></strong></span>
+          <span ng-show="availableGroupSets.length">{{availableGroupSets.length}} available <a href="" data-toggle="modal"  data-target="#listThingsModal" ng-click="selectedListName='Categories';selectedList = availableGroupSets">group categories</a></span>
           <span ng-show="!availableGroupSets.length">No available group sets. <a href="" ng-click="creatingGroupSet=true" ng-show="!creatingGroupSet">Create one?</a></span>
           <span ng-show="creatingGroupSet && !availableGroupSets.length" class="form-inline">
             <label for="newGroupSet" class="sr-only">New group set name</label>
@@ -255,5 +255,34 @@
           {{value}}
         </td>
       </table>
+  </div>
+</div>
+
+
+<div class="modal fade" id="listThingsModal" tabindex="-1" role="dialog" aria-labelledby="listThingsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">
+          <span aria-hidden="true">&times;</span>
+          <span class="sr-only">Close</span>
+        </button>
+        <h3 class="modal-title" id="listThingsModalLabel">Available {{selectedListName}}</span></h3>
+      </div>
+      <div class="modal-body">
+        <table class="table table table-striped table-hover table-condensed">
+          <thead>
+            <th scope="col">Name</th>
+            <th scope="col">Id</th>
+          </thead>
+          <tbody>
+            <tr ng-repeat="item in selectedList">
+              <td>{{item.name}}</td>
+              <td>{{item.id}}</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
   </div>
 </div>
