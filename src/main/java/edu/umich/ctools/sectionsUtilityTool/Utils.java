@@ -66,6 +66,11 @@ public class Utils {
 	protected static final String JSON_PARAM_FAILED_WITH_MESSAGES = "failed_with_messages";
 	protected static final String JSON_PARAM_IMPORTED_WITH_MESSAGES = "imported_with_messages";
 	protected static final String JSON_PARAM_IMPORTED = "imported";
+	public static final String URL_CHUNK_ACCOUNTS = "/accounts/";
+	public static final String URL_CHUNK_COURSES = "/courses/";
+	public static final String URL_CHUNK_COURSE_SIS_COURSE_ID = "/?course[sis_course_id]=";
+	public static final String URL_CHUNK_SIS_IMPORT_WITH_BATCH_MODE_STICKINESS_DISABLED = "?batch_mode=0&override_sis_stickiness=0&extension=csv";
+	public static final String URL_CHUNK_ACCOUNTS_1_SIS_IMPORTS = "/accounts/1/sis_imports/";
 	private static Log M_log = LogFactory.getLog(Utils.class);
 
 	private static final String CANVAS_API_GETALLSECTIONS_PER_COURSE = "canvas.api.getallsections.per.course.regex";
@@ -242,11 +247,13 @@ public class Utils {
 	}
 
 	public static String urlConstructor(String... urlChunks) {
-		String url = canvasURL + CANVAS_API_VERSION;
+		StringBuffer url =new StringBuffer();
+		url.append(canvasURL);
+		url.append(CANVAS_API_VERSION);
 		for (String chunk : urlChunks) {
-			url += chunk;
+			url.append(chunk);
 		}
-		return url;
+		return url.toString();
 	}
 
 	public static HttpResponse executeApiCall(HttpUriRequest clientRequest) {

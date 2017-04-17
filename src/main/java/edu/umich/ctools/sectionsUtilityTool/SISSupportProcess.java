@@ -62,16 +62,16 @@ public class SISSupportProcess {
 			Map.Entry<Integer, String> csvFile = csvContentWithStatus.entrySet().iterator().next();
 
 			int status = csvFile.getKey();
-			String csvValue = csvFile.getValue();
+			String csvBody = csvFile.getValue();
 			//things went wrong in making the csv file
 			if (status != HttpStatus.SC_OK) {
 				response.setStatus(status);
-				out.print(csvValue);
+				out.print(csvBody);
 				out.flush();
 				return;
 			}
 			//So lets do the sisupload with constructed csv file
-			ApiResultWrapper arw = sisUploadCall(csvValue);
+			ApiResultWrapper arw = sisUploadCall(csvBody);
 
 			status = arw.getStatus();
 			response.setStatus(status);
@@ -166,7 +166,7 @@ public class SISSupportProcess {
 	}
 
 	private ApiResultWrapper sisUploadCall(String csvFileContent){
-		String url = Utils.urlConstructor("/accounts/1/sis_imports?batch_mode=0&override_sis_stickiness=0&extension=csv");
+		String url = Utils.urlConstructor(Utils.URL_CHUNK_ACCOUNTS_1_SIS_IMPORTS+Utils.URL_CHUNK_SIS_IMPORT_WITH_BATCH_MODE_STICKINESS_DISABLED);
 		HttpPost post = new HttpPost(url);
 		post.setEntity(new StringEntity(csvFileContent, ContentType.create(Utils.CONSTANT_MIME_TEXT_CSV, "UTF-8")));
 		ApiResultWrapper arw = Utils.makeApiCall(post);
@@ -177,7 +177,7 @@ public class SISSupportProcess {
 	private ApiResultWrapper getCourseSisId(String courseId) {
 		M_log.debug("getCourseSisId() call");
 		String course_account_id;
-		String url = Utils.urlConstructor("/courses/", courseId);
+		String url = Utils.urlConstructor(Utils.URL_CHUNK_COURSES, courseId);
 		ApiResultWrapper arw = Utils.makeApiCall(new HttpGet(url));
 		String msg = String.format("couldn't get course_sis_id for course %s, with Status code %s, due to: %s", courseId,
 				arw.getStatus(), (arw.getApiResp().isEmpty()) ? arw.getMessage() : arw.getApiResp());
@@ -196,7 +196,7 @@ public class SISSupportProcess {
 		M_log.debug("createACourseSISId() call");
 		String courseSISId = Utils.generateSisCourseId();
 		//https://umich.test.instructure.com/api/v1/courses/183787/?course[sis_course_id]=pu_sis_id_0329_3
-		String url = Utils.urlConstructor("/courses/", courseId, "/?course[sis_course_id]=" + courseSISId);
+		String url = Utils.urlConstructor(Utils.URL_CHUNK_COURSES, courseId, Utils.URL_CHUNK_COURSE_SIS_COURSE_ID, courseSISId);
 		ApiResultWrapper arw = Utils.makeApiCall(new HttpPut(url));
 		String msg = String.format("couldn't create course_sis_id for course %s, with status code %s, due to: %s", courseId,
 				arw.getStatus(), (arw.getApiResp().isEmpty()) ? arw.getMessage() : arw.getApiResp());

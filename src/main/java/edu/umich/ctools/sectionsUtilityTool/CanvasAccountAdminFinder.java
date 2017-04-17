@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class CanvasAccountAdminFinder {
 
+	protected static final String URL_CHUNK_ADMINS_USER_ID = "/admins/?user_id[]=";
 	private static Log M_log = LogFactory.getLog(SectionsUtilityToolServlet.class);
 
 	protected boolean isAccountAdmin(HttpServletRequest request) {
@@ -30,8 +31,8 @@ public class CanvasAccountAdminFinder {
 
 	private boolean determineIfUserIsAdminInHierarchy(int userCanvasId, int courseAccountId) {
 		M_log.debug("determineIfUserIsAdminInHierarchy() call");
-		String url = Utils.urlConstructor("/accounts/", String.valueOf(courseAccountId),
-				"/admins/?user_id[]=", String.valueOf(userCanvasId));
+		String url = Utils.urlConstructor(Utils.URL_CHUNK_ACCOUNTS, String.valueOf(courseAccountId),
+				URL_CHUNK_ADMINS_USER_ID, String.valueOf(userCanvasId));
 		ApiResultWrapper arw = Utils.makeApiCall(new HttpGet(url));
 		String errMsg = String.format("check user %s is an admin in the course account %s had null response, with status %s, due to:%s"
 				, userCanvasId, courseAccountId, arw.getStatus(), (arw.getApiResp().isEmpty()) ? arw.getMessage() : arw.getApiResp());
@@ -56,7 +57,7 @@ public class CanvasAccountAdminFinder {
 	public int getParentAccount(int accountId) {
 		M_log.debug("getParentAccount() call");
 		// https://umich.test.instructure.com:443/api/v1/accounts/78
-		String url = Utils.urlConstructor("/accounts/", String.valueOf(accountId));
+		String url = Utils.urlConstructor(Utils.URL_CHUNK_ACCOUNTS, String.valueOf(accountId));
 		ApiResultWrapper arw = Utils.makeApiCall(new HttpGet(url));
 		int parentAccountId = 0;
 		String errMsg = String.format("getting parent for account %s for SubAccountAdmin check failed with status code " +
@@ -76,7 +77,7 @@ public class CanvasAccountAdminFinder {
 	private int getCourseAccountId(String courseId) {
 		M_log.debug("getCourseAccountId() call");
 		int course_account_id = 0;
-		String url = Utils.urlConstructor("/courses/", courseId);
+		String url = Utils.urlConstructor(Utils.URL_CHUNK_COURSES, courseId);
 		ApiResultWrapper arw = Utils.makeApiCall(new HttpGet(url));
 		String errMsg = String.format("As part of SubAccountAdmin check, couldn't get accountId the course %s" +
 						" belong to, with status code %s, due to: %s",

@@ -23,7 +23,7 @@ public class SISDataHolderForEmail {
 	public String getCourseId() {
 		return courseId;
 	}
-	public void setNumberOfTries(int numberOfTries) {
+	public void incrementNumberOfTries(int numberOfTries) {
 		this.numberOfTries+= numberOfTries;
 	}
 	public int getNumberOfTries() {

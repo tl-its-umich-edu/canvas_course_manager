@@ -28,16 +28,16 @@ public class SISPollingThread implements Runnable {
 	volatile boolean flag = true;
 	Properties appExtPropertiesFile = SectionsUtilityToolServlet.appExtPropertiesFile;
 	private int pollingAttempts =Integer.valueOf(appExtPropertiesFile.getProperty(Utils.SIS_POLLING_ATTEMPTS));
-	private int pollingFrequency =Integer.valueOf(appExtPropertiesFile.getProperty(Utils.SIS_POLLING_FREQUENCY));
+	private int sleepTimeForPolling =Integer.valueOf(appExtPropertiesFile.getProperty(Utils.SIS_POLLING_FREQUENCY));
 
 
 	@Override
 	public void run() {
 		while (flag) {
-			M_log.debug("***************************** Starting polling Thread");
-			List<SISDataHolderForEmail> pollingId = SectionsUtilityToolServlet.canvasPollingIds;
-			listOFPolls(pollingId);
-			Iterator<SISDataHolderForEmail> iterator = pollingId.iterator();
+			M_log.debug("***************************** Starting the thread check loop");
+			List<SISDataHolderForEmail> pollingIds = SectionsUtilityToolServlet.canvasPollingIds;
+			printListOfPollsToDebugLog(pollingIds);
+			Iterator<SISDataHolderForEmail> iterator = pollingIds.iterator();
 			while (iterator.hasNext()) {
 				SISDataHolderForEmail emailData = iterator.next();
 				M_log.debug(String.format("Number of attempts by for job %s are %s "
@@ -46,42 +46,46 @@ public class SISPollingThread implements Runnable {
 					emailData.setSISUploadFailed(true);
 					sendEmailReport(emailData, null);
 					iterator.remove();
+					M_log.warn(String.format("The SIS Request %s for request type %s for course %s took longer than expected, removing the request from Thread Pool",
+							emailData.getPollingId(),emailData.getSisProcessType(),emailData.getCourseId()));
+					continue;
 				}
 				ApiResultWrapper arw = sisApiCallCheckingJobStatus(emailData);
 				int status = arw.getStatus();
-
 				if (status != HttpStatus.SC_OK) {
-					M_log.warn(String.format("SIS polling call failed with status code %s due to %s"
+					M_log.warn(String.format("SIS polling call failed with status code %s due to %s but will try in next poll"
 							, status, arw.getMessage()));
-					emailData.setNumberOfTries(1);
+					emailData.incrementNumberOfTries(1);
 					continue;
 				}
 
 				String apiResp = arw.getApiResp();
 				if (!isSISUploadDone(apiResp)) {
-					emailData.setNumberOfTries(1);
+					emailData.incrementNumberOfTries(1);
+					M_log.info(String.format("The SIS request %s of request type %s for course %s ,No# of (polling)attempts made for status %s "
+							, emailData.getPollingId(), emailData.getSisProcessType(), emailData.getCourseId(), emailData.getNumberOfTries()));
 					continue;
 				}
 				sendEmailReport(emailData, apiResp);
 				iterator.remove();
 
 			}
-			listOFPolls(pollingId);
-			M_log.debug("***************************** Finish polling Thread");
+			printListOfPollsToDebugLog(pollingIds);
+			M_log.debug("***************************** Finish the thread check loop");
 
 			try {
-				Thread.sleep(pollingFrequency);
+				Thread.sleep(sleepTimeForPolling);
 			} catch (InterruptedException e) {
-				M_log.error("Canvas polling thread got Interrupted due to "+e.getMessage());
+				M_log.error("Canvas polling thread got Interrupted due to " + e.getMessage());
 			} catch (Exception e) {
-				M_log.error("Canvas polling thread got Interrupted due to "+e.getMessage());
+				M_log.error("Canvas polling thread got Interrupted due to " + e.getMessage());
 			}
 
 		}
 
 	}
 
-	private void listOFPolls(List<SISDataHolderForEmail> pollingId) {
+	private void printListOfPollsToDebugLog(List<SISDataHolderForEmail> pollingId) {
 		for (SISDataHolderForEmail daa: pollingId){
 		M_log.debug("PollingList" +daa.getPollingId());
 		}
@@ -99,7 +103,7 @@ public class SISPollingThread implements Runnable {
 	}
 
 	private ApiResultWrapper sisApiCallCheckingJobStatus(SISDataHolderForEmail data) {
-		String url = Utils.urlConstructor("/accounts/1/sis_imports/", String.valueOf(data.getPollingId()));
+		String url = Utils.urlConstructor(Utils.URL_CHUNK_ACCOUNTS_1_SIS_IMPORTS, String.valueOf(data.getPollingId()));
 		ApiResultWrapper arw = Utils.makeApiCall(new HttpGet(url));
 		return arw;
 	}
@@ -132,7 +136,7 @@ public class SISPollingThread implements Runnable {
 				BodyPart bodyParts = new MimeBodyPart();
 				//BSA might come up with better wording, so keeping it simple for now
 				bodyParts.setText((data.getSisProcessType().getDescription() + " " +
-						"request either failed or canvas is taking too long to process this request"));
+						"canvas is taking too long to process this request"));
 				message.setContent(multipart);
 				Transport.send(message);
 				return;
@@ -153,7 +157,8 @@ public class SISPollingThread implements Runnable {
 			}
 
 			message.setContent(multipart);
-			M_log.info("Sending email for course " + data.getCourseId());
+			M_log.info(String.format("SIS request %s of type %s for course %s Finished! Sending email report  " ,
+					data.getPollingId(),data.getSisProcessType(),data.getCourseId()));
 			Transport.send(message);
 		} catch (MessagingException | JSONException e) {
 			M_log.error(String.format(errmsg, data.getCourseId(), e.getMessage()));
@@ -200,7 +205,7 @@ public class SISPollingThread implements Runnable {
 		if (workflowState.equals(Utils.JSON_PARAM_IMPORTED)) {
 			if (sisProcessType.equals(SISUploadType.ADD_SECTIONS)) {
 				int sectionAddedCount = (int) apiResp.getJSONObject("data").getJSONObject("counts").get("sections");
-				//giving the count from canvas how many section added to course. user could match up to one in the
+				//giving the count from canvas how many section added to course, user could match up to one in the
 				//attachment since as part of finished sis response canvas is not providing any more detail.
 				msgBody.append("Sections added: " + sectionAddedCount);
 			}
