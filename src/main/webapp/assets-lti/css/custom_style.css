@@ -97,6 +97,15 @@ ul {
     right:25%;
 }
 
+.debugLink {
+  position:absolute;
+  top:50px;
+  right:0;
+}
+.debugLink:hover, .debugLink:focus {
+  text-decoration: none;
+}
+
 .whyPop {
     text-align: left;
     position:absolute;
