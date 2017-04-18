@@ -481,8 +481,8 @@ $scope.createGroupSet = function(){
   // watch for changes to input[type:file]
   //read and parse the file
   $scope.$watch('csvfile', function(newFileObj) {
+    $scope.content = false;
     if (newFileObj) {
-      $scope.content = false;
       $scope.loading = true;
       var reader = new FileReader();
       reader.readAsText(newFileObj);
@@ -497,7 +497,9 @@ $scope.createGroupSet = function(){
     }
   });
 
-
+$scope.csvFileReset = function (){
+   angular.element("input[type='file']").val(null);
+};
 
   // event handler for clicking on the Upload CSV button
   $scope.submitCSV = function() {
