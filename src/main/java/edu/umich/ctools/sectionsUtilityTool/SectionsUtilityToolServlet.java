@@ -110,7 +110,10 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	protected static Properties appExtPropertiesFile=null;
 
 	private static List<String> rolesThatCanAddTeacherList = null;
-	protected static List<SISDataHolderForEmail> canvasPollingIds =Collections.synchronizedList(new LinkedList<>());
+
+	protected static List<SISDataHolderForEmail> canvasPollingIds =Collections.synchronizedList(new ArrayList<>());
+	protected static int addedPollingIdCount;
+	protected static int removedPollingIdCount;
 
 	private static final HashMap<String, Integer> enrollmentsMap = new HashMap<String, Integer>(){
 		private static final long serialVersionUID = -1389517682290891890L;

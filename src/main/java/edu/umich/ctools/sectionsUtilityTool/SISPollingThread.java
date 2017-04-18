@@ -35,42 +35,48 @@ public class SISPollingThread implements Runnable {
 	public void run() {
 		while (flag) {
 			M_log.debug("***************************** Starting the thread check loop");
-			List<SISDataHolderForEmail> pollingIds = SectionsUtilityToolServlet.canvasPollingIds;
-			printListOfPollsToDebugLog(pollingIds);
-			Iterator<SISDataHolderForEmail> iterator = pollingIds.iterator();
-			while (iterator.hasNext()) {
-				SISDataHolderForEmail emailData = iterator.next();
-				M_log.debug(String.format("Number of attempts by for job %s are %s "
-						, emailData.getPollingId(), emailData.getNumberOfTries()));
-				if (emailData.getNumberOfTries() >= pollingAttempts) {
-					emailData.setSISUploadFailed(true);
-					sendEmailReport(emailData, null);
+			synchronized (this) {
+				List<SISDataHolderForEmail> pollingIds = SectionsUtilityToolServlet.canvasPollingIds;
+				M_log.info("+++ Polling Id added" + SectionsUtilityToolServlet.addedPollingIdCount);
+				M_log.info("--- Polling Id removed" + SectionsUtilityToolServlet.removedPollingIdCount);
+				Iterator<SISDataHolderForEmail> iterator = pollingIds.iterator();
+				printListOfPollsToDebugLog(pollingIds);
+				while (iterator.hasNext()) {
+					SISDataHolderForEmail emailData = iterator.next();
+					M_log.debug(String.format("Number of attempts by for job %s are %s "
+							, emailData.getPollingId(), emailData.getNumberOfTries()));
+					if (emailData.getNumberOfTries() >= pollingAttempts) {
+						emailData.setSISUploadFailed(true);
+						sendEmailReport(emailData, null);
+						iterator.remove();
+						M_log.warn(String.format("The SIS Request %s for request type %s for course %s took longer than expected, REMOVING the request from THREAD",
+								emailData.getPollingId(), emailData.getSisProcessType(), emailData.getCourseId()));
+						removedPollingIdCount();
+						continue;
+					}
+					ApiResultWrapper arw = sisApiCallCheckingJobStatus(emailData);
+					int status = arw.getStatus();
+					if (status != HttpStatus.SC_OK) {
+						M_log.warn(String.format("SIS polling call failed with status code %s due to %s but will try in next poll"
+								, status, arw.getMessage()));
+						emailData.incrementNumberOfTries(1);
+						continue;
+					}
+
+					String apiResp = arw.getApiResp();
+					if (!isSISUploadDone(apiResp)) {
+						emailData.incrementNumberOfTries(1);
+						M_log.info(String.format("The SIS request %s of request type %s for course %s ,No# of (polling)attempts made for status %s "
+								, emailData.getPollingId(), emailData.getSisProcessType(), emailData.getCourseId(), emailData.getNumberOfTries()));
+						continue;
+					}
+					sendEmailReport(emailData, apiResp);
+					M_log.info("Removing the Polling Id from the list" + emailData.getPollingId());
 					iterator.remove();
-					M_log.warn(String.format("The SIS Request %s for request type %s for course %s took longer than expected, removing the request from Thread Pool",
-							emailData.getPollingId(),emailData.getSisProcessType(),emailData.getCourseId()));
-					continue;
+					removedPollingIdCount();
 				}
-				ApiResultWrapper arw = sisApiCallCheckingJobStatus(emailData);
-				int status = arw.getStatus();
-				if (status != HttpStatus.SC_OK) {
-					M_log.warn(String.format("SIS polling call failed with status code %s due to %s but will try in next poll"
-							, status, arw.getMessage()));
-					emailData.incrementNumberOfTries(1);
-					continue;
-				}
-
-				String apiResp = arw.getApiResp();
-				if (!isSISUploadDone(apiResp)) {
-					emailData.incrementNumberOfTries(1);
-					M_log.info(String.format("The SIS request %s of request type %s for course %s ,No# of (polling)attempts made for status %s "
-							, emailData.getPollingId(), emailData.getSisProcessType(), emailData.getCourseId(), emailData.getNumberOfTries()));
-					continue;
-				}
-				sendEmailReport(emailData, apiResp);
-				iterator.remove();
-
+				printListOfPollsToDebugLog(pollingIds);
 			}
-			printListOfPollsToDebugLog(pollingIds);
 			M_log.debug("***************************** Finish the thread check loop");
 
 			try {
@@ -85,10 +91,15 @@ public class SISPollingThread implements Runnable {
 
 	}
 
-	private void printListOfPollsToDebugLog(List<SISDataHolderForEmail> pollingId) {
-		for (SISDataHolderForEmail daa: pollingId){
-		M_log.debug("PollingList" +daa.getPollingId());
+	private synchronized void printListOfPollsToDebugLog(List<SISDataHolderForEmail> pollingId) {
+		for (SISDataHolderForEmail data: pollingId){
+		M_log.debug("PollingList" +data.getPollingId());
 		}
+	}
+
+	private synchronized void removedPollingIdCount(){
+		SectionsUtilityToolServlet.removedPollingIdCount += 1;
+		M_log.info("*#$*#$*#$ Number of Polling Ids removed are " + SectionsUtilityToolServlet.removedPollingIdCount);
 	}
 
 	public static boolean isSISUploadDone(String apiResp){

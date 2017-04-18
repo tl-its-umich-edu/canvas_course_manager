@@ -62,16 +62,16 @@ public class SISSupportProcess {
 			Map.Entry<Integer, String> csvFile = csvContentWithStatus.entrySet().iterator().next();
 
 			int status = csvFile.getKey();
-			String csvBody = csvFile.getValue();
+			String csvFinalContent = csvFile.getValue();
 			//things went wrong in making the csv file
 			if (status != HttpStatus.SC_OK) {
 				response.setStatus(status);
-				out.print(csvBody);
+				out.print(csvFinalContent);
 				out.flush();
 				return;
 			}
 			//So lets do the sisupload with constructed csv file
-			ApiResultWrapper arw = sisUploadCall(csvBody);
+			ApiResultWrapper arw = sisUploadCall(csvFinalContent);
 
 			status = arw.getStatus();
 			response.setStatus(status);
@@ -88,17 +88,29 @@ public class SISSupportProcess {
 				return;
 			}
 			// if good response then add the details to thread for later polling canvas status of job for reporting
-			String apiResp = arw.getApiResp();
-			JSONObject sisRes = new JSONObject(apiResp);
-			int id = (int) sisRes.get("id");
-			SISDataHolderForEmail emailData = new SISDataHolderForEmail
-					(id, courseId, emailAddress, SISUploadType.ADD_SECTIONS, csvFileContent);
-			SectionsUtilityToolServlet.canvasPollingIds.add(emailData);
+			savingPollingIdsForReporting(csvFinalContent, emailAddress, courseId, arw, SISUploadType.ADD_SECTIONS);
 			//send the good response to UI
 			out.print(arw.getApiResp());
 			out.flush();
 		}
 	}
+
+	private synchronized void savingPollingIdsForReporting(String csvFileContent, String emailAddress, String courseId,
+														   ApiResultWrapper arw, SISUploadType type) {
+		String apiResp = arw.getApiResp();
+		JSONObject sisRes = new JSONObject(apiResp);
+		int id = (int) sisRes.get("id");
+		SISDataHolderForEmail emailData = new SISDataHolderForEmail(id, courseId, emailAddress, type, csvFileContent);
+		M_log.info("Adding the Polling Id to List: "+id);
+		SectionsUtilityToolServlet.canvasPollingIds.add(emailData);
+		addingPollingIdCount();
+	}
+
+	private synchronized void addingPollingIdCount(){
+		SectionsUtilityToolServlet.addedPollingIdCount += 1;
+		M_log.info(" @&*@&* Number of POLLING ID's Added are " + SectionsUtilityToolServlet.addedPollingIdCount);
+	}
+
 
 	private String getAttachmentContent() {
 		// Create a new file upload handler
