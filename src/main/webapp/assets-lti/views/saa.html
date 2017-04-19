@@ -22,8 +22,8 @@
           <span ng-show="!availableSections.length">No available sections.</span>
           <span ng-show="availableGroups.length">{{availableGroups.length}} available <a href="" data-toggle="modal"  data-target="#listThingsModal" ng-click="selectedListName='Groups';selectedList = availableGroupsGrid">group(s).</a></span>
           <span ng-show="!availableGroups.length">No available groups.</span>
-          <span ng-show="availableGroupSets.length">{{availableGroupSets.length}} available <a href="" data-toggle="modal"  data-target="#listThingsModal" ng-click="selectedListName='Categories';selectedList = availableGroupSets">group categories</a></span>
-          <span ng-show="!availableGroupSets.length">No available group sets. <a href="" ng-click="creatingGroupSet=true" ng-show="!creatingGroupSet">Create one?</a></span>
+          <span ng-show="availableGroupSets.length">{{availableGroupSets.length}} available <a href="" data-toggle="modal"  data-target="#listThingsModal" ng-click="selectedListName='Categories';selectedList = availableGroupSets">Group Sets</a></span>
+          <span ng-show="!availableGroupSets.length">No available Group Sets. <a href="" ng-click="creatingGroupSet=true" ng-show="!creatingGroupSet">Create one?</a></span>
           <span ng-show="creatingGroupSet && !availableGroupSets.length" class="form-inline">
             <label for="newGroupSet" class="sr-only">New group set name</label>
             <input id="newGroupSet" type="text" name="" value="" placeholder="Group Set Name" ng-model="newGroupSet" class="form-control">
@@ -65,7 +65,7 @@
   </div>
 
   <p ng-show="selectedFunction.notes">
-      {{selectedFunction.notes}} <span ng-show="selectedFunction.type==='csv'"> See <strong><a href="" ng-click="csv_fields=true">CSV Info</a></strong> for data validation rules.</span>
+      <pre>{{selectedFunction.notes}}</pre> <span ng-show="selectedFunction.type==='csv'"><br> See <strong><a href="" ng-click="csv_fields=true">CSV Info</a></strong> for data validation rules.</span>
   </p>
   <p ng-show="selectedFunction.type==='csv'">
     Your file must include these headers in the first row: <strong ng-repeat="field in selectedFunction.field_array">{{field}}<span ng-if="!$last">, </span></strong>

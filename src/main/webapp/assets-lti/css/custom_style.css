@@ -23,6 +23,14 @@ input:invalid {
     padding:25px 10px;
 }
 
+pre {
+  border:0px solid #fff;
+  background:#fff;
+  font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 14px;
+  padding:0;
+  margin:0
+}
 #content {
     background: #eee;
     border-width:0 1px;
