@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import edu.umich.its.lti.TcSessionData;
 import edu.umich.its.lti.utils.OauthCredentials;
 import edu.umich.its.lti.utils.OauthCredentialsFactory;
 import edu.umich.its.lti.utils.RequestSignatureUtils;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
@@ -97,11 +98,6 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String TEACHER_ENROLLMENT = "TeacherEnrollment";
 	private static final String TA_ENROLLMENT = "TaEnrollment";
 
-	private static final String DELETE = "DELETE";
-	private static final String POST = "POST";
-	private static final String GET = "GET";
-	private static final String PUT = "PUT";
-
 	//Member variables
 	private String callType = null;
 	private String ltiUrl = null;
@@ -114,6 +110,10 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	protected static Properties appExtPropertiesFile=null;
 
 	private static List<String> rolesThatCanAddTeacherList = null;
+
+	protected static List<SISDataHolderForEmail> canvasPollingIds =Collections.synchronizedList(new ArrayList<>());
+	protected static int addedPollingIdCount;
+	protected static int removedPollingIdCount;
 
 	private static final HashMap<String, Integer> enrollmentsMap = new HashMap<String, Integer>(){
 		private static final long serialVersionUID = -1389517682290891890L;
@@ -173,6 +173,10 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug(" Servlet init(): Called");
 		configurePropertyValues();
 		configureOauthCredentials();
+		SISPollingThread polling=new SISPollingThread();
+		Thread thread = new Thread(polling);
+		thread.start();
+		M_log.info("************* Thread Started"+thread.getId());
 	}
 
 	private void configurePropertyValues() {
@@ -232,7 +236,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		HttpServletResponse response = vtc.getResponse();
 		HttpSession session= request.getSession(true);
 		M_log.debug("session id: "+session.getId());
-		boolean admin = isAccountAdmin(request);
+		CanvasAccountAdminFinder adminFinder = new CanvasAccountAdminFinder();
+		boolean admin = adminFinder.isAccountAdmin(request);
 		if (admin) {
 			M_log.info(String.format("The user \"%s\" is account admin in the course %s",
 					request.getParameter(Utils.LTI_PARAM_UNIQNAME), request.getParameter(Utils.LTI_PARAM_CANVAS_COURSE_ID)));
@@ -320,97 +325,6 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		context.put("ltiValues", ltiValues);
 	}
 
-	private boolean isAccountAdmin(HttpServletRequest request) {
-		M_log.debug("isAdmin() call");
-		String courseId = request.getParameter(Utils.LTI_PARAM_CANVAS_COURSE_ID);
-		int userId = Integer.parseInt(request.getParameter(Utils.LTI_PARAM_CANVAS_USER_ID));
-
-		int courseAccountId= getCourseAccountId(courseId);
-		if(courseAccountId == 0){
-			return false;
-		}
-		M_log.debug("*** Course Account ID " + courseAccountId);
-		return determineIfUserIsAdminInHierarchy(userId,courseAccountId);
-	}
-
-    private boolean determineIfUserIsAdminInHierarchy(int userCanvasId, int courseAccountId) {
-        M_log.debug("determineIfUserIsAdminInHierarchy() call");
-        String adminInCourseResp = Utils.makeApiCall("/accounts/", String.valueOf(courseAccountId),
-                "/admins/?user_id[]=", String.valueOf(userCanvasId));
-
-        if (adminInCourseResp == null) {
-            M_log.error(String.format("check user %s is an admin in the course account %s had null response"
-                    , userCanvasId, courseAccountId));
-            return false;
-        }
-
-        JSONArray subAccountAdminsJson = new JSONArray(adminInCourseResp);
-        if (subAccountAdminsJson.length() > 0) {
-            //user is a some kind of admin in the course
-            return true;
-        }
-        //find out if the user is a subaccount admin one level up in the hierarchy
-        int parentAccount = getParentAccount(courseAccountId);
-        // 0 means cannot get the desired response or trying to get parent of root account which is not applicable
-        if (parentAccount == 0) {
-            return false;
-        }
-        return determineIfUserIsAdminInHierarchy(userCanvasId, parentAccount);
-    }
-
-    public int getParentAccount(int accountId) {
-        M_log.debug("getParentAccount() call");
-        // https://umich.test.instructure.com:443/api/v1/accounts/78
-        String parentAccountResponse = Utils.makeApiCall("/accounts/", String.valueOf(accountId));
-        int parentAccountId = 0;
-
-        if (parentAccountResponse == null) {
-            M_log.error(String.format("getting parent for account %s for SubAccountAdmin check failed due " +
-                    "to null response", accountId));
-            return 0;
-        }
-
-        JSONObject parentAccountJson = new JSONObject(parentAccountResponse);
-        if (!parentAccountJson.isNull("parent_account_id")) {
-            parentAccountId = (int) parentAccountJson.get("parent_account_id");
-        }
-
-        return parentAccountId;
-
-    }
-
-    private int getCourseAccountId(String courseId) {
-        M_log.debug("getCourseAccountId() call");
-        int course_account_id = 0;
-        String courseData = Utils.makeApiCall("/courses/", courseId);
-        if (courseData == null) {
-            M_log.error(String.format("As part of SubAccountAdmin check, couldn't get accountId the course %s" +
-                    " belong to", courseId));
-            return 0;
-        }
-        JSONObject courseJson = new JSONObject(courseData);
-        if (!courseJson.isNull("account_id")) {
-            course_account_id = (int) courseJson.get("account_id");
-        }
-        return course_account_id;
-    }
-
-    private String getCourseSisId(String courseId) {
-        M_log.debug("getCourseSisId() call");
-        String course_account_id=null;
-        String courseData = Utils.makeApiCall("/courses/", courseId);
-        if (courseData == null) {
-            M_log.error(String.format("couldn't get course_sis_id for course %s", courseId));
-            return null;
-        }
-        JSONObject courseJson = new JSONObject(courseData);
-        if (!courseJson.isNull("sis_course_id")) {
-            course_account_id = (String)courseJson.get("sis_course_id");
-        }
-        return course_account_id;
-    }
-
-
 	private void fillCcmValuesForContext(Map<String, String> ltiValues, TcSessionData tc) {
 		HashMap<String, Object> customValuesMap = tc.getCustomValuesMap();
 		M_log.info("**** CCM Values in Context are ****");
@@ -466,54 +380,38 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}
 	}
 
-    public void doPost(HttpServletRequest request, HttpServletResponse response) {
-        M_log.debug("doPOST: Called");
-        try {
-            //determine if this is an LTI Call or a browser call?
-            if (request.getParameterMap().containsKey("oauth_consumer_key")) {
-                processLti(request, response);
-                return;
-            }
-            String pathInfo = request.getPathInfo();
+	public void doPost(HttpServletRequest request, HttpServletResponse response)  {
+		M_log.debug("doPOST: Called");
+		try {
+			//determine if this is an LTI Call or a browser call?
+			if (request.getParameterMap().containsKey("oauth_consumer_key")) {
+				processLti(request, response);
+				return;
+			}
+			boolean isMultipart = ServletFileUpload.isMultipartContent(request);
 
-            if (pathInfo.contains(Utils.SIS_IMPORTS)) {
-                handleSISImportProcess(request, response);
-            }
-            canvasRestApiCall(request, response);
-        } catch (Exception e) {
-            M_log.error("POST request has some exceptions", e);
-        }
-    }
+			if (isMultipart) {
+				SISSupportProcess sisSupportProcess = new SISSupportProcess(request, response);
+				sisSupportProcess.handleSISImportProcess();
+				return;
+			}
+			canvasRestApiCall(request, response);
+		} catch (Exception e) {
+			M_log.error("POST request has some exceptions", e);
+		}
+	}
 
-    private void handleSISImportProcess(HttpServletRequest request, HttpServletResponse response) {
-        String pathInfo = request.getPathInfo();
-        if (pathInfo.contains(Utils.SIS_UPLOAD_ADDING_SECTIONS)) {
-            handleSisImportOfAddingSectionToCourse(request, response);
-        }
-
-    }
-
-    private void handleSisImportOfAddingSectionToCourse(HttpServletRequest request, HttpServletResponse response) {
-        TcSessionData tc = (TcSessionData) request.getSession().getAttribute(Utils.TC_SESSION_DATA);
-        HashMap<String, Object> customValuesMap = tc.getCustomValuesMap();
-        String courseID = (String)customValuesMap.get(Utils.LTI_PARAM_CANVAS_COURSE_ID);
-        // course_sis_id is needed as part of creating sections via sis_upload
-        String courseSisId = getCourseSisId(courseID);
-        // TODO will process the call further.
-
-    }
-
-    private void processLti(HttpServletRequest request,
-                            HttpServletResponse response) throws IOException {
-        for (Object e : request.getParameterMap().entrySet()) {
-            Map.Entry<String, String[]> entry = (Map.Entry<String, String[]>) e;
-            String name = entry.getKey();
-            if (M_log.isDebugEnabled()) {
-                for (String value : entry.getValue()) {
-                    M_log.debug(name + " = " + value);
-                }
-            }
-        }
+	private void processLti(HttpServletRequest request,
+							HttpServletResponse response) throws IOException {
+		for (Object e : request.getParameterMap().entrySet()) {
+			Map.Entry<String, String[]> entry = (Map.Entry<String, String[]>) e;
+			String name = entry.getKey();
+			if (M_log.isDebugEnabled()) {
+				for (String value : entry.getValue()) {
+					M_log.debug(name + " = " + value);
+				}
+			}
+		}
 
 		ltiKey = request.getParameter("oauth_consumer_key");
 		ltiSecret = appExtSecurePropertiesFile.getProperty(ltiKey + ".secret");
@@ -742,13 +640,13 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		url = unmaskUrl(url, tc, stringToReplaceUser, stringToReplaceCourse);
 
 		HttpUriRequest clientRequest = null;
-		if(request.getMethod().equals(GET)) {
+		if(request.getMethod().equals(Utils.GET)) {
 			clientRequest = new HttpGet(url);
-		}else if (request.getMethod().equals(POST)) {
+		}else if (request.getMethod().equals(Utils.POST)) {
 			clientRequest = new HttpPost(url);
-		}else if(request.getMethod().equals(PUT)) {
+		}else if(request.getMethod().equals(Utils.PUT)) {
 			clientRequest=new HttpPut(url);
-		}else if(request.getMethod().equals(DELETE)) {
+		}else if(request.getMethod().equals(Utils.DELETE)) {
 			clientRequest=new HttpDelete(url);
 		}
 
@@ -954,7 +852,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		}
 	}
 	/*
-	 * This method control canvas api request allowed. If a particular request from UI is not in the allowed list then it will not process the request 
+	 * This method control canvas api request allowed. If a particular request from UI is not in the allowed list then it will not process the request
 	 * and sends an error to the UI. Using regex to match the incoming request
 	 */
 

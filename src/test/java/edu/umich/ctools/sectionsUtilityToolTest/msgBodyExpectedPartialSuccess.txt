@@ -1,0 +1,6 @@
+StartTime: 2016-07-19T20:46:29Z
+EndTime: 2016-07-19T20:46:30Z
+SIS upload imported with some errors
+["sections.csv","User not found for enrollment (User ID: 1, Course ID: 8, Section ID: )"]
+["sections.csv","User not found for enrollment (User ID: 2, Course ID: 8, Section ID: )"]
+["sections.csv","User not found for enrollment (User ID: 3, Course ID: 8, Section ID: )"]
