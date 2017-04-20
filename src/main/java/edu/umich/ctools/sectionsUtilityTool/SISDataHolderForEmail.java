@@ -11,7 +11,7 @@ public class SISDataHolderForEmail {
 	private SISUploadType sisProcessType;
 	private String sisEmailData;
 	private int numberOfTries;
-	private boolean isSISUploadFailed = false;
+	private boolean isSISUploadVerySlow = false;
 
 	public SISUploadType getSisProcessType() {
 		return sisProcessType;
@@ -37,12 +37,12 @@ public class SISDataHolderForEmail {
 	public String getSisEmailData() {
 		return sisEmailData;
 	}
-	public boolean isSISUploadFailed() {
-		return isSISUploadFailed;
+	public boolean isSISUploadVerySlow() {
+		return isSISUploadVerySlow;
 	}
 
-	public void setSISUploadFailed(boolean SISUploadFailed) {
-		isSISUploadFailed = SISUploadFailed;
+	public void setSISUploadVerySlow(boolean SISUploadVerySlow) {
+		isSISUploadVerySlow = SISUploadVerySlow;
 	}
 
 

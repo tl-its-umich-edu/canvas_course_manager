@@ -1,6 +1,7 @@
 
 
 <div class="container-fluid">
+  <a href="" class="debugLink"  ng-click="debug=!debug"><span class="sr-only">Link to debug panel</span>&nbsp;&nbsp;&nbsp;</a>
   <h2 style="font-size:130%">Sub-Account Administrator Utilities</h2>
   <div class="panel panel-default">
     <div class="panel-body form-inline">
@@ -21,8 +22,8 @@
           <span ng-show="!availableSections.length">No available sections.</span>
           <span ng-show="availableGroups.length">{{availableGroups.length}} available <a href="" data-toggle="modal"  data-target="#listThingsModal" ng-click="selectedListName='Groups';selectedList = availableGroupsGrid">group(s).</a></span>
           <span ng-show="!availableGroups.length">No available groups.</span>
-          <span ng-show="availableGroupSets.length">{{availableGroupSets.length}} available <a href="" data-toggle="modal"  data-target="#listThingsModal" ng-click="selectedListName='Categories';selectedList = availableGroupSets">group categories</a></span>
-          <span ng-show="!availableGroupSets.length">No available group sets. <a href="" ng-click="creatingGroupSet=true" ng-show="!creatingGroupSet">Create one?</a></span>
+          <span ng-show="availableGroupSets.length">{{availableGroupSets.length}} available <a href="" data-toggle="modal"  data-target="#listThingsModal" ng-click="selectedListName='Categories';selectedList = availableGroupSets">Group Sets</a></span>
+          <span ng-show="!availableGroupSets.length">No available Group Sets. <a href="" ng-click="creatingGroupSet=true" ng-show="!creatingGroupSet">Create one?</a></span>
           <span ng-show="creatingGroupSet && !availableGroupSets.length" class="form-inline">
             <label for="newGroupSet" class="sr-only">New group set name</label>
             <input id="newGroupSet" type="text" name="" value="" placeholder="Group Set Name" ng-model="newGroupSet" class="form-control">
@@ -64,7 +65,7 @@
   </div>
 
   <p ng-show="selectedFunction.notes">
-      {{selectedFunction.notes}} <span ng-show="selectedFunction.type==='csv'"> See <strong><a href="" ng-click="csv_fields=true">CSV Info</a></strong> for data validation rules.</span>
+      <pre>{{selectedFunction.notes}}</pre> <span ng-show="selectedFunction.type==='csv'"><br> See <strong><a href="" ng-click="csv_fields=true">CSV Info</a></strong> for data validation rules.</span>
   </p>
   <p ng-show="selectedFunction.type==='csv'">
     Your file must include these headers in the first row: <strong ng-repeat="field in selectedFunction.field_array">{{field}}<span ng-if="!$last">, </span></strong>
@@ -90,7 +91,7 @@
       <div class="form-group">
         <div class="input-group">
           <label class="sr-only" for="uploadCSV">Upload a CSV file</label>
-          <input id="uploadCSV" class="btn btn-primary" type="file" type="file" file-model="csvfile">
+          <input id="uploadCSV" class="btn btn-primary" type="file" type="file" ng-click="csvFileReset()" file-model="csvfile">
         </div>
       </div>
       <div class="input-group">
@@ -176,24 +177,16 @@
 
 
 <!-- debug panels TODO: remove when no longer needed -->
-<p  class="container-fluid">
-  <br>
-  <a href="" ng-click="debug=!debug">Toggle context debug panels</a>
-</p>
 <div ng-show="debug" class="container-fluid">
-
-  <h4>Course vals:</h4>
-
-  <div class="well">
-    <ul>
-      <li>
-        Course: {{course.name}}({{course.id}})
-      </li>
-    </ul>
-  </div>
-  <h4>Account vals:</h4>
+  <h4>Course: {{course.name}}({{course.id}})</h4>
   <div class="well">
     <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Component</th>
+          <th scope="col">Value</th>
+        </tr>
+      </thead>
       <tbody>
         <tr>
           <td>
@@ -209,7 +202,7 @@
             Course sections (SIS_IDs)
           </td>
           <td>
-            <span ng-repeat="section in availableSections"><span class="label label-default">{{section}}</span> </span>
+            <span ng-repeat="section in availableSections">{{section}}<span ng-if="!$last">, </span></span>
           </td>
 
         </tr>
@@ -218,7 +211,7 @@
             Course group sets
           </td>
           <td>
-            <span ng-repeat="groupset in availableGroupSets"><span class="label label-default">{{groupset.name}} ({{groupset.id}})</span><span ng-if="!$last">, </span></span>
+            <span ng-repeat="groupset in availableGroupSets">{{groupset.name}} ({{groupset.id}})<span ng-if="!$last">, </span></span>
             <span ng-show="!availableGroupSets.length">None</span>
           </td>
         </tr>
@@ -228,7 +221,7 @@
             Course groups (SIS_IDs)
           </td>
           <td>
-            <span ng-repeat="group in availableGroups"><span class="label label-default">{{group}}</span> </span>
+            <span ng-repeat="group in availableGroups">{{group}}<span ng-if="!$last">, </span> </span>
             <span ng-show="!availableGroups.length">None</span>
           </td>
         </tr>
@@ -247,6 +240,12 @@
   <h4>LTI vals:</h4>
   <div class="well">
     <table class="table table-stripped">
+      <thead>
+        <tr>
+          <th scope="col">Key</th>
+          <th scope="col">Value</th>
+        </tr>
+      </thead>
       <tr ng-repeat="(key, value) in ltiLaunch">
         <td>
           {{key}}

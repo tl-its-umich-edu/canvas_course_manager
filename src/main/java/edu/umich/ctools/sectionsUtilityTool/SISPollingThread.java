@@ -28,76 +28,108 @@ public class SISPollingThread implements Runnable {
 	volatile boolean flag = true;
 	Properties appExtPropertiesFile = SectionsUtilityToolServlet.appExtPropertiesFile;
 	private int pollingAttempts =Integer.valueOf(appExtPropertiesFile.getProperty(Utils.SIS_POLLING_ATTEMPTS));
-	private int sleepTimeForPolling =Integer.valueOf(appExtPropertiesFile.getProperty(Utils.SIS_POLLING_FREQUENCY));
+	private int sleepTimeForPolling =Integer.valueOf(appExtPropertiesFile.getProperty(Utils.SIS_POLLING_SLEEPTIME));
 
 
 	@Override
+	/* Here we grab all the canvasId for polling to send a report to the admins of the sis process once uploaded to canvas.
+	canvas is pretty quick in getting the sis_upload done, but some reason it's processing is slow then after X attempts we would
+	take it out of the polling list. All this tracking is for reporting so if we take the item out of the list that does mean
+	sis upload is interrupted by CCM tool.
+	*/
 	public void run() {
 		while (flag) {
 			M_log.debug("***************************** Starting the thread check loop");
 			synchronized (this) {
-				List<SISDataHolderForEmail> pollingIds = SectionsUtilityToolServlet.canvasPollingIds;
-				M_log.info("+++ Polling Id added" + SectionsUtilityToolServlet.addedPollingIdCount);
-				M_log.info("--- Polling Id removed" + SectionsUtilityToolServlet.removedPollingIdCount);
-				Iterator<SISDataHolderForEmail> iterator = pollingIds.iterator();
-				printListOfPollsToDebugLog(pollingIds);
-				while (iterator.hasNext()) {
-					SISDataHolderForEmail emailData = iterator.next();
-					M_log.debug(String.format("Number of attempts by for job %s are %s "
-							, emailData.getPollingId(), emailData.getNumberOfTries()));
-					if (emailData.getNumberOfTries() >= pollingAttempts) {
-						emailData.setSISUploadFailed(true);
-						sendEmailReport(emailData, null);
+				try {
+				    List<SISDataHolderForEmail> pollingIds = SectionsUtilityToolServlet.canvasPollingIds;
+					int addedPollingIdCount = SectionsUtilityToolServlet.addedPollingIdCount;
+					int removedPollingIdCount = SectionsUtilityToolServlet.removedPollingIdCount;
+
+					M_log.debug("+++ Polling Id added " + addedPollingIdCount);
+					M_log.debug("--- Polling Id removed " + removedPollingIdCount);
+
+					//this check is made for keeping track of Threading issues
+					didThreadingIssuesOccur(pollingIds, addedPollingIdCount, removedPollingIdCount);
+					Iterator<SISDataHolderForEmail> iterator = pollingIds.iterator();
+					printListOfPollsToDebugLog(pollingIds);
+					while (iterator.hasNext()) {
+						SISDataHolderForEmail emailData = iterator.next();
+						M_log.debug(String.format("Number of attempts by for job %s are %s "
+								, emailData.getPollingId(), emailData.getNumberOfTries()));
+						// Well the check is to ensure polling to canvas don't take forever due to slow processing on canvas end
+						//after certain attempt decided logistically we take the polling Id out of the list and report this to user.
+						if (emailData.getNumberOfTries() >= pollingAttempts) {
+							emailData.setSISUploadVerySlow(true);
+							sendEmailReport(emailData, null);
+							iterator.remove();
+							M_log.warn(String.format("The SIS Request %s for request type %s for course %s took longer than expected, REMOVING the request from THREAD",
+									emailData.getPollingId(), emailData.getSisProcessType(), emailData.getCourseId()));
+							removedPollingIdCount();
+							continue;
+						}
+						ApiResultWrapper arw = apiCallCheckingSISJobStatus(emailData);
+						int status = arw.getStatus();
+						//if polling to canvas failed we keep track of this for X attempts and after that
+						// if still response is unsuccessful we take it out of the list
+						if (status != HttpStatus.SC_OK) {
+							M_log.warn(String.format("SIS polling call failed with status code %s due to %s but will try in next poll"
+									, status, arw.getMessage()));
+							emailData.incrementNumberOfTries(1);
+							continue;
+						}
+
+						String apiResp = arw.getApiResp();
+						// sis process is done(for success/failure/partial_success cases) only when we see progress =100,
+						// Unit test written testing this.
+						if (!isSISUploadDone(apiResp)) {
+							emailData.incrementNumberOfTries(1);
+							M_log.info(String.format("The SIS request %s of request type %s for course %s ,No# of (polling)attempts made for status %s "
+									, emailData.getPollingId(), emailData.getSisProcessType(), emailData.getCourseId(), emailData.getNumberOfTries()));
+							continue;
+						}
+						// sending email report to user saying what canvas did with the sisUpload request they submitted
+						sendEmailReport(emailData, apiResp);
+						M_log.info("Removing the Polling Id from the list" + emailData.getPollingId());
 						iterator.remove();
-						M_log.warn(String.format("The SIS Request %s for request type %s for course %s took longer than expected, REMOVING the request from THREAD",
-								emailData.getPollingId(), emailData.getSisProcessType(), emailData.getCourseId()));
 						removedPollingIdCount();
-						continue;
 					}
-					ApiResultWrapper arw = sisApiCallCheckingJobStatus(emailData);
-					int status = arw.getStatus();
-					if (status != HttpStatus.SC_OK) {
-						M_log.warn(String.format("SIS polling call failed with status code %s due to %s but will try in next poll"
-								, status, arw.getMessage()));
-						emailData.incrementNumberOfTries(1);
-						continue;
-					}
-
-					String apiResp = arw.getApiResp();
-					if (!isSISUploadDone(apiResp)) {
-						emailData.incrementNumberOfTries(1);
-						M_log.info(String.format("The SIS request %s of request type %s for course %s ,No# of (polling)attempts made for status %s "
-								, emailData.getPollingId(), emailData.getSisProcessType(), emailData.getCourseId(), emailData.getNumberOfTries()));
-						continue;
-					}
-					sendEmailReport(emailData, apiResp);
-					M_log.info("Removing the Polling Id from the list" + emailData.getPollingId());
-					iterator.remove();
-					removedPollingIdCount();
+					printListOfPollsToDebugLog(pollingIds);
+				} catch (Exception e) {
+					M_log.error("Some thing unexpected happened in the SISPollingThread due to "+e.getMessage());
 				}
-				printListOfPollsToDebugLog(pollingIds);
-			}
-			M_log.debug("***************************** Finish the thread check loop");
+				M_log.debug("***************************** Finish the thread check loop");
+				try {
+					Thread.sleep(sleepTimeForPolling);
+				} catch (InterruptedException e) {
+					M_log.error("Canvas polling thread got Interrupted due to " + e.getMessage());
+				} catch (Exception e) {
+					M_log.error("Canvas polling thread got Interrupted due to " + e.getMessage());
+				}
 
-			try {
-				Thread.sleep(sleepTimeForPolling);
-			} catch (InterruptedException e) {
-				M_log.error("Canvas polling thread got Interrupted due to " + e.getMessage());
-			} catch (Exception e) {
-				M_log.error("Canvas polling thread got Interrupted due to " + e.getMessage());
 			}
-
 		}
 
 	}
 
-	private synchronized void printListOfPollsToDebugLog(List<SISDataHolderForEmail> pollingId) {
+	private void didThreadingIssuesOccur(List<SISDataHolderForEmail> pollingIds, int addedPollingIdCount, int removedPollingIdCount) {
+		if ((addedPollingIdCount - removedPollingIdCount) == pollingIds.size()) {
+			M_log.info("polling went fine");
+			return;
+		}
+		M_log.info("canvas polling has some problems as number of things added/removed count" + (addedPollingIdCount - removedPollingIdCount) +
+				"not equal to ids in the canvas polling id List: " + pollingIds.size());
+	}
+
+	// if calling from other than synchronized block this method needs to be synchronized keyword
+	private void printListOfPollsToDebugLog(List<SISDataHolderForEmail> pollingId) {
 		for (SISDataHolderForEmail data: pollingId){
-		M_log.debug("PollingList" +data.getPollingId());
+		M_log.debug("PollingId " +data.getPollingId());
 		}
 	}
 
-	private synchronized void removedPollingIdCount(){
+	// if calling from other than synchronized block this method needs to be synchronized keyword
+	private void removedPollingIdCount(){
 		SectionsUtilityToolServlet.removedPollingIdCount += 1;
 		M_log.info("*#$*#$*#$ Number of Polling Ids removed are " + SectionsUtilityToolServlet.removedPollingIdCount);
 	}
@@ -113,7 +145,7 @@ public class SISPollingThread implements Runnable {
 
 	}
 
-	private ApiResultWrapper sisApiCallCheckingJobStatus(SISDataHolderForEmail data) {
+	private ApiResultWrapper apiCallCheckingSISJobStatus(SISDataHolderForEmail data) {
 		String url = Utils.urlConstructor(Utils.URL_CHUNK_ACCOUNTS_1_SIS_IMPORTS, String.valueOf(data.getPollingId()));
 		ApiResultWrapper arw = Utils.makeApiCall(new HttpGet(url));
 		return arw;
@@ -142,7 +174,7 @@ public class SISPollingThread implements Runnable {
 
 			//if canvas taking long time to process the sis request, after X attempts intentionally we take the request
 			// out of the thread pool that's when apiResp is null and we send a email to user about this situation.
-			if ((apiResp == null) && data.isSISUploadFailed()) {
+			if ((apiResp == null) && data.isSISUploadVerySlow()) {
 				Multipart multipart = new MimeMultipart();
 				BodyPart bodyParts = new MimeBodyPart();
 				//BSA might come up with better wording, so keeping it simple for now
@@ -189,6 +221,10 @@ public class SISPollingThread implements Runnable {
 		msgBody.append("\n");
 		msgBody.append("EndTime: " + endTime);
 		msgBody.append("\n");
+
+		// canvas success/failure/partial success response is stated with 3 Json attribute
+		// imported = success; failed_with_message = Failure of SIS process;
+		// imported_with_message = partial success, we report to the user about these conditions
 
 		if (workflowState.equals(Utils.JSON_PARAM_IMPORTED_WITH_MESSAGES)) {
 			msgBody.append("SIS upload imported with some errors");
