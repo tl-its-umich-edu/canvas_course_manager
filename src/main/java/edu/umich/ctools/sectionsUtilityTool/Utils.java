@@ -60,7 +60,7 @@ public class Utils {
 	protected static final String FRIEND_CONTACT_EMAIL = "umich.friend.contactemail";
 	protected static final String SIS_REPORT_CC_ADDRESS = "sis.report.cc.address";
 	protected static final String SIS_POLLING_ATTEMPTS = "sis.polling.attempts";
-	protected static final String SIS_POLLING_FREQUENCY = "sis.polling.frequency";
+	protected static final String SIS_POLLING_SLEEPTIME = "sis.polling.sleeptime";
 	protected static final String IS_MAIL_DEBUG_ENABLED = "mail.debug.enabled";
 	protected static final String JSON_PARAM_WORKFLOW_STATE = "workflow_state";
 	protected static final String JSON_PARAM_FAILED_WITH_MESSAGES = "failed_with_messages";
@@ -82,6 +82,7 @@ public class Utils {
 	public static final String CANVAS_API_VERSION = "/api/v1" ;
 	public static String canvasURL = null;
 	public static String canvasToken = null;
+	// when a api call  fails due to unknown reason may be due to internal failures return a UI with a status code is good.
 	public final static int API_UNKNOWN_ERROR = 666;
 	public final static int API_EXCEPTION_ERROR = 667;
 
@@ -301,6 +302,7 @@ public class Utils {
 
 	public static String generateSisCourseId() {
 		Random rand = new Random();
+		// The reason for picking 40 is to have random number b/w 1-40, This will avoid 2 courses from having same sisId
 		int ranNum = rand.nextInt(40) + 1;
 		long epoch = System.currentTimeMillis();
 		String courseSisId = "ccmC" + epoch + "-" + ranNum;
@@ -312,9 +314,9 @@ public class Utils {
 		//ideally this is not the case but if at all that happens we just want some name that goes as part of sis_section_id
 		//as not hard rule that applies
 		if(courseId==null){
-			M_log.warn("Course id could not be found for making a SIS Section Id");
 			long epoch = System.currentTimeMillis();
 			courseId = String.valueOf(epoch);
+			M_log.warn("Course id could not be found for making a SIS Section Id. Used current timestamp for course id:");
 		}
 		return "ccmS" + courseId + "-";
 	}

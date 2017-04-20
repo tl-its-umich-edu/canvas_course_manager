@@ -20,7 +20,7 @@ public class UtilsTest extends TestCase {
 		assertEquals("https://howdy.test.com/api/v1/accounts/12345", actual);
 
 		actual = Utils.urlConstructor(Utils.URL_CHUNK_COURSES, "45667");
-		assertEquals("https://howdy.test.com/api/v1/courses/45667",(actual));
+		assertEquals("https://howdy.test.com/api/v1/courses/45667",actual);
 
 		actual = Utils.urlConstructor(Utils.URL_CHUNK_COURSES,"34567",Utils.URL_CHUNK_COURSE_SIS_COURSE_ID,"cmmS12121");
 		assertEquals("https://howdy.test.com/api/v1/courses/34567/?course[sis_course_id]=cmmS12121",actual);

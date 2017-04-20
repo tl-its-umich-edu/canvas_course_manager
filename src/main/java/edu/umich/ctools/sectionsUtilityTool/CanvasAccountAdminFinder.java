@@ -23,6 +23,7 @@ public class CanvasAccountAdminFinder {
 
 		int courseAccountId = getCourseAccountId(courseId);
 		if (courseAccountId == 0) {
+			M_log.error("Couldn't get the course account id for course "+courseId);
 			return false;
 		}
 		M_log.debug("*** Course Account ID " + courseAccountId);
