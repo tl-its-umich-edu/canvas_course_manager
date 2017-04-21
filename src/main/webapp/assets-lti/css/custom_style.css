@@ -226,7 +226,7 @@ td.table-danger {
   color:#000
 }
 
-.table.ng-hide-remove {
+.temp-alert.ng-hide-remove, .table.ng-hide-remove {
   -webkit-animation:1s show;
   animation:1s show;
 }
