@@ -52,13 +52,14 @@ public class Utils {
 	public static final String PUT = "PUT";
 	public static final String CSV_HEADERS_SECTIONS = "section_id,name,status,course_id";
 	public static final String CONSTANT_MIME_TEXT_CSV = "text/csv";
+	public static final int CONTSTANT_ONE_MINUTE_MILLI_SECOND = 60000;
 	protected static final String MAIL_SMTP_HOST = "mail.smtp.host";
 	protected static final String MAIL_SMTP_AUTH = "mail.smtp.auth";
 	protected static final String MAIL_SMTP_STARTTLS = "mail.smtp.starttls.enable";
 	protected static final String MAIL_DEBUG = "mail.debug";
 	protected static final String MAIL_HOST = "umich.friend.mailhost";
 	protected static final String FRIEND_CONTACT_EMAIL = "umich.friend.contactemail";
-	protected static final String SIS_REPORT_CC_ADDRESS = "sis.report.cc.address";
+	protected static final String SIS_REPORT_CCM_SUPPORT_ADDRESS = "sis.report.ccm.support.address";
 	protected static final String SIS_POLLING_ATTEMPTS = "sis.polling.attempts";
 	protected static final String SIS_POLLING_SLEEPTIME = "sis.polling.sleeptime";
 	protected static final String IS_MAIL_DEBUG_ENABLED = "mail.debug.enabled";
@@ -71,6 +72,11 @@ public class Utils {
 	public static final String URL_CHUNK_COURSE_SIS_COURSE_ID = "/?course[sis_course_id]=";
 	public static final String URL_CHUNK_SIS_IMPORT_WITH_BATCH_MODE_STICKINESS_DISABLED = "?batch_mode=0&override_sis_stickiness=0&extension=csv";
 	public static final String URL_CHUNK_ACCOUNTS_1_SIS_IMPORTS = "/accounts/1/sis_imports/";
+	public static final String CONTANT_ACTIVE = "active";
+	public static final String CONSTANT_ID_PREFIX = "id_prefix";
+	public static final String CONSTANT_UTF_8 = "UTF-8";
+	public static final int CONSTANT_NO_OF_ATTEMPTS_DEFAULT = 5;
+	public static final String CONSTANT_LINE_FEED = "\n";
 	private static Log M_log = LogFactory.getLog(Utils.class);
 
 	private static final String CANVAS_API_GETALLSECTIONS_PER_COURSE = "canvas.api.getallsections.per.course.regex";
@@ -222,19 +228,21 @@ public class Utils {
 
 	public static ApiResultWrapper makeApiCall(HttpUriRequest clientRequest){
 		HttpResponse response;
-		response = Utils.executeApiCall(clientRequest);
-
-		if (response == null) {
-			String errMsg = String.format("{\"errorMsg\":\"The request %s failed with errors\"}",
-					clientRequest.getURI().toString());
-			return new ApiResultWrapper(Utils.API_UNKNOWN_ERROR, errMsg, "");
-		}
-
-		int statusCode = response.getStatusLine().getStatusCode();
-
+		String errMsg = "";
+		int statusCode;
 		String apiResponse = "";
-		String errMsg = "{\"errorMsg\":\"The request %s has failed to extract the response due to %s\"}";
 		try {
+			response = Utils.executeApiCall(clientRequest);
+
+			if (response == null) {
+				errMsg = String.format("{\"errorMsg\":\"The request %s failed with errors\"}",
+						clientRequest.getURI().toString());
+				return new ApiResultWrapper(Utils.API_UNKNOWN_ERROR, errMsg, "");
+			}
+
+			statusCode = response.getStatusLine().getStatusCode();
+
+			errMsg = "{\"errorMsg\":\"The request %s has failed to extract the response due to %s\"}";
 			apiResponse = EntityUtils.toString(response.getEntity(), "UTF-8");
 		} catch (IOException e) {
 			return new ApiResultWrapper(Utils.API_EXCEPTION_ERROR,
@@ -277,7 +285,7 @@ public class Utils {
 		} finally {
 			long stopTime = System.currentTimeMillis();
 			long elapsedTime = stopTime - startTime;
-			M_log.info(String.format("CANVAS Api response took %sms", elapsedTime));
+			M_log.info(String.format("CANVAS Api %s response took %sms", clientRequest.getURI().toString(),elapsedTime));
 		}
 		return response;
 	}
