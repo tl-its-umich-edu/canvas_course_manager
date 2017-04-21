@@ -34,21 +34,17 @@ canvasSupportApp.directive('eventFocus', function(focus) {
 });
 
 // directive to upload a file
-canvasSupportApp.service('fileUpload', ['$http', function($http) {
-  this.uploadFileAndFieldsToUrl = function(file, uploadUrl) {
+canvasSupportApp.service('fileUpload', ['$http','$log', function($http, $log) {
+  this.uploadFileAndFieldsToUrl = function(file, uploadUrl, doneCallBack) {
     var fd = new FormData();
     fd.append('file', file);
-
-    //alert('Posting (not really) to: ' + uploadUrl);
     $http.post(uploadUrl, fd, {
         transformRequest: angular.identity,
         headers: {
           'Content-Type': undefined
         }
-      })
-      .success(function() {})
-      .error(function() {
-        alert('Posting to: /' + uploadUrl);
+      }).then (function(response) {
+        doneCallBack(response);
       });
   };
 }]);

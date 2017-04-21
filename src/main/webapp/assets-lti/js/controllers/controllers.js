@@ -460,14 +460,18 @@ $scope.createGroupSet = function(){
 };
   //listen for changes to the function chosen
   $scope.changeSelectedFunction = function() {
-    $('#gridTable input').val('');
-    $scope.content={};
-    $scope.errors=[];
-    $scope.showErrors=false;
-    $scope.globalParseError=null;
-    $('#fileForm')[0].reset();
+    $scope.resultPost = null;
+    $scope.resetScope();
   };
 
+$scope.resetScope = function(){
+  $('#gridTable input').val('');
+  $scope.content={};
+  $scope.errors=[];
+  $scope.showErrors=false;
+  $scope.globalParseError=null;
+  $('#fileForm')[0].reset();
+};
 
   // on page load set content to false
   $scope.content = false;
@@ -504,8 +508,11 @@ $scope.csvFileReset = function (){
   // event handler for clicking on the Upload CSV button
   $scope.submitCSV = function() {
     var file = $scope.csvfile;
-    $log.info($scope.selectedFunction.url);
-    fileUpload.uploadFileAndFieldsToUrl(file, $scope.selectedFunction.url);
+    fileUpload.uploadFileAndFieldsToUrl(file, $scope.selectedFunction.url, function(resultPost){
+      $scope.resetScope();
+      $scope.selectedFunction = null;
+      $scope.resultPost = resultPost;
+    });
   };
 
   //event handler for submitting a grid form
