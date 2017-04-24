@@ -36,7 +36,12 @@
   </div>
   <h4 style="font-size:110%">{{selectedFunction.name}}
   </h4>
-
+  <div ng-show="resultPost"  ng-class="{ 'temp-alert alert alert-success': resultPost.status ===200, 'alert alert-danger': resultPost.status !== 200}">
+    <div ng-show="resultPost.status ===200">SIS Import started at {{resultPost.data.created_at | date:'medium'}} - check your email in a bit for results of the import.</div>
+    <div ng-show="resultPost.status !==200">Someth8ng bad happened. Here is what we know:<br><br>
+      {{resultPost}}
+    </div>
+  </div>
   <div class="" ng-show="selectedFunction">
     <!-- current function field listing, including validation rules, available by toggling link above -->
     <div class="well" ng-show="csv_fields">
@@ -87,58 +92,58 @@
     && !availableGroups.length)
     || (selectedFunction.id ==='groups_to_sections' && !availableGroupSets.length)">
     <div class="" ng-show="selectedFunction.type==='csv'">
-    <form class="form-inline well" id="fileForm">
-      <div class="form-group">
-        <div class="input-group">
-          <label class="sr-only" for="uploadCSV">Upload a CSV file</label>
-          <input id="uploadCSV" class="btn btn-primary" type="file" type="file" ng-click="csvFileReset()" file-model="csvfile">
+      <form class="form-inline well" id="fileForm">
+        <div class="form-group">
+          <div class="input-group">
+            <label class="sr-only" for="uploadCSV">Upload a CSV file</label>
+            <input id="uploadCSV" class="btn btn-primary" type="file" type="file" ng-click="csvFileReset()" file-model="csvfile">
+          </div>
         </div>
+        <div class="input-group">
+          <span  ng-show="loading"class="alert-info alert-inline">Loading...</span>
+          <span  ng-show="globalParseError"class="alert-danger alert-inline">{{globalParseError}}</span>
+          <button ng-show="csvfile && content.data.length" class="btn btn-default" type="reset" ng-click="content={};errors=[];showErrors=false;log=[];globalParseError=null;" name="reset-file-input">Reset</button>
+        </div>
+        <!-- either there were errors in the CSV or there were no errors, in which case the user gets an upload control -->
+        <div class="pull-right" ng-show="(content.data && content.data.length !==0) && (log  && log.length ===0)">
+            No errors detected <button class="btn btn-primary" ng-click="submitCSV()">Upload</button>
+        </div>
+      </form>
+      <div class="alert alert-danger" ng-show="log.length && content.data.length">
+        <span ng-if="log.length >1">There were {{log.length}} errors</span><span ng-if="log.length ===1">There was {{log.length}} error</span>, highlighted below. <input type="checkbox" id="showErrors" name="" value="" ng-model="showErrors">        <label for="showErrors">Show error log and lines with errors only</label>
       </div>
-      <div class="input-group">
-        <span  ng-show="loading"class="alert-info alert-inline">Loading...</span>
-        <span  ng-show="globalParseError"class="alert-danger alert-inline">{{globalParseError}}</span>
-        <button ng-show="csvfile && content.data.length" class="btn btn-default" type="reset" ng-click="content={};errors=[];showErrors=false;log=[];globalParseError=null;" name="reset-file-input">Reset</button>
-      </div>
-      <!-- either there were errors in the CSV or there were no errors, in which case the user gets an upload control -->
-      <div class="pull-right" ng-show="(content.data && content.data.length !==0) && (log  && log.length ===0)">
-          No errors detected <button class="btn btn-primary" ng-click="submitCSV()">Upload</button>
-      </div>
-    </form>
-    <div class="alert alert-danger" ng-show="log.length && content.data.length">
-      <span ng-if="log.length >1">There were {{log.length}} errors</span><span ng-if="log.length ===1">There was {{log.length}} error</span>, highlighted below. <input type="checkbox" id="showErrors" name="" value="" ng-model="showErrors">        <label for="showErrors">Show error log and lines with errors only</label>
-    </div>
 
-    <!-- list of errors with line numbers -->
-    <div class="panel panel-default"  ng-show="showErrors">
-      <ul class="panel-body">
-        <li ng-repeat="message in log track by $index">{{message}}</li>
-      </ul>
+      <!-- list of errors with line numbers -->
+      <div class="panel panel-default"  ng-show="showErrors">
+        <ul class="panel-body">
+          <li ng-repeat="message in log track by $index">{{message}}</li>
+        </ul>
+      </div>
+      <!-- tabled presentation of attached CSV file, error rows marked -->
+      <table class="table" ng-show="content.data.length">
+        <thead>
+          <tr>
+            <th>
+            </th>
+            <th ng-repeat="header in content.headers track by $index" scope="col">
+              {{header}}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-class="{ 'table-danger': contentline.invalid}"
+            ng-hide="showErrors && !contentline.invalid"
+            ng-repeat="contentline in content.data track by $index">
+            <td>
+              {{$index+1}}
+            </td>
+            <td ng-repeat="item in contentline.data track by $index"  ng-class="{ 'table-danger': item.error}">
+              {{item.value}} <a class="pull-right" href="" ng-show="item.error" title="{{item.message}}"><strong><i class="glyphicon glyphicon-question-sign"></i></strong></a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <!-- tabled presentation of attached CSV file, error rows marked -->
-    <table class="table" ng-show="content.data.length">
-      <thead>
-        <tr>
-          <th>
-          </th>
-          <th ng-repeat="header in content.headers track by $index" scope="col">
-            {{header}}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr ng-class="{ 'table-danger': contentline.invalid}"
-          ng-hide="showErrors && !contentline.invalid"
-          ng-repeat="contentline in content.data track by $index">
-          <td>
-            {{$index+1}}
-          </td>
-          <td ng-repeat="item in contentline.data track by $index"  ng-class="{ 'table-danger': item.error}">
-            {{item.value}} <a class="pull-right" href="" ng-show="item.error" title="{{item.message}}"><strong><i class="glyphicon glyphicon-question-sign"></i></strong></a>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
   </div>
   <div class="alert alert-danger" ng-show="selectedFunction.id==='users_to_sections_grid' && !availableSections.length">
     No sections available in the course.

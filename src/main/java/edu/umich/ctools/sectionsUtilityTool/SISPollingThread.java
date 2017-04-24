@@ -212,7 +212,11 @@ public class SISPollingThread implements Runnable {
 		}
 
 	}
-
+    /*
+	 We are sending an email to the ccm admin support group in case of exceptions that we wouldn't anticipate to see
+     like out of memory error, threading errors etc. This way atleast we know if an error need an attention
+     rather get buried in logs
+     */
 	private void sendEmailReportingTheException(Exception exp) {
 		StringBuffer bodyMsg = new StringBuffer();
 		bodyMsg.append("Background Polling has some Exceptions due to "+exp.getMessage());
