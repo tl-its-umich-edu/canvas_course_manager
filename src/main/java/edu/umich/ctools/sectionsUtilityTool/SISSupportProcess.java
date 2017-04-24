@@ -189,7 +189,7 @@ public class SISSupportProcess {
 		String sisSectionIdChunk = Utils.getSisSectionIDChunk(request);
 		for (int i = 1; i < sections.length; i++) {
 			String[] aSectionInfo = sections[i].split(",");
-			String section = aSectionInfo[0].replace(aSectionInfo[0], sisSectionIdChunk + aSectionInfo[0]) + ","
+			String section = aSectionInfo[0].replace(aSectionInfo[0], aSectionInfo[0]+sisSectionIdChunk) + ","
 					+ aSectionInfo[1] + "," + Utils.CONTANT_ACTIVE + "," + courseSisId;
 			completeCsvFile.append(section);
 			completeCsvFile.append(Utils.CONSTANT_LINE_FEED);
@@ -211,12 +211,12 @@ public class SISSupportProcess {
 			String[] eachRow = item.split(",");
 			List<String> row = Arrays.asList(eachRow);
 			Collections.swap(row, 0, 1);
-			swappedCSVColumns.append(concatenate(row));
+			swappedCSVColumns.append(appendingTheSwappedColumnsBackToCSVFormat(row));
 		}
 		return swappedCSVColumns.toString();
 	}
 
-	private static String concatenate(List<String> rowItems){
+	private static String appendingTheSwappedColumnsBackToCSVFormat(List<String> rowItems){
 		StringBuffer csv = new StringBuffer();
 		for (int i = 0; i <rowItems.size(); i++) {
 			csv.append(rowItems.get(i));

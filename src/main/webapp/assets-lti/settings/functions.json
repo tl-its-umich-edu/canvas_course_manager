@@ -63,7 +63,7 @@
   "id": "groups_to_sections",
   "url": "addGroups",
   "type": "csv",
-  "notes":"Tool supplies course_id. \nThe id_prefix  will be used to construct a unique section sis_id. \nYou may want to use a prefix that is meaningful.",
+  "notes":"Tool supplies course_id. \nThe id_prefix  will be used to construct a unique group sis_id. \nYou may want to use a prefix that is meaningful.",
   "field_array":["id_prefix","name","groupset"],
   "fields": [{
     "name": "id_prefix",
@@ -95,7 +95,7 @@
   "id": "users_to_groups",
   "url": "addUsersToGroups",
   "type": "csv",
-  "notes":"user_id is either the UMID or an email address for non-UM users. \nImportant: users need to be in course already.",
+  "notes":"user_id is either the UMID or an email address for non-UM users. \nImportant: users need to be in course already.\nNote: to see available group ids click on \"group(s)\" link above.",
   "field_array":["group_id","user_id"],
   "fields": [ {
     "name": "group_id",

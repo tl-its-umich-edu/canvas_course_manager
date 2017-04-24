@@ -52,7 +52,7 @@ public class Utils {
 	public static final String PUT = "PUT";
 	public static final String CSV_HEADERS_SECTIONS = "section_id,name,status,course_id";
 	public static final String CONSTANT_MIME_TEXT_CSV = "text/csv";
-	public static final int CONTSTANT_ONE_MINUTE_MILLI_SECOND = 60000;
+	public static final int CONSTANT_ONE_MINUTE_MILLI_SECOND = 60000;
 	protected static final String MAIL_SMTP_HOST = "mail.smtp.host";
 	protected static final String MAIL_SMTP_AUTH = "mail.smtp.auth";
 	protected static final String MAIL_SMTP_STARTTLS = "mail.smtp.starttls.enable";
@@ -243,7 +243,7 @@ public class Utils {
 			statusCode = response.getStatusLine().getStatusCode();
 
 			errMsg = "{\"errorMsg\":\"The request %s has failed to extract the response due to %s\"}";
-			apiResponse = EntityUtils.toString(response.getEntity(), "UTF-8");
+			apiResponse = EntityUtils.toString(response.getEntity(), CONSTANT_UTF_8);
 		} catch (IOException e) {
 			return new ApiResultWrapper(Utils.API_EXCEPTION_ERROR,
 					String.format(errMsg, clientRequest.getURI().toString(), e.getMessage()), "");
@@ -326,11 +326,27 @@ public class Utils {
 			courseId = String.valueOf(epoch);
 			M_log.warn("Course id could not be found for making a SIS Section Id. Used current timestamp for course id:");
 		}
-		return "ccmS" + courseId + "-";
+		return "-ccmS" + courseId;
 	}
 
 	private static HashMap<String, Object> getLTICustomParams(HttpServletRequest request) {
 		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(Utils.TC_SESSION_DATA);
 		return tc.getCustomValuesMap();
+	}
+
+	public static int getIntegerValueOfProperty(String propertyName) {
+		String propertyAsString = SectionsUtilityToolServlet.appExtPropertiesFile.getProperty(propertyName);
+		if (propertyAsString == null || propertyAsString.isEmpty()) {
+			M_log.error("Missing the property \""+propertyName +"\" in \"ccm.properties\" file, defaulting the value");
+			return (propertyName.equals(Utils.SIS_POLLING_ATTEMPTS))?Utils.CONSTANT_NO_OF_ATTEMPTS_DEFAULT:Utils.CONSTANT_ONE_MINUTE_MILLI_SECOND;
+		}
+		int propertyAsValue;
+		try {
+			propertyAsValue = Integer.valueOf(propertyAsString);
+		} catch (NumberFormatException e) {
+			M_log.error("The property \""+propertyName+"\" in \"ccm.properties\" file should be a number");
+			return (propertyName.equals(Utils.SIS_POLLING_ATTEMPTS))?Utils.CONSTANT_NO_OF_ATTEMPTS_DEFAULT:Utils.CONSTANT_ONE_MINUTE_MILLI_SECOND;
+		}
+		return propertyAsValue;
 	}
 }
