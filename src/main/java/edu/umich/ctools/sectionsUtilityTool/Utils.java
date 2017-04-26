@@ -52,13 +52,14 @@ public class Utils {
 	public static final String PUT = "PUT";
 	public static final String CSV_HEADERS_SECTIONS = "section_id,name,status,course_id";
 	public static final String CONSTANT_MIME_TEXT_CSV = "text/csv";
+	public static final int CONSTANT_ONE_MINUTE_MILLI_SECOND = 60000;
 	protected static final String MAIL_SMTP_HOST = "mail.smtp.host";
 	protected static final String MAIL_SMTP_AUTH = "mail.smtp.auth";
 	protected static final String MAIL_SMTP_STARTTLS = "mail.smtp.starttls.enable";
 	protected static final String MAIL_DEBUG = "mail.debug";
 	protected static final String MAIL_HOST = "umich.friend.mailhost";
 	protected static final String FRIEND_CONTACT_EMAIL = "umich.friend.contactemail";
-	protected static final String SIS_REPORT_CC_ADDRESS = "sis.report.cc.address";
+	protected static final String SIS_REPORT_CCM_SUPPORT_ADDRESS = "sis.report.ccm.support.address";
 	protected static final String SIS_POLLING_ATTEMPTS = "sis.polling.attempts";
 	protected static final String SIS_POLLING_SLEEPTIME = "sis.polling.sleeptime";
 	protected static final String IS_MAIL_DEBUG_ENABLED = "mail.debug.enabled";
@@ -71,6 +72,11 @@ public class Utils {
 	public static final String URL_CHUNK_COURSE_SIS_COURSE_ID = "/?course[sis_course_id]=";
 	public static final String URL_CHUNK_SIS_IMPORT_WITH_BATCH_MODE_STICKINESS_DISABLED = "?batch_mode=0&override_sis_stickiness=0&extension=csv";
 	public static final String URL_CHUNK_ACCOUNTS_1_SIS_IMPORTS = "/accounts/1/sis_imports/";
+	public static final String CONTANT_ACTIVE = "active";
+	public static final String CONSTANT_ID_PREFIX = "id_prefix";
+	public static final String CONSTANT_UTF_8 = "UTF-8";
+	public static final int CONSTANT_NO_OF_ATTEMPTS_DEFAULT = 5;
+	public static final String CONSTANT_LINE_FEED = "\n";
 	private static Log M_log = LogFactory.getLog(Utils.class);
 
 	private static final String CANVAS_API_GETALLSECTIONS_PER_COURSE = "canvas.api.getallsections.per.course.regex";
@@ -222,20 +228,22 @@ public class Utils {
 
 	public static ApiResultWrapper makeApiCall(HttpUriRequest clientRequest){
 		HttpResponse response;
-		response = Utils.executeApiCall(clientRequest);
-
-		if (response == null) {
-			String errMsg = String.format("{\"errorMsg\":\"The request %s failed with errors\"}",
-					clientRequest.getURI().toString());
-			return new ApiResultWrapper(Utils.API_UNKNOWN_ERROR, errMsg, "");
-		}
-
-		int statusCode = response.getStatusLine().getStatusCode();
-
+		String errMsg = "";
+		int statusCode;
 		String apiResponse = "";
-		String errMsg = "{\"errorMsg\":\"The request %s has failed to extract the response due to %s\"}";
 		try {
-			apiResponse = EntityUtils.toString(response.getEntity(), "UTF-8");
+			response = Utils.executeApiCall(clientRequest);
+
+			if (response == null) {
+				errMsg = String.format("{\"errorMsg\":\"The request %s failed with errors\"}",
+						clientRequest.getURI().toString());
+				return new ApiResultWrapper(Utils.API_UNKNOWN_ERROR, errMsg, "");
+			}
+
+			statusCode = response.getStatusLine().getStatusCode();
+
+			errMsg = "{\"errorMsg\":\"The request %s has failed to extract the response due to %s\"}";
+			apiResponse = EntityUtils.toString(response.getEntity(), CONSTANT_UTF_8);
 		} catch (IOException e) {
 			return new ApiResultWrapper(Utils.API_EXCEPTION_ERROR,
 					String.format(errMsg, clientRequest.getURI().toString(), e.getMessage()), "");
@@ -277,7 +285,7 @@ public class Utils {
 		} finally {
 			long stopTime = System.currentTimeMillis();
 			long elapsedTime = stopTime - startTime;
-			M_log.info(String.format("CANVAS Api response took %sms", elapsedTime));
+			M_log.info(String.format("CANVAS Api %s response took %sms", clientRequest.getURI().toString(),elapsedTime));
 		}
 		return response;
 	}
@@ -318,11 +326,27 @@ public class Utils {
 			courseId = String.valueOf(epoch);
 			M_log.warn("Course id could not be found for making a SIS Section Id. Used current timestamp for course id:");
 		}
-		return "ccmS" + courseId + "-";
+		return "-ccmS" + courseId;
 	}
 
 	private static HashMap<String, Object> getLTICustomParams(HttpServletRequest request) {
 		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(Utils.TC_SESSION_DATA);
 		return tc.getCustomValuesMap();
+	}
+
+	public static int getIntegerValueOfProperty(String propertyName) {
+		String propertyAsString = SectionsUtilityToolServlet.appExtPropertiesFile.getProperty(propertyName);
+		if (propertyAsString == null || propertyAsString.isEmpty()) {
+			M_log.error("Missing the property \""+propertyName +"\" in \"ccm.properties\" file, defaulting the value");
+			return (propertyName.equals(Utils.SIS_POLLING_ATTEMPTS))?Utils.CONSTANT_NO_OF_ATTEMPTS_DEFAULT:Utils.CONSTANT_ONE_MINUTE_MILLI_SECOND;
+		}
+		int propertyAsValue;
+		try {
+			propertyAsValue = Integer.valueOf(propertyAsString);
+		} catch (NumberFormatException e) {
+			M_log.error("The property \""+propertyName+"\" in \"ccm.properties\" file should be a number");
+			return (propertyName.equals(Utils.SIS_POLLING_ATTEMPTS))?Utils.CONSTANT_NO_OF_ATTEMPTS_DEFAULT:Utils.CONSTANT_ONE_MINUTE_MILLI_SECOND;
+		}
+		return propertyAsValue;
 	}
 }
