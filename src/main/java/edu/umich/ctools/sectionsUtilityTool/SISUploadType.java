@@ -5,7 +5,7 @@ package edu.umich.ctools.sectionsUtilityTool;
  */
 public enum SISUploadType {
 	ADD_SECTIONS("addSections", "adding_sections_to_course"),
-	ADD_USERS_TO_SECTIONS("addUsersToSections", "adding_user_to_sections_in_course");
+	ADD_USERS_TO_SECTIONS("addUsersToSections", "adding_enrollments_to_sections_in_course");
 
 	private final String description;
 

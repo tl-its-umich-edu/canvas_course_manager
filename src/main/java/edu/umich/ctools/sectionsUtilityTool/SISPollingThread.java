@@ -15,6 +15,8 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -27,16 +29,16 @@ public class SISPollingThread implements Runnable {
 
 	volatile boolean flag = true;
 	Properties appExtPropertiesFile = SectionsUtilityToolServlet.appExtPropertiesFile;
-	private int pollingAttempts =Integer.valueOf(appExtPropertiesFile.getProperty(Utils.SIS_POLLING_ATTEMPTS));
-	private int sleepTimeForPolling =Integer.valueOf(appExtPropertiesFile.getProperty(Utils.SIS_POLLING_SLEEPTIME));
+	private int pollingAttempts = getPollingAttempt();
+	private int sleepTimeForPolling = getSleepTimeForPolling();
 
 
-	@Override
 	/* Here we grab all the canvasId for polling to send a report to the admins of the sis process once uploaded to canvas.
-	canvas is pretty quick in getting the sis_upload done, but some reason it's processing is slow then after X attempts we would
-	take it out of the polling list. All this tracking is for reporting so if we take the item out of the list that does mean
+	canvas is pretty quick in getting the sis_upload done, but some reason it's processing is slow, then after X attempts we would
+	take it out of the polling list. All this tracking is for reporting so if we take the item out of the list that doesn't mean
 	sis upload is interrupted by CCM tool.
 	*/
+	@Override
 	public void run() {
 		while (flag) {
 			M_log.debug("***************************** Starting the thread check loop");
@@ -57,6 +59,7 @@ public class SISPollingThread implements Runnable {
 						SISDataHolderForEmail emailData = iterator.next();
 						M_log.debug(String.format("Number of attempts by for job %s are %s "
 								, emailData.getPollingId(), emailData.getNumberOfTries()));
+
 						// Well the check is to ensure polling to canvas don't take forever due to slow processing on canvas end
 						//after certain attempt decided logistically we take the polling Id out of the list and report this to user.
 						if (emailData.getNumberOfTries() >= pollingAttempts) {
@@ -95,8 +98,12 @@ public class SISPollingThread implements Runnable {
 						removedPollingIdCount();
 					}
 					printListOfPollsToDebugLog(pollingIds);
+				} catch (RuntimeException e) {
+					M_log.error("Some thing unexpected happened in the SISPollingThread due to "+e.getMessage());
+					sendEmailReportingTheException(e);
 				} catch (Exception e) {
 					M_log.error("Some thing unexpected happened in the SISPollingThread due to "+e.getMessage());
+					sendEmailReportingTheException(e);
 				}
 				M_log.debug("***************************** Finish the thread check loop");
 				try {
@@ -154,20 +161,15 @@ public class SISPollingThread implements Runnable {
 	public void sendEmailReport(SISDataHolderForEmail data, String apiResp) {
 		M_log.debug("sendEmailReport(): Called");
 		String fromAddress = appExtPropertiesFile.getProperty(Utils.FRIEND_CONTACT_EMAIL);
-		String ccAddress = appExtPropertiesFile.getProperty(Utils.SIS_REPORT_CC_ADDRESS);
+		String ccmSupportAddress = appExtPropertiesFile.getProperty(Utils.SIS_REPORT_CCM_SUPPORT_ADDRESS);
 
-		Properties properties = System.getProperties();
-		properties.put(Utils.MAIL_SMTP_AUTH, "false");
-		properties.put(Utils.MAIL_SMTP_STARTTLS, "true");
-		properties.put(Utils.MAIL_SMTP_HOST, appExtPropertiesFile.getProperty(Utils.MAIL_HOST));
-		//if enabled will print out raw email body to logs.
-		properties.put(Utils.MAIL_DEBUG, appExtPropertiesFile.getProperty(Utils.IS_MAIL_DEBUG_ENABLED));
+		Properties properties = getMailProperties();
 
 		Session session = Session.getInstance(properties);
 		MimeMessage message = new MimeMessage(session);
 		String errmsg = "Problem in sending the email for course %s due to %s";
 		try {
-			message.addRecipient(Message.RecipientType.CC, new InternetAddress(ccAddress));
+			message.addRecipient(Message.RecipientType.CC, new InternetAddress(ccmSupportAddress));
 			message.addRecipient(Message.RecipientType.TO, new InternetAddress(data.getEmailAddress()));
 			message.setFrom(new InternetAddress(fromAddress));
 			message.setSubject(String.format(data.getSisProcessType().getDescription() + " " + data.getCourseId()));
@@ -210,6 +212,53 @@ public class SISPollingThread implements Runnable {
 		}
 
 	}
+    /*
+	 We are sending an email to the ccm admin support group in case of exceptions that we wouldn't anticipate to see
+     like out of memory error, threading errors etc. This way atleast we know if an error need an attention
+     rather get buried in logs
+     */
+	private void sendEmailReportingTheException(Exception exp) {
+		StringBuffer bodyMsg = new StringBuffer();
+		bodyMsg.append("Background Polling has some Exceptions due to "+exp.getMessage());
+		bodyMsg.append(Utils.CONSTANT_LINE_FEED);
+		StringWriter errors = new StringWriter();
+		exp.printStackTrace(new PrintWriter(errors));
+		bodyMsg.append(errors.toString());
+		M_log.debug(bodyMsg.toString());
+
+		Properties properties = getMailProperties();
+		Session session = Session.getInstance(properties);
+		MimeMessage message = new MimeMessage(session);
+
+		try {
+			String ccmSupportAddress = appExtPropertiesFile.getProperty(Utils.SIS_REPORT_CCM_SUPPORT_ADDRESS);
+			String fromAddress = appExtPropertiesFile.getProperty(Utils.FRIEND_CONTACT_EMAIL);
+			message.addRecipient(Message.RecipientType.TO, new InternetAddress(ccmSupportAddress));
+			message.setFrom(new InternetAddress(fromAddress));
+			message.setSubject("Canvas Course Manage: Polling Thread Exceptions");
+			Multipart multipart = new MimeMultipart();
+			BodyPart body = new MimeBodyPart();
+			body.setText(bodyMsg.toString());
+			multipart.addBodyPart(body);
+			message.setContent(multipart);
+			Transport.send(message);
+
+		} catch (MessagingException e) {
+			M_log.error("Email failed due to " + e.getMessage());
+		} catch (Exception e) {
+			M_log.error("Email failed due to " + e.getMessage());
+		}
+	}
+
+	private Properties getMailProperties() {
+		Properties properties = System.getProperties();
+		properties.put(Utils.MAIL_SMTP_AUTH, "false");
+		properties.put(Utils.MAIL_SMTP_STARTTLS, "true");
+		properties.put(Utils.MAIL_SMTP_HOST, appExtPropertiesFile.getProperty(Utils.MAIL_HOST));
+		//if enabled will print out raw email body to logs.
+		properties.put(Utils.MAIL_DEBUG, appExtPropertiesFile.getProperty(Utils.IS_MAIL_DEBUG_ENABLED));
+		return properties;
+	}
 
 	public static String getBody(SISUploadType sisProcessType, JSONObject apiResp) throws JSONException {
 		String workflowState = (String) apiResp.get(Utils.JSON_PARAM_WORKFLOW_STATE);
@@ -218,9 +267,9 @@ public class SISPollingThread implements Runnable {
 
 		StringBuilder msgBody = new StringBuilder();
 		msgBody.append("StartTime: " + startTime);
-		msgBody.append("\n");
+		msgBody.append(Utils.CONSTANT_LINE_FEED);
 		msgBody.append("EndTime: " + endTime);
-		msgBody.append("\n");
+		msgBody.append(Utils.CONSTANT_LINE_FEED);
 
 		// canvas success/failure/partial success response is stated with 3 Json attribute
 		// imported = success; failed_with_message = Failure of SIS process;
@@ -228,11 +277,11 @@ public class SISPollingThread implements Runnable {
 
 		if (workflowState.equals(Utils.JSON_PARAM_IMPORTED_WITH_MESSAGES)) {
 			msgBody.append("SIS upload imported with some errors");
-			msgBody.append("\n");
+			msgBody.append(Utils.CONSTANT_LINE_FEED);
 			JSONArray processing_warnings = apiResp.getJSONArray("processing_warnings");
 			for (int i = 0; i < processing_warnings.length(); i++) {
 				msgBody.append(processing_warnings.get(i));
-				msgBody.append("\n");
+				msgBody.append(Utils.CONSTANT_LINE_FEED);
 			}
 			return msgBody.toString();
 
@@ -243,7 +292,7 @@ public class SISPollingThread implements Runnable {
 			JSONArray processingErrors = apiResp.getJSONArray("processing_errors");
 			for (int i = 0; i < processingErrors.length(); i++) {
 				msgBody.append(processingErrors.get(i));
-				msgBody.append("\n");
+				msgBody.append(Utils.CONSTANT_LINE_FEED);
 			}
 			return msgBody.toString();
 
@@ -256,6 +305,10 @@ public class SISPollingThread implements Runnable {
 				//attachment since as part of finished sis response canvas is not providing any more detail.
 				msgBody.append("Sections added: " + sectionAddedCount);
 			}
+			if(sisProcessType.equals(SISUploadType.ADD_USERS_TO_SECTIONS)){
+				int enrollmentsToSection = (int) apiResp.getJSONObject("data").getJSONObject("counts").get("enrollments");
+				msgBody.append("Enrollments added: " + enrollmentsToSection);
+			}
 		}
 		return msgBody.toString();
 	}
@@ -264,10 +317,21 @@ public class SISPollingThread implements Runnable {
 		BodyPart attachment = new MimeBodyPart();
 		attachment.setDataHandler(new DataHandler(new ByteArrayDataSource(data.getSisEmailData().getBytes(),
 				Utils.CONSTANT_MIME_TEXT_CSV)));
-		if (data.getSisProcessType().equals(SISUploadType.ADD_SECTIONS)) {
-			attachment.setFileName(SISUploadType.ADD_SECTIONS.getDescription() + "_"+ data.getCourseId()+".csv");
-		}
+		attachment.setFileName(data.getSisProcessType().getDescription() + "_" + data.getCourseId() + ".csv");
+
 		return attachment;
 
 	}
+
+	// defaults to 5 attempts (if property goes missing/bad in ccm.properties) to retry polling before giving up
+	private int getPollingAttempt() {
+		return Utils.getIntegerValueOfProperty(Utils.SIS_POLLING_ATTEMPTS);
+	}
+
+	//defaulting to every minute polling if the property goes missing/bad in ccm.properties
+	private Integer getSleepTimeForPolling() {
+		return Utils.getIntegerValueOfProperty(Utils.SIS_POLLING_SLEEPTIME);
+	}
+
+
 }
