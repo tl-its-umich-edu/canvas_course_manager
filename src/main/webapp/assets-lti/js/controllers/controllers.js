@@ -533,21 +533,11 @@ $scope.csvFileReset = function (){
         }
       });
 
-      var filename = 'grid_data.csv';
-      var formData = new FormData();
-      formData.append('file', new File([new Blob([csv])],  filename));
-      $.ajax({
-          url: '/' + $scope.selectedFunction.url,
-          data: formData,
-          processData: false,
-          contentType: false,
-          type: 'POST',
-          success: function () {
-
-          },
-          error: function () {
-
-          }
+      var file = csv;
+      fileUpload.uploadFileAndFieldsToUrl(file, $scope.selectedFunction.url, function(resultPost){
+        $scope.resetScope();
+        $scope.selectedFunction = null;
+        $scope.resultPost = resultPost;
       });
   };
 
