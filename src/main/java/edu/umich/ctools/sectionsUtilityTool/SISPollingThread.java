@@ -235,7 +235,7 @@ public class SISPollingThread implements Runnable {
 			String fromAddress = appExtPropertiesFile.getProperty(Utils.FRIEND_CONTACT_EMAIL);
 			message.addRecipient(Message.RecipientType.TO, new InternetAddress(ccmSupportAddress));
 			message.setFrom(new InternetAddress(fromAddress));
-			message.setSubject("Polling Thread Exceptions");
+			message.setSubject("Canvas Course Manage: Polling Thread Exceptions");
 			Multipart multipart = new MimeMultipart();
 			BodyPart body = new MimeBodyPart();
 			body.setText(bodyMsg.toString());
@@ -325,28 +325,13 @@ public class SISPollingThread implements Runnable {
 
 	// defaults to 5 attempts (if property goes missing/bad in ccm.properties) to retry polling before giving up
 	private int getPollingAttempt() {
-		return getIntegerValueOfProperty(Utils.SIS_POLLING_ATTEMPTS);
+		return Utils.getIntegerValueOfProperty(Utils.SIS_POLLING_ATTEMPTS);
 	}
 
 	//defaulting to every minute polling if the property goes missing/bad in ccm.properties
 	private Integer getSleepTimeForPolling() {
-		return getIntegerValueOfProperty(Utils.SIS_POLLING_SLEEPTIME);
+		return Utils.getIntegerValueOfProperty(Utils.SIS_POLLING_SLEEPTIME);
 	}
 
-	private int getIntegerValueOfProperty(String propertyName) {
-		String propertyAsString = appExtPropertiesFile.getProperty(propertyName);
-		if (propertyAsString == null || propertyAsString.isEmpty()) {
-			M_log.error("Missing the property \""+propertyName +"\" in \"ccm.properties\" file, defaulting the value");
-			return (propertyName.equals(Utils.SIS_POLLING_ATTEMPTS))?Utils.CONSTANT_NO_OF_ATTEMPTS_DEFAULT:Utils.CONTSTANT_ONE_MINUTE_MILLI_SECOND;
-		}
-		int propertyAsValue;
-		try {
-			propertyAsValue = Integer.valueOf(propertyAsString);
-		} catch (NumberFormatException e) {
-			M_log.error("The property \""+propertyName+"\" in \"ccm.properties\" file should be a number");
-			return (propertyName.equals(Utils.SIS_POLLING_ATTEMPTS))?Utils.CONSTANT_NO_OF_ATTEMPTS_DEFAULT:Utils.CONTSTANT_ONE_MINUTE_MILLI_SECOND;
-		}
-		return propertyAsValue;
-	}
 
 }
