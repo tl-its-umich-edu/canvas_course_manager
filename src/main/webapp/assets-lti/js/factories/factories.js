@@ -11,7 +11,7 @@ canvasSupportApp.factory('Courses', function ($http, $q) {
         .then(function(result) {
           courses = courses.concat(result.data);
           if (result.headers('Next')) {
-            getNext(result.headers('Next'));
+            getNext(decodeURIComponent(result.headers('Next')));
           } else {
             result.data = courses;
             deferred.resolve(result);
@@ -33,6 +33,40 @@ canvasSupportApp.factory('Courses', function ($http, $q) {
     }
   };
 });
+
+canvasSupportApp.factory('Things', function ($http, $q) {
+  var getThings = function(url) {
+    var things = [];
+    var deferred = $q.defer();
+    var getNext = function(url) {
+      $http.get(url)
+        .then(function(result) {
+          things = things.concat(result.data);
+          if (result.headers('Next')) {
+            getNext(result.headers('Next'));
+          } else {
+            result.data = things;
+            deferred.resolve(result);
+          }
+        }, function(result) {
+          errorDisplay(url, result.status, 'Unable to get things');
+            deferred.resolve(result);
+        });
+    };
+    getNext(url);
+
+    return deferred.promise;
+
+  };
+
+  return {
+    getThings: function(url) {
+      return getThings(url);
+    }
+  };
+});
+
+
 
 //TERMS FACTORY - does the request for terms
 canvasSupportApp.factory('Terms', function ($http) {

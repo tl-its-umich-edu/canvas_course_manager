@@ -1,5 +1,5 @@
 'use strict';
-/* global $, canvasSupportApp, _, generateCurrentTimestamp, angular, validateEmailAddress */
+/* global $, canvasSupportApp, _, generateCurrentTimestamp, angular, validateEmailAddress, FileReader */
 
 /* SINGLE COURSE CONTROLLER */
 canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, $scope, $rootScope, $filter, $location, $log) {
@@ -449,29 +449,29 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
     });
   });
 
-$scope.createGroupSet = function(){
-  var createGroupSetUrl = 'manager/api/v1/courses/' + $scope.course.id + '/group_categories?name=' + $scope.newGroupSet;
-  $log.info(createGroupSetUrl);
-  Course.postGroupSet(createGroupSetUrl).then(function (resultGroupsSets){
-    $log.info(resultGroupsSets.data);
-    $scope.availableGroupSets = [resultGroupsSets.data];
-    $log.info($scope.availableGroupSets);
-  });
-};
+  $scope.createGroupSet = function(){
+    var createGroupSetUrl = 'manager/api/v1/courses/' + $scope.course.id + '/group_categories?name=' + $scope.newGroupSet;
+    $log.info(createGroupSetUrl);
+    Course.postGroupSet(createGroupSetUrl).then(function (resultGroupsSets){
+      $log.info(resultGroupsSets.data);
+      $scope.availableGroupSets = [resultGroupsSets.data];
+      $log.info($scope.availableGroupSets);
+    });
+  };
   //listen for changes to the function chosen
   $scope.changeSelectedFunction = function() {
     $scope.resultPost = null;
     $scope.resetScope();
   };
 
-$scope.resetScope = function(){
-  $('#gridTable input').val('');
-  $scope.content={};
-  $scope.errors=[];
-  $scope.showErrors=false;
-  $scope.globalParseError=null;
-  $('#fileForm')[0].reset();
-};
+  $scope.resetScope = function(){
+    $('#gridTable input').val('');
+    $scope.content={};
+    $scope.errors=[];
+    $scope.showErrors=false;
+    $scope.globalParseError=null;
+    $('#fileForm')[0].reset();
+  };
 
   // on page load set content to false
   $scope.content = false;
@@ -501,9 +501,9 @@ $scope.resetScope = function(){
     }
   });
 
-$scope.csvFileReset = function (){
-   angular.element("input[type='file']").val(null);
-};
+  $scope.csvFileReset = function (){
+     angular.element("input[type='file']").val(null);
+  };
 
   // event handler for clicking on the Upload CSV button
   $scope.submitCSV = function() {
@@ -667,6 +667,31 @@ $scope.csvFileReset = function (){
   };
 }]);
 
-canvasSupportApp.controller('gradesController', ['$scope', '$location', function ($scope, $location) {
+canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location', '$rootScope', '$log', function (Things, $scope, $location, $rootScope, $log) {
+  $scope.$watch('trimfile', function(newFileObj) {
+    $scope.content = false;
+    if (newFileObj) {
+      $scope.loading = true;
+      var reader = new FileReader();
+      reader.readAsText(newFileObj);
+      reader.onload = function(e) {
+        $scope.toTrim = reader.result;
 
+      };
+      $scope.filename = newFileObj.name;
+    }
+  });
+
+
+  $scope.trimToSection = function(section){
+    //1. get the section enrollment (only students)
+    var url = 'manager/api/v1/sections/'+ section + '/enrollments?type[]=StudentEnrollment&per_page=10';
+    Things.getThings(url).then(function (resultSectionEnrollment) {
+      //2. pluck the comparator (user_id)
+      $scope.sectionEnrollment = _.pluck(resultSectionEnrollment.data, 'user_id');
+      console.log($scope.toTrim);
+      console.log($scope.sectionEnrollment);
+      //3. trim $scope.toTrim to only those lines that have the comparator
+    });
+  };
 }]);
