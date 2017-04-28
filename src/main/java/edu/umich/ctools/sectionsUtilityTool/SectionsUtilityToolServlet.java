@@ -391,8 +391,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			boolean isMultipart = ServletFileUpload.isMultipartContent(request);
 
 			if (isMultipart) {
-				SISSupportProcess sisSupportProcess = new SISSupportProcess(request, response);
-				sisSupportProcess.handleSISImportProcess();
+				CourseSupportProcess csp = new CourseSupportProcess(request, response);
+				csp.getDataAndStartCourseSupportProcess();
 				return;
 			}
 			canvasRestApiCall(request, response);
