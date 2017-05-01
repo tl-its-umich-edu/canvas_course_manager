@@ -51,7 +51,9 @@ public class CourseSupportProcess {
 
 		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(Utils.TC_SESSION_DATA);
 		if (tc == null) {
-			String errMsg = "{\"errors\":\"Session might Expired, Refresh Browser\"}";
+			response.setStatus(Utils.API_UNKNOWN_ERROR);
+			String errMsg = "{\"errors\":\"The operation couldn't be completed because your session may have expired. " +
+					"To try again, please reload the page.\"}";
 			out.print(errMsg);
 			out.flush();
 			return;

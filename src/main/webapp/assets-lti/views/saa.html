@@ -20,16 +20,6 @@
         <div class="panel-body">
           <span ng-show="availableSections.length">{{availableSections.length}} available <a href="" data-toggle="modal"  data-target="#listThingsModal" ng-click="selectedListName='Sections';selectedList = availableSectionsGrid"> section(s).</a></span>
           <span ng-show="!availableSections.length">No available sections.</span>
-          <span ng-show="availableGroups.length">{{availableGroups.length}} available <a href="" data-toggle="modal"  data-target="#listThingsModal" ng-click="selectedListName='Groups';selectedList = availableGroupsGrid">group(s).</a></span>
-          <span ng-show="!availableGroups.length">No available groups.</span>
-          <span ng-show="availableGroupSets.length">{{availableGroupSets.length}} available <a href="" data-toggle="modal"  data-target="#listThingsModal" ng-click="selectedListName='Categories';selectedList = availableGroupSets">Group Sets</a></span>
-          <span ng-show="!availableGroupSets.length">No available Group Sets. <a href="" ng-click="creatingGroupSet=true" ng-show="!creatingGroupSet">Create one?</a></span>
-          <span ng-show="creatingGroupSet && !availableGroupSets.length" class="form-inline">
-            <label for="newGroupSet" class="sr-only">New group set name</label>
-            <input id="newGroupSet" type="text" name="" value="" placeholder="Group Set Name" ng-model="newGroupSet" class="form-control">
-            <button type="button" class="btn btn-primary" ng-click="createGroupSet()">Create</button>
-            <button type="button" class="btn btn-default" ng-click="creatingGroupSet = false;newGroupSet=''">Cancel</button>
-          </span>
         </div>
       </div>
     </div>
@@ -38,7 +28,7 @@
   </h4>
   <div ng-show="resultPost"  ng-class="{ 'temp-alert alert alert-success': resultPost.status ===200, 'alert alert-danger': resultPost.status !== 200}">
     <div ng-show="resultPost.status ===200">SIS Import started at {{resultPost.data.created_at | date:'medium'}} - check your email in a bit for results of the import.</div>
-    <div ng-show="resultPost.status !==200">Someth8ng bad happened. Here is what we know:<br><br>
+    <div ng-show="resultPost.status !==200">Something bad happened. Here is what we know:<br><br>
       {{resultPost}}
     </div>
   </div>
@@ -76,21 +66,8 @@
     Your file must include these headers in the first row: <strong ng-repeat="field in selectedFunction.field_array">{{field}}<span ng-if="!$last">, </span></strong>
   </p>
 
-
-
-  <div class="alert alert-danger" ng-show="(selectedFunction.id ==='users_to_groups'
-    && !availableGroups.length)
-    ||(selectedFunction.id==='users_to_groups_grid'
-    && !availableGroups.length)
-    || (selectedFunction.id ==='groups_to_sections' && !availableGroupSets.length)">
-    There are no groups or group sets available in the course.
-  </div>
   <!-- do not display upload controls if the chosen function involves groups and there are no groups in course -->
-  <div ng-hide="(selectedFunction.id ==='users_to_groups'
-    && !availableGroups.length)
-    ||(selectedFunction.id==='users_to_groups_grid'
-    && !availableGroups.length)
-    || (selectedFunction.id ==='groups_to_sections' && !availableGroupSets.length)">
+  <div>
     <div class="" ng-show="selectedFunction.type==='csv'">
       <form class="form-inline well" id="fileForm">
         <div class="form-group">
@@ -102,13 +79,17 @@
         <div class="input-group">
           <span  ng-show="loading"class="alert-info alert-inline">Loading...</span>
           <span  ng-show="globalParseError"class="alert-danger alert-inline">{{globalParseError}}</span>
-          <button ng-show="csvfile && content.data.length" class="btn btn-default" type="reset" ng-click="content={};errors=[];showErrors=false;log=[];globalParseError=null;" name="reset-file-input">Reset</button>
+          <button ng-show="csvfile && content.data.length" class="btn btn-default" type="reset" ng-click="content={};errors=[];showErrors=false;log=[];globalParseError=null;;groupsParseError=null;" name="reset-file-input">Reset</button>
         </div>
         <!-- either there were errors in the CSV or there were no errors, in which case the user gets an upload control -->
-        <div class="pull-right" ng-show="(content.data && content.data.length !==0) && (log  && log.length ===0)">
+        <div class="pull-right" ng-show="(content.data && content.data.length !==0 && !groupsParseError) && (log  && log.length ===0)">
             No errors detected <button class="btn btn-primary" ng-click="submitCSV()">Upload</button>
         </div>
       </form>
+      <div class="alert alert-danger" ng-show="groupsParseError">
+        {{groupsParseError}}
+      </div>
+
       <div class="alert alert-danger" ng-show="log.length && content.data.length">
         <span ng-if="log.length >1">There were {{log.length}} errors</span><span ng-if="log.length ===1">There was {{log.length}} error</span>, highlighted below. <input type="checkbox" id="showErrors" name="" value="" ng-model="showErrors">        <label for="showErrors">Show error log and lines with errors only</label>
       </div>

@@ -139,7 +139,7 @@ public class GroupsToCourseThread implements Runnable {
 			status.append(getErrorMessageForGroupsFailure(grpReport));
 			return status.toString();
 		}
-		status.append("Groups creations and Enrollments to groups is successful!");
+		status.append("Groups creations and adding Enrollments to groups are successful!");
 		return status.toString();
 	}
 

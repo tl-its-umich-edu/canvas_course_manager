@@ -1,5 +1,5 @@
 'use strict';
-/* global $, canvasSupportApp, _, generateCurrentTimestamp, angular, validateEmailAddress */
+/* global $, canvasSupportApp, _, generateCurrentTimestamp, angular, validateEmailAddress, FileReader */
 
 /* SINGLE COURSE CONTROLLER */
 canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, $scope, $rootScope, $filter, $location, $log) {
@@ -435,13 +435,6 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
             return { 'name': group.name, 'id': group.id };
         }
       );
-
-      var functCSVGrpSet = _.findWhere($scope.functions, {id: "groups_to_sections"});
-      var fieldCSVGrpSet = _.findWhere(functCSVGrpSet.fields, {name: "groupset"});
-      fieldCSVGrpSet.validation.choices = $scope.availableGroupSetsFlat;
-      var functCSVGrp = _.findWhere($scope.functions, {id: "users_to_groups"});
-      var fieldCSVGrp = _.findWhere(functCSVGrp.fields, {name: "group_id"});
-      fieldCSVGrp.validation.choices = $scope.availableGroups;
       var functGrpGrid = _.findWhere($scope.functions, {id: "users_to_groups_grid"});
       var fieldGrpGrid = _.findWhere(functGrpGrid.fields, {name: "group_id"});
       fieldGrpGrid.validation.choices = $scope.availableGroups;
@@ -449,29 +442,29 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
     });
   });
 
-$scope.createGroupSet = function(){
-  var createGroupSetUrl = 'manager/api/v1/courses/' + $scope.course.id + '/group_categories?name=' + $scope.newGroupSet;
-  $log.info(createGroupSetUrl);
-  Course.postGroupSet(createGroupSetUrl).then(function (resultGroupsSets){
-    $log.info(resultGroupsSets.data);
-    $scope.availableGroupSets = [resultGroupsSets.data];
-    $log.info($scope.availableGroupSets);
-  });
-};
+  $scope.createGroupSet = function(){
+    var createGroupSetUrl = 'manager/api/v1/courses/' + $scope.course.id + '/group_categories?name=' + $scope.newGroupSet;
+    $log.info(createGroupSetUrl);
+    Course.postGroupSet(createGroupSetUrl).then(function (resultGroupsSets){
+      $log.info(resultGroupsSets.data);
+      $scope.availableGroupSets = [resultGroupsSets.data];
+      $log.info($scope.availableGroupSets);
+    });
+  };
   //listen for changes to the function chosen
   $scope.changeSelectedFunction = function() {
     $scope.resultPost = null;
     $scope.resetScope();
   };
 
-$scope.resetScope = function(){
-  $('#gridTable input').val('');
-  $scope.content={};
-  $scope.errors=[];
-  $scope.showErrors=false;
-  $scope.globalParseError=null;
-  $('#fileForm')[0].reset();
-};
+  $scope.resetScope = function(){
+    $('#gridTable input').val('');
+    $scope.content={};
+    $scope.errors=[];
+    $scope.showErrors=false;
+    $scope.globalParseError=null;
+    $('#fileForm')[0].reset();
+  };
 
   // on page load set content to false
   $scope.content = false;
@@ -501,9 +494,9 @@ $scope.resetScope = function(){
     }
   });
 
-$scope.csvFileReset = function (){
-   angular.element("input[type='file']").val(null);
-};
+  $scope.csvFileReset = function (){
+     angular.element("input[type='file']").val(null);
+  };
 
   // event handler for clicking on the Upload CSV button
   $scope.submitCSV = function() {
@@ -660,6 +653,27 @@ $scope.csvFileReset = function (){
         result.data.push(lineObj);
       }
     }
+    if($scope.selectedFunction.id==='groups_to_sections'){
+      var groupsetMap = [];
+      var userMap = [];
+      _.each(result.data, function(thisData){
+        groupsetMap.push(thisData.data[0].value);
+        userMap.push(thisData.data[2].value);
+      });
+      // check that there is only one groupset and that it is not contained in groupsets existing
+      if (_.uniq(groupsetMap).length > 1){
+        $scope.groupsParseError = 'You have more than one groupset specified in the file. ';
+        // console.log($scope.availableGroupSets);
+      }
+      if(_.findWhere($scope.availableGroupSets, {name: _.uniq(groupsetMap) } ) !== undefined){
+        $scope.groupsParseError = $scope.groupsParseError + 'There already is a groupset with that name in the course. ';
+      }
+      // check that there is no dupe users
+      if(_.uniq(userMap).length !== userMap.length){
+        $scope.groupsParseError = $scope.groupsParseError + 'You have duplicate users in the list.';
+      }
+    }
+
     $scope.loading = false;
     result.headers = linesHeaders;
 
@@ -667,6 +681,5 @@ $scope.csvFileReset = function (){
   };
 }]);
 
-canvasSupportApp.controller('gradesController', ['$scope', '$location', function ($scope, $location) {
-
+canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootScope', '$log', function ($scope, $location, $rootScope, $log) {
 }]);

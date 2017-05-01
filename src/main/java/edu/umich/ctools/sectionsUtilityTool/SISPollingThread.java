@@ -163,7 +163,7 @@ public class SISPollingThread implements Runnable {
 		String fromAddress = appExtPropertiesFile.getProperty(Utils.FRIEND_CONTACT_EMAIL);
 		String ccmSupportAddress = appExtPropertiesFile.getProperty(Utils.SIS_REPORT_CCM_SUPPORT_ADDRESS);
 
-		Properties properties = getMailProperties();
+		Properties properties = Utils.getMailProperties();
 
 		Session session = Session.getInstance(properties);
 		MimeMessage message = new MimeMessage(session);
@@ -178,10 +178,11 @@ public class SISPollingThread implements Runnable {
 			// out of the thread pool that's when apiResp is null and we send a email to user about this situation.
 			if ((apiResp == null) && data.isSISUploadVerySlow()) {
 				Multipart multipart = new MimeMultipart();
-				BodyPart bodyParts = new MimeBodyPart();
+				BodyPart body = new MimeBodyPart();
 				//BSA might come up with better wording, so keeping it simple for now
-				bodyParts.setText((data.getUploadType().getDescription() + " " +
+				body.setText((data.getUploadType().getDescription() + " " +
 						"canvas is taking too long to process this request"));
+				multipart.addBodyPart(body);
 				message.setContent(multipart);
 				Transport.send(message);
 				return;
@@ -226,7 +227,7 @@ public class SISPollingThread implements Runnable {
 		bodyMsg.append(errors.toString());
 		M_log.debug(bodyMsg.toString());
 
-		Properties properties = getMailProperties();
+		Properties properties = Utils.getMailProperties();
 		Session session = Session.getInstance(properties);
 		MimeMessage message = new MimeMessage(session);
 
@@ -248,16 +249,6 @@ public class SISPollingThread implements Runnable {
 		} catch (Exception e) {
 			M_log.error("Email failed due to " + e.getMessage());
 		}
-	}
-
-	private Properties getMailProperties() {
-		Properties properties = System.getProperties();
-		properties.put(Utils.MAIL_SMTP_AUTH, "false");
-		properties.put(Utils.MAIL_SMTP_STARTTLS, "true");
-		properties.put(Utils.MAIL_SMTP_HOST, appExtPropertiesFile.getProperty(Utils.MAIL_HOST));
-		//if enabled will print out raw email body to logs.
-		properties.put(Utils.MAIL_DEBUG, appExtPropertiesFile.getProperty(Utils.IS_MAIL_DEBUG_ENABLED));
-		return properties;
 	}
 
 	public static String getBody(CourseUploadType uploadType, JSONObject apiResp) throws JSONException {
