@@ -426,7 +426,7 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
 
     var groupUrl = 'manager/api/v1/courses/' + $scope.course.id + '/groups';
     Course.getGroups(groupUrl).then(function (resultGroups){
-      //add to the model for groups the actual groups available in the course
+      //add to the model for groupsets the actual groupsets available in the course
       $scope.availableGroups = _.map(_.pluck(resultGroups.data, 'id'), function(val){ return String(val); });
 
       $scope.availableGroupsGrid = _.map(
@@ -436,28 +436,18 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
         }
       );
 
-      var functCSVGrpSet = _.findWhere($scope.functions, {id: "groups_to_sections"});
-      var fieldCSVGrpSet = _.findWhere(functCSVGrpSet.fields, {name: "groupset"});
-      fieldCSVGrpSet.validation.choices = $scope.availableGroupSetsFlat;
-      var functCSVGrp = _.findWhere($scope.functions, {id: "users_to_groups"});
-      var fieldCSVGrp = _.findWhere(functCSVGrp.fields, {name: "group_id"});
-      fieldCSVGrp.validation.choices = $scope.availableGroups;
+      // var functCSVGrpSet = _.findWhere($scope.functions, {id: "groups_to_sections"});
+      // var fieldCSVGrpSet = _.findWhere(functCSVGrpSet.fields, {name: "groupset"});
+      // fieldCSVGrpSet.validation.choices = $scope.availableGroupSetsFlat;
+      // var functCSVGrp = _.findWhere($scope.functions, {id: "users_to_groups"});
+      // var fieldCSVGrp = _.findWhere(functCSVGrp.fields, {name: "group_id"});
+      // fieldCSVGrp.validation.choices = $scope.availableGroups;
       var functGrpGrid = _.findWhere($scope.functions, {id: "users_to_groups_grid"});
       var fieldGrpGrid = _.findWhere(functGrpGrid.fields, {name: "group_id"});
       fieldGrpGrid.validation.choices = $scope.availableGroups;
       fieldGrpGrid.validation.grid_choices = $scope.availableGroupsGrid;
     });
   });
-
-  $scope.createGroupSet = function(){
-    var createGroupSetUrl = 'manager/api/v1/courses/' + $scope.course.id + '/group_categories?name=' + $scope.newGroupSet;
-    $log.info(createGroupSetUrl);
-    Course.postGroupSet(createGroupSetUrl).then(function (resultGroupsSets){
-      $log.info(resultGroupsSets.data);
-      $scope.availableGroupSets = [resultGroupsSets.data];
-      $log.info($scope.availableGroupSets);
-    });
-  };
   //listen for changes to the function chosen
   $scope.changeSelectedFunction = function() {
     $scope.resultPost = null;
@@ -469,6 +459,7 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
     $scope.content={};
     $scope.errors=[];
     $scope.showErrors=false;
+    $scope.groupsParseError = null;
     $scope.globalParseError=null;
     $('#fileForm')[0].reset();
   };
@@ -559,6 +550,7 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
        $scope.loading = false;
        return null;
     }
+
 
     //remove leading and trailing spaces
     for (var i = 0; i < linesHeaders.length; i++) {
@@ -651,13 +643,29 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
         lineObj.invalid = true;
       }
 
-
-
       if (lineArray.length === 1 && lineArray[0] === '') {
-
       } else {
-
         result.data.push(lineObj);
+      }
+    }
+    if($scope.selectedFunction.id==='groups_to_sections'){
+      var groupsetMap = [];
+      var userMap = [];
+      _.each(result.data, function(thisData){
+        groupsetMap.push(thisData.data[0].value);
+        userMap.push(thisData.data[2].value);
+      });
+      // check that there is only one groupset and that it is not contained in groupsets existing
+      if (_.uniq(groupsetMap).length > 1){
+        $scope.groupsParseError = 'You have more than one groupset specified in the file. ';
+        // console.log($scope.availableGroupSets);
+      }
+      if(_.findWhere($scope.availableGroupSets, {name: _.uniq(groupsetMap) } ) !== undefined){
+        $scope.groupsParseError = $scope.groupsParseError + 'There already is a groupset with that name in the course. ';
+      }
+      // check that there is no dupe users
+      if(_.uniq(userMap).length !== userMap.length){
+        $scope.groupsParseError = $scope.groupsParseError + 'You have duplicate users in the list.';
       }
     }
     $scope.loading = false;
@@ -668,30 +676,4 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
 }]);
 
 canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location', '$rootScope', '$log', function (Things, $scope, $location, $rootScope, $log) {
-  $scope.$watch('trimfile', function(newFileObj) {
-    $scope.content = false;
-    if (newFileObj) {
-      $scope.loading = true;
-      var reader = new FileReader();
-      reader.readAsText(newFileObj);
-      reader.onload = function(e) {
-        $scope.toTrim = reader.result;
-
-      };
-      $scope.filename = newFileObj.name;
-    }
-  });
-
-
-  $scope.trimToSection = function(section){
-    //1. get the section enrollment (only students)
-    var url = 'manager/api/v1/sections/'+ section + '/enrollments?type[]=StudentEnrollment&per_page=10';
-    Things.getThings(url).then(function (resultSectionEnrollment) {
-      //2. pluck the comparator (user_id)
-      $scope.sectionEnrollment = _.pluck(resultSectionEnrollment.data, 'user_id');
-      console.log($scope.toTrim);
-      console.log($scope.sectionEnrollment);
-      //3. trim $scope.toTrim to only those lines that have the comparator
-    });
-  };
 }]);
