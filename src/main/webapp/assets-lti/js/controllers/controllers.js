@@ -442,15 +442,6 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
     });
   });
 
-  $scope.createGroupSet = function(){
-    var createGroupSetUrl = 'manager/api/v1/courses/' + $scope.course.id + '/group_categories?name=' + $scope.newGroupSet;
-    $log.info(createGroupSetUrl);
-    Course.postGroupSet(createGroupSetUrl).then(function (resultGroupsSets){
-      $log.info(resultGroupsSets.data);
-      $scope.availableGroupSets = [resultGroupsSets.data];
-      $log.info($scope.availableGroupSets);
-    });
-  };
   //listen for changes to the function chosen
   $scope.changeSelectedFunction = function() {
     $scope.resultPost = null;
@@ -501,6 +492,10 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
   // event handler for clicking on the Upload CSV button
   $scope.submitCSV = function() {
     var file = $scope.csvfile;
+    $log.warn($scope.selectedFunction);
+    if($scope.selectedFunction.id ==='groups_to_sections'){
+      $scope.availableGroupSets.push({ 'name': $scope.newGroupSet, 'id': ''});
+    }
     fileUpload.uploadFileAndFieldsToUrl(file, $scope.selectedFunction.url, function(resultPost){
       $scope.resetScope();
       $scope.selectedFunction = null;
@@ -656,6 +651,7 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
     if($scope.selectedFunction.id==='groups_to_sections'){
       var groupsetMap = [];
       var userMap = [];
+      $scope.groupsParseError ='';
       _.each(result.data, function(thisData){
         groupsetMap.push(thisData.data[0].value);
         userMap.push(thisData.data[2].value);
@@ -663,9 +659,11 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
       // check that there is only one groupset and that it is not contained in groupsets existing
       if (_.uniq(groupsetMap).length > 1){
         $scope.groupsParseError = 'You have more than one groupset specified in the file. ';
-        // console.log($scope.availableGroupSets);
       }
-      if(_.findWhere($scope.availableGroupSets, {name: _.uniq(groupsetMap) } ) !== undefined){
+      else {
+        $scope.newGroupSet = groupsetMap[0];
+      }
+      if(_.findWhere($scope.availableGroupSets, {name: _.uniq(groupsetMap)[0] } ) !== undefined){
         $scope.groupsParseError = $scope.groupsParseError + 'There already is a groupset with that name in the course. ';
       }
       // check that there is no dupe users
