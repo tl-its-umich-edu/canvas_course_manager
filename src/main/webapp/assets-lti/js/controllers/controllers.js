@@ -492,7 +492,6 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
   // event handler for clicking on the Upload CSV button
   $scope.submitCSV = function() {
     var file = $scope.csvfile;
-    $log.warn($scope.selectedFunction);
     if($scope.selectedFunction.id ==='groups_to_sections'){
       $scope.availableGroupSets.push({ 'name': $scope.newGroupSet, 'id': ''});
     }
