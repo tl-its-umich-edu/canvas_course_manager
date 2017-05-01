@@ -11,7 +11,7 @@ canvasSupportApp.factory('Courses', function ($http, $q) {
         .then(function(result) {
           courses = courses.concat(result.data);
           if (result.headers('Next')) {
-            getNext(decodeURIComponent(result.headers('Next')));
+            getNext(result.headers('Next'));
           } else {
             result.data = courses;
             deferred.resolve(result);
