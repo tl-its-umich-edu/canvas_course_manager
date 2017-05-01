@@ -1,56 +1,19 @@
-  <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a data-target="#geff" href="" aria-controls="geff" role="tab" data-toggle="tab">Grade Export File Formatter</a></li>
-    <li role="presentation"><a data-target="#puff" href="" aria-controls="puff" role="tab" data-toggle="tab">Puff</a></li>
-  </ul>
+<h2 style="font-size:130%">Grade Export File Formatter</h2>
+<p>
+Use Grade Export File Formatter to reformat the "CSV File" from "Grades" into acceptable format for upload into "Faculty Center"
+</p>
+<div class="file-input" id="drop-zone" style="height: calc(100% - 50px);padding: 5%;margin-top: 20px;border: 3px dashed #bbb;text-align:center">
 
-  <!-- Tab panes -->
-  <div class="tab-content">
-    <div role="tabpanel" class="tab-pane active" id="geff">
-      <h2 style="font-size:130%">Grade Export File Formatter</h2>
-      <p>
-        Use Grade Export File Formatter to reformat the "CSV File" from "Grades" into acceptable format for upload into "Faculty Center"
-      </p>
-      <div class="file-input" id="drop-zone" style="height: calc(100% - 50px);padding: 5%;margin-top: 20px;border: 3px dashed #bbb;text-align:center">
-
-        <div class="text-center drop-file-instruct" style="font-size: 65px;color: rgb(187,187,187);font-weight: 200;pointer-events: none;">
-          Drag file here
-        </div>
-        <div class="text-center drop-file-or" style="margin-top: -10px;margin-bottom: 10px;color: rgb(187,187,187);pointer-events: none;font-size: 25px;">
-          or
-          <p>choose a grade file</p>
-        </div>
-        <input class="btn btn-primary" id="csv-file" type="file" name="files" style="display:inline">
-      </div>
-      <div class="text-center" id="upload-file-info" style="padding-top: 10px;">
-      </div>
-    </div>
-    <div role="tabpanel" class="tab-pane" id="puff">
-        <h2 style="font-size:130%">Trim grade export file to a section</h2>
-        <p><strong>Step 1</strong> - provide the file you downloaded from grade export.</p>
-        <p><input class="btn btn-default" id="trim-file" type="file" name="files" style="display:inline" file-model="trimfile"></p>
-           <!-- <input id="uploadCSV" class="btn btn-primary" type="file" type="file" ng-click="csvFileReset()" file-model="csvfile"> -->
-        <p><strong>Step 2</strong> - indicate what section to trim it to.</p>
-        <div class="panel panel-default">
-          <div class="panel-body">
-            <ul style="margin-bottom:0">
-              <li ng-repeat="section in sections">
-                <input type="radio" name="sectionSelection" ng-value="section" ng-model="$parent.selectedSection" id="section{{section.id}}">
-                <label style="font-weight:normal" for="section{{section.id}}">{{section.name}}</label>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <p><strong>Step 3</strong> - trim. The trimmed file will be downloaded to your computer. It will be named <code>&lt;uniqname>-&lt;section name>.csv</code></p>
-        <p>
-          <button type="button" class="btn btn-primary" ng-click="trimToSection(selectedSection.id)">
-          Trim
-        </button>
-        </p>
-
-
-
-    </div>
-  </div>
+<div class="text-center drop-file-instruct" style="font-size: 65px;color: rgb(187,187,187);font-weight: 200;pointer-events: none;">
+  Drag file here
+</div>
+<div class="text-center drop-file-or" style="margin-top: -10px;margin-bottom: 10px;color: rgb(187,187,187);pointer-events: none;font-size: 25px;">
+  or
+  <p>choose a grade file</p>
+</div>
+<input class="btn btn-primary" id="csv-file" type="file" name="files" style="display:inline">
+</div>
+<div class="text-center" id="upload-file-info" style="padding-top: 10px;">
 </div>
 <script type="text/javascript" src="vendor/utils/papaparse.min.js"></script>
 <script type="text/javascript" src="assets-lti/js/geff.js"></script>
