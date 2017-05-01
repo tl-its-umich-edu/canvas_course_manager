@@ -77,7 +77,6 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String GET_GROUPSET= "get.groupset.regex";
 	private static final String POST_GROUPSET= "post.groupset.regex";
 
-
 	private static final String M_PATH_DATA = "mPathData";
 	private static final String LTI_1P0_CONST = "LTI-1p0";
 	private static final String LTI_VERSION = "lti_version";
