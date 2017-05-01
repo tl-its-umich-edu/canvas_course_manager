@@ -667,31 +667,5 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
   };
 }]);
 
-canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location', '$rootScope', '$log', function (Things, $scope, $location, $rootScope, $log) {
-  $scope.$watch('trimfile', function(newFileObj) {
-    $scope.content = false;
-    if (newFileObj) {
-      $scope.loading = true;
-      var reader = new FileReader();
-      reader.readAsText(newFileObj);
-      reader.onload = function(e) {
-        $scope.toTrim = reader.result;
-
-      };
-      $scope.filename = newFileObj.name;
-    }
-  });
-
-
-  $scope.trimToSection = function(section){
-    //1. get the section enrollment (only students)
-    var url = 'manager/api/v1/sections/'+ section + '/enrollments?type[]=StudentEnrollment&per_page=10';
-    Things.getThings(url).then(function (resultSectionEnrollment) {
-      //2. pluck the comparator (user_id)
-      $scope.sectionEnrollment = _.pluck(resultSectionEnrollment.data, 'user_id');
-      console.log($scope.toTrim);
-      console.log($scope.sectionEnrollment);
-      //3. trim $scope.toTrim to only those lines that have the comparator
-    });
-  };
+canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootScope', '$log', function ($scope, $location, $rootScope, $log) {
 }]);
