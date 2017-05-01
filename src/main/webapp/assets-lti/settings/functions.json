@@ -63,7 +63,7 @@
   "id": "groups_to_sections",
   "url": "addGroupsAndUsers",
   "type": "csv",
-  "notes":"Tool supplies course_id. Only one groupset per import. No duplicate user entries.",
+  "notes":"Tool supplies course_id. Only one groupset per import. No duplicate user entries. Important: preserve the order shown in CSV Info.",
   "field_array":["groupset","name","users"],
   "fields": [{
     "name": "groupset",
