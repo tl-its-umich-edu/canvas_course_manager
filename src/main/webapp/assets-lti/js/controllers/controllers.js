@@ -435,13 +435,6 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
             return { 'name': group.name, 'id': group.id };
         }
       );
-
-      var functCSVGrpSet = _.findWhere($scope.functions, {id: "groups_to_sections"});
-      var fieldCSVGrpSet = _.findWhere(functCSVGrpSet.fields, {name: "groupset"});
-      fieldCSVGrpSet.validation.choices = $scope.availableGroupSetsFlat;
-      var functCSVGrp = _.findWhere($scope.functions, {id: "users_to_groups"});
-      var fieldCSVGrp = _.findWhere(functCSVGrp.fields, {name: "group_id"});
-      fieldCSVGrp.validation.choices = $scope.availableGroups;
       var functGrpGrid = _.findWhere($scope.functions, {id: "users_to_groups_grid"});
       var fieldGrpGrid = _.findWhere(functGrpGrid.fields, {name: "group_id"});
       fieldGrpGrid.validation.choices = $scope.availableGroups;
@@ -660,6 +653,27 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
         result.data.push(lineObj);
       }
     }
+    if($scope.selectedFunction.id==='groups_to_sections'){
+      var groupsetMap = [];
+      var userMap = [];
+      _.each(result.data, function(thisData){
+        groupsetMap.push(thisData.data[0].value);
+        userMap.push(thisData.data[2].value);
+      });
+      // check that there is only one groupset and that it is not contained in groupsets existing
+      if (_.uniq(groupsetMap).length > 1){
+        $scope.groupsParseError = 'You have more than one groupset specified in the file. ';
+        // console.log($scope.availableGroupSets);
+      }
+      if(_.findWhere($scope.availableGroupSets, {name: _.uniq(groupsetMap) } ) !== undefined){
+        $scope.groupsParseError = $scope.groupsParseError + 'There already is a groupset with that name in the course. ';
+      }
+      // check that there is no dupe users
+      if(_.uniq(userMap).length !== userMap.length){
+        $scope.groupsParseError = $scope.groupsParseError + 'You have duplicate users in the list.';
+      }
+    }
+
     $scope.loading = false;
     result.headers = linesHeaders;
 

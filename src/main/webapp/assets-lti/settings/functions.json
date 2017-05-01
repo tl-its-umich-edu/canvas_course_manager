@@ -59,16 +59,17 @@
     }
   }]
 }, {
-  "name": "Add multiple new groups to course through CSV",
+  "name": "Add multiple new groups and users to course through CSV",
   "id": "groups_to_sections",
-  "url": "addGroups",
+  "url": "addGroupsAndUsers",
   "type": "csv",
-  "notes":"Tool supplies course_id. \nThe id_prefix  will be used to construct a unique group sis_id. \nYou may want to use a prefix that is meaningful.",
-  "field_array":["id_prefix","name","groupset"],
+  "notes":"Tool supplies course_id. Only one groupset per import. No duplicate user entries.",
+  "field_array":["groupset","name","users"],
   "fields": [{
-    "name": "id_prefix",
+    "name": "groupset",
     "validation": {
-      "spaces": false,
+      "only_one":true,
+      "spaces": true,
       "chars": "alpha",
       "max": 300,
       "min": 3
@@ -79,42 +80,19 @@
       "spaces": true,
       "chars": "alpha",
       "max": 300,
-      "min": 5
+      "min": 3
     }
   },{
-      "name": "groupset",
+      "name": "users",
       "validation": {
         "spaces": false,
+        "no_dupes":true,
         "chars": "alpha",
+        "pattern":"^\\d{8,8}$|.*@(?!umich\\.edu).*",
+        "val_message":"Please use an 8 digit number or a non umich email address",
         "max": 300,
         "min": 1
       }
-  }]
-}, {
-  "name": "Add multiple users to course groups through CSV",
-  "id": "users_to_groups",
-  "url": "addUsersToGroups",
-  "type": "csv",
-  "notes":"user_id is either the UMID or an email address for non-UM users. \nImportant: users need to be in course already.\nNote: to see available group ids click on \"group(s)\" link above.",
-  "field_array":["group_id","user_id"],
-  "fields": [ {
-    "name": "group_id",
-    "validation": {
-      "spaces": false,
-      "chars": "alpha",
-      "max": 30,
-      "min": 2
-    }
-  }, {
-    "name": "user_id",
-    "validation": {
-      "spaces": false,
-      "chars": "alpha",
-      "pattern":"^\\d{8,8}$|.*@(?!umich\\.edu).*",
-      "val_message":"Please use an 8 digit number or a non umich email address",
-      "max": 100,
-      "min": 3
-    }
   }]
 }, {
   "name": "Add multiple users to course sections through data grid",
