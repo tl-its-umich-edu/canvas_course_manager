@@ -34,6 +34,7 @@ canvasSupportApp.factory('Courses', function ($http, $q) {
   };
 });
 
+
 //TERMS FACTORY - does the request for terms
 canvasSupportApp.factory('Terms', function ($http) {
   return {
