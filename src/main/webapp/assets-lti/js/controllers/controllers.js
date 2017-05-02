@@ -681,8 +681,11 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
 
     $scope.loading = false;
     result.headers = linesHeaders;
-
+    $('html, body').animate({
+      scrollTop : 300
+    }, 1000);
     return result;
+
   };
 }]);
 
