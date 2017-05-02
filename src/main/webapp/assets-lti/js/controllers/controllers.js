@@ -435,10 +435,6 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
             return { 'name': group.name, 'id': group.id };
         }
       );
-      var functGrpGrid = _.findWhere($scope.functions, {id: "users_to_groups_grid"});
-      var fieldGrpGrid = _.findWhere(functGrpGrid.fields, {name: "group_id"});
-      fieldGrpGrid.validation.choices = $scope.availableGroups;
-      fieldGrpGrid.validation.grid_choices = $scope.availableGroupsGrid;
     });
   });
 
@@ -453,7 +449,9 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
     $scope.content={};
     $scope.errors=[];
     $scope.showErrors=false;
+    $scope.throttleError=null;
     $scope.globalParseError=null;
+    $scope.groupsParseError=null;
     $('#fileForm')[0].reset();
   };
 
@@ -527,7 +525,6 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
           csv = csv + thisRowArr.join(',') + '\n';
         }
       });
-
       var file = csv;
       fileUpload.uploadFileAndFieldsToUrl(file, $scope.selectedFunction.url, function(resultPost){
         $scope.resetScope();
