@@ -79,6 +79,7 @@
         <div class="input-group">
           <span  ng-show="loading"class="alert-info alert-inline">Loading...</span>
           <span  ng-show="globalParseError"class="alert-danger alert-inline">{{globalParseError}}</span>
+          <span  ng-show="throttleError"class="alert-danger alert-inline">{{throttleError}}</span>
           <button ng-show="csvfile && content.data.length" class="btn btn-default" type="reset" ng-click="content={};errors=[];showErrors=false;log=[];globalParseError=null;;groupsParseError=null;" name="reset-file-input">Reset</button>
         </div>
         <!-- either there were errors in the CSV or there were no errors, in which case the user gets an upload control -->
