@@ -7,6 +7,7 @@ canvasSupportApp.run(function($rootScope) {
   //for any init values needed
   $rootScope.server = '';
   $rootScope.user = {};
+  $rootScope.csv_throttle = 1000;
   //to turn on/off the 2 functionalities
   $rootScope.functionality = {
     'friends': true,

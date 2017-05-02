@@ -475,11 +475,19 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
       var reader = new FileReader();
       reader.readAsText(newFileObj);
       reader.onload = function(e) {
-        var CSVPreview = function() {
-          $scope.headers = $scope.selectedFunction.fields;
-          $scope.content = parseCSV(reader.result, $scope.headers, $scope.headers.length);
-        };
-        $timeout(CSVPreview, 100);
+        if(reader.result.split('\n').length > $rootScope.csv_throttle && $scope.selectedFunction.id==='groups_to_sections'){
+          $timeout(function(){
+            $scope.loading = false;
+            $scope.throttleError = 'No more than ' + $rootScope.csv_throttle + ' rows in CSV allowed with this function';
+          });
+        }
+        else {
+          var CSVPreview = function() {
+            $scope.headers = $scope.selectedFunction.fields;
+            $scope.content = parseCSV(reader.result, $scope.headers, $scope.headers.length);
+          };
+          $timeout(CSVPreview, 100);
+        }
       };
       $scope.filename = newFileObj.name;
     }
