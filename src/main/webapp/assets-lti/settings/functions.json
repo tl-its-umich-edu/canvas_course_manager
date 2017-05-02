@@ -134,23 +134,34 @@
   "url": "addUsersToGroupsGrid",
   "type": "grid",
   "notes":"SAA suplies all. Front end populates enumerations (group_id) based on available group_ids in the context",
+  "field_array":["groupset","name","users"],
   "fields": [{
-    "name": "user_id",
+    "name": "groupset",
     "validation": {
-      "spaces": false,
+      "only_one":true,
+      "spaces": true,
       "chars": "alpha",
-      "pattern":"^\\d{8,8}$|.*@(?!umich\\.edu).*",
-      "val_message":"Please use an 8 digit number or a non umich email address",
-      "max": 100,
+      "max": 300,
       "min": 3
     }
   },{
-    "name": "group_id",
+    "name": "name",
     "validation": {
-      "spaces": false,
+      "spaces": true,
       "chars": "alpha",
       "max": 300,
-      "min": 5
+      "min": 3
     }
+  },{
+      "name": "users",
+      "validation": {
+        "spaces": false,
+        "no_dupes":true,
+        "chars": "alpha",
+        "pattern":"^\\d{8,8}$|.*@(?!umich\\.edu).*",
+        "val_message":"Please use an 8 digit number or a non umich email address",
+        "max": 300,
+        "min": 1
+      }
   }]
 }]
