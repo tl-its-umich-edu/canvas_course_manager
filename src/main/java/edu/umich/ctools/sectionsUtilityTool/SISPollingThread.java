@@ -67,7 +67,7 @@ public class SISPollingThread implements Runnable {
 							sendEmailReport(emailData, null);
 							iterator.remove();
 							M_log.warn(String.format("The SIS Request %s for request type %s for course %s took longer than expected, REMOVING the request from THREAD",
-									emailData.getPollingId(), emailData.getSisProcessType(), emailData.getCourseId()));
+									emailData.getPollingId(), emailData.getUploadType(), emailData.getCourseId()));
 							removedPollingIdCount();
 							continue;
 						}
@@ -88,7 +88,7 @@ public class SISPollingThread implements Runnable {
 						if (!isSISUploadDone(apiResp)) {
 							emailData.incrementNumberOfTries(1);
 							M_log.info(String.format("The SIS request %s of request type %s for course %s ,No# of (polling)attempts made for status %s "
-									, emailData.getPollingId(), emailData.getSisProcessType(), emailData.getCourseId(), emailData.getNumberOfTries()));
+									, emailData.getPollingId(), emailData.getUploadType(), emailData.getCourseId(), emailData.getNumberOfTries()));
 							continue;
 						}
 						// sending email report to user saying what canvas did with the sisUpload request they submitted
@@ -163,7 +163,7 @@ public class SISPollingThread implements Runnable {
 		String fromAddress = appExtPropertiesFile.getProperty(Utils.FRIEND_CONTACT_EMAIL);
 		String ccmSupportAddress = appExtPropertiesFile.getProperty(Utils.SIS_REPORT_CCM_SUPPORT_ADDRESS);
 
-		Properties properties = getMailProperties();
+		Properties properties = Utils.getMailProperties();
 
 		Session session = Session.getInstance(properties);
 		MimeMessage message = new MimeMessage(session);
@@ -172,16 +172,17 @@ public class SISPollingThread implements Runnable {
 			message.addRecipient(Message.RecipientType.CC, new InternetAddress(ccmSupportAddress));
 			message.addRecipient(Message.RecipientType.TO, new InternetAddress(data.getEmailAddress()));
 			message.setFrom(new InternetAddress(fromAddress));
-			message.setSubject(String.format(data.getSisProcessType().getDescription() + " " + data.getCourseId()));
+			message.setSubject(String.format(data.getUploadType().getDescription() + " " + data.getCourseId()));
 
 			//if canvas taking long time to process the sis request, after X attempts intentionally we take the request
 			// out of the thread pool that's when apiResp is null and we send a email to user about this situation.
 			if ((apiResp == null) && data.isSISUploadVerySlow()) {
 				Multipart multipart = new MimeMultipart();
-				BodyPart bodyParts = new MimeBodyPart();
+				BodyPart body = new MimeBodyPart();
 				//BSA might come up with better wording, so keeping it simple for now
-				bodyParts.setText((data.getSisProcessType().getDescription() + " " +
+				body.setText((data.getUploadType().getDescription() + " " +
 						"canvas is taking too long to process this request"));
+				multipart.addBodyPart(body);
 				message.setContent(multipart);
 				Transport.send(message);
 				return;
@@ -191,7 +192,7 @@ public class SISPollingThread implements Runnable {
 			String workflowState = (String) resp.get(Utils.JSON_PARAM_WORKFLOW_STATE);
 
 			Multipart multipart = new MimeMultipart();
-			String msgBody = getBody(data.getSisProcessType(), resp);
+			String msgBody = getBody(data.getUploadType(), resp);
 			//msgBody of the email
 			BodyPart body = new MimeBodyPart();
 			body.setText(msgBody);
@@ -203,7 +204,7 @@ public class SISPollingThread implements Runnable {
 
 			message.setContent(multipart);
 			M_log.info(String.format("SIS request %s of type %s for course %s Finished! Sending email report  " ,
-					data.getPollingId(),data.getSisProcessType(),data.getCourseId()));
+					data.getPollingId(),data.getUploadType(),data.getCourseId()));
 			Transport.send(message);
 		} catch (MessagingException | JSONException e) {
 			M_log.error(String.format(errmsg, data.getCourseId(), e.getMessage()));
@@ -226,7 +227,7 @@ public class SISPollingThread implements Runnable {
 		bodyMsg.append(errors.toString());
 		M_log.debug(bodyMsg.toString());
 
-		Properties properties = getMailProperties();
+		Properties properties = Utils.getMailProperties();
 		Session session = Session.getInstance(properties);
 		MimeMessage message = new MimeMessage(session);
 
@@ -250,17 +251,7 @@ public class SISPollingThread implements Runnable {
 		}
 	}
 
-	private Properties getMailProperties() {
-		Properties properties = System.getProperties();
-		properties.put(Utils.MAIL_SMTP_AUTH, "false");
-		properties.put(Utils.MAIL_SMTP_STARTTLS, "true");
-		properties.put(Utils.MAIL_SMTP_HOST, appExtPropertiesFile.getProperty(Utils.MAIL_HOST));
-		//if enabled will print out raw email body to logs.
-		properties.put(Utils.MAIL_DEBUG, appExtPropertiesFile.getProperty(Utils.IS_MAIL_DEBUG_ENABLED));
-		return properties;
-	}
-
-	public static String getBody(SISUploadType sisProcessType, JSONObject apiResp) throws JSONException {
+	public static String getBody(CourseUploadType uploadType, JSONObject apiResp) throws JSONException {
 		String workflowState = (String) apiResp.get(Utils.JSON_PARAM_WORKFLOW_STATE);
 		String startTime = (String) apiResp.get("started_at");
 		String endTime = (String) apiResp.get("ended_at");
@@ -299,13 +290,13 @@ public class SISPollingThread implements Runnable {
 		}
 
 		if (workflowState.equals(Utils.JSON_PARAM_IMPORTED)) {
-			if (sisProcessType.equals(SISUploadType.ADD_SECTIONS)) {
+			if (uploadType.equals(CourseUploadType.ADD_SECTIONS)) {
 				int sectionAddedCount = (int) apiResp.getJSONObject("data").getJSONObject("counts").get("sections");
 				//giving the count from canvas how many section added to course, user could match up to one in the
 				//attachment since as part of finished sis response canvas is not providing any more detail.
 				msgBody.append("Sections added: " + sectionAddedCount);
 			}
-			if(sisProcessType.equals(SISUploadType.ADD_USERS_TO_SECTIONS)){
+			if(uploadType.equals(CourseUploadType.ADD_USERS_TO_SECTIONS)){
 				int enrollmentsToSection = (int) apiResp.getJSONObject("data").getJSONObject("counts").get("enrollments");
 				msgBody.append("Enrollments added: " + enrollmentsToSection);
 			}
@@ -317,7 +308,7 @@ public class SISPollingThread implements Runnable {
 		BodyPart attachment = new MimeBodyPart();
 		attachment.setDataHandler(new DataHandler(new ByteArrayDataSource(data.getSisEmailData().getBytes(),
 				Utils.CONSTANT_MIME_TEXT_CSV)));
-		attachment.setFileName(data.getSisProcessType().getDescription() + "_" + data.getCourseId() + ".csv");
+		attachment.setFileName(data.getUploadType().getDescription() + "_" + data.getCourseId() + ".csv");
 
 		return attachment;
 

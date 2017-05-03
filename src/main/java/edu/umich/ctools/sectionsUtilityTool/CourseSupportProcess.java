@@ -23,7 +23,7 @@ import java.util.*;
 /**
  * Created by pushyami on 3/29/17.
  */
-public class SISSupportProcess {
+public class CourseSupportProcess {
 
 	private static Log M_log = LogFactory.getLog(SectionsUtilityToolServlet.class);
 
@@ -31,18 +31,18 @@ public class SISSupportProcess {
 	private final HttpServletResponse response;
 
 
-	public SISSupportProcess(HttpServletRequest request, HttpServletResponse response) {
+	public CourseSupportProcess(HttpServletRequest request, HttpServletResponse response) {
 		this.request=request;
 		this.response=response;
 	}
 
-	protected void handleSISImportProcess() throws IOException {
+	protected void getDataAndStartCourseSupportProcess() throws IOException {
 		PrintWriter out=response.getWriter();
 		String csvFileContent = getAttachmentContent();
 
 		if (csvFileContent == null) {
 			response.setStatus(Utils.API_UNKNOWN_ERROR);
-			String errMsg = "{\"errorMsg\":\"Failed to grab the attachment content\"}";
+			String errMsg = "{\"errors\":\"Failed to grab the attachment content\"}";
 			out.print(errMsg);
 			out.flush();
 			return;
@@ -50,28 +50,47 @@ public class SISSupportProcess {
 		String pathInfo = request.getPathInfo();
 
 		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(Utils.TC_SESSION_DATA);
+		if (tc == null) {
+			response.setStatus(Utils.API_UNKNOWN_ERROR);
+			String errMsg = "{\"errors\":\"The operation couldn't be completed because your session may have expired. " +
+					"To try again, please reload the page.\"}";
+			out.print(errMsg);
+			out.flush();
+			return;
+		}
 		HashMap<String, Object> customValuesMap = tc.getCustomValuesMap();
 		String emailAddress = (String) customValuesMap.get(Utils.LTI_PARAM_CONTACT_EMAIL_PRIMARY);
 		String courseId = (String) customValuesMap.get(Utils.LTI_PARAM_CANVAS_COURSE_ID);
 
-		if (pathInfo.contains(SISUploadType.ADD_SECTIONS.getValue())) {
+		if (pathInfo.contains(CourseUploadType.ADD_SECTIONS.getValue())) {
 			String courseID = (String) customValuesMap.get(Utils.LTI_PARAM_CANVAS_COURSE_ID);
 			// step to construct csv file for sis upload.
 			HashMap<Integer, String> csvContentWithStatus = makeSectionsCSVForSISUpload(csvFileContent, courseID);
-			processSISRequest(out, emailAddress, courseId, csvContentWithStatus,SISUploadType.ADD_SECTIONS);
+			processSISRequest(out, emailAddress, courseId, csvContentWithStatus, CourseUploadType.ADD_SECTIONS);
 			return;
 		}
 
-		if(pathInfo.contains(SISUploadType.ADD_USERS_TO_SECTIONS.getValue())){
+		if(pathInfo.contains(CourseUploadType.ADD_USERS_TO_SECTIONS.getValue())){
 			String courseID = (String) customValuesMap.get(Utils.LTI_PARAM_CANVAS_COURSE_ID);
 			HashMap<Integer, String> csvContentWithStatus = makeEnrollmentsForSectionsCSVForSISUpload(csvFileContent, courseID);
-			processSISRequest(out, emailAddress, courseId, csvContentWithStatus,SISUploadType.ADD_USERS_TO_SECTIONS);
+			processSISRequest(out, emailAddress, courseId, csvContentWithStatus, CourseUploadType.ADD_USERS_TO_SECTIONS);
 			return;
 		}
+
+		if(pathInfo.contains(CourseUploadType.ADD_GROUPS_AND_USERS.getValue())){
+			GroupsToCourseThread grpsThread = new GroupsToCourseThread(csvFileContent,emailAddress,courseId);
+			new Thread(grpsThread).start();
+			response.setStatus(HttpStatus.SC_OK);
+			M_log.info(Utils.getCurrentISODate());
+			out.print("{\"workflow_state\":\"created\",\"created_at\": \""+Utils.getCurrentISODate()+"\"}");
+			out.flush();
+			M_log.info(String.format("Starting groups process for course: ",courseId));
+		}
+
 	}
 
 	private void processSISRequest(PrintWriter out, String emailAddress, String courseId,
-								   HashMap<Integer, String> csvContentWithStatus, SISUploadType type) {
+								   HashMap<Integer, String> csvContentWithStatus, CourseUploadType type) {
 		Map.Entry<Integer, String> csvFile = csvContentWithStatus.entrySet().iterator().next();
 
 		int status = csvFile.getKey();
@@ -113,7 +132,7 @@ public class SISSupportProcess {
 	}
 
 	private synchronized void savingPollingIdsForReporting(String csvFileContent, String emailAddress, String courseId,
-														   ApiResultWrapper arw, SISUploadType type) {
+														   ApiResultWrapper arw, CourseUploadType type) {
 		String apiResp = arw.getApiResp();
 		JSONObject sisRes = new JSONObject(apiResp);
 		int id = (int) sisRes.get("id");
@@ -257,6 +276,7 @@ public class SISSupportProcess {
 		return csvMap;
 
 	}
+
 	private ApiResultWrapper sisUploadCall(String csvFileContent){
 		String url = Utils.urlConstructor(Utils.URL_CHUNK_ACCOUNTS_1_SIS_IMPORTS+Utils.URL_CHUNK_SIS_IMPORT_WITH_BATCH_MODE_STICKINESS_DISABLED);
 		HttpPost post = new HttpPost(url);

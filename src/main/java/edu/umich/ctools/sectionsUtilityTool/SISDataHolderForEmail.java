@@ -8,13 +8,13 @@ public class SISDataHolderForEmail {
 	private final String courseId;
 	private String emailAddress;
 	private int pollingId;
-	private SISUploadType sisProcessType;
+	private CourseUploadType uploadType;
 	private String sisEmailData;
 	private int numberOfTries;
 	private boolean isSISUploadVerySlow = false;
 
-	public SISUploadType getSisProcessType() {
-		return sisProcessType;
+	public CourseUploadType getUploadType() {
+		return uploadType;
 	}
 
 	public String getEmailAddress() {
@@ -46,11 +46,11 @@ public class SISDataHolderForEmail {
 	}
 
 
-	public SISDataHolderForEmail(int pollingId, String courseId,String emailAddress, SISUploadType sisProcessType, String sisEmailData){
+	public SISDataHolderForEmail(int pollingId, String courseId, String emailAddress, CourseUploadType sisProcessType, String sisEmailData){
 		this.pollingId=pollingId;
 		this.courseId=courseId;
 		this.emailAddress = emailAddress;
-		this.sisProcessType=sisProcessType;
+		this.uploadType =sisProcessType;
 		this.sisEmailData=sisEmailData;
 	}
 
