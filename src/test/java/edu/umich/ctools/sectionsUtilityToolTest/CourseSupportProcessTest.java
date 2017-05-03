@@ -1,6 +1,6 @@
 package edu.umich.ctools.sectionsUtilityToolTest;
 
-import edu.umich.ctools.sectionsUtilityTool.SISSupportProcess;
+import edu.umich.ctools.sectionsUtilityTool.CourseSupportProcess;
 import junit.framework.TestCase;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 /**
  * Created by pushyami on 4/21/17.
  */
-public class SISSupportProcessTest extends TestCase {
+public class CourseSupportProcessTest extends TestCase {
 	protected static final String PATH_SRC_TEST_JAVA_EDU_UMICH_CTOOLS = "/src/test/java/edu/umich/ctools/sectionsUtilityToolTest";
 	private String csv;
 	private String swappedColumnCVS;
@@ -31,13 +31,13 @@ public class SISSupportProcessTest extends TestCase {
 	}
 	@Test
 	public void testSwapCSVFileContent(){
-		String actual = SISSupportProcess.swapCSVFileContent(swappedColumnCVS);
+		String actual = CourseSupportProcess.swapCSVFileContent(swappedColumnCVS);
 		assertEquals(csv,actual);
 	}
 
 	@Test
 	public void testHeaderStartingElement(){
-		assertEquals(true,SISSupportProcess.isHeaderStartWithIdPrefix(csv));
-		assertEquals(false,SISSupportProcess.isHeaderStartWithIdPrefix(swappedColumnCVS));
+		assertEquals(true, CourseSupportProcess.isHeaderStartWithIdPrefix(csv));
+		assertEquals(false, CourseSupportProcess.isHeaderStartWithIdPrefix(swappedColumnCVS));
 	}
 }

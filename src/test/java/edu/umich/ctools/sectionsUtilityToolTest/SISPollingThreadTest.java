@@ -1,7 +1,7 @@
 package edu.umich.ctools.sectionsUtilityToolTest;
 
 import edu.umich.ctools.sectionsUtilityTool.SISPollingThread;
-import edu.umich.ctools.sectionsUtilityTool.SISUploadType;
+import edu.umich.ctools.sectionsUtilityTool.CourseUploadType;
 import junit.framework.TestCase;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -47,7 +47,7 @@ public class SISPollingThreadTest extends TestCase {
     }
     @Test
     public void testMessageBodyForSISImportedWithErrors() {
-        String actual = SISPollingThread.getBody(SISUploadType.ADD_SECTIONS, new JSONObject(this.partialSuccessJson));
+        String actual = SISPollingThread.getBody(CourseUploadType.ADD_SECTIONS, new JSONObject(this.partialSuccessJson));
         Path path = Paths.get(Paths.get(".").toAbsolutePath() + PATH_SRC_TEST_JAVA_EDU_UMICH_CTOOLS +
                 "/msgBodyExpectedPartialSuccess.txt");
         byte[] expected = null;
@@ -62,7 +62,7 @@ public class SISPollingThreadTest extends TestCase {
 
     @Test
     public void testMsessageBodyForSISImportFailure(){
-        String actual = SISPollingThread.getBody(SISUploadType.ADD_SECTIONS, new JSONObject(this.failedJson));
+        String actual = SISPollingThread.getBody(CourseUploadType.ADD_SECTIONS, new JSONObject(this.failedJson));
         Path path = Paths.get(Paths.get(".").toAbsolutePath() + PATH_SRC_TEST_JAVA_EDU_UMICH_CTOOLS +
                 "/msgBodyExpectedFailed.txt");
         byte[] expected = null;
@@ -78,7 +78,7 @@ public class SISPollingThreadTest extends TestCase {
 
     @Test
     public void testMsgBodyForSISImportSuccess(){
-        String actual = SISPollingThread.getBody(SISUploadType.ADD_SECTIONS, new JSONObject(this.successJson));
+        String actual = SISPollingThread.getBody(CourseUploadType.ADD_SECTIONS, new JSONObject(this.successJson));
         System.out.println(actual);
         Path path = Paths.get(Paths.get(".").toAbsolutePath() + PATH_SRC_TEST_JAVA_EDU_UMICH_CTOOLS +
                 "/msgBodyExpectedSuccess.txt");

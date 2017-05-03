@@ -31,10 +31,9 @@ import org.apache.http.util.EntityUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Properties;
-import java.util.Random;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class Utils {
 
@@ -77,6 +76,9 @@ public class Utils {
 	public static final String CONSTANT_UTF_8 = "UTF-8";
 	public static final int CONSTANT_NO_OF_ATTEMPTS_DEFAULT = 5;
 	public static final String CONSTANT_LINE_FEED = "\n";
+	public static final String CONSTANT_SUCCESS = "Success";
+	public static final String CONSTANT_FAILURE = "Failure";
+	public static final String URL_CHUNK_GRP_CATEGORIES = "/group_categories/";
 	private static Log M_log = LogFactory.getLog(Utils.class);
 
 	private static final String CANVAS_API_GETALLSECTIONS_PER_COURSE = "canvas.api.getallsections.per.course.regex";
@@ -242,7 +244,7 @@ public class Utils {
 
 			statusCode = response.getStatusLine().getStatusCode();
 
-			errMsg = "{\"errorMsg\":\"The request %s has failed to extract the response due to %s\"}";
+			errMsg = "{\"errors\":\"The request %s has failed to extract the response due to %s\"}";
 			apiResponse = EntityUtils.toString(response.getEntity(), CONSTANT_UTF_8);
 		} catch (IOException e) {
 			return new ApiResultWrapper(Utils.API_EXCEPTION_ERROR,
@@ -263,6 +265,16 @@ public class Utils {
 			url.append(chunk);
 		}
 		return url.toString();
+	}
+
+	public static Properties getMailProperties() {
+		Properties properties = System.getProperties();
+		properties.put(Utils.MAIL_SMTP_AUTH, "false");
+		properties.put(Utils.MAIL_SMTP_STARTTLS, "true");
+		properties.put(Utils.MAIL_SMTP_HOST, SectionsUtilityToolServlet.appExtPropertiesFile.getProperty(Utils.MAIL_HOST));
+		//if enabled will print out raw email body to logs.
+		properties.put(Utils.MAIL_DEBUG, SectionsUtilityToolServlet.appExtPropertiesFile.getProperty(Utils.IS_MAIL_DEBUG_ENABLED));
+		return properties;
 	}
 
 	public static HttpResponse executeApiCall(HttpUriRequest clientRequest) {
@@ -327,6 +339,14 @@ public class Utils {
 			M_log.warn("Course id could not be found for making a SIS Section Id. Used current timestamp for course id:");
 		}
 		return "-ccmS" + courseId;
+	}
+
+	public static String getCurrentISODate(){
+		TimeZone tz = TimeZone.getTimeZone("UTC");
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+		df.setTimeZone(tz);
+		String nowAsISO = df.format(new Date());
+		return nowAsISO;
 	}
 
 	private static HashMap<String, Object> getLTICustomParams(HttpServletRequest request) {
