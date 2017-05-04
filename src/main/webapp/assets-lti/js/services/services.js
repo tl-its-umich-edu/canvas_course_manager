@@ -43,9 +43,13 @@ canvasSupportApp.service('fileUpload', ['$http','$log', function($http, $log) {
         headers: {
           'Content-Type': undefined
         }
+        //success
       }).then (function(response) {
         doneCallBack(response);
-      });
+        //failure
+      },function(response) {
+            doneCallBack(response);
+        });
   };
 }]);
 
