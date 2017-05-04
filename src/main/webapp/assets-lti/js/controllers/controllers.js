@@ -435,10 +435,6 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
             return { 'name': group.name, 'id': group.id };
         }
       );
-      var functGrpGrid = _.findWhere($scope.functions, {id: "users_to_groups_grid"});
-      var fieldGrpGrid = _.findWhere(functGrpGrid.fields, {name: "group_id"});
-      fieldGrpGrid.validation.choices = $scope.availableGroups;
-      fieldGrpGrid.validation.grid_choices = $scope.availableGroupsGrid;
     });
   });
 
@@ -453,7 +449,9 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
     $scope.content={};
     $scope.errors=[];
     $scope.showErrors=false;
+    $scope.throttleError=null;
     $scope.globalParseError=null;
+    $scope.groupsParseError=null;
     $('#fileForm')[0].reset();
   };
 
@@ -527,7 +525,6 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
           csv = csv + thisRowArr.join(',') + '\n';
         }
       });
-
       var file = csv;
       fileUpload.uploadFileAndFieldsToUrl(file, $scope.selectedFunction.url, function(resultPost){
         $scope.resetScope();
@@ -559,6 +556,7 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
     for (var i = 0; i < linesHeaders.length; i++) {
       linesHeaders[i] = linesHeaders[i].trim();
     }
+
     var linesValues = _.rest(lines,1);
     if(linesValues.length === 0){
       $scope.loading = false;
@@ -658,24 +656,30 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
     if($scope.selectedFunction.id==='groups_to_sections'){
       var groupsetMap = [];
       var userMap = [];
+
       $scope.groupsParseError ='';
+
+      if(!angular.equals(linesHeaders, $scope.selectedFunction.field_array)){
+        $scope.groupsParseError = 'The headers in the file do not match the required header set or order.';
+      }
+
       _.each(result.data, function(thisData){
         groupsetMap.push(thisData.data[0].value);
         userMap.push(thisData.data[2].value);
       });
       // check that there is only one groupset and that it is not contained in groupsets existing
       if (_.uniq(groupsetMap).length > 1){
-        $scope.groupsParseError = 'You have more than one groupset specified in the file. ';
+        $scope.groupsParseError = $scope.groupsParseError + ' You have more than one groupset specified in the file. ';
       }
       else {
         $scope.newGroupSet = groupsetMap[0];
       }
       if(_.findWhere($scope.availableGroupSets, {name: _.uniq(groupsetMap)[0] } ) !== undefined){
-        $scope.groupsParseError = $scope.groupsParseError + 'There already is a groupset with that name in the course. ';
+        $scope.groupsParseError = $scope.groupsParseError + ' There already is a groupset with that name in the course. ';
       }
       // check that there is no dupe users
       if(_.uniq(userMap).length !== userMap.length){
-        $scope.groupsParseError = $scope.groupsParseError + 'You have duplicate users in the list.';
+        $scope.groupsParseError = $scope.groupsParseError + ' You have duplicate users in the list.';
       }
     }
 
