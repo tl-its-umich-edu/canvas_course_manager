@@ -7,7 +7,9 @@ canvasSupportApp.run(function($rootScope) {
   //for any init values needed
   $rootScope.server = '';
   $rootScope.user = {};
-  $rootScope.csv_throttle = 1000;
+  // we are setting the throttling to 200k row limit for the admin tool.
+  //Todo this needs to be deleted and other code that is supporting this variable
+  $rootScope.csv_throttle = 200000;
   //to turn on/off the 2 functionalities
   $rootScope.functionality = {
     'friends': true,
