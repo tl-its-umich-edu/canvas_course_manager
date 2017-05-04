@@ -525,8 +525,9 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
           csv = csv + thisRowArr.join(',') + '\n';
         }
       });
+
+      $scope.groupGridErrors=false;
       if($scope.selectedFunction.id ==='users_to_groups_grid'){
-        $scope.groupGridErrors=false;
         $scope.groupsParseError='';
         var arr = _.rest(csv.split('\n'));
         var groupsets=[];
