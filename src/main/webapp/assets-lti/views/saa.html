@@ -27,10 +27,11 @@
   <h4 style="font-size:110%">{{selectedFunction.name}}
   </h4>
   <div ng-show="resultPost"  ng-class="{ 'temp-alert alert alert-success': resultPost.status ===200, 'alert alert-danger': resultPost.status !== 200}">
-    <div ng-show="resultPost.status ===200">SIS Import started at {{resultPost.data.created_at | date:'medium'}} - check your email in a bit for results of the import.</div>
-    <div ng-show="resultPost.status !==200">Something bad happened. Here is what we know:<br><br>
-      {{resultPost}}
-    </div>
+    <div ng-show="resultPost.status ===200">Process started at {{resultPost.data.created_at | date:'medium'}} - check your email in a bit for results of the import.</div>
+      <div ng-show="resultPost.status !==200">Something bad happened. Here is what we know:<br><br>
+      <div ng-show="resultPost.status !==200 && resultPost.data.errors">{{resultPost.data.errors}}</div>
+      <div ng-show="resultPost.status !==200 && !resultPost.data.errors">{{resultPost.data}}</div>
+      </div>
   </div>
   <div class="" ng-show="selectedFunction">
     <!-- current function field listing, including validation rules, available by toggling link above -->
