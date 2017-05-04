@@ -525,12 +525,38 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
           csv = csv + thisRowArr.join(',') + '\n';
         }
       });
+      if($scope.selectedFunction.id ==='users_to_groups_grid'){
+        $scope.groupGridErrors=false;
+        $scope.groupsParseError='';
+        var arr = _.rest(csv.split('\n'));
+        var groupsets=[];
+        var users=[];
+        _.each(arr, function(row){
+          var rowArr = row.split(',');
+          groupsets.push(rowArr[0]);
+          users.push(rowArr[2]);
+        });
+        if(_.uniq(_.compact(groupsets)).length > 1){
+          $scope.groupGridErrors=true;
+          $scope.groupsParseError = $scope.groupsParseError + ' You have more than one groupset specified in the file. ';
+        }
+        if(_.compact(users).length !== _.uniq(_.compact(users)).length){
+          $scope.groupGridErrors=true;
+          $scope.groupsParseError = $scope.groupsParseError + ' You have duplicate users in the list.';
+        }
+        if(_.findWhere($scope.availableGroupSets, {name: _.uniq(_.compact(groupsets))[0] } ) !== undefined){
+          $scope.groupGridErrors=true;
+          $scope.groupsParseError = $scope.groupsParseError + ' There already is a groupset ' + _.uniq(_.compact(groupsets))[0] + ' with that name in the course. ';
+        }
+      }
       var file = csv;
-      fileUpload.uploadFileAndFieldsToUrl(file, $scope.selectedFunction.url, function(resultPost){
-        $scope.resetScope();
-        $scope.selectedFunction = null;
-        $scope.resultPost = resultPost;
-      });
+      if($scope.groupGridErrors === false){
+        fileUpload.uploadFileAndFieldsToUrl(file, $scope.selectedFunction.url, function(resultPost){
+          $scope.resetScope();
+          $scope.selectedFunction = null;
+          $scope.resultPost = resultPost;
+        });
+      }
   };
 
   //parse attached CSV and validate it against functions model
