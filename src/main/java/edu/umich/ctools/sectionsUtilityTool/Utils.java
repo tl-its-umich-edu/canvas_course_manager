@@ -76,8 +76,6 @@ public class Utils {
 	public static final String CONSTANT_UTF_8 = "UTF-8";
 	public static final int CONSTANT_NO_OF_ATTEMPTS_DEFAULT = 5;
 	public static final String CONSTANT_LINE_FEED = "\n";
-	public static final String CONSTANT_SUCCESS = "Success";
-	public static final String CONSTANT_FAILURE = "Failure";
 	public static final String URL_CHUNK_GRP_CATEGORIES = "/group_categories/";
 	private static Log M_log = LogFactory.getLog(Utils.class);
 

@@ -97,7 +97,7 @@ public class CourseSupportProcess {
 		String csvFinalContent = csvFile.getValue();
 		//things went wrong in making the csv file
 		if (status != HttpStatus.SC_OK) {
-			M_log.error(String.format("Problems occurred internally with making the CSV file for %s in course %s ",type,courseId));
+			M_log.error(String.format("{\"errors\":\"Problems occurred internally with making the CSV file for %s in course %s \"",type,courseId));
 			response.setStatus(status);
 			out.print(csvFinalContent);
 			out.flush();
