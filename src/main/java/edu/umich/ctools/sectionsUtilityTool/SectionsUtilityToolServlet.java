@@ -906,9 +906,12 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		//string built, time to make call
 		String uniqname = null;
+		boolean isAdmin = false;
 		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(Utils.TC_SESSION_DATA);
 		if( tc != null){
 			uniqname = (String) tc.getCustomValuesMap().get(Utils.LTI_PARAM_UNIQNAME);
+			String isAdminStrg = (String) tc.getCustomValuesMap().get(Utils.IS_ACCOUNT_ADMIN);
+			isAdmin=Boolean.valueOf(isAdminStrg);
 		}
 
 		Utils.logApiCall(uniqname, sectionsApiCall, request);
@@ -962,6 +965,13 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		M_log.debug("ENROLLMENT FOUND: " + enrollmentTypeFromSession);
 
 		if(enrollmentTypeFromSession == null){
+			// while adding friend account only teacher/observer/ta can add enrollments to course that is ruled
+			// by login in the addEnrollmentsToSession(), but some cases admins need to do this so this check will enforce
+			// they can do it other wise they have to add them self to course or masquerade to add users.
+			if(isAdmin){
+				M_log.info(String.format("Account Admin \"%s\" adding user to Course %s ",uniqname,courseIdFromRequest));
+				return true;
+			}
 			return false;
 		}
 
