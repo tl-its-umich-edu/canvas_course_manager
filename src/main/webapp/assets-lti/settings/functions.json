@@ -131,7 +131,7 @@
 }, {
   "name": "Add multiple users to course groups through data grid",
   "id": "users_to_groups_grid",
-  "url": "addUsersToGroupsGrid",
+  "url": "addGroupsAndUsersGrid",
   "type": "grid",
   "notes":"SAA suplies all. Front end populates enumerations (group_id) based on available group_ids in the context",
   "field_array":["groupset","name","users"],
