@@ -651,9 +651,11 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 		HttpResponse canvasResponse = Utils.executeApiCall(clientRequest);
 		if(canvasResponse == null){
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			M_log.error(String.format("The Api call %s failed with errors", url));
 			return;
 		}
+		int statusCode = canvasResponse.getStatusLine().getStatusCode();
 		BufferedReader rd = new BufferedReader(new InputStreamReader(canvasResponse.getEntity().getContent()));
 
 		String linkValue = null;
@@ -673,7 +675,10 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		if( originalUrl.substring(originalUrl.indexOf("/api")).matches(appExtPropertiesFile.getProperty(CANVAS_API_GET_COURSE_ENROLL)) && request.getSession().getAttribute(LAUNCH_TYPE).equals(LTI)){
 			addEnrollmentsToSession(request, sb);
 		}
-
+		response.setStatus(statusCode);
+		if(statusCode / 100 != 2){
+			M_log.error(String.format("Canvas Api \"%s\" call failed with status code %s due to %s ",url,statusCode,sb.toString()));
+		}
 		out.print(sb.toString());
 		out.flush();
 	}
