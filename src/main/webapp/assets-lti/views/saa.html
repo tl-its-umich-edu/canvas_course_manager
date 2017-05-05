@@ -135,7 +135,7 @@
   <div class="alert alert-danger" ng-show="groupsParseError">
     {{groupsParseError}}
   </div>
-  <div ng-show="(selectedFunction.id==='users_to_groups_grid' && availableGroups.length) ||(selectedFunction.id==='users_to_sections_grid' && availableSections.length)">
+  <div ng-show="(selectedFunction.id==='users_and_groups_grid') ||(selectedFunction.id==='users_to_sections_grid' && availableSections.length)">
     <table class="table table-striped  table-hover" style="width:auto" id="gridTable">
       <thead>
         <tr>
