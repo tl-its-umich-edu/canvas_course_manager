@@ -219,7 +219,8 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
           return result;
         },
         function error(result) {
-          errorDisplay(url, result.status, result.data.errors);
+          errorDisplayFriendCreateToCanvas(url, result.status, 'UM Course Manager cannot add \''+friendEmailAddress
+                +'\' to Canvas. Try adding them with the +People button in the People tool. If that doesn\'t work, please contact 4help@umich.edu');
           return result;
         }
       );

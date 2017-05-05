@@ -23,6 +23,20 @@ var errorDisplay = function (url, status, errorMessage) {
   }
 };
 
+var errorDisplayFriendCreateToCanvas = function (url, status, errorMessage) {
+    switch(status) {
+        case 403:
+            window.location = '/canvasCourseManager/error.html';
+            break;
+        case 400:
+            $('#debugPanelBody').html('<h3>' + status + '</h3><p>' + errorMessage + '</p>');
+            $('#debugPanel').fadeIn();
+            break;
+        default:
+            $('#debugPanelBody').html('<h3>' + status + '</h3><p>' + errorMessage + '</p>');
+            $('#debugPanel').fadeIn();
+    }
+};
 // provide a timestamp to add to angular GETs to invalidate cache
 // Matches jQuery parameter when cache: false - makes regexp whitelist
 // easier to manage
