@@ -382,6 +382,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
 
 
 canvasSupportApp.controller('navController', ['$scope', '$location', function ($scope, $location) {
+  $scope.view='';
   $scope.changeView = function(view){
     $scope.view = view;
   };
@@ -419,7 +420,7 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
     var functCSVSect = _.findWhere($scope.functions, {id: "users_in_sections"});
     var fieldCSVSect = _.findWhere(functCSVSect.fields, {name: "section_id"});
     fieldCSVSect.validation.choices = $scope.availableSections;
-    var functCSVGrid = _.findWhere($scope.functions, {id: "users_to_sections_grid"});
+    var functCSVGrid = _.findWhere($scope.functions, {id: "users_and_groups_grid"});
     var fieldCSVGrid = _.findWhere(functCSVGrid.fields, {name: "section_id"});
     fieldCSVGrid.validation.choices = $scope.availableSections;
     fieldCSVGrid.validation.grid_choices = $scope.availableSectionsGrid;
@@ -448,6 +449,7 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
     $('#gridTable input').val('');
     $scope.content={};
     $scope.errors=[];
+    $scope.csv_fields=false;
     $scope.showErrors=false;
     $scope.throttleError=null;
     $scope.globalParseError=null;
@@ -473,7 +475,7 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
       var reader = new FileReader();
       reader.readAsText(newFileObj);
       reader.onload = function(e) {
-        if(reader.result.split('\n').length > $rootScope.csv_throttle && $scope.selectedFunction.id==='groups_to_sections'){
+        if(reader.result.split('\n').length > $rootScope.csv_throttle && $scope.selectedFunction.id==='users_and_groups'){
           $timeout(function(){
             $scope.loading = false;
             $scope.throttleError = 'No more than ' + $rootScope.csv_throttle + ' rows in CSV allowed with this function';
@@ -498,7 +500,7 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
   // event handler for clicking on the Upload CSV button
   $scope.submitCSV = function() {
     var file = $scope.csvfile;
-    if($scope.selectedFunction.id ==='groups_to_sections'){
+    if($scope.selectedFunction.id ==='users_and_groups'){
       $scope.availableGroupSets.push({ 'name': $scope.newGroupSet, 'id': ''});
     }
     fileUpload.uploadFileAndFieldsToUrl(file, $scope.selectedFunction.url, function(resultPost){
@@ -527,7 +529,7 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
       });
 
       $scope.groupGridErrors=false;
-      if($scope.selectedFunction.id ==='users_to_groups_grid'){
+      if($scope.selectedFunction.id ==='users_and_groups_grid'){
         $scope.groupsParseError='';
         var arr = _.rest(csv.split('\n'));
         var groupsets=[];
@@ -680,7 +682,7 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
         result.data.push(lineObj);
       }
     }
-    if($scope.selectedFunction.id==='groups_to_sections'){
+    if($scope.selectedFunction.id==='users_and_groups'){
       var groupsetMap = [];
       var userMap = [];
 

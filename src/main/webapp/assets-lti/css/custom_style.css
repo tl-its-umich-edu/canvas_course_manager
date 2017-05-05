@@ -23,6 +23,14 @@ input:invalid {
     padding:25px 10px;
 }
 
+.navLTI .navbar-brand a:hover {
+  text-decoration: none
+}
+
+.navLTI .navbar-nav>li>a {
+    color: #428bca
+}
+
 pre {
   border:0px solid #fff;
   background:#fff;

@@ -33,7 +33,7 @@
       <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       <div id="debugPanelBody"></div>
     </div>
-    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <nav class="navbar navbar-default navbar-fixed-top navLTI" role="navigation"  ng-controller="navController">
         <div class="container-fluid">
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header mastHead">
@@ -43,20 +43,23 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <h1 class="navbar-brand collapse-nav">U-M Course Manager</h1>
+                <h1 class="navbar-brand collapse-nav">
+
+                  <a ng-if="view !==''"  ng-click="changeView('')"  href="#ltihome">U-M Course Manager</a>
+                  <span ng-if="view ===''" >U-M Course Manager</span>
+                </h1>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" ng-controller="navController">
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-right">
-                  <li>
-                    <a ng-if="view && view !=='LTI'" class="collapse-nav"  ng-click="changeView('LTI')" href="#ltihome">LTI</a>
-                  </li>
                   <li ng-if="ltiLaunch.role_is_account_admin ==='true'">
-                    <a ng-if="view !=='Sub Account Administrator Utils'" class="collapse-nav" ng-click="changeView('Sub Account Administrator Utils')"  href="#saa">SAA</a>
+                    <a ng-if="view !=='Sub Account Administrator Utils'" class="collapse-nav" ng-click="changeView('Sub Account Administrator Utils')"  href="#saa">SAcc Admin</a>
+                    <span ng-if="view ==='Sub Account Administrator Utils'" class="navbar-text">SAcc Admin</span>
                   </li>
-                  <li ng-if="view !=='Grades'">
-                    <a  class="collapse-nav" ng-click="changeView('Grades')"  href="#grades">Grades</a>
+                  <li>
+                    <a  ng-if="view !=='Grades'"  class="collapse-nav" ng-click="changeView('Grades')"  href="#grades">Grades</a>
+                    <span ng-if="view ==='Grades'" class="navbar-text">Grades</span>
                   </li>
                   <li>
                     <a href="" class="collapse-nav" id="helpLink" data-url="help-lti.html">Help</a>

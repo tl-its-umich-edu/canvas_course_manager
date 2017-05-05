@@ -3,7 +3,7 @@
   "id": "users_in_sections",
   "url":"addUsersToSections",
   "type": "csv",
-  "notes":"Tool supplies course_id. \nuser_id is either the UMID or an email address for non-UM users.",
+  "notes":"user_id is either the UMID (i.e. 23125467) or an email address for non-UM users.",
   "field_array":["user_id","role","section_id"],
   "fields": [{
       "name": "user_id",
@@ -39,7 +39,7 @@
   "id": "sections_to_canvas",
   "url": "addSections",
   "type": "csv",
-  "notes":"Tool supplies course_id. \nThe id_prefix  will be used to construct a unique section sis_id. \nYou may want to use a prefix that is meaningful.",
+  "notes":"The id_prefix  will be used to construct a unique section sis_id. \nYou may want to use a prefix that is meaningful to you or your group.",
   "field_array":["id_prefix","name"],
   "fields": [{
     "name": "id_prefix",
@@ -60,10 +60,10 @@
   }]
 }, {
   "name": "Add multiple new groups and users to course through CSV",
-  "id": "groups_to_sections",
+  "id": "users_and_groups",
   "url": "addGroupsAndUsers",
   "type": "csv",
-  "notes":"Tool supplies course_id. Only one groupset per import. No duplicate user entries.\nImportant: preserve the order shown in CSV Info.\nUsers must already exist in course to be added to groups",
+  "notes":"Only one groupset per import - do not use an existing groupset. No duplicate user entries. Important: preserve the order shown in CSV Info.",
   "field_array":["groupset","name","user_id"],
   "fields": [{
     "name": "groupset",
@@ -96,10 +96,10 @@
   }]
 }, {
   "name": "Add multiple users to course sections through data grid",
-  "id": "users_to_sections_grid",
+  "id": "users_and_groups_grid",
   "url": "addUsersToSectionsGrid",
   "type": "grid",
-  "notes":"SAA suplies all. Front end populates enumerations based on available section_ids and roles in the context",
+  "notes":"Input the user id (either the UMID or an email address for non-UM users), select section and role.",
   "fields": [{
     "name": "user_id",
     "validation": {
@@ -130,10 +130,10 @@
   }]
 }, {
   "name": "Add multiple users to course groups through data grid",
-  "id": "users_to_groups_grid",
+  "id": "users_and_groups_grid",
   "url": "addGroupsAndUsersGrid",
   "type": "grid",
-  "notes":"SAA suplies all. Front end populates enumerations (group_id) based on available group_ids in the context",
+  "notes":"Only one groupset per import - do not use an existing groupset. No duplicate user entries.",
   "field_array":["groupset","name","user_id"],
   "fields": [{
     "name": "groupset",
