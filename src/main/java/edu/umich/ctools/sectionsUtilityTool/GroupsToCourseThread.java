@@ -4,6 +4,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.json.JSONObject;
 
@@ -106,10 +107,16 @@ public class GroupsToCourseThread implements Runnable {
 			ApiResultWrapper arw = Utils.makeApiCall(new HttpPost(url));
 			int status = arw.getStatus();
 			if (status / 100 != 2) {
-				grpReport.errMessages.add(String.format("The enrollment \"%s\" is not added to the group \"%s\" in group set \"%s\" failed with status code %s "
-						, user, grpName, grpReport.getGrpSetName(), status));
 				M_log.error(String.format("Adding user %s to a group %s in group set %s in course %s failed with status code %s due to %s "
 						, user, grpName, grpReport.getGrpSetName(), courseId, status, (arw.getApiResp().isEmpty()) ? arw.getMessage() : arw.getApiResp()));
+				if (status == HttpStatus.SC_NOT_FOUND) {
+					grpReport.errMessages.add(String.format("The enrollment \"%s\" is not added to the group \"%s\" " +
+									"in group set \"%s\" due to Users must already exist in course to be added to groups "
+							, user, grpName, grpReport.getGrpSetName()));
+					continue;
+				}
+				grpReport.errMessages.add(String.format("The enrollment \"%s\" is not added to the group \"%s\" in group set \"%s\" failed with status code %s "
+						, user, grpName, grpReport.getGrpSetName(), status));
 				continue;
 			}
 			grpReport.usersToGroup.put(grpName, user);
@@ -167,6 +174,7 @@ public class GroupsToCourseThread implements Runnable {
 			Multipart multipart = new MimeMultipart();
 			BodyPart body = new MimeBodyPart();
 			String msgBody = getBody(grpReport);
+			M_log.debug(msgBody);
 			body.setText(msgBody);
 			multipart.addBodyPart(body);
 			message.setContent(multipart);
