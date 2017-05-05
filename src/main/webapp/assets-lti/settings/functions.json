@@ -63,8 +63,8 @@
   "id": "groups_to_sections",
   "url": "addGroupsAndUsers",
   "type": "csv",
-  "notes":"Tool supplies course_id. Only one groupset per import. No duplicate user entries. Important: preserve the order shown in CSV Info.",
-  "field_array":["groupset","name","users"],
+  "notes":"Tool supplies course_id. Only one groupset per import. No duplicate user entries.\nImportant: preserve the order shown in CSV Info.\nUsers must already exist in course to be added to groups",
+  "field_array":["groupset","name","user_id"],
   "fields": [{
     "name": "groupset",
     "validation": {
@@ -83,7 +83,7 @@
       "min": 3
     }
   },{
-      "name": "users",
+      "name": "user_id",
       "validation": {
         "spaces": false,
         "no_dupes":true,
@@ -134,7 +134,7 @@
   "url": "addGroupsAndUsersGrid",
   "type": "grid",
   "notes":"SAA suplies all. Front end populates enumerations (group_id) based on available group_ids in the context",
-  "field_array":["groupset","name","users"],
+  "field_array":["groupset","name","user_id"],
   "fields": [{
     "name": "groupset",
     "validation": {
@@ -153,7 +153,7 @@
       "min": 3
     }
   },{
-      "name": "users",
+      "name": "user_id",
       "validation": {
         "spaces": false,
         "no_dupes":true,
