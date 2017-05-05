@@ -19,6 +19,13 @@ input:invalid {
     font-size:24px;
 }
 
+.navLTI .navbar-brand a:hover {
+  text-decoration: none
+}
+.navLTI .navbar-nav>li>a {
+  color: #428bca
+}
+
 .contentWrapper {
     padding:25px 10px;
 }
