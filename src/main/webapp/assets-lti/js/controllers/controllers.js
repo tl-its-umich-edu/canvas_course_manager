@@ -750,7 +750,7 @@ canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location'
     $scope.processing=true;
     var user = $rootScope.ltiLaunch.custom_canvas_user_login_id;
     //1. get the section enrollment (only students)
-    var url = 'manager/api/v1/sections/'+ section.id + '/enrollments?type[]=StudentEnrollment&per_page=50';
+    var url = 'manager/api/v1/sections/'+ section.id + '/enrollments?type[]=StudentEnrollment&per_page=100';
     Things.getThings(url).then(function (resultSectionEnrollment) {
       //2. pluck the comparator (user_id)
       $scope.sectionEnrollment = _.pluck(resultSectionEnrollment.data, valueToPluck.replace(/ /g, '_').toLowerCase());
