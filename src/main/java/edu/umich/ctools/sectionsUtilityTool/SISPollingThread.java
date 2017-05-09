@@ -15,8 +15,11 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -179,9 +182,8 @@ public class SISPollingThread implements Runnable {
 			if ((apiResp == null) && data.isSISUploadVerySlow()) {
 				Multipart multipart = new MimeMultipart();
 				BodyPart body = new MimeBodyPart();
-				//BSA might come up with better wording, so keeping it simple for now
-				body.setText((data.getUploadType().getDescription() + " " +
-						"canvas is taking too long to process this request"));
+				String bodyForSlowProcessingEmailMsg = getBodyForSlowProcessingEmail(data);
+				body.setText(bodyForSlowProcessingEmailMsg);
 				multipart.addBodyPart(body);
 				message.setContent(multipart);
 				Transport.send(message);
@@ -206,7 +208,7 @@ public class SISPollingThread implements Runnable {
 			M_log.info(String.format("SIS request %s of type %s for course %s Finished! Sending email report  " ,
 					data.getPollingId(),data.getUploadType(),data.getCourseId()));
 			Transport.send(message);
-		} catch (MessagingException | JSONException e) {
+		} catch (MessagingException | JSONException | IOException e) {
 			M_log.error(String.format(errmsg, data.getCourseId(), e.getMessage()));
 		} catch (Exception e) {
 			M_log.error(String.format(errmsg, data.getCourseId(), e.getMessage()));
@@ -249,6 +251,17 @@ public class SISPollingThread implements Runnable {
 		} catch (Exception e) {
 			M_log.error("Email failed due to " + e.getMessage());
 		}
+	}
+
+	public String getBodyForSlowProcessingEmail(SISDataHolderForEmail data) throws IOException {
+		HashMap<String, String> map = new HashMap<>();
+		map.put("<sis_process_type>", data.getUploadType().getDescription());
+		map.put("<course_number>", data.getCourseId());
+
+		String slowProcessEmailFile = appExtPropertiesFile.getProperty(Utils.SIS_SLOW_PROCESS_EMAIL_FILE_PATH);
+		String emailMessage = Utils.readFile(slowProcessEmailFile, StandardCharsets.UTF_8);
+		emailMessage = Utils.replacePlaceHolders(emailMessage, map);
+		return emailMessage;
 	}
 
 	public static String getBody(CourseUploadType uploadType, JSONObject apiResp) throws JSONException {

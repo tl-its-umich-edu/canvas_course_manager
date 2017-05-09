@@ -47,6 +47,11 @@ The Canvas Course Manager (CCM) is an application that will be able to be used b
 	* <code>lti.url= URL to launch LTI tool</code>
 	* <code>call.type= Either 'canvas' or 'esb'</code>
 	* <code>stub.test= 'true' or 'false'</code>
+       * <code>sis.report.ccm.support.address=group email for sending emaild</code>
+       * <code>sis.polling.attempts=number of attempts to poll canvas default =10</code>
+       * <code>sis.polling.sleeptime=often times(in seconds) to poll canvas default=60000</code>
+       * <code>umich.sis.slowprocessemail=File path to requester email slowprocess-email.template</code>
+       * <code>mail.debug.enabled='true' or 'false'</code>
     
 5. Add the following 9 properties to ccm-secure.properties:<br/> 
 	* <code>canvas.admin.token= Canvas Token </code>

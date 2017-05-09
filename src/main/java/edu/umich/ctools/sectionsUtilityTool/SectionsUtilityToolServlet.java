@@ -158,7 +158,6 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			put(MPATHWAYS_API_GNERIC, "for mpathways calls");
 			put(GET_GROUPS, "for getting the groups of the current course");
 			put(GET_GROUPSET, "for getting the groupset of the current course");
-			put(POST_GROUPSET, "for creating a groupset in the current course");
 
 		}
 	};

@@ -26,15 +26,10 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Properties;
 
 public class Friend 
@@ -233,23 +228,6 @@ public class Friend
 		return response;
 	}
 
-	public static String readFile(String path, Charset encoding) throws IOException{
-		byte[] encoded = Files.readAllBytes(Paths.get(path));
-		return new String(encoded, encoding);
-	}
-
-	public static String replacePlaceHolders(String message, HashMap<String,String> map){
-
-		Iterator<String> keySetIterator = map.keySet().iterator();
-
-		while(keySetIterator.hasNext()){ 
-			String key = keySetIterator.next(); 
-			message = message.replace(key, map.get(key)); 
-		}
-
-		return message;
-	}
-
 
 	/*
 	 * Actually sends out an invite
@@ -280,8 +258,8 @@ public class Friend
 			map.put(INSTRUCTOR_NAME_TAG, instructorName);
 			map.put(CONTACT_EMAIL_TAG, contactEmail);
 
-			emailMessage = Friend.readFile(friendEmailFile, StandardCharsets.UTF_8);
-			emailMessage = replacePlaceHolders(emailMessage, map);
+			emailMessage = Utils.readFile(friendEmailFile, StandardCharsets.UTF_8);
+			emailMessage = Utils.replacePlaceHolders(emailMessage, map);
 
 			Object[] params = new Object[]{contactEmail, referrerUrl, emailMessage, new String[]{accountEmail}, currentUserEmail};
 			Object[] results = (Object[]) Xclient.execute(SEND_INVITES_WS, params);
@@ -334,8 +312,8 @@ public class Friend
 			map.put("<instructor>", instructorName);
 			map.put("<friend>", inviteEmail);
 
-			emailMessage = Friend.readFile(requesterEmailFile, StandardCharsets.UTF_8);
-			emailMessage = replacePlaceHolders(emailMessage, map);
+			emailMessage = Utils.readFile(requesterEmailFile, StandardCharsets.UTF_8);
+			emailMessage = Utils.replacePlaceHolders(emailMessage, map);
 
 			M_log.debug("Setting up message for sendMail");
 			MimeMessage message = new MimeMessage(session);
