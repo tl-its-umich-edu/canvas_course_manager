@@ -31,6 +31,10 @@ import org.apache.http.util.EntityUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -59,6 +63,7 @@ public class Utils {
 	protected static final String MAIL_HOST = "umich.friend.mailhost";
 	protected static final String FRIEND_CONTACT_EMAIL = "umich.friend.contactemail";
 	protected static final String SIS_REPORT_CCM_SUPPORT_ADDRESS = "sis.report.ccm.support.address";
+	protected static String SIS_SLOW_PROCESS_EMAIL_FILE_PATH = "umich.sis.slowprocessemail";
 	protected static final String SIS_POLLING_ATTEMPTS = "sis.polling.attempts";
 	protected static final String SIS_POLLING_SLEEPTIME = "sis.polling.sleeptime";
 	protected static final String IS_MAIL_DEBUG_ENABLED = "mail.debug.enabled";
@@ -366,5 +371,28 @@ public class Utils {
 			return (propertyName.equals(Utils.SIS_POLLING_ATTEMPTS))?Utils.CONSTANT_NO_OF_ATTEMPTS_DEFAULT:Utils.CONSTANT_ONE_MINUTE_MILLI_SECOND;
 		}
 		return propertyAsValue;
+	}
+
+	public static String readFile(String path, Charset encoding) throws IOException{
+		byte[] encoded = Files.readAllBytes(Paths.get(path));
+		return new String(encoded, encoding);
+	}
+
+	public static String replacePlaceHolders(String message, HashMap<String, String> map){
+
+		Iterator<String> keySetIterator = map.keySet().iterator();
+
+		while(keySetIterator.hasNext()){
+			String key = keySetIterator.next();
+			message = message.replace(key, map.get(key));
+		}
+
+		return message;
+	}
+
+	public static String readEmailTemplateAndReplacePlaceHolders(HashMap<String, String> map, String emailFile) throws IOException {
+		String emailMessage = readFile(emailFile, StandardCharsets.UTF_8);
+		emailMessage = replacePlaceHolders(emailMessage, map);
+		return emailMessage;
 	}
 }
