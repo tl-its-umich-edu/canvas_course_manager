@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
@@ -387,5 +388,11 @@ public class Utils {
 		}
 
 		return message;
+	}
+
+	public static String readEmailTemplateAndReplacePlaceHolders(HashMap<String, String> map, String emailFile) throws IOException {
+		String emailMessage = readFile(emailFile, StandardCharsets.UTF_8);
+		emailMessage = replacePlaceHolders(emailMessage, map);
+		return emailMessage;
 	}
 }

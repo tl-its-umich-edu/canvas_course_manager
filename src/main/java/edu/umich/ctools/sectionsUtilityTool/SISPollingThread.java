@@ -18,7 +18,6 @@ import javax.mail.util.ByteArrayDataSource;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -105,7 +104,7 @@ public class SISPollingThread implements Runnable {
 					M_log.error("Some thing unexpected happened in the SISPollingThread due to "+e.getMessage());
 					sendEmailReportingTheException(e);
 				} catch (Exception e) {
-					M_log.error("Some thing unexpected happened in the SISPollingThread due to "+e.getMessage());
+					M_log.error("UNEXPECTED: Some thing unexpected happened in the SISPollingThread due to "+e.getMessage());
 					sendEmailReportingTheException(e);
 				}
 				M_log.debug("***************************** Finish the thread check loop");
@@ -114,7 +113,7 @@ public class SISPollingThread implements Runnable {
 				} catch (InterruptedException e) {
 					M_log.error("Canvas polling thread got Interrupted due to " + e.getMessage());
 				} catch (Exception e) {
-					M_log.error("Canvas polling thread got Interrupted due to " + e.getMessage());
+					M_log.error("UNEXPECTED: Canvas polling thread got Interrupted due to " + e.getMessage());
 				}
 
 			}
@@ -211,7 +210,7 @@ public class SISPollingThread implements Runnable {
 		} catch (MessagingException | JSONException | IOException e) {
 			M_log.error(String.format(errmsg, data.getCourseId(), e.getMessage()));
 		} catch (Exception e) {
-			M_log.error(String.format(errmsg, data.getCourseId(), e.getMessage()));
+			M_log.error(String.format("UNEXPECTED: "+errmsg, data.getCourseId(), e.getMessage()));
 		}
 
 	}
@@ -249,7 +248,7 @@ public class SISPollingThread implements Runnable {
 		} catch (MessagingException e) {
 			M_log.error("Email failed due to " + e.getMessage());
 		} catch (Exception e) {
-			M_log.error("Email failed due to " + e.getMessage());
+			M_log.error("UNEXPECTED: Email failed due to " + e.getMessage());
 		}
 	}
 
@@ -259,8 +258,8 @@ public class SISPollingThread implements Runnable {
 		map.put("<course_number>", data.getCourseId());
 
 		String slowProcessEmailFile = appExtPropertiesFile.getProperty(Utils.SIS_SLOW_PROCESS_EMAIL_FILE_PATH);
-		String emailMessage = Utils.readFile(slowProcessEmailFile, StandardCharsets.UTF_8);
-		emailMessage = Utils.replacePlaceHolders(emailMessage, map);
+		String emailMessage = Utils.readEmailTemplateAndReplacePlaceHolders(map, slowProcessEmailFile);
+		M_log.debug(emailMessage);
 		return emailMessage;
 	}
 

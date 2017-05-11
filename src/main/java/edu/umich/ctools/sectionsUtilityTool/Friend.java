@@ -28,7 +28,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -258,8 +257,7 @@ public class Friend
 			map.put(INSTRUCTOR_NAME_TAG, instructorName);
 			map.put(CONTACT_EMAIL_TAG, contactEmail);
 
-			emailMessage = Utils.readFile(friendEmailFile, StandardCharsets.UTF_8);
-			emailMessage = Utils.replacePlaceHolders(emailMessage, map);
+			emailMessage=Utils.readEmailTemplateAndReplacePlaceHolders(map,friendEmailFile);
 
 			Object[] params = new Object[]{contactEmail, referrerUrl, emailMessage, new String[]{accountEmail}, currentUserEmail};
 			Object[] results = (Object[]) Xclient.execute(SEND_INVITES_WS, params);
@@ -312,8 +310,7 @@ public class Friend
 			map.put("<instructor>", instructorName);
 			map.put("<friend>", inviteEmail);
 
-			emailMessage = Utils.readFile(requesterEmailFile, StandardCharsets.UTF_8);
-			emailMessage = Utils.replacePlaceHolders(emailMessage, map);
+			emailMessage=Utils.readEmailTemplateAndReplacePlaceHolders(map,requesterEmailFile);
 
 			M_log.debug("Setting up message for sendMail");
 			MimeMessage message = new MimeMessage(session);
