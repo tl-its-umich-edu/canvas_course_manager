@@ -31,10 +31,10 @@ RUN mvn clean install \
 RUN apt-get remove -y maven openjdk-8-jdk git \
  && apt-get autoremove -y
 
-# Download the YourKit to /usr/local for profiling. This may be commented out for production.
-WORKDIR /usr/local
-RUN wget https://www.yourkit.com/download/yjp-2017.02-b59.zip \
- 	&& unzip yjp-2017.02-b59.zip
+# Download the YourKit to /usr/local for profiling. This will be commented out for production.
+#WORKDIR /usr/local
+#RUN wget https://www.yourkit.com/download/yjp-2017.02-b59.zip \
+ #	&& unzip yjp-2017.02-b59.zip
 
 WORKDIR /usr/local/tomcat/webapps
 
@@ -48,8 +48,10 @@ ENV JAVA_OPTS="-server \
 -DccmPropsPathSecure=file:$CATALINA_HOME/conf/ccm-secure.properties \
 -DccmPropsPath=file:$CATALINA_HOME/conf/ccm.properties \
 -Dlog4j.configuration=file:/usr/local/tomcat/conf/log4j.properties \
--agentpath:/usr/local/yjp-2017.02/bin/linux-x86-64/libyjpagent.so=delay=10000,sessionname=Tomcat \
 "
+# When need for profiling the application this option goes in the JAVA_OPTS
+#-agentpath:/usr/local/yjp-2017.02/bin/linux-x86-64/libyjpagent.so=delay=10000,sessionname=Tomcat \
+
 #tomcat port
 EXPOSE 8080
 #apache port
