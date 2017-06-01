@@ -44,10 +44,9 @@ public class SISPollingThread implements Runnable {
 	public void run() {
 		while (flag) {
 			M_log.debug("***************************** Starting the thread check loop");
-			List<SISDataHolderForEmail> pollingIds = SectionsUtilityToolServlet.canvasPollingIds;
-			//It's imperative to synchronize the list while iterating, this will avoid ConcurrentModificationException
-			synchronized (pollingIds) {
+			synchronized (this) {
 				try {
+					List<SISDataHolderForEmail> pollingIds = SectionsUtilityToolServlet.canvasPollingIds;
 					int addedPollingIdCount = SectionsUtilityToolServlet.addedPollingIdCount;
 					int removedPollingIdCount = SectionsUtilityToolServlet.removedPollingIdCount;
 
