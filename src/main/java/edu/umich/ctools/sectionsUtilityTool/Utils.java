@@ -249,6 +249,11 @@ public class Utils {
 
 			errMsg = "{\"errors\":\"The request %s has failed to extract the response due to %s\"}";
 			apiResponse = EntityUtils.toString(response.getEntity(), CONSTANT_UTF_8);
+
+			if(statusCode / 100 != 2){
+				M_log.error(String.format("The API call %s failed with status code %s due to %s "
+						,clientRequest.getURI().toString(),statusCode,apiResponse));
+			}
 		} catch (IOException e) {
 			return new ApiResultWrapper(Utils.API_EXCEPTION_ERROR,
 					String.format(errMsg, clientRequest.getURI().toString(), e.getMessage()), "");
