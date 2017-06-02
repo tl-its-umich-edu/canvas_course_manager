@@ -44,9 +44,10 @@ public class SISPollingThread implements Runnable {
 	public void run() {
 		while (flag) {
 			M_log.debug("***************************** Starting the thread check loop");
-			synchronized (this) {
+			List<SISDataHolderForEmail> pollingIds = SectionsUtilityToolServlet.canvasPollingIds;
+			//It's imperative to synchronize the list while iterating, this will avoid ConcurrentModificationException
+			synchronized (pollingIds) {
 				try {
-					List<SISDataHolderForEmail> pollingIds = SectionsUtilityToolServlet.canvasPollingIds;
 					int addedPollingIdCount = SectionsUtilityToolServlet.addedPollingIdCount;
 					int removedPollingIdCount = SectionsUtilityToolServlet.removedPollingIdCount;
 
@@ -98,26 +99,28 @@ public class SISPollingThread implements Runnable {
 						M_log.info("Removing the Polling Id from the list" + emailData.getPollingId());
 						iterator.remove();
 						removedPollingIdCount();
-					}
+					} //end of iterator while loop
 					printListOfPollsToDebugLog(pollingIds);
 				} catch (RuntimeException e) {
-					M_log.error("Some thing unexpected happened in the SISPollingThread due to "+e.getMessage());
+					M_log.error("Some thing unexpected happened in the SISPollingThread due to " + e.getMessage());
 					sendEmailReportingTheException(e);
 				} catch (Exception e) {
-					M_log.error("UNEXPECTED: Some thing unexpected happened in the SISPollingThread due to "+e.getMessage());
+					M_log.error("UNEXPECTED: Some thing unexpected happened in the SISPollingThread due to " + e.getMessage());
 					sendEmailReportingTheException(e);
 				}
-				M_log.debug("***************************** Finish the thread check loop");
-				try {
-					Thread.sleep(sleepTimeForPolling);
-				} catch (InterruptedException e) {
-					M_log.error("Canvas polling thread got Interrupted due to " + e.getMessage());
-				} catch (Exception e) {
-					M_log.error("UNEXPECTED: Canvas polling thread got Interrupted due to " + e.getMessage());
-				}
+			} // end of sync loop
 
+			M_log.debug("***************************** Finish the thread check loop");
+			
+			try {
+				Thread.sleep(sleepTimeForPolling);
+			} catch (InterruptedException e) {
+				M_log.error("Canvas polling thread got Interrupted due to " + e.getMessage());
+			} catch (Exception e) {
+				M_log.error("UNEXPECTED: Canvas polling thread got Interrupted due to " + e.getMessage());
 			}
-		}
+
+		} // end of while loop
 
 	}
 
