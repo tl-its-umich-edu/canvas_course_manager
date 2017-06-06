@@ -160,8 +160,9 @@
           <input title="{{field.validation.val_message}}" ng-if="!field.validation.grid_choices && !field.validation.choices && selectedFunction.id==='users_to_groups_grid' && field.name==='users'" pattern="{{field.validation.pattern}}" type="text" class="form-control select"  name="{{field.name}}{{$index}}" maxlength="{{field.validation.max}}" id="{{field.name}}{{$index}}" value="" placeholder="{{field.name}}" ng-class="{'first': $first, 'last': $last}">
           <input title="{{field.validation.val_message}}" ng-if="!field.validation.grid_choices && !field.validation.choices && selectedFunction.id!=='users_to_groups_grid'" type="text" class="form-control select" pattern="{{field.validation.pattern}}"  name="{{field.name}}{{$index}}" maxlength="{{field.validation.max}}" id="{{field.name}}{{$index}}" value="" placeholder="{{field.name}}" ng-class="{'first': $first, 'last': $last}">
           <select ng-if="field.validation.grid_choices" class="form-control select" name="" ng-class="{'first': $first, 'last': $last}">
-            <option ng-if="field.validation.grid_choices" value="{{choice.id}}" ng-repeat="choice in field.validation.grid_choices">{{choice.name}}</option>
+             <option ng-if="field.validation.grid_choices && choice.id" value="{{choice.id}}" ng-repeat="choice in field.validation.grid_choices">{{choice.name}}</option>
           </select>
+
           <select ng-if="field.validation.choices && !field.validation.grid_choices" class="form-control select" name="" ng-class="{'first': $first, 'last': $last}">
             <option ng-if="field.validation.choices" value="{{choice}}" ng-repeat="choice in field.validation.choices">{{choice}}</option>
           </select>
