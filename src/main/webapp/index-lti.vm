@@ -53,8 +53,8 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-right">
                   <li ng-if="ltiLaunch.role_is_account_admin ==='true'">
-                    <a ng-if="view !=='Sub Account Administrator Utils'" class="collapse-nav" ng-click="changeView('Sub Account Administrator Utils')"  href="#saa">SAcc Admin</a>
-                    <span ng-if="view ==='Sub Account Administrator Utils'" class="navbar-text">SAcc Admin</span>
+                    <a ng-if="view !=='Sub Account Administrator Utils'" class="collapse-nav" ng-click="changeView('Sub Account Administrator Utils')"  href="#saa">Acct Admin Tools</a>
+                    <span ng-if="view ==='Sub Account Administrator Utils'" class="navbar-text">Acct Admin Tools</span>
                   </li>
                   <li>
                     <a  ng-if="view !=='Grades'"  class="collapse-nav" ng-click="changeView('Grades')"  href="#grades">Grades</a>
