@@ -59,7 +59,7 @@
     }
   ]
 }, {
-  "name": "Add multiple new groups and users to course through CSV",
+  "name": "Add new groups and course members to course through CSV",
   "id": "users_and_groups",
   "url": "addGroupsAndUsers",
   "type": "csv",
@@ -129,7 +129,7 @@
     }
   }]
 }, {
-  "name": "Add multiple users to course groups through data grid",
+  "name": "Add new groups and course members to course through data grid",
   "id": "users_and_groups_grid",
   "url": "addGroupsAndUsersGrid",
   "type": "grid",
