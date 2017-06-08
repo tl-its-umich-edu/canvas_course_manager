@@ -187,6 +187,7 @@ public class SISPollingThread implements Runnable {
 				String bodyForSlowProcessingEmailMsg = getBodyForSlowProcessingEmail(data);
 				body.setText(bodyForSlowProcessingEmailMsg);
 				multipart.addBodyPart(body);
+				multipart.addBodyPart(getAttachment(data));
 				message.setContent(multipart);
 				Transport.send(message);
 				return;
