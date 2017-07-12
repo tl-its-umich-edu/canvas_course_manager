@@ -17,6 +17,7 @@ package edu.umich.ctools.sectionsUtilityTool;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
 import edu.umich.ctools.esb.utils.WAPI;
+import edu.umich.ctools.esb.utils.WAPIException;
 import edu.umich.ctools.esb.utils.WAPIResultWrapper;
 import edu.umich.its.lti.TcSessionData;
 import edu.umich.its.lti.utils.OauthCredentials;
@@ -548,21 +549,38 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 				wapiValuesMap.put("apiPrefix", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_PREFIX));
 				wapiValuesMap.put("key", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_KEY));
 				wapiValuesMap.put("secret", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_SECRET));
+				wapiValuesMap.put("scope", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_SCOPE_INSTRUCTORS));
+				wapiValuesMap.put("grant_type", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_GRANT_TYPE));
 				WAPI wapi = new WAPI(wapiValuesMap);
+
+				HashMap<String,String> headers = new HashMap<String,String>();
+				headers.put("x-ibm-client-id",appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_IBM_CLIENT_ID));
+
 				long startTime = System.currentTimeMillis();
+				String errMsg = "MPATHWAYS API call did not complete successfully";
 				try {
 					String url = wapi.getApiPrefix() + uniqname + "/Terms/" + mpathwaysTermId + "/Classes";
 					M_log.info("WAPI URL: " + url);
-					wrappedResult = wapi.getRequest(url);
+					wrappedResult = wapi.doRequest(url, headers);
 					addMpathwayDataToSession(request, wrappedResult, mpathwaysTermId);
-				} catch (UnirestException e) {
-					M_log.error("MPATHWAYS API call did not complete successfully", e);
+				} catch (WAPIException e) {
+					M_log.error(errMsg, e);
+				} catch (Exception e) {
+					M_log.error(errMsg, e);
+				} finally {
+					long stopTime = System.currentTimeMillis();
+					long elapsedTime = stopTime - startTime;
+					M_log.info(String.format("MPATHWAYS API response took %sms", elapsedTime));
 				}
-				long stopTime = System.currentTimeMillis();
-				long elapsedTime = stopTime - startTime;
-				M_log.info(String.format("MPATHWAYS API response took %sms",elapsedTime));
+			}
+			if (wrappedResult == null) {
+				response.setStatus(500);
+				wrappedResult = new WAPIResultWrapper(500, "Unexpected error", new JSONObject());
+			} else {
+				response.setStatus(wrappedResult.getStatus());
 			}
 		}
+
 		out.print(wrappedResult.toJson());
 		out.flush();
 	}
