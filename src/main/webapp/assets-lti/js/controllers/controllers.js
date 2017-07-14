@@ -399,13 +399,12 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
 
   // store the sections again as an array of objects - this is used by the grid (presenting the section name
   // but submitting the sis_id)
-  $scope.availableSectionsGrid = _.map(
-    $rootScope.sections,
-    function(section) {
-        return { 'name': section.name, 'id': section.sis_section_id };
+  $scope.availableSectionsGrid = [];
+  _.each($rootScope.sections, function(section){
+    if(section.sis_section_id){
+      $scope.availableSectionsGrid.push({ 'name': section.name, 'id': section.sis_section_id });
     }
-  );
-
+  });
   // get the existing groupsets, like above we store it as a flat array (to ensure CSV type is not using an existing one)
   var groupSetUrl = 'manager/api/v1/courses/' + $scope.course.id + '/group_categories';
   Course.getGroups(groupSetUrl).then(function (resultGroupsSets){
