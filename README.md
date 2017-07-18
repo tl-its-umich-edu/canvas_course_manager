@@ -63,6 +63,14 @@ The Canvas Course Manager (CCM) is an application that will be able to be used b
 	* <code>umich.friend.kspassword= password to above keystore file </code>
 	* <code>lti.key= Numeric key to launch LTI tool </code>
 	* <code>lti.secret=alpha numeric secret to launch LTI tool</code>
+	    ######ESB bus Properties
+	* <code>esb.token.server=token server url</code>
+	* <code>esb.prefix=instructors api call prefix</code>
+	* <code>esb.key=key</code>
+	* <code>esb.ibm.client.id=key</code>
+	* <code>esb.secret=secret</code>
+	* <code>esb.scope.instructors=</code>
+	* <code>esb.grant.type=</code>
 
 6. Invoke the following URL in your browser:  
 <code>http://localhost:PORT/canvasCourseManager/index-sc.vm?testUser=UNIQUENAME</code>  
