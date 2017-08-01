@@ -14,11 +14,11 @@
         class="form-control">
         <option style="display:none" value="">Select a task</option>
       </select>
-      <!-- shows field information on current function -->
+      <!-- shows what sections are available -->
       <br><br>
       <div class="panel panel-default">
         <div class="panel-body">
-          <span ng-show="availableSections.length">{{availableSections.length}} available <a href="" data-toggle="modal"  data-target="#listThingsModal" ng-click="selectedListName='Sections';selectedList = availableSectionsGrid"> section(s).</a></span>
+          <span ng-show="availableSections.length">{{availableSections.length}} available <a href="" data-toggle="modal"  data-target="#listThingsModal" ng-click="selectedListName='Sections';selectedList = availableSectionsGrid"> section(s).</a> Not seeing all sections? Reload this page.</span>
           <span ng-show="!availableSections.length">No available sections.</span>
         </div>
       </div>
@@ -26,6 +26,7 @@
   </div>
   <h4 style="font-size:110%">{{selectedFunction.name}}
   </h4>
+  <!-- a POST took place, here display the results (sucess and alavish variety or errors) -->
   <div ng-show="resultPost"  ng-class="{ 'temp-alert alert alert-success': resultPost.status ===200, 'alert alert-danger': resultPost.status !== 200}">
     <div ng-show="resultPost.status ===200">Process started at {{resultPost.data.created_at | date:'medium'}} - check your email in a bit for results of the import.</div>
       <div ng-show="resultPost.status !==200">Something bad happened. Here is what we know:<br><br>
@@ -33,6 +34,7 @@
       <div ng-show="resultPost.status !==200 && !resultPost.data.errors">{{resultPost.data}}</div>
       </div>
   </div>
+  <!-- user has selected a function-->
   <div class="" ng-show="selectedFunction">
     <!-- current function field listing, including validation rules, available by toggling link above -->
     <div class="well" ng-show="csv_fields">
@@ -59,7 +61,7 @@
       </table>
     </div>
   </div>
-
+  <!-- show information specific to this function -->
   <p ng-show="selectedFunction.notes">
       <pre>{{selectedFunction.notes}}</pre> <span ng-show="selectedFunction.type==='csv'"><br> See <strong><a href="" ng-click="csv_fields=true">CSV Info</a></strong> for data validation rules.</span>
   </p>
@@ -67,10 +69,11 @@
     Your file must include these headers in the first row: <strong ng-repeat="field in selectedFunction.field_array">{{field}}<span ng-if="!$last">, </span></strong>
   </p>
 
-  <!-- do not display upload controls if the chosen function involves groups and there are no groups in course -->
   <div>
+    <!-- display file upload control, log and preview  if selectedFuntion is a csv function -->
     <div class="" ng-show="selectedFunction.type==='csv'">
       <form class="form-inline well" id="fileForm">
+        <!-- upload control -->
         <div class="form-group">
           <div class="input-group">
             <label class="sr-only" for="uploadCSV">Upload a CSV file</label>
@@ -79,6 +82,7 @@
         </div>
         <div class="input-group">
           <span  ng-show="loading"class="alert-info alert-inline">Loading...</span>
+          <!-- report various errors (parsing, too big) -->
           <span  ng-show="globalParseError"class="alert-danger alert-inline">{{globalParseError}}</span>
           <span  ng-show="throttleError"class="alert-danger alert-inline">{{throttleError}}</span>
           <button ng-show="csvfile && content.data.length" class="btn btn-default" type="reset" ng-click="resetScope()" name="reset-file-input">Reset</button>
@@ -88,10 +92,11 @@
             No errors detected <button class="btn btn-primary" ng-click="submitCSV()">Upload</button>
         </div>
       </form>
+      <!-- group list failed validation in some global way -->
       <div class="alert alert-danger" ng-show="groupsParseError">
         {{groupsParseError}}
       </div>
-
+      <!-- file was ok, there were no global errors, but there were some errors specific to certain values -->
       <div class="alert alert-danger" ng-show="log.length && content.data.length">
         <span ng-if="log.length >1">There were {{log.length}} errors</span><span ng-if="log.length ===1">There was {{log.length}} error</span>, highlighted below. <input type="checkbox" id="showErrors" name="" value="" ng-model="showErrors">        <label for="showErrors">Show error log and lines with errors only</label>
       </div>
@@ -102,7 +107,7 @@
           <li ng-repeat="message in log track by $index">{{message}}</li>
         </ul>
       </div>
-      <!-- tabled presentation of attached CSV file, error rows marked -->
+      <!-- tabled presentation Preview of attached CSV file, error rows marked -->
       <table class="table" ng-show="content.data.length">
         <thead>
           <tr>
@@ -114,12 +119,15 @@
           </tr>
         </thead>
         <tbody>
+          <!-- repeats per each row in the CSV ng-hide works when checbox is checked and the particular line
+          is valid -->
           <tr ng-class="{ 'table-danger': contentline.invalid}"
             ng-hide="showErrors && !contentline.invalid"
             ng-repeat="contentline in content.data track by $index">
             <td>
               {{$index+1}}
             </td>
+            <!-- repeat per each object in the line array -->
             <td ng-repeat="item in contentline.data track by $index"  ng-class="{ 'table-danger': item.error}">
               {{item.value}} <a class="pull-right" href="" ng-show="item.error" title="{{item.message}}"><strong><i class="glyphicon glyphicon-question-sign"></i></strong></a>
             </td>
@@ -130,11 +138,13 @@
   </div>
   <div class="alert alert-danger" ng-show="selectedFunction.id==='users_to_sections_grid' && !availableSections.length">
     No sections available in the course.
-  </div>
-  <!-- form table presentation for adding users in a grid to sections of groups -->
+ </div>
+  <!-- a global user/groups parse error was thrown by validator -->
   <div class="alert alert-danger" ng-show="groupsParseError">
     {{groupsParseError}}
   </div>
+  <!-- form table presentation for adding users in a grid to sections of groups
+  show only of the selected function is a grid function and in the case of users to sections, if there are also sections -->
   <div ng-show="(selectedFunction.id==='users_and_groups_grid') ||(selectedFunction.id==='users_to_sections_grid' && availableSections.length)">
     <table class="table table-striped  table-hover" style="width:auto" id="gridTable">
       <thead>
@@ -143,23 +153,26 @@
         </tr>
       </thead>
       <tr ng-repeat="i in getNumber(gridRowNumber) track by $index" class="formRow">
+
         <td ng-repeat="field in selectedFunction.fields track by $index">
+          <!-- present the proper control depending on the nature of corresponding validation requirements -->
           <input title="{{field.validation.val_message}}" ng-if="!field.validation.grid_choices && !field.validation.choices && selectedFunction.id==='users_to_groups_grid' && field.name!=='users'" type="text" class="form-control select"  name="{{field.name}}{{$index}}" maxlength="{{field.validation.max}}" id="{{field.name}}{{$index}}" value="" placeholder="{{field.name}}" ng-class="{'first': $first, 'last': $last}">
           <input title="{{field.validation.val_message}}" ng-if="!field.validation.grid_choices && !field.validation.choices && selectedFunction.id==='users_to_groups_grid' && field.name==='users'" pattern="{{field.validation.pattern}}" type="text" class="form-control select"  name="{{field.name}}{{$index}}" maxlength="{{field.validation.max}}" id="{{field.name}}{{$index}}" value="" placeholder="{{field.name}}" ng-class="{'first': $first, 'last': $last}">
           <input title="{{field.validation.val_message}}" ng-if="!field.validation.grid_choices && !field.validation.choices && selectedFunction.id!=='users_to_groups_grid'" type="text" class="form-control select" pattern="{{field.validation.pattern}}"  name="{{field.name}}{{$index}}" maxlength="{{field.validation.max}}" id="{{field.name}}{{$index}}" value="" placeholder="{{field.name}}" ng-class="{'first': $first, 'last': $last}">
           <select ng-if="field.validation.grid_choices" class="form-control select" name="" ng-class="{'first': $first, 'last': $last}">
-            <option ng-if="field.validation.grid_choices" value="{{choice.id}}" ng-repeat="choice in field.validation.grid_choices">{{choice.name}}</option>
+             <option ng-if="field.validation.grid_choices && choice.id" value="{{choice.id}}" ng-repeat="choice in field.validation.grid_choices">{{choice.name}}</option>
           </select>
+
           <select ng-if="field.validation.choices && !field.validation.grid_choices" class="form-control select" name="" ng-class="{'first': $first, 'last': $last}">
             <option ng-if="field.validation.choices" value="{{choice}}" ng-repeat="choice in field.validation.choices">{{choice}}</option>
           </select>
-
-
         </td>
       </tr>
     </table>
     <div>
+      <!-- submit the grid -->
       <button class="btn btn-primary" name="" ng-click="submitGrid()">Submit</button>
+      <!-- add more roles -->
       <button type="button" class="btn btn-default" ng-click="gridRowNumber = gridRowNumber + 10" style="margin-left:50px">
         + Add 10 more rows
       </button>
@@ -250,7 +263,7 @@
   </div>
 </div>
 
-
+<!-- user wants to see the sections available (used to list groups and gr)-->
 <div class="modal fade" id="listThingsModal" tabindex="-1" role="dialog" aria-labelledby="listThingsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">

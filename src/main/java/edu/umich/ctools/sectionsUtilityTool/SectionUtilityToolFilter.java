@@ -15,30 +15,20 @@ limitations under the License.
  */
 package edu.umich.ctools.sectionsUtilityTool;
 
-import java.io.IOException;
-import java.util.Hashtable;
-import java.util.Properties;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.naming.directory.*;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.io.IOException;
+import java.util.Hashtable;
+import java.util.Properties;
 
 public class SectionUtilityToolFilter implements Filter {
 
@@ -57,6 +47,9 @@ public class SectionUtilityToolFilter implements Filter {
 	protected static final String ESB_KEY = "esb.key";
 	protected static final String ESB_SECRET = "esb.secret";
 	protected static final String ESB_PREFIX = "esb.prefix";
+	protected static final String ESB_SCOPE_INSTRUCTORS = "esb.scope.instructors";
+	protected static final String ESB_GRANT_TYPE = "esb.grant.type";
+	protected static final String ESB_IBM_CLIENT_ID = "esb.ibm.client.id";
 	protected static final String PROPERTY_TEST_STUB = "stub.test";
 	protected static final String TEST_USER = "testUser";
 	protected static final String LAUNCH_TYPE = "launchType";

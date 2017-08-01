@@ -1,6 +1,6 @@
 FROM tomcat:8-jre8
 
-MAINTAINER Chris Kretler <ckretler@umich.edu>
+MAINTAINER Teaching and Learning <its.tl.dev@umich.edu>
 
 RUN apt-get update \
  && apt-get install -y vim maven openjdk-8-jdk git
@@ -10,13 +10,13 @@ ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 WORKDIR /tmp
 
 # Build esbUtils, a dependency of the CCM.
-RUN git clone https://github.com/tl-its-umich-edu/esbUtils \
+RUN git clone --branch v2.0  https://github.com/tl-its-umich-edu/esbUtils \
  && cd esbUtils \
  && mvn clean install
 
 # Build lti-utils, a dependency of the CCM.
 #RUN git clone --branch 1.5 https://github.com/tl-its-umich-edu/lti-utils \
-RUN git clone https://github.com/tl-its-umich-edu/lti-utils \
+RUN git clone --branch 1.6 https://github.com/tl-its-umich-edu/lti-utils \
  && cd lti-utils \
  && mvn clean install
 
@@ -31,6 +31,11 @@ RUN mvn clean install \
 RUN apt-get remove -y maven openjdk-8-jdk git \
  && apt-get autoremove -y
 
+# Download the YourKit to /usr/local for profiling. This will be commented out for production.
+#WORKDIR /usr/local
+#RUN wget https://www.yourkit.com/download/yjp-2017.02-b59.zip \
+ #	&& unzip yjp-2017.02-b59.zip
+
 WORKDIR /usr/local/tomcat/webapps
 
 # Set Opts, including paths for the CCM properties.
@@ -44,6 +49,9 @@ ENV JAVA_OPTS="-server \
 -DccmPropsPath=file:$CATALINA_HOME/conf/ccm.properties \
 -Dlog4j.configuration=file:/usr/local/tomcat/conf/log4j.properties \
 "
+# When need for profiling the application this option goes in the JAVA_OPTS
+#-agentpath:/usr/local/yjp-2017.02/bin/linux-x86-64/libyjpagent.so=delay=10000,sessionname=Tomcat \
+
 #tomcat port
 EXPOSE 8080
 #apache port

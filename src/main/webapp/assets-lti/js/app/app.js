@@ -8,7 +8,7 @@ canvasSupportApp.run(function($rootScope) {
   $rootScope.server = '';
   $rootScope.user = {};
   // we are setting the throttling to 200k row limit for the admin tool.
-  //Todo this needs to be deleted and other code that is supporting this variable
+  //Todo this needs to be deleted and set in an external property
   $rootScope.csv_throttle = 200000;
   //to turn on/off the 2 functionalities
   $rootScope.functionality = {
@@ -18,7 +18,7 @@ canvasSupportApp.run(function($rootScope) {
   // this uses an object populated with LTI launch parameters and added to index.lti.vm
   $rootScope.ltiLaunch = ltiLaunch;
 });
-
+// setting up routes to the different templategs and controllers
 canvasSupportApp.config(['$routeProvider',
   function($routeProvider) {
     $routeProvider.

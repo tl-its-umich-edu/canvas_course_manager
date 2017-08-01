@@ -381,6 +381,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
 }]);
 
 
+//top nav controller - it's sole reson for existence is turning off link to View X when you are in View X
 canvasSupportApp.controller('navController', ['$scope', '$location', function ($scope, $location) {
   $scope.view='';
   $scope.changeView = function(view){
@@ -390,9 +391,14 @@ canvasSupportApp.controller('navController', ['$scope', '$location', function ($
 
 /* SSA (Affiliate Functions) CONTROLLER */
 canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 'fileUpload', '$timeout', '$log', '$http', function(Course, $scope, $rootScope, fileUpload, $timeout, $log, $http) {
+  // get the course scope - we will be using it for construction URLS and in the debug panel
   $scope.course = $rootScope.course;
+  // get the sections already in the course we will use to validate adding users to sections
+  //(section needs to exist) - store as a flat simple array of section sis_ids)
   $scope.availableSections = _.map(_.pluck($rootScope.sections, 'sis_section_id'), function(val){ return String(val); });
 
+  // store the sections again as an array of objects - this is used by the grid (presenting the section name
+  // but submitting the sis_id)
   $scope.availableSectionsGrid = _.map(
     $rootScope.sections,
     function(section) {
@@ -400,9 +406,9 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
     }
   );
 
+  // get the existing groupsets, like above we store it as a flat array (to ensure CSV type is not using an existing one)
   var groupSetUrl = 'manager/api/v1/courses/' + $scope.course.id + '/group_categories';
   Course.getGroups(groupSetUrl).then(function (resultGroupsSets){
-    $scope.availableGroupSetsFlat = _.map(_.pluck(resultGroupsSets.data, 'id'), function(val){ return String(val); });
     $scope.availableGroupSets =
     _.map(
       resultGroupsSets.data,
@@ -413,38 +419,36 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
   });
 
 
-  // functions.json contain the model (name, url, field list, validation rules for fields) for all interactions, CSV or form based
+  // functions.json contain the model (name, url, field list, validation rules for fields) for all interactions
+  //CSV or form based
   $http.get('assets-lti/settings/functions.json').success(function(data) {
     $scope.functions = data;
-    //add to the model for sections the actual sections available in the course
+    //add to the model for users and sections CSV the actual sections available in the course
     var functCSVSect = _.findWhere($scope.functions, {id: "users_in_sections"});
     var fieldCSVSect = _.findWhere(functCSVSect.fields, {name: "section_id"});
     fieldCSVSect.validation.choices = $scope.availableSections;
-    var functCSVGrid = _.findWhere($scope.functions, {id: "users_and_groups_grid"});
+    //add to the model for users and sections GRID the actual sections available in the course
+    var functCSVGrid = _.findWhere($scope.functions, {id: "users_to_sections_grid"});
     var fieldCSVGrid = _.findWhere(functCSVGrid.fields, {name: "section_id"});
     fieldCSVGrid.validation.choices = $scope.availableSections;
     fieldCSVGrid.validation.grid_choices = $scope.availableSectionsGrid;
 
     var groupUrl = 'manager/api/v1/courses/' + $scope.course.id + '/groups';
+
+    //TODO: maybe remove this request - we are not using this info anywhere except in the debug panel
     Course.getGroups(groupUrl).then(function (resultGroups){
       //add to the model for groups the actual groups available in the course
       $scope.availableGroups = _.map(_.pluck(resultGroups.data, 'id'), function(val){ return String(val); });
-
-      $scope.availableGroupsGrid = _.map(
-        resultGroups.data,
-        function(group) {
-            return { 'name': group.name, 'id': group.id };
-        }
-      );
     });
   });
 
-  //listen for changes to the function chosen
+  //listen for changes to the function chosen and reseting scope
   $scope.changeSelectedFunction = function() {
     $scope.resultPost = null;
     $scope.resetScope();
   };
 
+  // reseting scope -  restoring model and view to defaults
   $scope.resetScope = function(){
     $('#gridTable input').val('');
     $scope.content={};
@@ -459,22 +463,24 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
 
   // on page load set content to false
   $scope.content = false;
-  //grids will load 5 rows by default for development, later change to 25
-  $scope.gridRowNumber = 5;
-  // used by template
+  //grids will load 25 rows by default
+  $scope.gridRowNumber = 25;
+  // used by template in an ng-repeat using number above
   $scope.getNumber = function(num) {
     return new Array(num);
   };
 
   // watch for changes to input[type:file]
-  //read and parse the file
+  // if new file read and parse the file
   $scope.$watch('csvfile', function(newFileObj) {
     $scope.content = false;
     if (newFileObj) {
       $scope.loading = true;
       var reader = new FileReader();
       reader.readAsText(newFileObj);
+      // when done reading
       reader.onload = function(e) {
+        // check that number of rows does not exceed throttle set in app.js
         if(reader.result.split('\n').length > $rootScope.csv_throttle && $scope.selectedFunction.id==='users_and_groups'){
           $timeout(function(){
             $scope.loading = false;
@@ -482,6 +488,7 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
           });
         }
         else {
+          // use a function to parse, display and valdiate the data
           var CSVPreview = function() {
             $scope.headers = $scope.selectedFunction.fields;
             $scope.content = parseCSV(reader.result, $scope.headers, $scope.headers.length);
@@ -500,12 +507,18 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
   // event handler for clicking on the Upload CSV button
   $scope.submitCSV = function() {
     var file = $scope.csvfile;
+    // add new group set to the existing groupset array of objects
+    // to update it so that the user does not add another file with the same groupset
     if($scope.selectedFunction.id ==='users_and_groups'){
       $scope.availableGroupSets.push({ 'name': $scope.newGroupSet, 'id': ''});
     }
+    // use fileUpload service to handle the upload
+    // params are file (the data), url (for this selectedFunction), and a callback to do some clean up
     fileUpload.uploadFileAndFieldsToUrl(file, $scope.selectedFunction.url, function(resultPost){
       $scope.resetScope();
       $scope.selectedFunction = null;
+      // resultPost contains suceess and error payloads
+      // UI does some contortions to display these correctly
       $scope.resultPost = resultPost;
     });
   };
@@ -530,6 +543,9 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
 
       $scope.groupGridErrors=false;
       if($scope.selectedFunction.id ==='users_and_groups_grid'){
+        // special validations for this function, essentially
+        // assuring that there is just one groupset and that users are not duplicated
+        // and that the new groupset does not exist in the course already
         $scope.groupsParseError='';
         var arr = _.rest(csv.split('\n'));
         var groupsets=[];
@@ -554,6 +570,7 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
       }
       var file = csv;
       if($scope.groupGridErrors === false){
+        // use same service and arg structure as CSV submission
         fileUpload.uploadFileAndFieldsToUrl(file, $scope.selectedFunction.url, function(resultPost){
           $scope.resetScope();
           $scope.selectedFunction = null;
@@ -564,17 +581,24 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
 
   //parse attached CSV and validate it against functions model
   var parseCSV = function(CSVdata, headers, colCount) {
-    $scope.content={};$scope.errors=[];$scope.globalParseError=null;
+    // initialize certain scope vars
+    $scope.content={};
+    $scope.errors=[];
+    $scope.globalParseError=null;
     //remove certain line break chars
     CSVdata = CSVdata.replace(/\r/g, '');
+    //create an array of lines
     var lines = CSVdata.split("\n");
+    //only one line - line endings may be funky
     if(lines.length === 1){
       $scope.loading = false;
       $scope.globalParseError ='Something is wrong with your file. Is it standard CSV format?';
       return null;
     }
+    //grab first row
     var linesHeaders = lines[0].split(',');
 
+    // check that first row has same number of elements required by the selectedFunction json
     if((_.difference(linesHeaders, $scope.selectedFunction.field_array).length)){
        $scope.globalParseError ='Something is wrong with your file.  Bad or missing headers? Should be: \"' + $scope.selectedFunction.field_array.join(', ') + '\"';
        $scope.loading = false;
@@ -586,61 +610,74 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
       linesHeaders[i] = linesHeaders[i].trim();
     }
 
+    // get all lines except the header line
     var linesValues = _.rest(lines,1);
+    // more line ending paranoia
     if(linesValues.length === 0){
       $scope.loading = false;
       $scope.globalParseError ='Something is wrong with your file. Line endings?';
       return null;
     }
+    //initialize final object
     var result = {};
     result.data =[];
     $scope.errors = [];
     $scope.log =[];
 
+    // sort the headers in the functions.json to match the order in the
+    // first line of the CSV - this makes order in the CSV inmmaterial
     var sortedHeaders =[];
     _.each (linesHeaders, function(lineHeader, index){
       var header = _.findWhere(headers, {name:lineHeader});
       sortedHeaders.push(header);
     });
+    // create array of this line
     for (var i = 0; i < linesValues.length; i++) {
       var lineArray = linesValues[i].split(',');
-
+      // initialize an line object
       var lineObj = {};
       lineObj.data = [];
       var number_pattern = /^\d+$/;
-
+      // for each of the headers
       _.each(sortedHeaders, function(header, index) {
+        //initialize object for this value
         var obj = {};
         obj.invalid = false;
         obj.message='';
+        // last paranoid check
         if(header===undefined){
           $scope.loading =false;
           $scope.globalParseError = "Something is wrong with your file. Is it standard CSV format?";
           return null;
         }
+        // grab the .validation value fo this funciton from functions.json
         var validation = header.validation;
 
         if (lineArray[index]) {
           //remove leading and trailing spaces
           var thisVal = lineArray[index].trim();
+          // does it have spaces and spaces are forbidden?
           if (thisVal.split(' ').length !== 1 && !validation.spaces) {
             $scope.log.push(i+1 + ' - "' + thisVal + '" has spaces');
             obj.message = obj.message + thisVal + ' has spaces';
             obj.invalid = true;
             lineObj.invalid=true;
           }
+          // more chars than allowed?
           if (thisVal.length > validation.max) {
             $scope.log.push(i+1 + ' - "' + thisVal + '" has too many chars');
             obj.message = obj.message + thisVal + ' has too many chars';
             obj.invalid = true;
             lineObj.invalid=true;
           }
+          // less chars than allowed?
           if (thisVal.length < validation.min) {
             $scope.log.push(i+1 + ' - "' + thisVal + '" has too few chars');
             obj.message = obj.message + thisVal + ' has too few chars';
             obj.invalid = true;
             lineObj.invalid=true;
           }
+          // if validation has a pattern  - test this
           if(validation.pattern){
             var pat = new RegExp(validation.pattern);
             if (!pat.test(thisVal)) {
@@ -650,13 +687,15 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
               lineObj.invalid=true;
             }
           }
-
+          // is it supposed to be a number?
           if (!number_pattern.test(thisVal) && validation.chars === 'num') {
             $scope.log.push(i+1 + ' - "' + thisVal + '" is not a number');
             obj.message = obj.message + thisVal + ' is not a number';
             obj.invalid = true;
             lineObj.invalid=true;
           }
+          // are there specific choices that this value needs to be?
+          // think adding users and sections - sections need to be there already - we added the sections above
           if (validation.choices) {
             if (_.indexOf(validation.choices, thisVal) === -1) {
               $scope.log.push(i+1 + ' - "' + thisVal + '" is not one of the choices in [' + validation.choices + ']');
@@ -666,9 +705,10 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
             }
           }
         }
-
+        //push the result to the lineObj.data array
         lineObj.data.push({'value':lineArray[index],'error':obj.invalid,'message':obj.message});
       });
+      // check for missing values
       if (lineArray.length !== colCount && lineArray !== ['']) {
         lineObj.invalid = true;
       }
@@ -678,11 +718,16 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
       if (lineArray.length === 1 && lineArray[0] === '') {
 
       } else {
-
+        // push the line to the result
         result.data.push(lineObj);
       }
     }
     if($scope.selectedFunction.id==='users_and_groups'){
+      // special validation for users and groups
+      // 1. header order
+      // 2. no more than 1 groupset name
+      // 3. existing groupsets
+      // 4. duplicate user entries
       var groupsetMap = [];
       var userMap = [];
 
@@ -712,17 +757,20 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
       }
     }
 
+    //stop the spinner
     $scope.loading = false;
     result.headers = linesHeaders;
     $('html, body').animate({
       scrollTop : 300
     }, 1000);
+    // pass the result to the view via a model change
     return result;
 
   };
 }]);
 
 canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location', '$rootScope', '$log', '$timeout', function (Things, $scope, $location, $rootScope, $log, $timeout) {
+
   var valueToPluck = 'SIS User ID';
   $scope.$watch('trimfile', function(newFileObj) {
     $scope.content = false;

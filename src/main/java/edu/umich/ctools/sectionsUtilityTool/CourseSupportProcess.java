@@ -78,7 +78,16 @@ public class CourseSupportProcess {
 		}
 
 		if(pathInfo.contains(CourseUploadType.ADD_GROUPS_AND_USERS.getValue())){
-			GroupsToCourseThread grpsThread = new GroupsToCourseThread(csvFileContent,emailAddress,courseId);
+			String[] csvList = csvFileContent.split(Utils.CONSTANT_LINE_FEED);
+			// empty data set
+			if (csvList.length == 1) {
+				response.setStatus(Utils.API_UNKNOWN_ERROR);
+				M_log.error(String.format("Empty groups to user CSV data is sent for course %s ",courseId));
+				out.print("{\"errors\":\"Empty groups-users data, try again with proper groups data\"}");
+				out.flush();
+				return;
+			}
+			GroupsToCourseThread grpsThread = new GroupsToCourseThread(csvFileContent, emailAddress, courseId);
 			new Thread(grpsThread).start();
 			response.setStatus(HttpStatus.SC_OK);
 			M_log.info(Utils.getCurrentISODate());

@@ -8,11 +8,13 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.json.JSONObject;
 
+import javax.activation.DataHandler;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.util.ByteArrayDataSource;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Collection;
@@ -177,6 +179,7 @@ public class GroupsToCourseThread implements Runnable {
 			M_log.debug(msgBody);
 			body.setText(msgBody);
 			multipart.addBodyPart(body);
+			multipart.addBodyPart(getAttachment());
 			message.setContent(multipart);
 			M_log.info(String.format("Sending Email for the Groups set %s in course %s ", grpReport.getGrpSetName(), courseId));
 			Transport.send(message);
@@ -185,6 +188,16 @@ public class GroupsToCourseThread implements Runnable {
 		} catch (Exception e) {
 			M_log.error(String.format(errmsg, CourseUploadType.ADD_GROUPS_AND_USERS,courseId, e.getMessage()));
 		}
+	}
+
+	public BodyPart getAttachment() throws MessagingException {
+		BodyPart attachment = new MimeBodyPart();
+		attachment.setDataHandler(new DataHandler(new ByteArrayDataSource(csvGrpContent.getBytes(),
+				Utils.CONSTANT_MIME_TEXT_CSV)));
+		attachment.setFileName(CourseUploadType.ADD_GROUPS_AND_USERS.getDescription() + "_" + courseId + ".csv");
+
+		return attachment;
+
 	}
 
 	private ApiResultWrapper createGroupSet(String grpSetName) {
