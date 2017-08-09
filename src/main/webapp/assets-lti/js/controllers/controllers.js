@@ -770,9 +770,10 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
 }]);
 
 canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location', '$rootScope', '$log', '$timeout', function (Things, $scope, $location, $rootScope, $log, $timeout) {
-
+  $scope.mute=true;
   var valueToPluck = 'SIS User ID';
   $scope.$watch('trimfile', function(newFileObj) {
+    $scope.headers=[];
     $scope.content = false;
     if (newFileObj) {
       $scope.loading = true;
@@ -782,9 +783,9 @@ canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location'
         Papa.parse(reader.result, {
         	complete: function(results) {
             $timeout(function(){
-              $scope.headers = results.data[0];
-              $scope.pluckPos = _.indexOf($scope.headers, valueToPluck);
-              $scope.toTrim = _.rest(results.data);
+              $scope.headers = _.first(results.data, 3);
+              $scope.pluckPos = _.indexOf($scope.headers[0], valueToPluck);
+              $scope.toTrim = _.rest(results.data ,3);
             });
         	}
         });
@@ -810,7 +811,10 @@ canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location'
           }
         }
       });
-      sectionResults.unshift($scope.headers);
+      if(!$scope.mute){
+        $scope.headers.splice(1,1);
+      }
+      sectionResults = $scope.headers.concat(sectionResults);
       var csv = Papa.unparse(sectionResults);
 
       downloadCSVFile(sectionResults);
