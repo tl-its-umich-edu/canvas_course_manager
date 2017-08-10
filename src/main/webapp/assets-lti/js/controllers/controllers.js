@@ -837,6 +837,12 @@ canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location'
           document.body.appendChild(link); // Required for FF
           // delay to give impression of processing file
           $scope.processing=false;
+          $scope.mute = true;
+          $scope.headers=[];
+          $scope.content = null;
+          $scope.changePointsPossible=null;
+          $scope.selectedSection=null;
+          angular.element('#trim-file').val(null);
           setTimeout(function() {
             link.click();
           }, 800);
