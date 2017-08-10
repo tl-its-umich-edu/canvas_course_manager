@@ -803,14 +803,21 @@ canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location'
     Things.getThings(url).then(function (resultSectionEnrollment) {
       //2. pluck the comparator (user_id)
       $scope.sectionEnrollment = _.pluck(resultSectionEnrollment.data, valueToPluck.replace(/ /g, '_').toLowerCase());
+      //$log.warn($scope.sectionEnrollment);
       //3. trim $scope.toTrim to only those lines that have the comparator
       _.each($scope.toTrim, function(toTrimEl){
         if(toTrimEl[$scope.pluckPos]){
+          if(toTrimEl[$scope.pluckPos].length !==8){
+            toTrimEl[$scope.pluckPos] = '0' + toTrimEl[$scope.pluckPos];
+          }
           if(_.indexOf($scope.sectionEnrollment, toTrimEl[$scope.pluckPos].toString()) !==-1 ){
             sectionResults.push(toTrimEl);
           }
         }
       });
+      if($scope.changePointsPossible){
+        $scope.headers[2][$scope.headers[2].length - 1] = $scope.changePointsPossible;
+      }
       if(!$scope.mute){
         $scope.headers.splice(1,1);
       }
@@ -824,7 +831,7 @@ canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location'
           var encodedUri = encodeURI(csvContent);
           var link = document.createElement("a");
           link.setAttribute("href", encodedUri);
-          link.setAttribute("download", user + $scope.selectedSection.name + '.csv');
+          link.setAttribute("download", user + '-' + $scope.selectedSection.name + '.csv');
           document.body.appendChild(link); // Required for FF
           // delay to give impression of processing file
           $scope.processing=false;

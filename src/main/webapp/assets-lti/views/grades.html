@@ -26,11 +26,24 @@
   </div>
   <div role="tabpanel" class="tab-pane" id="puff">
       <h2 style="font-size:130%">Trim grade export file to a section</h2>
-      <p><strong>Step 1</strong> - provide the file you downloaded from grade export. Uncheck <input type="checkbox" name="mute" id="mute" value="" ng-model="mute"> <label for="mute">mute </label> if you want to notify students about this.</p>
-      <p><input class="btn btn-default" id="trim-file" type="file" name="files" style="display:inline" file-model="trimfile"></p>
-      <p><strong>Step 2</strong> - indicate what section to trim it to.</p>
       <div class="panel panel-default">
-        <div class="panel-body">
+        <div class="panel-body" style="padding:5px 15px 20px 15px">
+          <h3  style="font-size:110%">Step 1 - provide the file you downloaded from grade export.</h3>
+          <div><input class="btn btn-default" id="trim-file" type="file" name="files" style="display:inline" file-model="trimfile"></div>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-body" style="padding:5px 15px 20px 15px">
+          <div class="form-inline">
+            <h3  style="font-size:110%">Step 2 - change some options</h3>
+             <div><input type="checkbox" name="mute" id="mute" value="" ng-model="mute"> <label for="mute" style="font-weight:normal">Do not notify students</label></div>
+             <div><label for="pointsPossible" style="font-weight:normal"> Change the Points Possible value: </label> <input type="text" ng-model="changePointsPossible" id="pointsPossible" class="form-control" style="width:4em"></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-body" style="padding:5px 15px 20px 15px">
+          <h3  style="font-size:110%">Step 3 - indicate what section to trim it to.</h3>
           <ul style="margin-bottom:0">
             <li ng-repeat="section in sections">
               <input type="radio" name="sectionSelection" ng-value="section" ng-model="$parent.selectedSection" id="section{{section.id}}">
@@ -39,12 +52,23 @@
           </ul>
         </div>
       </div>
-      <p><strong>Step 3</strong> - trim. The trimmed file will be downloaded to your computer. It will be named <code>&lt;uniqname>-&lt;section name>.csv</code></p>
-      <p>
-        <button type="button" class="btn btn-primary" ng-click="trimToSection(selectedSection)" ng-disabled="!selectedSection || !trimfile">
-        Trim <span ng-show="processing"> - working!</span>
-      </button>
-      </p>
+      <div class="panel panel-default">
+        <div class="panel-body" style="padding:5px 15px 20px 15px">
+          <h3  style="font-size:110%">Step 4 - trim. The trimmed file will be downloaded to your computer.</h3>
+          <div> It will be named <code>&lt;uniqname>-&lt;section name>.csv</code></div>
+          <div>
+            <span ng-show="changePointsPossible">The points possible will be changed to <strong>{{changePointsPossible}}</strong>.</span>
+            <span ng-show="!mute">Students <strong>will</strong> be notified.</span>
+          </div>
+
+          <div>
+            <br>
+            <button type="button" class="btn btn-primary" ng-click="trimToSection(selectedSection)" ng-disabled="!selectedSection || !trimfile">
+              Trim <span ng-show="processing"> - working!</span>
+            </button>
+          </div>
+        </div>
+      </div>
   </div>
 </div>
 </div>
