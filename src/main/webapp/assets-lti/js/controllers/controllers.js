@@ -807,8 +807,10 @@ canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location'
       //3. trim $scope.toTrim to only those lines that have the comparator
       _.each($scope.toTrim, function(toTrimEl){
         if(toTrimEl[$scope.pluckPos]){
+          //the export from Pearson may have dropped one or more leading 0
           if(toTrimEl[$scope.pluckPos].length !==8){
-            toTrimEl[$scope.pluckPos] = '0' + toTrimEl[$scope.pluckPos];
+            var padding = Array(8 - toTrimEl[$scope.pluckPos].length + 1).join('0');
+            toTrimEl[$scope.pluckPos] = padding + toTrimEl[$scope.pluckPos];
           }
           if(_.indexOf($scope.sectionEnrollment, toTrimEl[$scope.pluckPos].toString()) !==-1 ){
             sectionResults.push(toTrimEl);
