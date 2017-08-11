@@ -37,7 +37,11 @@
           <div class="form-inline">
             <h3  style="font-size:110%">Step 2 - change some options</h3>
              <div><input type="checkbox" name="mute" id="mute" value="" ng-model="mute"> <label for="mute" style="font-weight:normal">Do not notify students</label></div>
-             <div><label for="pointsPossible" style="font-weight:normal"> Change the Points Possible value: </label> <input type="text" ng-model="changePointsPossible" id="pointsPossible" class="form-control" style="width:4em"></div>
+             <div>
+              <label for="pointsPossible" style="font-weight:normal"> Change the Points Possible value: </label>
+              <input type="text" ng-model="changePointsPossible" id="pointsPossible" class="form-control" style="width:4em">
+              <span ng-show="pointsPossible">(currently set in spreadsheet to {{pointsPossible}})</span>
+             </div>
           </div>
         </div>
       </div>

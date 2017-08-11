@@ -784,6 +784,7 @@ canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location'
         	complete: function(results) {
             $timeout(function(){
               $scope.headers = _.first(results.data, 3);
+              $scope.pointsPossible = _.last($scope.headers[2]);
               $scope.pluckPos = _.indexOf($scope.headers[0], valueToPluck);
               $scope.toTrim = _.rest(results.data ,3);
             });
@@ -807,23 +808,28 @@ canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location'
       //3. trim $scope.toTrim to only those lines that have the comparator
       _.each($scope.toTrim, function(toTrimEl){
         if(toTrimEl[$scope.pluckPos]){
-          //the export from Pearson may have dropped one or more leading 0
+          //the export from Pearson may have dropped one or more leading 0 from the UMID
           if(toTrimEl[$scope.pluckPos].length !==8){
             var padding = Array(8 - toTrimEl[$scope.pluckPos].length + 1).join('0');
             toTrimEl[$scope.pluckPos] = padding + toTrimEl[$scope.pluckPos];
           }
+          // is this item's UMID in the section enrollments array: if so add it
           if(_.indexOf($scope.sectionEnrollment, toTrimEl[$scope.pluckPos].toString()) !==-1 ){
             sectionResults.push(toTrimEl);
           }
         }
       });
+      // has instructor opted to change the points possible: if so change the value to it
       if($scope.changePointsPossible){
         $scope.headers[2][$scope.headers[2].length - 1] = $scope.changePointsPossible;
       }
+      // has instructor opted to unmute grade upload: if so remove the corresponding row
       if(!$scope.mute){
         $scope.headers.splice(1,1);
       }
+      // prepend the headers to the results
       sectionResults = $scope.headers.concat(sectionResults);
+      // transform sectionResults to a csv
       var csv = Papa.unparse(sectionResults);
 
       downloadCSVFile(sectionResults);
@@ -835,14 +841,17 @@ canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location'
           link.setAttribute("href", encodedUri);
           link.setAttribute("download", user + '-' + $scope.selectedSection.name + '.csv');
           document.body.appendChild(link); // Required for FF
-          // delay to give impression of processing file
+          // reset scope vars
+          $scope.pointsPossible=null;
           $scope.processing=false;
           $scope.mute = true;
-          $scope.headers=[];
+          $scope.headers=null;
           $scope.content = null;
           $scope.changePointsPossible=null;
           $scope.selectedSection=null;
+          // reset file upload input
           angular.element('#trim-file').val(null);
+          // delay to give impression of processing file
           setTimeout(function() {
             link.click();
           }, 800);
