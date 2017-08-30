@@ -783,10 +783,10 @@ canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location'
         Papa.parse(reader.result, {
         	complete: function(results) {
             $timeout(function(){
-              $scope.headers = _.first(results.data, 3);
-              $scope.pointsPossible = _.last($scope.headers[2]);
+              $scope.headers = [results.data[0],results.data[2]];
+              $scope.pointsPossible = _.last($scope.headers[1]);
               $scope.pluckPos = _.indexOf($scope.headers[0], valueToPluck);
-              $scope.toTrim = _.rest(results.data ,3);
+              $scope.toTrim = _.rest(results.data ,2);
             });
         	}
         });
@@ -821,11 +821,7 @@ canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location'
       });
       // has instructor opted to change the points possible: if so change the value to it
       if($scope.changePointsPossible){
-        $scope.headers[2][$scope.headers[2].length - 1] = $scope.changePointsPossible;
-      }
-      // has instructor opted to unmute grade upload: if so remove the corresponding row
-      if(!$scope.mute){
-        $scope.headers.splice(1,1);
+        $scope.headers[1][$scope.headers[1].length - 1] = $scope.changePointsPossible;
       }
       // prepend the headers to the results
       sectionResults = $scope.headers.concat(sectionResults);
