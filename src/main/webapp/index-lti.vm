@@ -1,3 +1,10 @@
+#set($ltiList = ${ltiValues})
+#set($ltiEntry="")
+#set ($name_family = $ltiValues.get("lis_person_name_family").replace("'",""))
+#set ($name_given = $ltiValues.get("lis_person_name_given").replace("'",""))
+
+#if($ltiValues.get("isAllowed"))
+
 <!DOCTYPE html>
 <html lang="en" ng-app="canvasSupportApp">
   <head>
@@ -108,3 +115,18 @@
   </body>
 
 </html>
+#else
+  <html>
+    <head>
+      <meta charset="utf-8">
+      <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css">
+      <title>Nor allowed</title>
+    </head>
+    <body>
+      <br><br>
+      <div class="alert alert-info">
+        Sorry - this functionality is only for instructors.
+      </div>
+    </body>
+  </html>
+#end
