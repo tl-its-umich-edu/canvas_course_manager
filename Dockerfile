@@ -53,7 +53,7 @@ ENV JAVA_OPTS="-server \
 #-agentpath:/usr/local/yjp-2017.02/bin/linux-x86-64/libyjpagent.so=delay=10000,sessionname=Tomcat \
 
 #tomcat port
-EXPOSE 8080
+#EXPOSE 8080
 #apache port
 EXPOSE 8009
 #debug port
@@ -62,4 +62,5 @@ ENV JPDA_ADDRESS="5009"
 ENV JPDA_TRANSPORT="dt_socket"
 
 # Launch Tomcat
-CMD cp /usr/share/ccm-props/* /usr/local/tomcat/conf/; catalina.sh jpda run
+#CMD cp /usr/share/ccm-props/* /usr/local/tomcat/conf/; catalina.sh jpda run
+CMD cp /tmp/tomcat/* /usr/local/tomcat/conf/; cp /usr/share/ccm-props/* /usr/local/tomcat/conf/; catalina.sh jpda run
