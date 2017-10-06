@@ -15,7 +15,6 @@ limitations under the License.
  */
 package edu.umich.ctools.sectionsUtilityTool;
 
-import com.mashape.unirest.http.exceptions.UnirestException;
 import edu.umich.ctools.esb.utils.WAPI;
 import edu.umich.ctools.esb.utils.WAPIException;
 import edu.umich.ctools.esb.utils.WAPIResultWrapper;
@@ -243,6 +242,13 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			M_log.info(String.format("The user \"%s\" is account admin in the course %s",
 					request.getParameter(Utils.LTI_PARAM_UNIQNAME), request.getParameter(Utils.LTI_PARAM_CANVAS_COURSE_ID)));
 		}
+		ToolAccessGranter accessGranter = new ToolAccessGranter(request.getParameter(Utils.LTI_PARAM_CANVAS_COURSE_ID),
+				request.getParameter(Utils.LTI_PARAM_CANVAS_USER_ID));
+		boolean allowedToolAccess=accessGranter.isAllowedAccess(admin);
+		if (allowedToolAccess) {
+			M_log.info(String.format("The user \"%s\" is granted access to the tool in the course %s",
+					request.getParameter(Utils.LTI_PARAM_UNIQNAME), request.getParameter(Utils.LTI_PARAM_CANVAS_COURSE_ID)));
+		}
 
 		HashMap<String, Object> customValuesMap = new HashMap<>();
 
@@ -255,6 +261,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		customValuesMap.put(Utils.LTI_PARAM_CANVAS_USER_ID, request.getParameter(Utils.LTI_PARAM_CANVAS_USER_ID));
 		customValuesMap.put(Utils.SESSION_ROLES_FOR_ADDING_TEACHER, appExtPropertiesFile.getProperty(ROLE_CAN_ADD_TEACHER));
 		customValuesMap.put(Utils.IS_ACCOUNT_ADMIN, String.valueOf(admin));
+		customValuesMap.put(Utils.IS_TOOL_ACCESS_ALLOWED, String.valueOf(allowedToolAccess));
 
 		TcSessionData tc = (TcSessionData) session.getAttribute(Utils.TC_SESSION_DATA);
 
