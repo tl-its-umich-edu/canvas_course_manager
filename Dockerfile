@@ -63,4 +63,4 @@ ENV JPDA_TRANSPORT="dt_socket"
 
 # Launch Tomcat
 #CMD cp /usr/share/ccm-props/* /usr/local/tomcat/conf/; catalina.sh jpda run
-CMD cp /tmp/tomcat/* /usr/local/tomcat/conf/; cp /usr/share/ccm-props/* /usr/local/tomcat/conf/; catalina.sh jpda run
+CMD cp /tmp/tomcat/* /usr/local/tomcat/conf/; cp /tmp/app/* /usr/local/tomcat/conf/; catalina.sh jpda run
