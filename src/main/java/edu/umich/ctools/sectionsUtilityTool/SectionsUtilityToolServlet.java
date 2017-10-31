@@ -15,8 +15,8 @@ limitations under the License.
  */
 package edu.umich.ctools.sectionsUtilityTool;
 
-import com.mashape.unirest.http.exceptions.UnirestException;
 import edu.umich.ctools.esb.utils.WAPI;
+import edu.umich.ctools.esb.utils.WAPIException;
 import edu.umich.ctools.esb.utils.WAPIResultWrapper;
 import edu.umich.its.lti.TcSessionData;
 import edu.umich.its.lti.utils.OauthCredentials;
@@ -240,6 +240,13 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			M_log.info(String.format("The user \"%s\" is account admin in the course %s",
 					request.getParameter(Utils.LTI_PARAM_UNIQNAME), request.getParameter(Utils.LTI_PARAM_CANVAS_COURSE_ID)));
 		}
+		ToolAccessGranter accessGranter = new ToolAccessGranter(request.getParameter(Utils.LTI_PARAM_CANVAS_COURSE_ID),
+				request.getParameter(Utils.LTI_PARAM_CANVAS_USER_ID));
+		boolean allowedToolAccess=accessGranter.isAllowedAccess(admin);
+		if (allowedToolAccess) {
+			M_log.info(String.format("The user \"%s\" is granted access to the tool in the course %s",
+					request.getParameter(Utils.LTI_PARAM_UNIQNAME), request.getParameter(Utils.LTI_PARAM_CANVAS_COURSE_ID)));
+		}
 
 		HashMap<String, Object> customValuesMap = new HashMap<>();
 
@@ -252,6 +259,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		customValuesMap.put(Utils.LTI_PARAM_CANVAS_USER_ID, request.getParameter(Utils.LTI_PARAM_CANVAS_USER_ID));
 		customValuesMap.put(Utils.SESSION_ROLES_FOR_ADDING_TEACHER, appExtPropertiesFile.getProperty(ROLE_CAN_ADD_TEACHER));
 		customValuesMap.put(Utils.IS_ACCOUNT_ADMIN, String.valueOf(admin));
+		customValuesMap.put(Utils.IS_TOOL_ACCESS_ALLOWED, String.valueOf(allowedToolAccess));
 
 		TcSessionData tc = (TcSessionData) session.getAttribute(Utils.TC_SESSION_DATA);
 
@@ -548,21 +556,38 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 				wapiValuesMap.put("apiPrefix", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_PREFIX));
 				wapiValuesMap.put("key", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_KEY));
 				wapiValuesMap.put("secret", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_SECRET));
+				wapiValuesMap.put("scope", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_SCOPE_INSTRUCTORS));
+				wapiValuesMap.put("grant_type", appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_GRANT_TYPE));
 				WAPI wapi = new WAPI(wapiValuesMap);
+
+				HashMap<String,String> headers = new HashMap<String,String>();
+				headers.put("x-ibm-client-id",appExtSecurePropertiesFile.getProperty(SectionUtilityToolFilter.ESB_IBM_CLIENT_ID));
+
 				long startTime = System.currentTimeMillis();
+				String errMsg = "MPATHWAYS API call did not complete successfully";
 				try {
 					String url = wapi.getApiPrefix() + uniqname + "/Terms/" + mpathwaysTermId + "/Classes";
 					M_log.info("WAPI URL: " + url);
-					wrappedResult = wapi.getRequest(url);
+					wrappedResult = wapi.doRequest(url, headers);
 					addMpathwayDataToSession(request, wrappedResult, mpathwaysTermId);
-				} catch (UnirestException e) {
-					M_log.error("MPATHWAYS API call did not complete successfully", e);
+				} catch (WAPIException e) {
+					M_log.error(errMsg, e);
+				} catch (Exception e) {
+					M_log.error(errMsg, e);
+				} finally {
+					long stopTime = System.currentTimeMillis();
+					long elapsedTime = stopTime - startTime;
+					M_log.info(String.format("MPATHWAYS API response took %sms", elapsedTime));
 				}
-				long stopTime = System.currentTimeMillis();
-				long elapsedTime = stopTime - startTime;
-				M_log.info(String.format("MPATHWAYS API response took %sms",elapsedTime));
+			}
+			if (wrappedResult == null) {
+				response.setStatus(500);
+				wrappedResult = new WAPIResultWrapper(500, "Unexpected error", new JSONObject());
+			} else {
+				response.setStatus(wrappedResult.getStatus());
 			}
 		}
+
 		out.print(wrappedResult.toJson());
 		out.flush();
 	}

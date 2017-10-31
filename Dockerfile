@@ -10,7 +10,7 @@ ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 WORKDIR /tmp
 
 # Build esbUtils, a dependency of the CCM.
-RUN git clone --branch v1.1  https://github.com/tl-its-umich-edu/esbUtils \
+RUN git clone --branch v2.0  https://github.com/tl-its-umich-edu/esbUtils \
  && cd esbUtils \
  && mvn clean install
 
@@ -52,8 +52,6 @@ ENV JAVA_OPTS="-server \
 # When need for profiling the application this option goes in the JAVA_OPTS
 #-agentpath:/usr/local/yjp-2017.02/bin/linux-x86-64/libyjpagent.so=delay=10000,sessionname=Tomcat \
 
-#tomcat port
-EXPOSE 8080
 #apache port
 EXPOSE 8009
 #debug port
@@ -62,4 +60,4 @@ ENV JPDA_ADDRESS="5009"
 ENV JPDA_TRANSPORT="dt_socket"
 
 # Launch Tomcat
-CMD cp /usr/share/ccm-props/* /usr/local/tomcat/conf/; catalina.sh jpda run
+CMD cp /tmp/tomcat/* /usr/local/tomcat/conf/; cp /tmp/app/* /usr/local/tomcat/conf/; catalina.sh jpda run

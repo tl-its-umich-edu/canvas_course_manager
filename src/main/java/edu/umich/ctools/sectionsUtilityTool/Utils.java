@@ -63,6 +63,7 @@ public class Utils {
 	protected static final String MAIL_HOST = "umich.friend.mailhost";
 	protected static final String FRIEND_CONTACT_EMAIL = "umich.friend.contactemail";
 	protected static final String SIS_REPORT_CCM_SUPPORT_ADDRESS = "sis.report.ccm.support.address";
+	public static final String IS_TOOL_ACCESS_ALLOWED = "isAllowed";
 	protected static String SIS_SLOW_PROCESS_EMAIL_FILE_PATH = "umich.sis.slowprocessemail";
 	protected static final String SIS_POLLING_ATTEMPTS = "sis.polling.attempts";
 	protected static final String SIS_POLLING_SLEEPTIME = "sis.polling.sleeptime";
