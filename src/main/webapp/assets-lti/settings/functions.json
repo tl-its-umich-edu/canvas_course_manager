@@ -141,6 +141,7 @@
       "only_one":true,
       "spaces": true,
       "chars": "alpha",
+      "pattern": ".*",
       "max": 300,
       "min": 3
     }
@@ -149,6 +150,7 @@
     "validation": {
       "spaces": true,
       "chars": "alpha",
+      "pattern": ".*",
       "max": 300,
       "min": 3
     }
