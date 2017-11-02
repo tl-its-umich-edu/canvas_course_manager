@@ -1,5 +1,5 @@
 'use strict';
-/* global $, canvasSupportApp, _, generateCurrentTimestamp, angular, validateEmailAddress, FileReader, document, setTimeout */
+/* global $, canvasSupportApp, _, generateCurrentTimestamp, angular, validateEmailAddress, FileReader, Papa, document, setTimeout */
 
 /* SINGLE COURSE CONTROLLER */
 canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, $scope, $rootScope, $filter, $location, $log) {
@@ -769,5 +769,88 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
 }]);
 
 canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location', '$rootScope', '$log', '$timeout', function (Things, $scope, $location, $rootScope, $log, $timeout) {
-  // empty controller for grades view
+  $scope.mute=true;
+  var valueToPluck = 'SIS User ID';
+  $scope.$watch('trimfile', function(newFileObj) {
+    $scope.headers=[];
+    $scope.content = false;
+    if (newFileObj) {
+      $scope.loading = true;
+      var reader = new FileReader();
+      reader.readAsText(newFileObj);
+      reader.onload = function(e) {
+        Papa.parse(reader.result, {
+        	complete: function(results) {
+            $timeout(function(){
+              $scope.headers = [results.data[0],results.data[2]];
+              $scope.pointsPossible = _.last($scope.headers[1]);
+              $scope.pluckPos = _.indexOf($scope.headers[0], valueToPluck);
+              $scope.toTrim = _.rest(results.data ,2);
+            });
+        	}
+        });
+      };
+      $scope.filename = newFileObj.name;
+    }
+  });
+
+  $scope.trimToSection = function(section){
+    var sectionResults = [];
+    $scope.processing=true;
+    var user = $rootScope.ltiLaunch.custom_canvas_user_login_id;
+    //1. get the section enrollment (only students)
+    var url = 'manager/api/v1/sections/'+ section.id + '/enrollments?type[]=StudentEnrollment&per_page=100';
+    Things.getThings(url).then(function (resultSectionEnrollment) {
+      //2. pluck the comparator (user_id)
+      $scope.sectionEnrollment = _.pluck(resultSectionEnrollment.data, valueToPluck.replace(/ /g, '_').toLowerCase());
+      //$log.warn($scope.sectionEnrollment);
+      //3. trim $scope.toTrim to only those lines that have the comparator
+      _.each($scope.toTrim, function(toTrimEl){
+        if(toTrimEl[$scope.pluckPos]){
+          //the export from Pearson may have dropped one or more leading 0 from the UMID
+          if(toTrimEl[$scope.pluckPos].length !==8){
+            var padding = Array(8 - toTrimEl[$scope.pluckPos].length + 1).join('0');
+            toTrimEl[$scope.pluckPos] = padding + toTrimEl[$scope.pluckPos];
+          }
+          // is this item's UMID in the section enrollments array: if so add it
+          if(_.indexOf($scope.sectionEnrollment, toTrimEl[$scope.pluckPos].toString()) !==-1 ){
+            sectionResults.push(toTrimEl);
+          }
+        }
+      });
+      // has instructor opted to change the points possible: if so change the value to it
+      if($scope.changePointsPossible){
+        $scope.headers[1][$scope.headers[1].length - 1] = $scope.changePointsPossible;
+      }
+      // prepend the headers to the results
+      sectionResults = $scope.headers.concat(sectionResults);
+      // transform sectionResults to a csv
+      var csv = Papa.unparse(sectionResults);
+
+      downloadCSVFile(sectionResults);
+        function downloadCSVFile(sectionResults) {
+          // credit: http://stackoverflow.com/questions/14964035/how-to-export-javascript-array-info-to-csv-on-client-side
+          var csvContent = "data:text/csv;charset=utf-8," + csv;
+          var encodedUri = encodeURI(csvContent);
+          var link = document.createElement("a");
+          link.setAttribute("href", encodedUri);
+          link.setAttribute("download", user + '-' + $scope.selectedSection.name + '.csv');
+          document.body.appendChild(link); // Required for FF
+          // reset scope vars
+          $scope.pointsPossible=null;
+          $scope.processing=false;
+          $scope.mute = true;
+          $scope.headers=null;
+          $scope.content = null;
+          $scope.changePointsPossible=null;
+          $scope.selectedSection=null;
+          // reset file upload input
+          angular.element('#trim-file').val(null);
+          // delay to give impression of processing file
+          setTimeout(function() {
+            link.click();
+          }, 800);
+        }
+    });
+  };
 }]);
