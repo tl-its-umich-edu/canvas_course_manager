@@ -768,6 +768,6 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
   };
 }]);
 
-canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location', '$rootScope', '$log', '$timeout', function (Things, $scope, $location, $rootScope, $log, $timeout) {
+canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootScope', '$log', '$timeout', function ($scope, $location, $rootScope, $log, $timeout) {
   // empty controller for grades view
 }]);
