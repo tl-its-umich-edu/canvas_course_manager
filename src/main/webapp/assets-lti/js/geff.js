@@ -43,8 +43,8 @@
       var targetData = results.data.slice(1); //ignore first row
       // see if all students have the same Current Grade and Final Grade
       validateData(targetData, errorCount);
-      // if there are stduents where Current Grade !== Final Grade
-      // show a message with numner and names of students affected
+      // if there are students where Current Grade !== Final Grade
+      // show a message with number and names of students affected
       if(errorCount.length !==0){
         $('#studentListCount').text(errorCount.length);
         $('#studentList').text(errorCount.join(', '));
