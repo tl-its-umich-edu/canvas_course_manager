@@ -1,7 +1,19 @@
 <h2 style="font-size:130%">Grade Export File Formatter</h2>
 <p>
-Use Grade Export File Formatter to reformat the "CSV File" from "Grades" into acceptable format for upload into "Faculty Center"
+  Use Grade Export File Formatter to reformat the "CSV File" from "Grades" into acceptable format for upload into "Faculty Center"
 </p>
+<div id="currentFinalMismatch"class="alert alert-danger" style="display:none">
+  The Current Score and Final Score do not match.
+The Current Grade calculates all the assignments that have been graded.
+The Final Grade column calculates all graded and ungraded assignments.
+GEFF uses the Final Grade column in preparing the file for upload to Faculty Center.
+For more information on configuring the gradebook for upload, see [insert link to documentation] <br> <br> 
+  You have ungraded activities for <strong id="studentListCount"></strong> students. Please score any ungraded gradebook cells and then re-export the gradebook. <br><br><strong>Affected students:</strong><br> <span id="studentList"></span>
+</div>
+
+<div id="noGradingSchemaMessage"class="alert alert-danger" style="display:none">
+  Uploaded csv did not have a grading scheme applied. Please go to gradebook and after doing so download again and re-import here.
+</div>
 <div class="file-input" id="drop-zone" style="height: calc(100% - 50px);padding: 5%;margin-top: 20px;border: 3px dashed #bbb;text-align:center">
 
 <div class="text-center drop-file-instruct" style="font-size: 65px;color: rgb(187,187,187);font-weight: 200;pointer-events: none;">
