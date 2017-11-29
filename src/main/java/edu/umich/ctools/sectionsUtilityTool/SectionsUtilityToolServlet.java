@@ -221,7 +221,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	public void fillContext(Context context, HttpServletRequest request) {
 		M_log.debug("fillContext() called");
-
+		context.put("openshiftBuildValues",openShiftBuildEnvVariables());
 		if ( SectionUtilityToolFilter.BASIC_LTI_LAUNCH_REQUEST.equals(request.getParameter(SectionUtilityToolFilter.LTI_MESSAGE_TYPE))) {
 			storeContext(context, request);
 		}
@@ -338,6 +338,20 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			ltiValues.put(ltiparam,(String)customValuesMap.get(ltiparam));
 			M_log.info(String.format(ltiparam + "=" + customValuesMap.get(ltiparam)));
 		}
+	}
+
+	private String openShiftBuildEnvVariables(){
+		StringBuilder buildInfo=new StringBuilder();
+		if(System.getenv(Utils.OPENSHIFT_BUILD_NAMESPACE)!=null){
+			buildInfo.append("OPENSHIFT_BUILD_NAMESPACE: " + System.getenv(Utils.OPENSHIFT_BUILD_NAMESPACE));
+			buildInfo.append(" OPENSHIFT_BUILD_NAME: " + System.getenv(Utils.OPENSHIFT_BUILD_NAME));
+			buildInfo.append(" GIT_SOURCE: " + System.getenv(Utils.OPENSHIFT_BUILD_SOURCE));
+			String branch = (System.getenv(Utils.OPENSHIFT_BUILD_REFERENCE) == null) ? "Master" : System.getenv(Utils.OPENSHIFT_BUILD_REFERENCE);
+			buildInfo.append(" GIT_BRANCH: " + branch);
+			buildInfo.append(" GIT_COMMIT: " + System.getenv(Utils.OPENSHIFT_BUILD_COMMIT));
+		}
+		M_log.debug("Openshift build Info: "+buildInfo.toString());
+		return buildInfo.toString();
 	}
 
 

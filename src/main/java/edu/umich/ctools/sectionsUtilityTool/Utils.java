@@ -97,6 +97,12 @@ public class Utils {
 	// when a api call  fails due to unknown reason may be due to internal failures return a UI with a status code is good.
 	public final static int API_UNKNOWN_ERROR = 666;
 	public final static int API_EXCEPTION_ERROR = 667;
+	public static final String OPENSHIFT_BUILD_NAMESPACE = "OPENSHIFT_BUILD_NAMESPACE";
+ 	public static final String OPENSHIFT_BUILD_SOURCE = "OPENSHIFT_BUILD_SOURCE";
+ 	public static final String OPENSHIFT_BUILD_REFERENCE = "OPENSHIFT_BUILD_REFERENCE";
+ 	public static final String OPENSHIFT_BUILD_NAME = "OPENSHIFT_BUILD_NAME";
+ 	public static final String OPENSHIFT_BUILD_COMMIT = "OPENSHIFT_BUILD_COMMIT";
+
 
 	public static Properties loadProperties(String path){
 		String propertiesFilePath = System.getProperty(path);
