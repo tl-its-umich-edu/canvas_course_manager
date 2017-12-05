@@ -2,17 +2,18 @@
 <p>
   Use Grade Export File Formatter to reformat the "CSV File" from "Grades" into acceptable format for upload into "Faculty Center"
 </p>
-<div id="currentFinalMismatch"class="alert alert-danger" style="display:none">
-  The Current Score and Final Score do not match.
-The Current Grade calculates all the assignments that have been graded.
-The Final Grade column calculates all graded and ungraded assignments.
-GEFF uses the Final Grade column in preparing the file for upload to Faculty Center.
-For more information on configuring the gradebook for upload, see [insert link to documentation] <br> <br> 
-  You have ungraded activities for <strong id="studentListCount"></strong> students. Please score any ungraded gradebook cells and then re-export the gradebook. <br><br><strong>Affected students:</strong><br> <span id="studentList"></span>
+<div id="currentFinalMismatch" class="alert alert-danger" style="display:none">
+  <p>
+    The Current Grade and Final Grade do not match. The <strong>Current Grade</strong> calculates graded assignments.
+    The <strong>Final Grade</strong> calculates graded + ungraded assignments, and assigns ungraded assignments as zero points. This can cause a discrepancy between the two grades. The Grade Export File Formatter (GEFF) uses the Final Grade and requires the Current Grade and Final Grade match.</p>
+  <p>There are ungraded assignments in the gradebook. Please enter scores for any ungraded assignment cells in the gradebook and download a new CSV file. </p>
+  <p>For more information for configuring the gradebook for upload, see Canvas: <a href="http://documentation.its.umich.edu/node/401" target="_blank">Preparing Final Grades for Wolverine Access.</a></p>
+<br>
+  You have ungraded activities for <strong id="studentListCount"></strong> student(s). Please score any ungraded gradebook cells and then re-export the gradebook. <br><br><strong>Affected students:</strong><br> <span id="studentList"></span>
 </div>
 
 <div id="noGradingSchemaMessage"class="alert alert-danger" style="display:none">
-  Uploaded csv did not have a grading scheme applied. Please go to gradebook and after doing so download again and re-import here.
+  Wolverine Access requires grades (A-E), but this file only includes percentages. Go to Settings and “Apply Grading Scheme”, then export a new CSV file. <a href="http://documentation.its.umich.edu/node/401" target="_blank">More Info.</a>
 </div>
 <div class="file-input" id="drop-zone" style="height: calc(100% - 50px);padding: 5%;margin-top: 20px;border: 3px dashed #bbb;text-align:center">
 
