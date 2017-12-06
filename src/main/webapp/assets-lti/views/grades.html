@@ -1,4 +1,94 @@
-<h2 style="font-size:130%">Grade Export File Formatter</h2>
+<ul class="nav nav-tabs" role="tablist">
+  <li role="presentation" class="active"><a data-target="#geff" href="" aria-controls="geff" role="tab" data-toggle="tab">Grade Export File Formatter</a></li>
+  <li role="presentation"><a data-target="#puff" href="" aria-controls="puff" role="tab" data-toggle="tab">Pearson Grades Formatter</a></li>
+</ul>
+<!-- Tab panes -->
+<div class="tab-content">
+  <div role="tabpanel" class="tab-pane active" id="geff">
+    <h2 style="font-size:130%">Grade Export File Formatter</h2>
+    <p>
+      Use Grade Export File Formatter to reformat the "CSV File" from "Grades" into acceptable format for upload into "Faculty Center"
+    </p>
+    <div id="currentFinalMismatch" class="alert alert-danger" style="display:none">
+      <p>
+        The Current Grade and Final Grade do not match. The <strong>Current Grade</strong> calculates graded assignments.
+        The <strong>Final Grade</strong> calculates graded + ungraded assignments, and assigns ungraded assignments as zero points. This can cause a discrepancy between the two grades. The Grade Export File Formatter (GEFF) uses the Final Grade and requires the Current Grade and Final Grade match.</p>
+      <p>There are ungraded assignments in the gradebook. Please enter scores for any ungraded assignment cells in the gradebook and download a new CSV file. </p>
+      <p>For more information for configuring the gradebook for upload, see Canvas: <a href="http://documentation.its.umich.edu/node/401" target="_blank">Preparing Final Grades for Wolverine Access.</a></p>
+    <br>
+      You have ungraded activities for <strong id="studentListCount"></strong> student(s). Please score any ungraded gradebook cells and then re-export the gradebook. <br><br><strong>Affected students:</strong><br> <span id="studentList"></span>
+    </div>
+
+    <div id="noGradingSchemaMessage"class="alert alert-danger" style="display:none">
+      Wolverine Access requires grades (A-E), but this file only includes percentages. Go to Settings and “Apply Grading Scheme”, then export a new CSV file. <a href="http://documentation.its.umich.edu/node/401" target="_blank">More Info.</a>
+    </div>
+    <div class="file-input" id="drop-zone" style="height: calc(100% - 50px);padding: 5%;margin-top: 20px;border: 3px dashed #bbb;text-align:center">
+
+      <div class="text-center drop-file-instruct" style="font-size: 65px;color: rgb(187,187,187);font-weight: 200;pointer-events: none;">
+        Drag file here
+      </div>
+      <div class="text-center drop-file-or" style="margin-top: -10px;margin-bottom: 10px;color: rgb(187,187,187);pointer-events: none;font-size: 25px;">
+        or
+        <p>choose a grade file</p>
+      </div>
+      <input class="btn btn-primary" id="csv-file" type="file" name="files" style="display:inline">
+    </div>
+    <div class="text-center" id="upload-file-info" style="padding-top: 10px;">
+    </div>
+  </div>
+  <div role="tabpanel" class="tab-pane" id="puff">
+      <h2 style="font-size:130%">Trim Pearson export file to a section</h2>
+      <p>Some external apps, like Pearson, provides instructors with a grade export that includes all the students in the course.</p>
+      <p>When instructors try to add these grades to their Canvas course the grade import process will ask about every student that was in the import but is not in the course.</p>
+      <p>Below you can trim the file you got from the app to only the students that are in the course.</p>
+      <div class="panel panel-default">
+        <div class="panel-body" style="padding:5px 15px 20px 15px">
+          <h3  style="font-size:110%">Step 1 - provide the file you downloaded from Pearson.</h3>
+          <div><input class="btn btn-default" id="trim-file" type="file" name="files" style="display:inline" file-model="trimfile"></div>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-body" style="padding:5px 15px 20px 15px">
+          <div class="form-inline">
+            <h3  style="font-size:110%">Step 2 (optional) - Change the Points Possible value</h3>
+             <div>
+              <label for="pointsPossible" style="font-weight:normal"> Change to: </label>
+              <input type="text" ng-model="changePointsPossible" id="pointsPossible" class="form-control" style="width:4em">
+              <span ng-show="pointsPossible">(currently set in spreadsheet to {{pointsPossible}})</span>
+             </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-body" style="padding:5px 15px 20px 15px">
+          <h3  style="font-size:110%">Step 3 - indicate what section to trim it to.</h3>
+          <ul style="margin-bottom:0">
+            <li ng-repeat="section in sections">
+              <input type="radio" name="sectionSelection" ng-value="section" ng-model="$parent.selectedSection" id="section{{section.id}}">
+              <label style="font-weight:normal" for="section{{section.id}}">{{section.name}}</label>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-body" style="padding:5px 15px 20px 15px">
+          <h3  style="font-size:110%">Step 4 - trim. The trimmed file will be downloaded to your computer.</h3>
+          <div> It will be named <code>&lt;uniqname>-&lt;section name>.csv</code></div>
+          <div>
+            <span ng-show="changePointsPossible">The points possible will be changed to <strong>{{changePointsPossible}}</strong>.</span>
+            <span ng-show="!mute">Students <strong>will</strong> be notified.</span>
+          </div>
+
+          <div>
+            <br>
+            <button type="button" class="btn btn-primary" ng-click="trimToSection(selectedSection)" ng-disabled="!selectedSection || !trimfile">
+              Trim <span ng-show="processing"> - working!</span>
+            </button>
+          </div>
+        </div>
+      </div>
+  </div>
+<!-- <h2 style="font-size:130%">Grade Export File Formatter</h2>
 <p>
   Use Grade Export File Formatter to reformat the "CSV File" from "Grades" into acceptable format for upload into "Faculty Center"
 </p>
@@ -27,6 +117,6 @@
 <input class="btn btn-primary" id="csv-file" type="file" name="files" style="display:inline">
 </div>
 <div class="text-center" id="upload-file-info" style="padding-top: 10px;">
-</div>
+</div> -->
 <script type="text/javascript" src="vendor/utils/papaparse.min.js"></script>
 <script type="text/javascript" src="assets-lti/js/geff.js"></script>
