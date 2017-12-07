@@ -1,6 +1,6 @@
 <ul class="nav nav-tabs" role="tablist">
   <li role="presentation" class="active"><a data-target="#geff" href="" aria-controls="geff" role="tab" data-toggle="tab">Grade Export File Formatter</a></li>
-  <li role="presentation"><a data-target="#puff" href="" aria-controls="puff" role="tab" data-toggle="tab">Pearson Grades Formatter</a></li>
+  <li role="presentation"><a data-target="#puff" href="" aria-controls="puff" role="tab" data-toggle="tab">Trim CSV to Section</a></li>
 </ul>
 <!-- Tab panes -->
 <div class="tab-content">
@@ -37,20 +37,33 @@
     </div>
   </div>
   <div role="tabpanel" class="tab-pane" id="puff">
-      <h2 style="font-size:130%">Trim Pearson export file to a section</h2>
-      <p>Some external apps, like Pearson, provides instructors with a grade export that includes all the students in the course.</p>
-      <p>When instructors try to add these grades to their Canvas course the grade import process will ask about every student that was in the import but is not in the course.</p>
-      <p>Below you can trim the file you got from the app to only the students that are in the course.</p>
+      <h2 style="font-size:130%">Trim CSV file to a section</h2>
+      <p>You have a CSV grade file with <strong>all the students in the course roster</strong> and want to import it into the site's gradebook.</p>
+      <div>
+        <p>This utility will provide you with a version of that file that includes <strong>only the students in specific sections of this site.</strong>
+          <a ng-hide="showWhy" ng-click="showWhy=true" href="" tabindex="0">(why?)</a>
+          <small ng-show="showWhy"><br>
+              When adding these grades to the Canvas course site the grade import process will
+              ask about every student in the file but not in the sections in the site. <strong>Tedious!</strong>
+          </small>
+        </p>
+      </div>
       <div class="panel panel-default">
         <div class="panel-body" style="padding:5px 15px 20px 15px">
-          <h3  style="font-size:110%">Step 1 - provide the file you downloaded from Pearson.</h3>
-          <div><input class="btn btn-default" id="trim-file" type="file" name="files" style="display:inline" file-model="trimfile"></div>
+          <h3  style="font-size:110%">Step 1</h3>
+          <p>Provide the file you downloaded from the external app.</p>
+          <div>
+            <label class="btn btn-file" ng-class="filename? 'btn-success': 'btn-primary'">
+              Browse <i class="glyphicon glyphicon-upload" ng-show="!filename"></i> <i class="glyphicon glyphicon-ok" ng-show="filename"></i> <input class="btn btn-default" id="trim-file" type="file" name="files" style="display:inline" file-model="trimfile">
+            </label> <small ng-show="filename">({{filename}})</small>
+          </div>
         </div>
       </div>
       <div class="panel panel-default">
         <div class="panel-body" style="padding:5px 15px 20px 15px">
           <div class="form-inline">
-            <h3  style="font-size:110%">Step 2 (optional) - Change the Points Possible value</h3>
+            <h3  style="font-size:110%">Step 2 (optional)</h3>
+            <p>Change the Points Possible value</p>
              <div>
               <label for="pointsPossible" style="font-weight:normal"> Change to: </label>
               <input type="text" ng-model="changePointsPossible" id="pointsPossible" class="form-control" style="width:4em">
@@ -61,7 +74,8 @@
       </div>
       <div class="panel panel-default">
         <div class="panel-body" style="padding:5px 15px 20px 15px">
-          <h3  style="font-size:110%">Step 3 - indicate what section to trim it to.</h3>
+          <h3  style="font-size:110%">Step 3</h3>
+          <p>Indicate what section to trim it to.</p>
           <ul style="margin-bottom:0">
             <li ng-repeat="section in sections">
               <input type="radio" name="sectionSelection" ng-value="section" ng-model="$parent.selectedSection" id="section{{section.id}}">
@@ -72,11 +86,11 @@
       </div>
       <div class="panel panel-default">
         <div class="panel-body" style="padding:5px 15px 20px 15px">
-          <h3  style="font-size:110%">Step 4 - trim. The trimmed file will be downloaded to your computer.</h3>
-          <div> It will be named <code>&lt;uniqname>-&lt;section name>.csv</code></div>
+          <h3  style="font-size:110%">Step 4</h3>
+          <p>Trim. The trimmed file will be downloaded to your computer.</p>
+          <div> It will be named <code>&lt;your uniqname>-&lt;section name>.csv</code></div>
           <div>
             <span ng-show="changePointsPossible">The points possible will be changed to <strong>{{changePointsPossible}}</strong>.</span>
-            <span ng-show="!mute">Students <strong>will</strong> be notified.</span>
           </div>
 
           <div>
