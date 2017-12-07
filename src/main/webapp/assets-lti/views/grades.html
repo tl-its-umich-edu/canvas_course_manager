@@ -52,11 +52,22 @@
         <div class="panel-body" style="padding:5px 15px 20px 15px">
           <h3  style="font-size:110%">Step 1</h3>
           <p>Provide the file you downloaded from the external app.</p>
-          <div>
-            <label class="btn btn-file" ng-class="filename? 'btn-success': 'btn-primary'">
-              Browse <i class="glyphicon glyphicon-upload" ng-show="!filename"></i> <i class="glyphicon glyphicon-ok" ng-show="filename"></i> <input class="btn btn-default" id="trim-file" type="file" name="files" style="display:inline" file-model="trimfile">
-            </label> <small ng-show="filename">({{filename}})</small>
+          <div class="input-group">
+            <label class="input-group-btn">
+              <span class="btn"  ng-class="filename? 'btn-success': 'btn-primary'">
+                Browse…
+                <i class="glyphicon glyphicon-upload" ng-show="!filename"></i> <i class="glyphicon glyphicon-ok" ng-show="filename"></i>
+                <input class="sr-only" id="trim-file" type="file" name="files" style="display:inline" file-model="trimfile">
+              </span>
+            </label>
+            <input type="text" class="form-control" readonly="" value="{{filename}}">
           </div>
+          <!-- <div>
+            <label class="btn btn-file" ng-class="filename? 'btn-success': 'btn-primary'">
+              Browse <i class="glyphicon glyphicon-upload" ng-show="!filename"></i> <i class="glyphicon glyphicon-ok" ng-show="filename"></i>
+               <input class="btn btn-default" id="trim-file" type="file" name="files" style="display:inline" file-model="trimfile">
+            </label> <small ng-show="filename">({{filename}})</small>
+          </div> -->
         </div>
       </div>
       <div class="panel panel-default">
