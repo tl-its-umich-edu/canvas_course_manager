@@ -769,19 +769,27 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
 }]);
 
 canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootScope', '$log', '$timeout', 'Things', function ($scope, $location, $rootScope, $log, $timeout, Things) {
+  //TODO: not sure this is needed
   $scope.mute=true;
+  //column to use to filter input list based on section enrollment
   var valueToPluck = 'SIS User ID';
+  //detects changes to the file input
   $scope.$watch('trimfile', function(newFileObj) {
     $scope.headers=[];
     $scope.content = false;
+    //there is a new file
     if (newFileObj) {
       $scope.loading = true;
+      //read the file
       var reader = new FileReader();
       reader.readAsText(newFileObj);
+      //when file is read
       reader.onload = function(e) {
+        //parse it into a json
         Papa.parse(reader.result, {
         	complete: function(results) {
             $timeout(function(){
+              //when parsed extract the headers, other values
               $scope.headers = [results.data[0],results.data[2]];
               $scope.pointsPossible = _.last($scope.headers[1]);
               $scope.pluckPos = _.indexOf($scope.headers[0], valueToPluck);
@@ -790,13 +798,15 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
         	}
         });
       };
+      ///put file name into scope
       $scope.filename = newFileObj.name;
     }
   });
-
+  // function called when user clicks on "Trim" button
   $scope.trimToSection = function(section){
     var sectionResults = [];
     $scope.processing=true;
+    // with use "user" to construct the file name that will download
     var user = $rootScope.ltiLaunch.custom_canvas_user_login_id;
     //1. get the section enrollment (only students)
     var url = 'manager/api/v1/sections/'+ section.id + '/enrollments?type[]=StudentEnrollment&per_page=100';
