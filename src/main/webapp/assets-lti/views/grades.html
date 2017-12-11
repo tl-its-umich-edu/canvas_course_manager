@@ -4,14 +4,14 @@
 </p>
 <div id="currentFinalMismatch" class="alert alert-danger" style="display:none">
   <p>
-    The Current Grade and Final Grade do not match. The <strong>Current Grade</strong> calculates graded assignments.
-    The <strong>Final Grade</strong> calculates graded + ungraded assignments, and assigns ungraded assignments as zero points. This can cause a discrepancy between the two grades. The Grade Export File Formatter (GEFF) uses the Final Grade and requires the Current Grade and Final Grade match.</p>
-  <p>There are ungraded assignments in the gradebook. Please enter scores for any ungraded assignment cells in the gradebook and download a new CSV file. </p>
+    There are blank cells in the gradebook. Please enter <em>0</em> or <em>EX</em> for any blank cells in the gradebook and export a new CSV file.
+  </p>
   <p>For more information for configuring the gradebook for upload, see Canvas: <a href="http://documentation.its.umich.edu/node/401" target="_blank">Preparing Final Grades for Wolverine Access.</a></p>
-<br>
-  You have ungraded activities for <strong id="studentListCount"></strong> student(s). Please score any ungraded gradebook cells and then re-export the gradebook. <br><br><strong>Affected students:</strong><br> <span id="studentList"></span>
+  <p>
+    Affected students: <strong id="studentListCount"></strong>. <a href="" id="showStudents">View?</a>
+  </p>
+  <p id="studentList" style="display:none"></p>
 </div>
-
 <div id="noGradingSchemaMessage"class="alert alert-danger" style="display:none">
   Wolverine Access requires grades (A-E), but this file only includes percentages. Go to Settings and “Apply Grading Scheme”, then export a new CSV file. <a href="http://documentation.its.umich.edu/node/401" target="_blank">More Info.</a>
 </div>
