@@ -39,7 +39,7 @@
     $('#currentFinalMismatch').fadeOut('fast');
 
     // check to see if Final Grade is available
-    
+
     if(results.data[0].hasOwnProperty('Final Grade') || results.data[3].hasOwnProperty('Final Grade')){
       var targetData = results.data.slice(1); //ignore first row
       // see if all students have the same Current Grade and Final Grade
@@ -112,6 +112,9 @@
   function handleDragLeave(evt) {
       $('#drop-zone').css('border-color','#aaa');
   }
+  $('#showStudents').on('click', function(){
+    $('#studentList').fadeIn();
+  });
 
   $(document).ready(function() {
     // credit: https://www.html5rocks.com/en/tutorials/file/dndfiles/
