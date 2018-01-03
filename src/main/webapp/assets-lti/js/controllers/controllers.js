@@ -772,7 +772,7 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
   //TODO: not sure this is needed
   $scope.mute=true;
   //column to use to filter input list based on section enrollment
-  var valueToPluck = 'SIS User ID';
+  var valueToPluck = 'SIS Login ID';
   //detects changes to the file input
   $scope.$watch('trimfile', function(newFileObj) {
     $scope.headers=[];
@@ -789,10 +789,15 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
         Papa.parse(reader.result, {
         	complete: function(results) {
             $timeout(function(){
-              //when parsed extract the headers, other values
-              $scope.headers = [results.data[0],results.data[2]];
-              $scope.pointsPossible = _.last($scope.headers[1]);
+              //when parsed extract the headers
+              $scope.headers = [results.data[0],results.data[1]];
+              // brittle - but all samples confirm it - the Points Possible cell is the 6th one in the second row
+              $scope.pointsPossible = $scope.headers[1][5];
+              // could also see if first cell is a "Points Possible" (with trimming) value
+              // and then cycle throght the remainder cells in that row till we get a value
+              //$log.info(valueToPluck);
               $scope.pluckPos = _.indexOf($scope.headers[0], valueToPluck);
+              // $scope.toTrim =  the data rows
               $scope.toTrim = _.rest(results.data ,2);
             });
         	}
@@ -811,26 +816,40 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
     //1. get the section enrollment (only students)
     var url = 'manager/api/v1/sections/'+ section.id + '/enrollments?type[]=StudentEnrollment&per_page=100';
     Things.getThings(url).then(function (resultSectionEnrollment) {
-      //2. pluck the comparator (user_id)
-      $scope.sectionEnrollment = _.pluck(resultSectionEnrollment.data, valueToPluck.replace(/ /g, '_').toLowerCase());
-      //$log.warn($scope.sectionEnrollment);
+      //2. pluck the comparator
+      //$log.info(resultSectionEnrollment.data.length);
+      $scope.sectionEnrollment = [];
+      _.each(resultSectionEnrollment.data, function(user){
+        $scope.sectionEnrollment.push(user.user);
+      });
+      //$log.info(resultSectionEnrollment.data);
+      //$log.info($scope.sectionEnrollment);
+      //$log.info($scope.sectionEnrollment);
       //3. trim $scope.toTrim to only those lines that have the comparator
       _.each($scope.toTrim, function(toTrimEl){
         if(toTrimEl[$scope.pluckPos]){
           //the export from Pearson may have dropped one or more leading 0 from the UMID
-          if(toTrimEl[$scope.pluckPos].length !==8){
-            var padding = Array(8 - toTrimEl[$scope.pluckPos].length + 1).join('0');
-            toTrimEl[$scope.pluckPos] = padding + toTrimEl[$scope.pluckPos];
-          }
-          // is this item's UMID in the section enrollments array: if so add it
-          if(_.indexOf($scope.sectionEnrollment, toTrimEl[$scope.pluckPos].toString()) !==-1 ){
+          // if(toTrimEl[$scope.pluckPos].length !==8){
+          //   var padding = Array(8 - toTrimEl[$scope.pluckPos].length + 1).join('0');
+          //   toTrimEl[$scope.pluckPos] = padding + toTrimEl[$scope.pluckPos];
+          // }
+          // is this item's sis_login_id in the section enrollments array: if so add it
+          var match =_.findWhere($scope.sectionEnrollment, {sis_login_id: toTrimEl[$scope.pluckPos].toString()});
+          if(match){
+            // in case the export from the external tool is lacking
+            // some values - use the corresponding enrollenmt to populate it
+            // this obviates the need to see if the sis_user_id has been tampered with
+            // by the external tool (leading 0s dropped, for example)
+            toTrimEl[0] = match.sortable_name;
+            toTrimEl[1] = match.id;
+            toTrimEl[2] = match.sis_user_id;
             sectionResults.push(toTrimEl);
           }
         }
       });
-      // has instructor opted to change the points possible: if so change the value to it
+      // has instructor opted to change the points possible: if so change the value to it in the second header
       if($scope.changePointsPossible){
-        $scope.headers[1][$scope.headers[1].length - 1] = $scope.changePointsPossible;
+        $scope.headers[1][5] = $scope.changePointsPossible;
       }
       // prepend the headers to the results
       sectionResults = $scope.headers.concat(sectionResults);
