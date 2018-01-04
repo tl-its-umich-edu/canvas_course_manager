@@ -277,3 +277,33 @@ canvasSupportApp.factory('focus', function($timeout, $window) {
     });
   };
 });
+
+//GENERIC GETTER of things
+canvasSupportApp.factory('Things', function ($http, $q) {
+  var getThings = function(url) {
+    var things = [];
+    var deferred = $q.defer();
+    var getNext = function(url) {
+      $http.get(url)
+        .then(function(result) {
+          things = things.concat(result.data);
+          if (result.headers('Next')) {
+            getNext(result.headers('Next'));
+          } else {
+            result.data = things;
+            deferred.resolve(result);
+          }
+        }, function(result) {
+          errorDisplay(url, result.status, 'Unable to get things');
+            deferred.resolve(result);
+        });
+    };
+    getNext(url);
+    return deferred.promise;
+  };
+  return {
+    getThings: function(url) {
+      return getThings(url);
+    }
+  };
+});
