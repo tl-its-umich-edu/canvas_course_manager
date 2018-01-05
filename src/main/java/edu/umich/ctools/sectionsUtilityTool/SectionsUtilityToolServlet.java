@@ -76,8 +76,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String GET_GROUPS= "get.groups.regex";
 	private static final String GET_GROUPSET= "get.groupset.regex";
 	private static final String POST_GROUPSET= "post.groupset.regex";
-  private static final String GET_SECTION_ENROLLMENT= "get.section.enrollment.regex";
-  private static final String GET_SECTION_ENROLLMENT_PAGED= "get.section.enrollment.paged.regex";
+	private static final String GET_SECTION_ENROLLMENT= "get.section.enrollment.regex";
+	private static final String GET_SECTION_ENROLLMENT_PAGED= "get.section.enrollment.paged.regex";
 
 	private static final String M_PATH_DATA = "mPathData";
 	private static final String LTI_1P0_CONST = "LTI-1p0";
