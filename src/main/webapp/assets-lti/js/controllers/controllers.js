@@ -878,8 +878,11 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
         if($scope.changePointsPossible){
           $scope.headers[1][5] = $scope.changePointsPossible;
         }
+        var sectionResultsSorted = _.sortBy(sectionResults, function(result) {
+            return result[0];
+        });
         // prepend the headers to the results
-        sectionResults = $scope.headers.concat(sectionResults);
+        sectionResults = $scope.headers.concat(sectionResultsSorted);
         // transform sectionResults to a csv
         var csv = Papa.unparse(sectionResults);
 
