@@ -897,13 +897,18 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
             //link.setAttribute("download", user + '-' + $scope.selectedSection.name + '.csv');
             document.body.appendChild(link); // Required for FF
             // reset scope vars
-            $scope.pointsPossible=null;
-            $scope.processing=false;
+            $scope.pointsPossible = null;
+            $scope.processing = false;
             $scope.mute = true;
-            $scope.headers=null;
+            $scope.headers = null;
+            $scope.filename = null;
             $scope.content = null;
-            $scope.changePointsPossible=null;
-            $scope.selectedSection=null;
+            $scope.changePointsPossible = null;
+            $scope.trimfile = null;
+            $scope.selectedSectionNumbers = 0;
+            _.each($rootScope.sections, function(section){
+              section.selected = false;
+            });
             // reset file upload input
             angular.element('#trim-file').val(null);
             // delay to give impression of processing file
