@@ -2,7 +2,7 @@
 /* global $, canvasSupportApp, _, generateCurrentTimestamp, angular, validateEmailAddress, FileReader, document, setTimeout, Papa */
 
 /* SINGLE COURSE CONTROLLER */
-canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, $scope, $rootScope, $filter, $location, $log) {
+canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Things', 'Friend', 'SectionSet', 'Terms', 'focus', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course, Courses, Sections, Things, Friend, SectionSet, Terms, focus, $scope, $rootScope, $filter, $location, $log) {
     $scope.userIsFriend=false;
     $scope.contextCourseId = $rootScope.ltiLaunch.custom_canvas_course_id;
     $scope.currentUserCanvasId = $rootScope.ltiLaunch.custom_canvas_user_id;
@@ -24,7 +24,10 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
         $scope.course = resultCourse.data;
         $scope.course.addingSections = false;
         $rootScope.courseAccount = $scope.course.account_id;
-        Sections.getSectionsForCourseId('', true).then(function (resultSections) {
+        //things
+        var url = '/canvasCourseManager/manager/api/v1/courses/' + resultCourse.data.id +'/sections?per_page=100&_='+ generateCurrentTimestamp();
+        Things.getThings(url).then(function (resultSections) {
+        //Sections.getSectionsForCourseId(resultCourse.data.id, false).then(function (resultSections) {
           $rootScope.sections = resultSections.data;
           $scope.loadingSections = false;
           if(!resultSections.data.errors) {

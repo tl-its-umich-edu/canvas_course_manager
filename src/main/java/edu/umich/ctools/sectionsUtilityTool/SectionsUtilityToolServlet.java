@@ -54,6 +54,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS_MASK = "canvas.api.getcourse.by.uniqname.no.sections.mask.regex";
 	private static final String CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS_MASK_PAGED = "canvas.api.getcourse.by.uniqname.no.sections.mask.paged.regex";
 	private static final String CANVAS_API_GETALLSECTIONS_PER_COURSE = "canvas.api.getallsections.per.course.regex";
+	private static final String CANVAS_API_GETALLSECTIONS_PER_COURSE_PAGED = "canvas.api.getallsections.per.course.paged.regex";
 	private static final String CANVAS_API_GETSECTION_PER_COURSE = "canvas.api.getsection.per.course.regex";
 	private static final String CANVAS_API_GETSECTION_INFO = "canvas.api.getsection.info.regex";
 	private static final String CANVAS_API_DECROSSLIST = "canvas.api.decrosslist.regex";
@@ -151,6 +152,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			put(CANVAS_API_GETSECTION_INFO, "for getting section info");
 			put(CANVAS_API_GETSECTION_PER_COURSE, "for getting section info for a given course");
 			put(CANVAS_API_GETALLSECTIONS_PER_COURSE, "for getting all sections info for a given course");
+			put(CANVAS_API_GETALLSECTIONS_PER_COURSE_PAGED, "for getting all sections info for a given course, paged");
 			put(CANVAS_API_SEARCH_COURSES, "for searching courses");
 			put(CANVAS_API_SEARCH_USER, "for searching for users");
 			put(CANVAS_API_CREATE_USER, "for creating a user");
