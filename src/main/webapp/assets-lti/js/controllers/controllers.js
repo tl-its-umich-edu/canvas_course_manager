@@ -24,10 +24,9 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
         $scope.course = resultCourse.data;
         $scope.course.addingSections = false;
         $rootScope.courseAccount = $scope.course.account_id;
-        //things
+        // using a generic paged getter to retrieve *all* sections
         var url = '/canvasCourseManager/manager/api/v1/courses/' + resultCourse.data.id +'/sections?per_page=100&_='+ generateCurrentTimestamp();
         Things.getThings(url).then(function (resultSections) {
-        //Sections.getSectionsForCourseId(resultCourse.data.id, false).then(function (resultSections) {
           $rootScope.sections = resultSections.data;
           $scope.loadingSections = false;
           if(!resultSections.data.errors) {
