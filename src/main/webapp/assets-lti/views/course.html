@@ -37,7 +37,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <ul class="container-fluid sectionList">
                     <li ng-class="section.course_id !== course.id ? 'row addedSection' :'row'" ng-repeat="section in course.sections | orderBy:'name'" id="{{section.id}}" data-parent-id="{{section.course_id}}">
                         <div class="col-md-8 col-lg-8 col-sm-8 col-xs-8"><span ng-show="course.addingUser"><input type="checkbox" id="check{{section.id}}" ng-model="section.selected" ng-change="sectionSelectedQuery()"> <label for ="check{{section.id}}">{{section.name}}</label></span><span ng-show="!course.addingUser">{{section.name}}</span></div>
