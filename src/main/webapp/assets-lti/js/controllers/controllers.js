@@ -769,8 +769,21 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
 }]);
 
 canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootScope', '$log', '$timeout', 'Things', function ($scope, $location, $rootScope, $log, $timeout, Things) {
+  var user = $rootScope.ltiLaunch.custom_canvas_user_login_id;
+  var section_name = '';
+  $scope.selectedSectionNumber = 0;
   //TODO: not sure this is needed
   $scope.mute=true;
+  $scope.checkSelectedSections = function(){
+    $scope.selectedSectionNumber = 0;
+    _.each($rootScope.sections, function(section){
+      if(section.selected){
+        $scope.selectedSectionNumber = $scope.selectedSectionNumber + 1;
+        $scope.selectedSectionsSet = true;
+      }
+    });
+
+  }
   //column to use to filter input list based on section enrollment
   var valueToPluck = 'SIS Login ID';
   //detects changes to the file input
@@ -811,68 +824,104 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
   $scope.trimToSection = function(section){
     var sectionResults = [];
     $scope.processing=true;
-    // with use "user" to construct the file name that will download
-    var user = $rootScope.ltiLaunch.custom_canvas_user_login_id;
-    //1. get the section enrollment (only students)
-    var url = 'manager/api/v1/sections/'+ section.id + '/enrollments?type[]=StudentEnrollment&per_page=100';
-    Things.getThings(url).then(function (resultSectionEnrollment) {
-      //2. pluck the comparator (the user object)
-      $scope.sectionEnrollment = [];
-      _.each(resultSectionEnrollment.data, function(user){
-        $scope.sectionEnrollment.push(user.user);
-      });
-      //3. trim $scope.toTrim to only those lines that have the comparator
-      _.each($scope.toTrim, function(toTrimEl){
-        if(toTrimEl[$scope.pluckPos]){
-          // is this item's sis_login_id in the section enrollments user object array?
-          var match =_.findWhere($scope.sectionEnrollment, {sis_login_id: toTrimEl[$scope.pluckPos].toString()});
-          if(match){
-            // in case the export from the external tool is lacking
-            // some values - use the corresponding enrollement to populate it
-            // this obviates the need to see if the sis_user_id has been tampered with
-            // by the external tool (leading 0s dropped, for example)
-            toTrimEl[0] = match.sortable_name;
-            toTrimEl[1] = match.id;
-            toTrimEl[2] = match.sis_user_id;
-            //push the row to the sectionResults array
-            sectionResults.push(toTrimEl);
-          }
-        }
-      });
-      // has instructor opted to change the points possible: if so change the value to it in the second header
-      if($scope.changePointsPossible){
-        $scope.headers[1][5] = $scope.changePointsPossible;
+    $scope.sectionEnrollment = [];
+    $scope.selectedSections  = [];
+    // look at what sections have been selected
+    _.each($rootScope.sections, function(section){
+      if(section.selected){
+        $scope.selectedSections.push(section);
+        $scope.selectedSectionsSet = true;
       }
-      // prepend the headers to the results
-      sectionResults = $scope.headers.concat(sectionResults);
-      // transform sectionResults to a csv
-      var csv = Papa.unparse(sectionResults);
-
-      downloadCSVFile(sectionResults);
-        function downloadCSVFile(sectionResults) {
-          // credit: http://stackoverflow.com/questions/14964035/how-to-export-javascript-array-info-to-csv-on-client-side
-          var csvContent = "data:text/csv;charset=utf-8," + csv;
-          var encodedUri = encodeURI(csvContent);
-          var link = document.createElement("a");
-          link.setAttribute("href", encodedUri);
-          link.setAttribute("download", user + '-' + $scope.selectedSection.name + '.csv');
-          document.body.appendChild(link); // Required for FF
-          // reset scope vars
-          $scope.pointsPossible=null;
-          $scope.processing=false;
-          $scope.mute = true;
-          $scope.headers=null;
-          $scope.content = null;
-          $scope.changePointsPossible=null;
-          $scope.selectedSection=null;
-          // reset file upload input
-          angular.element('#trim-file').val(null);
-          // delay to give impression of processing file
-          setTimeout(function() {
-            link.click();
-          }, 800);
-        }
     });
+
+    // how many sections has the user selected
+    $scope.iterations = $scope.selectedSections.length;
+    // fo each selected section get enrollment
+    _.each($scope.selectedSections, function(section){
+      //1. get the section enrollment (only students)
+      var url = 'manager/api/v1/sections/'+ section.id + '/enrollments?type[]=StudentEnrollment&per_page=100';
+      section_name = section_name + '_' + section.name;
+      Things.getThings(url).then(function (resultSectionEnrollment) {
+        //2. pluck the comparator (the user object)
+        _.each(resultSectionEnrollment.data, function(user){
+          $scope.sectionEnrollment.push(user.user);
+        });
+        // done with this section - set how many remain to be fetched
+        $scope.iterations = $scope.iterations - 1;
+        // if now sections remain to be fetched, call trimming function
+        if($scope.iterations === 0) {
+          $scope.finalTrim();
+        }
+
+    });
+
+      $scope.finalTrim = function(){
+        //3. trim $scope.toTrim to only those lines that have the comparator
+        _.each($scope.toTrim, function(toTrimEl){
+          if(toTrimEl[$scope.pluckPos]){
+            // is this item's sis_login_id in the section enrollments user object array?
+            var match =_.findWhere($scope.sectionEnrollment, {sis_login_id: toTrimEl[$scope.pluckPos].toString()});
+            if(match){
+              // in case the export from the external tool is lacking
+              // some values - use the corresponding enrollement to populate it
+              // this obviates the need to see if the sis_user_id has been tampered with
+              // by the external tool (leading 0s dropped, for example)
+              toTrimEl[0] = match.sortable_name;
+              toTrimEl[1] = match.id;
+              toTrimEl[2] = match.sis_user_id;
+              //push the row to the sectionResults array
+              sectionResults.push(toTrimEl);
+            }
+          }
+        });
+        // has instructor opted to change the points possible: if so change the value to it in the second header
+        if($scope.changePointsPossible){
+          $scope.headers[1][5] = $scope.changePointsPossible;
+        }
+        var sectionResultsSorted = _.sortBy(sectionResults, function(result) {
+            return result[0];
+        });
+        // prepend the headers to the results
+        sectionResults = $scope.headers.concat(sectionResultsSorted);
+        // transform sectionResults to a csv
+        var csv = Papa.unparse(sectionResults);
+
+        downloadCSVFile(sectionResults);
+          function downloadCSVFile(sectionResults) {
+            // credit: http://stackoverflow.com/questions/14964035/how-to-export-javascript-array-info-to-csv-on-client-side
+            var csvContent = "data:text/csv;charset=utf-8," + csv;
+            var encodedUri = encodeURI(csvContent);
+            var link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", user + '-' + section_name + '.csv');
+            //link.setAttribute("download", user + '-' + $scope.selectedSection.name + '.csv');
+            document.body.appendChild(link); // Required for FF
+            // reset scope vars
+            $scope.pointsPossible = null;
+            $scope.processing = false;
+            $scope.mute = true;
+            $scope.headers = null;
+            $scope.filename = null;
+            $scope.content = null;
+            $scope.changePointsPossible = null;
+            $scope.trimfile = null;
+            $scope.selectedSectionNumbers = 0;
+            _.each($rootScope.sections, function(section){
+              section.selected = false;
+            });
+            // reset file upload input
+            angular.element('#trim-file').val(null);
+            // delay to give impression of processing file
+            setTimeout(function() {
+              link.click();
+            }, 800);
+          }
+        };
+
+
+    });
+
+
   };
 
 

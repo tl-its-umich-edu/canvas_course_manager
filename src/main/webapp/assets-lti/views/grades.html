@@ -89,7 +89,7 @@
           <p>Indicate what section to trim it to.</p>
           <ul style="margin-bottom:0">
             <li ng-repeat="section in sections">
-              <input type="radio" name="sectionSelection" ng-value="section" ng-model="$parent.selectedSection" id="section{{section.id}}">
+              <input type="checkbox" name="sectionSelection" ng-value="section" ng-click="checkSelectedSections()" ng-model="section.selected" id="section{{section.id}}">
               <label style="font-weight:normal" for="section{{section.id}}">{{section.name}}</label>
             </li>
           </ul>
@@ -105,17 +105,15 @@
           </div>
           <div>
             <br>
-            <button type="button" class="btn btn-primary" ng-click="trimToSection(selectedSection)" ng-disabled="!selectedSection || !trimfile">
+            <!-- !selectedSection ||  -->
+            <button type="button" class="btn btn-primary" ng-click="trimToSection(selectedSection)" ng-disabled="!trimfile || selectedSectionNumber === 0">
               Trim <i ng-show="processing" class="glyphicon glyphicon-refresh glyphicon-spin"></i>
-            </button>
+            </button> <span ng-show="processing"> This might take a while, depending on the size and number of sections selected</span>
           </div>
         </div>
       </div>
   </div>
 </div>
-
-
-
 
 <script type="text/javascript" src="vendor/utils/papaparse.min.js"></script>
 <script type="text/javascript" src="assets-lti/js/geff.js"></script>
