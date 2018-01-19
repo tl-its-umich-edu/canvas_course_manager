@@ -1,0 +1,120 @@
+<!-- add user Modal -->
+<div class="modal fade" id="addBulkUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserLabel" aria-hidden="true" ng-controller="addBulkUserController">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">
+          <span aria-hidden="true">&times;</span>
+          <span class="sr-only">Close</span>
+        </button>
+        <h3 class="modal-title" id="addUserLabel">Add a user to selected sections of {{coursemodal.course_code}}</span></h3>
+      </div>
+      <div class="modal-body addUserInner" id="addUserInner">
+        <div class="coursePanel well">
+            <ul class="container-fluid courseList">
+                <li data-course-id="{{coursemodal.id}}">
+                    <div class="form-inline"  ng-class="failedValidation ? 'form-inline has-error' : 'form-inline'">
+                      <span id="helpBlockFriend" class="help-block" ng-hide="userExists || newUser || addSuccess || addError ">Type or paste a non-UM user.</span>
+                      <div class="form-group" ng-show="!userExists && !newUser && !newUserFound">
+                        <p style="margin:10px 0" role="alert" class="alert alert-warning alert-inline" ng-show="failedValidation" id="failedToValidateEmail" tabindex="-1">Please specify a valid NON UMICH email address</p>
+                        <div class="clearfix"></div>
+                        <label class="sr-only" for="friendEmailAddress1">Email address</label>
+                        <input class="form-control" type="text" ng-model="coursemodal.friendEmailAddress" id="friendEmailAddress1" placeholder="email address" style="width:300px" aria-describedby="helpBlockFriend">
+                      </div>
+                      <p ng-show="newUser" id="helpBlockFriendCreate" role="alert" class="help-block alert alert-warning">Please supply a name for <strong>{{coursemodal.friendEmailAddress}}</strong>.</p>
+                      <div ng-show="newUser" id="newUser" tabindex="-1">
+                        <div class="form-group form-inline form-group">
+                          <fieldset aria-describedby="helpBlockFriendCreate">
+                            <legend class="sr-only">Create new user to add to sections</legend>
+                            <p role="alert" style="margin:0 0 10px 0" class="alert alert-warning alert-inline "  ng-show="failedValidation" id="failedToValidateEmailName" tabindex="-1">Please supply a first and last names.</p>
+                            <div class="clearfix"></div>
+                            <label for="friendEmailAddress2" class="sr-only" style="display:none">Enter email</label>
+                            <input type="text" class="form-control" id="friendEmailAddress2" placeholder="Enter email" ng-model="coursemodal.friendEmailAddress"  style="display:none">
+                            <label for="friendNameFirst" class="sr-only">First name</label>
+                            <input type="text" class="form-control" id="friendNameFirst" placeholder="First name" ng-model="coursemodal.friendNameFirst">
+                            <label for="friendNameLast" class="sr-only">Last name</label>
+                            <input type="text" class="form-control" id="friendNameLast" placeholder="Last name" ng-model="coursemodal.friendNameLast">
+                          </fieldset>
+                        </div>
+                      </div>
+                      <div id="addMessageContainer" tabindex="-1">
+                        <div role="alert" class="alert alert-danger" ng-show="newUserFail">
+                          {{friend_account.detailedMessage}}.
+                        </div>
+                        <div role="alert" class="alert alert-success" ng-show="addSuccess && !addError && !addErrorGeneric">
+                          The following user is now enrolled in this course. In future you can use the People tool to add, delete or modify his/her enrollment in any course section(s).
+                        </div>
+                        <div class="alert alert-danger" ng-show="addError">
+                          There were some errors.
+                        </div>
+                        <div class="alert alert-danger" ng-show="addErrorGeneric">
+                          {{addErrorGeneric}}
+                        </div>
+
+                      </div>
+                    </div>
+                    <div ng-show="userExists || addSuccess">
+                      <div role="alert" class="alert alert-info" ng-show="!addSuccess && !addError && userExists">Validated and ready to add</div>
+                      <table class="table">
+                        <tr>
+                          <th scope="col">Name</th>
+                          <th scope="col">Email address</th>
+                          <th scope="col" ng-show="addSuccess">Sections</th>
+                        </tr>
+                        <tr>
+                          <td>
+                            {{friend.name}}
+                          </td>
+                          <td>
+                            {{friend.sis_user_id}}
+                          </td>
+                          <td ng-show="addSuccess || addErrors">
+                              <span ng-repeat="success in successes track by $index"><span class="label label-success" >{{success}}</span> </span>
+                              <span ng-repeat="error in errors track by $index"><span class="label label-danger" >{{error}}</span> </span>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                    <ul class="sectionListAddFriend" id="course{{coursemodal.id}}" ng-hide="userExists || newUser || addSuccess">
+                        <li ng-repeat="section in coursemodal.sections | orderBy:'name'" class="row section" id="sect{{section.id}}">
+                            <div class="col-md-5 sectionName">
+                                <input type="checkbox" id="c{{section.id}}"
+                                  ng-model="section.selected" ng-change="sectionSelectedQuery()">
+                                <label for="c{{section.id}}">{{section.name}}</label>
+                            </div>
+                            <div class="col-md-7">
+                              <div class="btn-group pull-right">
+                                <div>
+                                  <label for="s{{section.id}}" class="sr-only">Select role for user in section {{section.name}}</label>
+                                  <select id="s{{section.id}}">
+                                    <option value="StudentEnrollment">Student</option>
+                                    <option ng-if="section.courseRole === 'TeacherEnrollment'" value="TeacherEnrollment">Teacher</option>
+                                    <option ng-if="section.courseRole === 'TeacherEnrollment'"  value="TaEnrollment">TA</option>
+                                    <option value="ObserverEnrollment">Observer</option>
+                                    <option ng-if="section.courseRole === 'TeacherEnrollment'" value="DesignerEnrollment">Designer</option>
+                                  </select>
+                                </div>
+                              </div>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <span ng-show="!coursemodal.sectionSelected">You need to select at least one section.</span>
+        <div role="alert" class="spinner" ng-show="coursemodal.loadingLookupFriend">&nbsp;&nbsp;&nbsp;&nbsp;<span class="sr-only">Loading</span></div>
+        <div role="alert" class="spinner" ng-show="coursemodal.loadingCreateUser">&nbsp;&nbsp;&nbsp;&nbsp;<span class="sr-only">Loading</span></div>
+        <button type="button" ng-show="!coursemodal.sectionSelected" class="btn btn-primary" disabled>Next</button>
+        <button type="button" ng-show="coursemodal.sectionSelected && !newUser && !userExists && !addSuccess" class="btn btn-primary" ng-click="lookUpCanvasFriendClick()">Next</button>
+        <button type="button" ng-show="coursemodal.sectionSelected && !newUser && userExists && !addSuccess" class="btn btn-default"  ng-click="addAnother()">Start Over</button>
+        <button type="button" ng-show="coursemodal.sectionSelected && !newUser && userExists && !addSuccess" class="btn btn-primary" ng-click="addUserToSectionsClick()">Add User</button>
+        <button type="button" ng-show="addSuccess" class="btn btn-default"  ng-click="addAnother()">Add More Users</button>
+        <button type="button" ng-show="addSuccess" class="btn btn-primary"  data-dismiss="modal">Done</button>
+        <button type="button" ng-show="coursemodal.sectionSelected && newUser && !addSuccess" class="btn btn-default"  ng-click="addAnother()">Start Over</button>
+        <button type="button" ng-show="coursemodal.sectionSelected && newUser && !addSuccess" class="btn btn-primary" ng-click="createFriendClick()">Add User</button>
+      </div>
+    </div>
+
+  </div>
+</div>
