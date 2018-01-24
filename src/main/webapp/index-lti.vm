@@ -103,6 +103,13 @@
         <div ng-include src="'assets-lti/views/friends.html'"></div>
       </div>
     </div>
+    <div class="modal fade" id="addBulkUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserLabel" aria-hidden="true" ng-controller="addBulkUserController">
+      <div class="modal-dialog modal-lg">
+        <div ng-include src="'assets-lti/views/add_bulk_user.html'"></div>
+      </div>
+    </div>
+
+
     <a aria-hidden="true" href="" style="position:fixed;right:0;top:60px;width:30px" ng-click="showDebug = !showDebug">&nbsp;</a>
     <div aria-hidden="true" ng-show="showDebug" class="alert alert-info">
         <script>
