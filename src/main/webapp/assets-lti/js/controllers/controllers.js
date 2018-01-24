@@ -242,7 +242,6 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
   // the user gets added to the selected sections
 
   $scope.createFriendClick = function () {
-
     var friendEmailAddress = $.trim($scope.coursemodal.friendEmailAddress);
     var friendNameFirst = $.trim($scope.coursemodal.friendNameFirst);
     var friendNameLast = $.trim($scope.coursemodal.friendNameLast);
@@ -938,202 +937,57 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
 
 }]);
 
-canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$rootScope', 'SectionSet', 'focus', function (Friend, $scope, $rootScope, SectionSet, focus) {
+canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$rootScope', 'SectionSet', 'focus', '$log', function (Friend, $scope, $rootScope, SectionSet, focus, $log) {
   // listen for changes triggered by the service to load course context in the modal
   $scope.$on('courseSetChanged', function(event, sectionSet) {
       $scope.coursemodal = sectionSet[0];
   });
-  $scope.$on('courseSetChanged', function(event, sectionSet) {
-      $scope.coursemodal = sectionSet[0];
-  });
+  //setting some initial values
+  $scope.newUsersExist = [];
+  $scope.newUsersNotExist = [];
+  $scope.parseUserList = function(){
+    $scope.newUserList = $scope.coursemodal.rawUserList.split(',');
+    $scope.newUserListLength = $scope.coursemodal.rawUserList.split(',').length;
+    _.each($scope.newUserList, function(user){
+      Friend.lookUpCanvasFriend($.trim(user)).then(function (resultLookUpCanvasFriend) {
+        if(resultLookUpCanvasFriend.data.length===0 ){
+          //if not in Canvas, add to list to create friend, create user in Canvas and add to site
+          // the list will render a table with inputs to enter first name and last name
+          $scope.newUsersNotExist.push($.trim(user));
+        } else {
+          var obj={'input':user};
+          //only one return from the search, add to the list
+          if(resultLookUpCanvasFriend.data.length === 1){
+            obj.details=[resultLookUpCanvasFriend.data[0]];
+            $scope.newUsersExist.push(obj);
+          }
+          else {
+            // more than one return - push the results to allow
+            // the user to select the right one
+            obj.details=resultLookUpCanvasFriend.data;
+            $scope.newUsersExist.push(obj);
+          }
+        }
+      });
+    });
+  };
 
+  // user has selected one of the candidates
+  // in the list returned by the search
+  $scope.selectCand = function(newUser, index){
+    var user = _.findWhere($scope.newUsersExist, {input: newUser});
+    var cand = user.details[index];
+    user.details = [];
+    user.details.push(cand);
+  };
   //change handler for section checkboxes - calculates if any checkbox is checked and updates
   // a variable used to enable the 'Add Friend' button
   $scope.sectionSelectedQuery = function () {
     if(_.where($scope.coursemodal.sections,{selected: true}).length > 0){
-
       $scope.coursemodal.sectionSelected = true;
     }
     else {
       $scope.coursemodal.sectionSelected = false;
     }
-  };
-
-  // handler for 'Add Friend' (the first one), if account exists in Canvas, add to sections, if not
-  // present a form to create
-
-  $scope.lookUpCanvasFriendClick = function () {
-    $scope.friend = {};
-    $scope.coursemodal.loadingLookupFriend = true;
-    var friendId = $.trim($scope.coursemodal.friendEmailAddress);
-    if(validateEmailAddress(friendId)){
-      $scope.failedValidation = false;
-      Friend.lookUpCanvasFriend(friendId).then(function (resultLookUpCanvasFriend) {
-        if(resultLookUpCanvasFriend.status ===200) {
-          if (resultLookUpCanvasFriend.data.length ===1 && resultLookUpCanvasFriend.data[0].sis_user_id === friendId) {
-            // user exists - set data to Canvas response
-            $scope.friend = resultLookUpCanvasFriend.data[0];
-            $scope.userExists = true;
-          } else {
-            // not an existing user - present interface to add
-            $scope.newUser = true;
-            $scope.$evalAsync(function() {
-              focus('newUser');
-            })
-
-          }
-        }
-        $scope.coursemodal.loadingLookupFriend = false;
-      });
-    }
-    else {
-      $scope.coursemodal.loadingLookupFriend = false;
-      $scope.failedValidation = true;
-      $scope.$evalAsync(function() {
-        focus('failedToValidateEmail');
-      })
-    }
-  };
-
-  // handler for 'Add Friend' (the second one) - calls Friends endpoint (that does the call to
-  // the external Friend service) - if successful the account is also created in Canvas and
-  // the user gets added to the selected sections
-
-  $scope.createFriendClick = function () {
-
-    var friendEmailAddress = $.trim($scope.coursemodal.friendEmailAddress);
-    var friendNameFirst = $.trim($scope.coursemodal.friendNameFirst);
-    var friendNameLast = $.trim($scope.coursemodal.friendNameLast);
-
-    var notifyInstructor = 'false';
-
-    if(validateEmailAddress(friendEmailAddress) && friendNameFirst !=='' && friendNameLast !==''){
-      $scope.failedValidation = false;
-      var requestorEmail = $rootScope.ltiLaunch.lis_person_contact_email_primary;
-      $scope.coursemodal.loadingCreateUser = true;
-
-      Friend.doFriendAccount(friendEmailAddress, requestorEmail, notifyInstructor, $rootScope.ltiLaunch.lis_person_name_given, $rootScope.ltiLaunch.lis_person_name_family).then(function (resultDoFriendAccount) {
-        //check for success of creating a friend account (or if it is already there)
-        if (resultDoFriendAccount.data.message === 'created' || resultDoFriendAccount.data.message === 'exists') {
-          $scope.friend_account = resultDoFriendAccount.data;
-          $scope.newUserFound=true;
-          $scope.friendDone=true;
-
-          Friend.createCanvasFriend(friendEmailAddress,friendNameFirst, friendNameLast).then(function (resultCreateCanvasFriend) {
-            // check for successufull creation of Canvas account
-            if (resultCreateCanvasFriend.data.sis_user_id === friendEmailAddress) {
-              // here we add the person to the scope and then use another function to add them to the sites
-              $scope.newUser=false;
-              $scope.newUserFound=true;
-              $scope.friend = resultCreateCanvasFriend.data;
-              $scope.canvasDone=true;
-              $scope.addUserToSectionsClick();
-            } else {
-              // TODO: servlet errors are caught by factory
-              // here we would deal with a 200 that nevertheless was an error, but have been unable to trigger this
-            }
-          });
-          $scope.userAvailable = true;
-          $scope.done = true;
-        } else {
-          // 500 errors are caught and reported by factory, here we
-          // are dealing with incorrect data errors (ie. email address that slipped through validator)
-          if(data.data.message !== 'request error') {
-            $scope.friend_account = resultCreateCanvasFriend.data;
-            $scope.newUserFail=true;
-          }
-        }
-        $scope.coursemodal.loadingCreateUser = false;
-      });
-    }
-    else {
-      $scope.failedValidation = true;
-      $scope.$evalAsync(function() {
-        focus('failedToValidateEmailName');
-      })
-
-    }
-  };
-
-  // handler to reset the state in the workflow
-  // and a allow the user to add another
-
-  $scope.addAnother = function() {
-    $scope.friend = false;
-    $scope.userExists = false;
-    $scope.newUser = false;
-    $scope.newUserFound = false;
-    $scope.successes = false;
-    $scope.addSuccess = false;
-    $scope.coursemodal.friendEmailAddress ='';
-    $scope.coursemodal.friendNameFirst ='';
-    $scope.coursemodal.friendNameLast ='';
-
-    $scope.resetable = false;
-    for(var e in $scope.coursemodal.sections) {
-      $scope.coursemodal.sections[e].selected = false;
-    }
-    $scope.coursemodal.sectionSelected = false;
-  };
-
-  // function used by the event handlers attached to the two
-  // 'Add Friend' buttons. It adds the user to the selected sections
-
-  $scope.addUserToSectionsClick = function () {
-    var checkedSections = _.where($scope.coursemodal.sections, {selected: true}).length;
-    var sectNumber = 0;
-    var successes = [];
-    var errors = [];
-    $('#successFullSections').empty();
-    for(var e in $scope.coursemodal.sections) {
-      if ($scope.coursemodal.sections[e].selected) {
-        sectNumber = sectNumber + 1;
-        var sectionId = $scope.coursemodal.sections[e].id;
-        var sectionName = $scope.coursemodal.sections[e].name;
-        var thisSectionRole = $('li#sect' +sectionId).find('select').val();
-        //REGEXINFO: canvas.api.add.user.regex
-        var url = '/canvasCourseManager/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + $scope.friend.id + '&enrollment[enrollment_state]=active&enrollment[type]=' + thisSectionRole;
-        Friend.addFriendToSection(url, sectionName, sectNumber).then(function (resultAddFriendToSection) {
-          if(resultAddFriendToSection.data[1].message){
-            $scope.addErrorGeneric = resultAddFriendToSection.data[1].message;
-          }
-          else {
-            if (resultAddFriendToSection.data.errors) {
-              // failed to process this add
-              errors.push(sectionName);
-              $scope.addError = true;
-            } else {
-              if(resultAddFriendToSection.data[1].course_id) {
-                // was able to process this add
-                successes.push(resultAddFriendToSection.data[0].section_name);
-                if (checkedSections === resultAddFriendToSection.data[0].section_number){
-                  // the last request, clean up the scope
-                  $scope.newUser = false;
-                  $scope.none = false;
-                  $scope.userAvailable  = false;
-                  $scope.coursemodal.resetable = true;
-                }
-              }
-              else {
-                errors.push(sectionName);
-              }
-            }
-          }
-        });
-      }
-    }
-    // if a single failure, toggle error message
-    if($scope.addError || $scope.addErrorGeneric) {
-      $scope.addSuccess = false;
-    } else {
-      $scope.addSuccess = true;
-    }
-    // make available to the template what sections succeeded, which not
-    $scope.successes = successes.sort();
-    $scope.errors = errors
-    // pass the focus to the container of the success and failure message
-    $scope.$evalAsync(function() {
-      focus('addMessageContainer');
-    })
   };
 }]);
