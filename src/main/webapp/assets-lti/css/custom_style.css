@@ -273,6 +273,15 @@ td.table-danger {
     display: block;
 }
 
+.candRow {
+  padding:5px;
+  margin-bottom:5px
+}
+.candRow:hover {
+   background: #fff
+}
+
+
 .glyphicon-spin {
   -webkit-animation: spin 1000ms infinite linear;
   animation: spin 1000ms infinite linear;
