@@ -943,10 +943,13 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
       $scope.coursemodal = sectionSet[0];
   });
   //setting some initial values
-  $scope.newUsersExist = [];
-  $scope.newUsersNotExist = [];
   $scope.parseUserList = function(){
+    $scope.newUsersExist = [];
+    $scope.newUsersNotExist = [];
     $scope.newUserList = $scope.coursemodal.rawUserList.split(',');
+    if($scope.newUserList.length > 30) {
+      $scope.newUserListTooLong = true;
+    }
     $scope.newUserListLength = $scope.coursemodal.rawUserList.split(',').length;
     $scope.multipleCandidateCount = 0;
     _.each($scope.newUserList, function(user){
@@ -983,6 +986,13 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
     user.details = [];
     user.details.push(cand);
     $scope.multipleCandidateCount = $scope.multipleCandidateCount - 1;
+  };
+
+  $scope.redoBulkUsers = function(){
+    $scope.newUsersExist = null;
+    $scope.newUsersNotExist = null;
+    $scope.newUserList = null;
+    $scope.coursemodal.rawUserList='';
   };
   //change handler for section checkboxes - calculates if any checkbox is checked and updates
   // a variable used to enable the 'Add Friend' button

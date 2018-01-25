@@ -11,14 +11,24 @@
     <div class="well">
         <ul class="container-fluid">
             <li data-course-id="{{coursemodal.id}}">
-              <div class="form-group">
-                <label for="userList" class="sr-only">
-                  Add users, comma separated.
-                </label>
-                <textarea ng-model="coursemodal.rawUserList" class="form-control" name="users" id="userList" rows="8"></textarea>
+              <div ng-show="newUserList || newUserList.length">
+                <button type="button" class="btn btn-primary" ng-click="redoBulkUsers()">
+                  Start over
+                </button>
               </div>
-              <div class="form-group">
-                <button class="btn btn-primary" ng-click="parseUserList()">Test</button>
+              <div ng-show="!newUserList">
+                <div class="form-group">
+                  <label for="userList" class="sr-only">
+                    Add users, comma separated.
+                  </label>
+                  <textarea ng-model="coursemodal.rawUserList" class="form-control" name="users" id="userList" rows="8"></textarea>
+                </div>
+                <div class="alert alert-warning" ng-if="newUserListTooLong">
+                  More than 30 user names detected.
+                </div>
+                <div class="form-group">
+                  <button class="btn btn-primary" ng-click="parseUserList()">Lookup users</button>
+                </div>
               </div>
               <div  ng-if="newUsersNotExist.length">
                 <h3>New users <small>(accounts will be created and added to selected section)</small></h3>
