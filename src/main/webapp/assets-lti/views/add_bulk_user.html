@@ -47,9 +47,11 @@
                   </tbody>
                 </table>
               </div>
-              {{newUsersExist}}
               <div ng-if="newUsersExist.length">
                 <h3>Existing users <small>(will be added to selected section)</small></h3>
+                <p class="alert alert-warning" ng-if="multipleCandidateCount && multipleCandidateCount !==0">
+                  <strong>Note: </strong>a search for these users returned more that one possibility in <strong>{{multipleCandidateCount}}</strong> cases. Indicate which one was intended, please.
+                </p>
                 <table class="table">
                   <thead>
                     <tr>
@@ -63,10 +65,14 @@
                         {{newUser.input}}
                       </th>
                       <td class="form-inline">
-                        <div ng-repeat="cand in newUser.details">
-                          {{cand.sortable_name}} <a ng-if="newUser.details.length > 1" class="pull-right" href="" ng-click="selectCand(newUser.input, $index)">this one</a>
-                        </div>
-
+                        <ul>
+                          <li ng-repeat="cand in newUser.details" ng-class="newUser.details.length > 1?'row candRow':'row'">
+                            <div class="col-md-10">{{cand.sortable_name}} <span ng-if="newUser.details.length > 1">({{cand.login_id}})</span></div>
+                            <div class="col-md-2">
+                             <button class="btn btn-default btn-xs" ng-if="newUser.details.length > 1" class="pull-right" ng-click="selectCand(newUser.input, $index)">Select</button>
+                           </div>
+                          </li>
+                        </ul>
                       </td>
                     </tr>
                   </tbody>

@@ -948,6 +948,7 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
   $scope.parseUserList = function(){
     $scope.newUserList = $scope.coursemodal.rawUserList.split(',');
     $scope.newUserListLength = $scope.coursemodal.rawUserList.split(',').length;
+    $scope.multipleCandidateCount = 0;
     _.each($scope.newUserList, function(user){
       Friend.lookUpCanvasFriend($.trim(user)).then(function (resultLookUpCanvasFriend) {
         if(resultLookUpCanvasFriend.data.length===0 ){
@@ -964,6 +965,7 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
           else {
             // more than one return - push the results to allow
             // the user to select the right one
+            $scope.multipleCandidateCount = $scope.multipleCandidateCount + 1;
             obj.details=resultLookUpCanvasFriend.data;
             $scope.newUsersExist.push(obj);
           }
@@ -977,8 +979,10 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
   $scope.selectCand = function(newUser, index){
     var user = _.findWhere($scope.newUsersExist, {input: newUser});
     var cand = user.details[index];
+    user.input = user.details[index].login_id;
     user.details = [];
     user.details.push(cand);
+    $scope.multipleCandidateCount = $scope.multipleCandidateCount - 1;
   };
   //change handler for section checkboxes - calculates if any checkbox is checked and updates
   // a variable used to enable the 'Add Friend' button
