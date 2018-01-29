@@ -281,6 +281,9 @@ td.table-danger {
    background: #fff
 }
 
+.candMultRow {
+  background:#fcf8e3  
+}
 
 .glyphicon-spin {
   -webkit-animation: spin 1000ms infinite linear;
