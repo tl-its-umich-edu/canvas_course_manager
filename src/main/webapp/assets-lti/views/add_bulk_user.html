@@ -5,33 +5,34 @@
       <span aria-hidden="true">&times;</span>
       <span class="sr-only">Close</span>
     </button>
-    <h3 class="modal-title" id="addUserLabel">Add a user to selected sections of {{coursemodal.course_code}}</span></h3>
+    <h3 class="modal-title" id="addUserLabel">Add users to selected sections of {{coursemodal.course_code}}</span></h3>
   </div>
   <div class="modal-body addUserInner" id="addUserInner">
     <div class="well">
         <ul class="container-fluid">
             <li data-course-id="{{coursemodal.id}}">
               <div ng-show="newUserList || newUserList.length">
-                <button type="button" class="btn btn-primary" ng-click="redoBulkUsers()">
+                <button type="button" class="btn btn-default" ng-click="redoBulkUsers()">
                   Start over
-                </button>
+                </button><br>
               </div>
               <div ng-show="!newUserList">
                 <div class="form-group">
                   <label for="userList" class="sr-only">
-                    Add users, comma separated.
+                    Add users, one per line.
                   </label>
-                  <textarea ng-model="coursemodal.rawUserList" class="form-control" name="users" id="userList" rows="8"></textarea>
+                  <textarea placeholder="Paste users, one per line." ng-model="coursemodal.rawUserList" class="form-control" name="users" id="userList" rows="8"></textarea>
                 </div>
                 <div class="alert alert-warning" ng-if="newUserListTooLong">
-                  More than 30 user names detected.
+                  More than 50 user names detected.
                 </div>
                 <div class="form-group">
                   <button class="btn btn-primary" ng-click="parseUserList()">Lookup users</button>
                 </div>
               </div>
+              <div class="alert alert-info" ng-if="lookingUpUsersWait">Looking up users - this may take a while.</div>
               <div  ng-if="newUsersNotExist.length">
-                <h3>New users <small>(accounts will be created and added to selected section)</small></h3>
+                <h3>New users <small>(accounts will be created)</small></h3>
                 <table class="table">
                   <thead>
                     <tr>
@@ -43,19 +44,22 @@
                   <tbody>
                     <tr ng-repeat="newUser in newUsersNotExist track by $index">
                       <th scope="row">
-                        {{newUser}}
+                        {{newUser.id}}
                       </th>
                       <td class="form-inline">
-                        <label for="{{newUser}}fn" class="sr-only">Enter first name for user {{newUser}}</label>
-                        <input type="text" id="{{newUser}}fn" class="form-control" name="" value="">
+                        <label for="{{newUser.id}}fn" class="sr-only">Enter first name for user {{newUser}}</label>
+                        <input ng-model="newUser.first_name" type="text" id="{{newUser.id}}fn" class="form-control" name="" value="" placeholder="First name">
                       </td>
                       <td class="form-inline">
-                        <label for="{{newUser}}ln" class="sr-only">Enter last name for user {{newUser}}</label>
-                        <input type="text" id="{{newUser}}ln" class="form-control" name="" value="">
+                        <label for="{{newUser}.id}ln" class="sr-only">Enter last name for user {{newUser}}</label>
+                        <input ng-model="newUser.last_name"  type="text" id="{{newUser.id}}ln" class="form-control" name="" value="" placeholder="Last name">
                       </td>
                     </tr>
                   </tbody>
                 </table>
+                <div class="form-group">
+                  <button class="btn btn-primary" ng-click="createUserList()">Create users</button>
+                </div>
               </div>
               <div ng-if="newUsersExist.length">
                 <h3>Existing users <small>(will be added to selected section)</small></h3>
@@ -70,7 +74,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr ng-repeat="newUser in newUsersExist track by $index">
+                    <tr ng-repeat="newUser in newUsersExist track by $index" ng-class="newUser.details.length > 1?'candMultRow':''">
                       <th scope="row">
                         {{newUser.input}}
                       </th>
@@ -88,8 +92,7 @@
                   </tbody>
                 </table>
               </div>
-
-
+              <h3>Select a section to add these users to</h3>
                 <ul class="coursePanel sectionListAddFriend" id="course{{coursemodal.id}}" ng-hide="userExists || newUser || addSuccess">
                     <li ng-repeat="section in coursemodal.sections | orderBy:'name'" class="row section" id="sect{{section.id}}">
                         <div class="col-md-5 sectionName">
