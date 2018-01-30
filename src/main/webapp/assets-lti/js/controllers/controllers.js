@@ -951,6 +951,28 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
   $scope.$on('courseSetChanged', function(event, sectionSet) {
       $scope.coursemodal = sectionSet[0];
   });
+
+  $scope.$watch('bulkfile', function(newFileObj) {
+    $scope.headers=[];
+    $scope.content = false;
+    //there is a new file
+    if (newFileObj) {
+      $scope.loading = true;
+      //read the file
+      var reader = new FileReader();
+      reader.readAsText(newFileObj);
+      //when file is read
+      reader.onload = function(e) {
+        $scope.coursemodal.rawUserList=reader.result;
+        $scope.parseUserList();
+      };
+      ///put file name into scope
+      $scope.bulkfilename = newFileObj.name;
+
+    }
+  });
+
+
   //setting some initial values
   $scope.parseUserList = function(){
     $scope.newUserList =[];
@@ -991,7 +1013,6 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
         }
         if($scope.newUserListLookedUpCount === $scope.newUserListLength){
           $scope.lookingUpUsersWait = false;
-          // we are done
         }
       });
     });
