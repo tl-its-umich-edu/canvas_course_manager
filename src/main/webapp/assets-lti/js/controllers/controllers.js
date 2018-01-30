@@ -953,84 +953,68 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
   });
   //setting some initial values
   $scope.parseUserList = function(){
+    $scope.newUserList =[];
     $scope.lookingUpUsersWait = true;
     $scope.newUsersExist = [];
+    $scope.newUsersExistNoName = [];
     $scope.newUsersNotExist = [];
-    $scope.newUserList = $scope.coursemodal.rawUserList.split('\n');
+    var firstSplit = _.rest($scope.coursemodal.rawUserList.split('\n'),1);
+    var headers = $scope.coursemodal.rawUserList.split('\n')[0].split(',');
+    _.each(firstSplit, function(user){
+      var userArray = user.split(',');
+      var newUser = {};
+      newUser[headers[0]] = userArray[0];
+      newUser[headers[1]] = userArray[1];
+      newUser[headers[2]] = userArray[2];
+      $scope.newUserList.push(newUser);
+    });
     if($scope.newUserList.length > 50) {
       $scope.newUserListTooLong = true;
     }
-    $scope.newUserListLength = $scope.coursemodal.rawUserList.split('\n').length;
-
-    $log.info($scope.newUserList);
-
+    $scope.newUserListLength = firstSplit.length - 1;
     $scope.newUserListLookedUpCount = 0;
-    $scope.multipleCandidateCount = 0;
+
     _.each($scope.newUserList, function(user){
-      Friend.lookUpCanvasFriend($.trim(user)).then(function (resultLookUpCanvasFriend) {
+      Friend.lookUpCanvasFriend($.trim(user.email)).then(function (resultLookUpCanvasFriend) {
         $scope.newUserListLookedUpCount = $scope.newUserListLookedUpCount + 1;
-        if($scope.newUserListLookedUpCount === $scope.newUserListLength){
-          $scope.lookingUpUsersWait = false;
-        }
         if(resultLookUpCanvasFriend.data.length===0 ){
           //if not in Canvas, add to list to create friend, create user in Canvas and add to site
           // the list will render a table with inputs to enter first name and last name
-          $scope.newUsersNotExist.push({id:$.trim(user),first_name:'',last_name:''});
+          $scope.newUsersNotExist.push({email:$.trim(user.email),first_name:user.first_name,last_name:user.last_name});
         } else {
-          var obj={'input':user};
-          //only one return from the search, add to the list
-          if(resultLookUpCanvasFriend.data.length === 1){
-            obj.details=[resultLookUpCanvasFriend.data[0]];
-            $scope.newUsersExist.push(obj);
+          if (resultLookUpCanvasFriend.data[0].sortable_name ==='') {
+            $scope.newUsersExistNoName.push({email:$.trim(user.email),first_name:user.first_name ,last_name:user.last_name});
           }
           else {
-            // more than one return - push the results to allow
-            // the user to select the right one
-            $scope.multipleCandidateCount = $scope.multipleCandidateCount + 1;
-            obj.details=resultLookUpCanvasFriend.data;
-            $scope.newUsersExist.push(obj);
+            $scope.newUsersExist.push({email:$.trim(user.email),first_name:resultLookUpCanvasFriend.data[0].sortable_name.split(',')[1] ,last_name:resultLookUpCanvasFriend.data[0].sortable_name.split(',')[0]});
           }
+        }
+        if($scope.newUserListLookedUpCount === $scope.newUserListLength){
+          $scope.lookingUpUsersWait = false;
+          // we are done
         }
       });
     });
   };
 
-  // user has selected one of the candidates
-  // in the list returned by the search
-  $scope.selectCand = function(newUser, index){
-    var user = _.findWhere($scope.newUsersExist, {input: newUser});
-    var cand = user.details[index];
-    user.input = user.details[index].login_id;
-    user.details = [];
-    user.details.push(cand);
-    $scope.multipleCandidateCount = $scope.multipleCandidateCount - 1;
-  };
-
   $scope.redoBulkUsers = function(){
     $scope.newUsersExist = null;
     $scope.newUsersNotExist = null;
+    $scope.newUsersExistNoName = null;
     $scope.newUserList = null;
     $scope.coursemodal.rawUserList='';
   };
 
-
-  $scope.createUserList = function(){
-    $log.info($scope.newUsersNotExist);
-    // for each
-      //validateEmailAddress
-      //validate friendNameLast
-      //validate friendNameFirst
-      //create in Friend service
-      //add to Canvas
-      //add to existing user list
-      //below just mocks the results
-      _.each($scope.newUsersNotExist, function(user){
-        $scope.newUsersExist.push({input:user.id, details:[{sortable_name:user.last_name + ', ' + user.last_name}]});
-        //really - should remove only the ones that succedded in being created and added to canvasn
-          $scope.newUsersNotExist = []
-      });
-
-
+  $scope.processUserLists = function(){
+    _.each($scope.newUsersExist, function(user){
+      // add to selected sections
+    });
+    _.each($scope.newUsersExistNoName, function(user){
+      //PUT into user to update names
+    });
+    _.each($scope.newUsersNotExist, function(user){
+      //create FRIEND, create CANVAS and add to section
+    });
   };
 
   //change handler for section checkboxes - calculates if any checkbox is checked and updates
