@@ -32,7 +32,7 @@
               </div>
               <div class="alert alert-info" ng-if="lookingUpUsersWait">Looking up users - this may take a while.</div>
               <div  ng-if="newUsersNotExist.length">
-                <h3>New users <small>(accounts will be created and added to section)</small></h3>
+                <h4>New users <br><small>Accounts will be created and added to section</small></h4>
                 <table class="table">
                   <thead>
                     <tr>
@@ -57,7 +57,7 @@
                 </table>
               </div>
               <div ng-if="newUsersExist.length">
-                <h3>Existing users <small>(will be added to selected section)</small></h3>
+                <h4>Existing users <br><small>Will be added to selected section</small></h4>
                 <table class="table">
                   <thead>
                     <tr>
@@ -82,7 +82,7 @@
                 </table>
               </div>
               <div ng-if="newUsersExistNoName.length">
-                <h3>Existing users that had no name in Canvas <br><small>(will be added to selected section after updating them)</small></h3>
+                <h4>Existing users that had no name in Canvas <br><small>Will be added to selected section after updating them</small></h4>
                 <table class="table">
                   <thead>
                     <tr>
@@ -108,7 +108,7 @@
               </div>
 
 
-              <h3>Select a section to add these users to</h3>
+              <h4>Select a section to add these users to</h4>
                 <ul class="coursePanel sectionListAddFriend" id="course{{coursemodal.id}}" ng-hide="userExists || newUser || addSuccess">
                     <li ng-repeat="section in coursemodal.sections | orderBy:'name'" class="row section" id="sect{{section.id}}">
                         <div class="col-md-5 sectionName">
