@@ -1023,6 +1023,7 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
     $scope.newUserList = null;
     $scope.coursemodal.rawUserList='';
     $scope.bulkfilename=null;
+    $scope.failedValidationList = null;
   };
 
   $scope.processUserLists = function(){
