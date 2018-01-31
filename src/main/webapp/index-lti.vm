@@ -119,7 +119,14 @@
             <div class="well">
                 <ul class="container-fluid">
                     <li data-course-id="{{coursemodal.id}}">
-                      <div class="input-group">
+                      <div ng-show="newUserList || newUserList.length" class="pull-right">
+                        <button type="button" class="btn btn-default" ng-click="redoBulkUsers()">
+                          Start over
+                        </button><br>
+                      </div>
+
+                      <h4>Provide  the data.<br><small>Format: 3 columns, first name, last name, email address. Header first row: first_name, last_name, email.<br> <span ng-show="!showTextArea && !newUserList" >  <a href="" ng-click="showTextArea = !showTextArea">Or paste in text with the same format.</a></span> <span ng-show="showTextArea && !newUserList"> <a href="" ng-click="showTextArea = !showTextArea">Or upload a CSV with same format.</a></span></small> <br> </h4>
+                      <div class="input-group" ng-show="!showTextArea">
                         <label class="input-group-btn">
                           <span class="btn"  ng-class="bulkfilename? 'btn-success': 'btn-primary'">
                             Browse...
@@ -129,32 +136,29 @@
                         </label>
                         <input type="text" class="form-control" readonly="" value="{{bulkfilename}}">
                       </div>
-                      <br><br>
-
-
-                      <div ng-show="newUserList || newUserList.length">
-                        <button type="button" class="btn btn-default" ng-click="redoBulkUsers()">
-                          Start over
-                        </button><br>
-                      </div>
-                      <div ng-show="!newUserList">
+                      <br>
+                      <div ng-show="!newUserList && showTextArea">
                         <div class="form-group">
                           <label for="userList" class="sr-only">
-                            Add users, one per line.
+                            Add users, one per line. Upload a CSV file. <a href="" ng-click="showTextArea = !showTextArea">Or upload a CSV with the same format.</a>
                           </label>
-                          <textarea placeholder="Paste users, one per line." ng-model="coursemodal.rawUserList" class="form-control" name="users" id="userList" rows="8"></textarea>
-                        </div>
-                        <div class="alert alert-warning" ng-if="newUserListTooLong">
-                          More than 50 user names detected.
+                          <textarea placeholder="Paste header and user rows, one per line in the specified format" ng-model="coursemodal.rawUserList" class="form-control" name="users" id="userList" rows="8"></textarea>
                         </div>
                         <div class="form-group">
                           <button class="btn btn-primary" ng-click="parseUserList()">Lookup users</button>
                         </div>
                       </div>
+                      <div class="alert alert-warning" ng-if="newUserListTooLong">
+                        More than 50 user names detected.
+                      </div>
+                      <div class="alert alert-warning" ng-if="failedValidationList.length">
+                        Following email addresses are not valid and are not included in the lists below: <br> <strong>{{failedValidationList.join(', ')}}</strong>
+                      </div>
                       <div class="alert alert-info" ng-if="lookingUpUsersWait">Looking up users - this may take a while.</div>
-                      <div  ng-if="newUsersNotExist.length">
-                        <h4>New users <br><small>Accounts will be created and added to section</small></h4>
-                        <table class="table">
+                      <div  ng-if="newUsersNotExist.length" class="panel panel-default">
+                        <div class="panel-heading"><h4>New users <br><small>Accounts will be created and added to section</small></h4></div>
+                        <div class="panel-body">
+                          <table class="table">
                           <thead>
                             <tr>
                               <th scope="col">Email</th>
@@ -176,10 +180,12 @@
                             </tr>
                           </tbody>
                         </table>
+                        </div>
                       </div>
-                      <div ng-if="newUsersExist.length">
-                        <h4>Existing users <br><small>Will be added to selected section</small></h4>
-                        <table class="table">
+                      <div  ng-if="newUsersExist.length" class="panel panel-default">
+                        <div class="panel-heading"><h4>Existing users <br><small>Will be added to selected section</small></h4></div>
+                        <div class="panel-body">
+                          <table class="table">
                           <thead>
                             <tr>
                               <th scope="col">Id</th>
@@ -201,10 +207,12 @@
                             </tr>
                           </tbody>
                         </table>
+                        </div>
                       </div>
-                      <div ng-if="newUsersExistNoName.length">
-                        <h4>Existing users that had no name in Canvas <br><small>Will be added to selected section after updating them</small></h4>
-                        <table class="table">
+                      <div ng-if="newUsersExistNoName.length"  class="panel panel-default">
+                        <div class="panel-heading"><h4>Existing users that had no name in Canvas <br><small>Will be added to selected section after updating them</small></h4></div>
+                        <div class="panel-body">
+                          <table class="table">
                           <thead>
                             <tr>
                               <th scope="col">Id</th>
@@ -226,11 +234,11 @@
                             </tr>
                           </tbody>
                         </table>
+                        </div>
                       </div>
 
-
                       <h4>Select a section to add these users to</h4>
-                        <ul class="coursePanel sectionListAddFriend" id="course{{coursemodal.id}}" ng-hide="userExists || newUser || addSuccess">
+                      <ul class="coursePanel sectionListAddFriend" id="course{{coursemodal.id}}" ng-hide="userExists || newUser || addSuccess">
                             <li ng-repeat="section in coursemodal.sections | orderBy:'name'" class="row section" id="sect{{section.id}}">
                                 <div class="col-md-5 sectionName">
                                     <input type="checkbox" id="c{{section.id}}"
@@ -241,7 +249,7 @@
                                   <div class="btn-group pull-right">
                                     <div>
                                       <label for="s{{section.id}}" class="sr-only">Select role for user in section {{section.name}}</label>
-                                      <select id="s{{section.id}}">
+                                      <select id="s{{section.id}}" class="form-control">
                                         <option value="StudentEnrollment">Student</option>
                                         <option ng-if="section.courseRole === 'TeacherEnrollment'" value="TeacherEnrollment">Teacher</option>
                                         <option ng-if="section.courseRole === 'TeacherEnrollment'"  value="TaEnrollment">TA</option>
