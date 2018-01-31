@@ -971,20 +971,27 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
     $scope.newUsersExist = [];
     $scope.newUsersExistNoName = [];
     $scope.newUsersNotExist = [];
+    $scope.failedValidationList =[]
     var firstSplit = _.rest($scope.coursemodal.rawUserList.split('\n'),1);
     var headers = $scope.coursemodal.rawUserList.split('\n')[0].split(',');
     _.each(firstSplit, function(user){
       var userArray = user.split(',');
       var newUser = {};
-      newUser[headers[0]] = userArray[0];
-      newUser[headers[1]] = userArray[1];
-      newUser[headers[2]] = userArray[2];
-      $scope.newUserList.push(newUser);
+      //validate good non umich email
+      if(validateEmailAddress(userArray[2])) {
+        newUser[headers[0]] = userArray[0];
+        newUser[headers[1]] = userArray[1];
+        newUser[headers[2]] = userArray[2];
+        $scope.newUserList.push(newUser);
+      } else {
+        // add to the list of failed emails
+        $scope.failedValidationList.push(userArray[2]);
+      }
     });
     if($scope.newUserList.length > 50) {
       $scope.newUserListTooLong = true;
     }
-    $scope.newUserListLength = firstSplit.length - 1;
+    $scope.newUserListLength = $scope.newUserList.length;
     $scope.newUserListLookedUpCount = 0;
 
     _.each($scope.newUserList, function(user){
@@ -1015,6 +1022,7 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
     $scope.newUsersExistNoName = null;
     $scope.newUserList = null;
     $scope.coursemodal.rawUserList='';
+    $scope.bulkfilename=null;
   };
 
   $scope.processUserLists = function(){
