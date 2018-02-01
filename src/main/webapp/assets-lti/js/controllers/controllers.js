@@ -972,6 +972,7 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
     $scope.newUsersExistNoName = [];
     $scope.newUsersNotExist = [];
     $scope.failedValidationList =[]
+    // TODO: need to add some format validation here
     var firstSplit = _.rest($scope.coursemodal.rawUserList.split('\n'),1);
     var headers = $scope.coursemodal.rawUserList.split('\n')[0].split(',');
     _.each(firstSplit, function(user){
@@ -1003,10 +1004,11 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
           $scope.newUsersNotExist.push({email:$.trim(user.email),first_name:user.first_name,last_name:user.last_name});
         } else {
           if (resultLookUpCanvasFriend.data[0].sortable_name ==='') {
-            $scope.newUsersExistNoName.push({email:$.trim(user.email),first_name:user.first_name ,last_name:user.last_name});
+            $scope.newUsersExistNoName.push({id:resultLookUpCanvasFriend.data[0].id, email:$.trim(user.email),first_name:user.first_name ,last_name:user.last_name});
           }
           else {
-            $scope.newUsersExist.push({email:$.trim(user.email),first_name:resultLookUpCanvasFriend.data[0].sortable_name.split(',')[1] ,last_name:resultLookUpCanvasFriend.data[0].sortable_name.split(',')[0]});
+            //user exists in Canvas and has a name
+            $scope.newUsersExist.push({id:resultLookUpCanvasFriend.data[0].id, email:$.trim(user.email),first_name:resultLookUpCanvasFriend.data[0].sortable_name.split(',')[1] ,last_name:resultLookUpCanvasFriend.data[0].sortable_name.split(',')[0]});
           }
         }
         if($scope.newUserListLookedUpCount === $scope.newUserListLength){
@@ -1026,17 +1028,86 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
     $scope.failedValidationList = null;
   };
 
+
+  //in all cases add to success and failure lists for feedback
+  //Note: maybe also hide all the paraphernalia used
+  // to get input and process it
   $scope.processUserLists = function(){
+
     _.each($scope.newUsersExist, function(user){
-      // add to selected sections
+      $scope.parseSections(user, _.where($scope.coursemodal.sections,{selected:true}));
     });
+
     _.each($scope.newUsersExistNoName, function(user){
-      //PUT into user to update names
+      var url ='/canvasCourseManager/manager/api/v1/users/'+ user.id + '?user[name]=' + user.first_name + ' ' + user.last_name + '&user[short_name]=' + user.first_name +'&user[sortable_name]=' + user.last_name + ', ' + user.first_name;
+      $scope.bulkUpdateUser(url);
+      $scope.parseSections(user, _.where($scope.coursemodal.sections,{selected:true}));
     });
+
     _.each($scope.newUsersNotExist, function(user){
-      //create FRIEND, create CANVAS and add to section
+      //Friend.doFriendAccount(friendEmailAddress, requestorEmail, notifyInstructor, $rootScope.ltiLaunch.lis_person_name_given, $rootScope.ltiLaunch.lis_person_name_family).then(function (resultDoFriendAccount) {
+        //Friend.createCanvasFriend(friendEmailAddress,friendNameFirst, friendNameLast).then(function (resultCreateCanvasFriend) {
+          //then add to sections
     });
   };
+
+  // call external function with user and selected sections as params
+  //console.log(_.where($scope.coursemodal.sections,{selected:true});
+
+  $scope.parseSections = function(user, sections) {
+    var sectNumber = 0;
+    for(var e in sections) {
+      sectNumber = sectNumber + 1;
+      var sectionId = sections[e].id;
+      var sectionName = sections[e].name;
+      var thisSectionRole = $('li#sect' +sectionId).find('select').val();
+      //REGEXINFO: canvas.api.add.user.regex
+      var url = '/canvasCourseManager/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + user.id + '&enrollment[enrollment_state]=active&enrollment[type]=' + thisSectionRole;
+      $scope.bulkAddUserToSection(url);
+    }
+  };
+
+  $scope.bulkUpdateUser = function(url){
+    $log.info('PUT: updating user name');
+    //PUT into user to update names
+    // will need a new regex
+    $log.info(url);
+  };
+
+
+  $scope.bulkAddUserToSection = function(url){
+    $log.info('POST: adding user to section');
+    $log.info(url);
+    //TODO: will need to return a success or a failure
+    // Friend.addFriendToSection(url, sectionName, sectNumber).then(function (resultAddFriendToSection) {
+    //   if(resultAddFriendToSection.data[1].message){
+    //     $scope.addErrorGeneric = resultAddFriendToSection.data[1].message;
+    //   }
+    //   else {
+    //     if (resultAddFriendToSection.data.errors) {
+    //       // failed to process this add
+    //       errors.push(sectionName);
+    //       $scope.addError = true;
+    //     } else {
+    //       if(resultAddFriendToSection.data[1].course_id) {
+    //         // was able to process this add
+    //         successes.push(resultAddFriendToSection.data[0].section_name);
+    //         if (checkedSections === resultAddFriendToSection.data[0].section_number){
+    //           // the last request, clean up the scope
+    //           $scope.newUser = false;
+    //           $scope.none = false;
+    //           $scope.userAvailable  = false;
+    //           $scope.coursemodal.resetable = true;
+    //         }
+    //       }
+    //       else {
+    //         errors.push(sectionName);
+    //       }
+    //     }
+    //   }
+    // });
+  }
+
 
   //change handler for section checkboxes - calculates if any checkbox is checked and updates
   // a variable used to enable the 'Add Friend' button
