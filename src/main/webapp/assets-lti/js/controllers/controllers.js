@@ -1063,16 +1063,26 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
 
     _.each($scope.newUsersNotExist, function(user){
       //this will be nested promises
+      $log.info('POST: Friend.doFriendAccount > ' + user.email +',' +$scope.requestor.email+','+ 'false' + ',' + $scope.requestor.first_name+','+ $scope.requestor.last_name);
+
       Friend.doFriendAccount(user.email, $scope.requestor.email, 'false', $scope.requestor.first_name, $scope.requestor.last_name).then(function (resultDoFriendAccount) {
-        $log.warn(resultDoFriendAccount.data);
-        //$log.info('POST: Friend.doFriendAccount > ' + user.email +',' +$scope.requestor.email+','+ 'false' + ',' + $scope.requestor.first_name+','+ $scope.requestor.last_name);
-        //Friend.createCanvasFriend(friendEmailAddress,friendNameFirst, friendNameLast).then(function (resultCreateCanvasFriend) {
-        //$log.info('POST: Friend.createCanvasFriend > ' + user.email + ',' + user.first_name+','+ user.last_name);
-          //then add to sections
-          // the user below is the response from the POST above
-          // should create a new user variable (createdUser) to pass on
-          //$scope.parseSections(user, _.where($scope.coursemodal.sections,{selected:true}));
-        });
+        if (resultDoFriendAccount.data.message === 'created' || resultDoFriendAccount.data.message === 'exists') {
+          $log.warn(resultDoFriendAccount.data);
+          $log.info(user.email + ' ' + user.first_name + ' '+ user.last_name + ' will now be added to Canvas');
+          $log.info('POST: Friend.createCanvasFriend > ' + user.email + ',' + user.first_name+','+ user.last_name);
+          Friend.createCanvasFriend(user.email,user.first_name , user.last_name).then(function (resultCreateCanvasFriend) {
+            var createdUser = resultCreateCanvasFriend.data[0];
+            $log.warn(resultCreateCanvasFriend.data);
+            //then add to sections
+            // the user below is the response from the POST above
+            // should create a new user variable (createdUser) to pass on
+            $scope.parseSections(createdUser, _.where($scope.coursemodal.sections,{selected:true}));
+          });
+        } else {
+          $log.info('adding user Friend service failed');
+          $log.warn(resultDoFriendAccount.data);
+        }
+      });
     });
   };
 
