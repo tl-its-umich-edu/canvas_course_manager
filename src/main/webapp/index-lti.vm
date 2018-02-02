@@ -156,7 +156,7 @@
                       </div>
                       <div class="alert alert-info" ng-if="lookingUpUsersWait">Looking up users - this may take a while.</div>
                       <div  ng-if="newUsersNotExist.length" class="panel panel-default">
-                        <div class="panel-heading"><h4>New users <br><small>Accounts will be created and added to section</small></h4></div>
+                        <div class="panel-heading"><h4>New users <br><small>UM-Friend account will be created (if it does not exist), Canvas account will be created and it will be added to section.</small></h4></div>
                         <div class="panel-body">
                           <table class="table">
                           <thead>
@@ -183,7 +183,7 @@
                         </div>
                       </div>
                       <div  ng-if="newUsersExist.length" class="panel panel-default">
-                        <div class="panel-heading"><h4>Existing users <br><small>Will be added to selected section</small></h4></div>
+                        <div class="panel-heading"><h4>Existing users <br><small>Will be added to selected section.</small></h4></div>
                         <div class="panel-body">
                           <table class="table">
                           <thead>
@@ -210,7 +210,7 @@
                         </div>
                       </div>
                       <div ng-if="newUsersExistNoName.length"  class="panel panel-default">
-                        <div class="panel-heading"><h4>Existing users that had no name in Canvas <br><small>Will be added to selected section after updating them</small></h4></div>
+                        <div class="panel-heading"><h4>Existing users that had no name in Canvas <br><small>Will be added to selected section after updating their names.</small></h4></div>
                         <div class="panel-body">
                           <table class="table">
                           <thead>
@@ -236,37 +236,43 @@
                         </table>
                         </div>
                       </div>
-
-                      <h4>Select a section to add these users to</h4>
-                      <ul class="coursePanel sectionListAddFriend" id="course{{coursemodal.id}}" ng-hide="userExists || newUser || addSuccess">
-                            <li ng-repeat="section in coursemodal.sections | orderBy:'name'" class="row section" id="sect{{section.id}}">
-                                <div class="col-md-5 sectionName">
-                                    <input type="checkbox" id="c{{section.id}}"
-                                      ng-model="section.selected" ng-change="sectionSelectedQuery()">
-                                    <label for="c{{section.id}}">{{section.name}}</label>
-                                </div>
-                                <div class="col-md-7">
-                                  <div class="btn-group pull-right">
-                                    <div>
-                                      <label for="s{{section.id}}" class="sr-only">Select role for user in section {{section.name}}</label>
-                                      <select id="s{{section.id}}" class="form-control">
-                                        <option value="StudentEnrollment">Student</option>
-                                        <option ng-if="section.courseRole === 'TeacherEnrollment'" value="TeacherEnrollment">Teacher</option>
-                                        <option ng-if="section.courseRole === 'TeacherEnrollment'"  value="TaEnrollment">TA</option>
-                                        <option value="ObserverEnrollment">Observer</option>
-                                        <option ng-if="section.courseRole === 'TeacherEnrollment'" value="DesignerEnrollment">Designer</option>
-                                      </select>
-                                    </div>
+                      <div ng-show="newUserList.length">
+                        <h4>Select a section to add these users to</h4>
+                        <ul class="coursePanel sectionListAddFriend" id="course{{coursemodal.id}}" ng-hide="userExists || newUser || addSuccess">
+                              <li ng-repeat="section in coursemodal.sections | orderBy:'name'" class="row section" id="sect{{section.id}}">
+                                  <div class="col-md-5 sectionName">
+                                      <input type="checkbox" id="c{{section.id}}"
+                                        ng-model="section.selected" ng-change="sectionSelectedQuery()">
+                                      <label for="c{{section.id}}">{{section.name}}</label>
                                   </div>
-                            </li>
-                        </ul>
+                                  <div class="col-md-7">
+                                    <div class="btn-group pull-right">
+                                      <div>
+                                        <label for="s{{section.id}}" class="sr-only">Select role for user in section {{section.name}}</label>
+                                        <select id="s{{section.id}}" class="form-control">
+                                          <option value="StudentEnrollment">Student</option>
+                                          <option ng-if="section.courseRole === 'TeacherEnrollment'" value="TeacherEnrollment">Teacher</option>
+                                          <option ng-if="section.courseRole === 'TeacherEnrollment'"  value="TaEnrollment">TA</option>
+                                          <option value="ObserverEnrollment">Observer</option>
+                                          <option ng-if="section.courseRole === 'TeacherEnrollment'" value="DesignerEnrollment">Designer</option>
+                                        </select>
+                                      </div>
+                                    </div>
+                              </li>
+                          </ul>
+                      </div>
+
                     </li>
                 </ul>
             </div>
           </div>
           <div class="modal-footer">
             <div class="form-group">
-              <button class="btn btn-primary" ng-click="processUserLists()">Process users</button>
+              <span ng-hide="newUserList.length">Provide some users above. </span>
+              <span ng-hide="coursemodal.sectionSelected || !newUserList.length">Select at least one section.</span>
+              <button class="btn btn-primary"
+                ng-disabled = "!coursemodal.sectionSelected || !newUserList.length"
+                ng-click="processUserLists()">Process users</button>
             </div>
           </div>
         </div>
