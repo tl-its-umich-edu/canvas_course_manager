@@ -1070,12 +1070,13 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
           $log.warn(resultDoFriendAccount.data);
           $log.info(user.email + ' ' + user.first_name + ' '+ user.last_name + ' will now be added to Canvas');
           $log.info('POST: Friend.createCanvasFriend > ' + user.email + ',' + user.first_name+','+ user.last_name);
+
           Friend.createCanvasFriend(user.email,user.first_name , user.last_name).then(function (resultCreateCanvasFriend) {
+            //TODO:some error checking here needed
             var createdUser = resultCreateCanvasFriend.data[0];
             $log.warn(resultCreateCanvasFriend.data);
             //then add to sections
-            // the user below is the response from the POST above
-            // should create a new user variable (createdUser) to pass on
+            // the createdUser below is the response from the POST above
             $scope.parseSections(createdUser, _.where($scope.coursemodal.sections,{selected:true}));
           });
         } else {
