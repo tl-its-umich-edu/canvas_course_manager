@@ -314,5 +314,7 @@ $(document).on('hidden.bs.modal', '#addBulkUserModal', function(){
     $scope.coursemodal.rawUserList='';
     $scope.bulkfilename=null;
     $scope.failedValidationList = null;
+    $scope.success = [];
+    $scope.errors = [];
   });
 });
