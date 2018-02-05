@@ -117,11 +117,22 @@
           </div>
           <div class="modal-body addUserInner" id="addUserInner">
             <div class="well">
-              <ul>
-                <li ng-repeat = "suc in success">
-                  {{suc.user}} added to section {{suc.section}} as {{suc.user_role}}
-                </li>
-              </ul>
+              <table class="table" ng-if="success.length">
+                <thead>
+                  <tr>
+                    <th scope="col">Person</th>
+                    <th scope="col">Added to section</th>
+                    <th scope="col">With role</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat = "suc in success |  orderBy:['user','section']">
+                    <td>{{suc.user}}</td>
+                    <td>{{suc.section}}</td>
+                    <td>{{suc.user_role}}</td>
+                  </tr>
+                </tbody>
+              </table>
               <ul>
                 <li ng-repeat = "err in errors">
                   {{err.user}} NOT added to section {{err.section}} as {{err.user_role}}
