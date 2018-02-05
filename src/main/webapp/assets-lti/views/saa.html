@@ -212,7 +212,7 @@
             Course sections (SIS_IDs)
           </td>
           <td>
-            <span ng-repeat="section in availableSections">{{section}}<span ng-if="!$last">, </span></span>
+            <span ng-repeat="section in availableSections track by $index">{{section}}<span ng-if="!$last">, </span></span>
           </td>
 
         </tr>
