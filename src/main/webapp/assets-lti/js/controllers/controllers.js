@@ -1,5 +1,5 @@
 'use strict';
-/* global $, canvasSupportApp, _, generateCurrentTimestamp, angular, validateEmailAddress, FileReader, document, setTimeout, Papa */
+/* global $, canvasSupportApp, _, generateCurrentTimestamp, angular, validateEmailAddress, FileReader, document, setTimeout, Papa, teacherPrivileges */
 
 /* SINGLE COURSE CONTROLLER */
 canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, $scope, $rootScope, $filter, $location, $log) {
@@ -60,7 +60,11 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     var courseEnrollmentUrl ='manager/api/v1/courses/course_id/enrollments?user_id=' + $scope.canvas_user_id + '&_=' + generateCurrentTimestamp();
 
     Course.getCourse(courseEnrollmentUrl).then(function (resultCourseEnrollment) {
-      $rootScope.courseRole = teacherPrivileges(resultCourseEnrollment.data, $scope.canAddTeachers);
+      if($rootScope.ltiLaunch.role_is_account_admin){
+        $rootScope.courseRole = 'TeacherEnrollment';
+      } else {
+        $rootScope.courseRole = teacherPrivileges(resultCourseEnrollment.data, $scope.canAddTeachers);
+      }
     });
 
   $scope.getCoursesForTerm = function() {
@@ -792,8 +796,7 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
         $scope.selectedSectionsSet = true;
       }
     });
-
-  }
+  };
   //column to use to filter input list based on section enrollment
   var valueToPluck = 'SIS Login ID';
   //detects changes to the file input
@@ -812,14 +815,15 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
         Papa.parse(reader.result, {
         	complete: function(results) {
             $timeout(function(){
-              //when parsed extract the headers
-              $scope.headers = [results.data[0],results.data[1]];
-              // brittle - but all samples confirm it - the Points Possible cell is the 6th one in the second row
-              $scope.pointsPossible = $scope.headers[1][5];
-              // could also see if first cell is a "Points Possible" (with trimming) value
-              // and then cycle throght the remainder cells in that row till we get a value
-              //$log.info(valueToPluck);
-              $scope.pluckPos = _.indexOf($scope.headers[0], valueToPluck);
+              //remove any trailing cells and get name and pp as the last element
+              var assigName = _.last(_.compact(results.data[0]));
+              var pointsPossible = _.last(_.compact(results.data[1]));
+              //we are constructing the headers from scratch, since there is so much
+              //variability on the format, and all we are going to inherit
+              //from the input is the login id, points possible, and grades
+              $scope.headers = [['Student','ID','SIS User ID','SIS Login ID',assigName],['Points Possible','','','',pointsPossible]];
+
+              $scope.pluckPos = _.indexOf(_.compact(results.data[0]), valueToPluck);
               // $scope.toTrim =  the data rows
               $scope.toTrim = _.rest(results.data ,2);
             });
@@ -862,7 +866,6 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
         if($scope.iterations === 0) {
           $scope.finalTrim();
         }
-
     });
 
       $scope.finalTrim = function(){
@@ -873,12 +876,18 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
             var match =_.findWhere($scope.sectionEnrollment, {sis_login_id: toTrimEl[$scope.pluckPos].toString()});
             if(match){
               // in case the export from the external tool is lacking
-              // some values - use the corresponding enrollement to populate it
+              // some values - use the corresponding enrollment to populate it
               // this obviates the need to see if the sis_user_id has been tampered with
               // by the external tool (leading 0s dropped, for example)
+              // below, all we keep from the original input row is the grade
+              // for everyth8ing else we use the data returned from the enrollment
+              var grade = _.last(_.compact(toTrimEl)); //remove all falsy values (some formats have trailing cells)
+              toTrimEl = [];
               toTrimEl[0] = match.sortable_name;
               toTrimEl[1] = match.id;
               toTrimEl[2] = match.sis_user_id;
+              toTrimEl[3] = match.sis_login_id;
+              toTrimEl[4] = grade;
               //push the row to the sectionResults array
               sectionResults.push(toTrimEl);
             }
@@ -886,7 +895,7 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
         });
         // has instructor opted to change the points possible: if so change the value to it in the second header
         if($scope.changePointsPossible){
-          $scope.headers[1][5] = $scope.changePointsPossible;
+          $scope.headers[1][4] = $scope.changePointsPossible;
         }
         var sectionResultsSorted = _.sortBy(sectionResults, function(result) {
             return result[0];
