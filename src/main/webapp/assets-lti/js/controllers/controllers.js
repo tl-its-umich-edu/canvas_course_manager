@@ -1110,6 +1110,7 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
   $scope.parseSections = function(user, sections) {
     var sectNumber = 0;
     for(var e in sections) {
+      $log.info(sections[e]);
       sectNumber = sectNumber + 1;
       var sectionId = sections[e].id;
       var sectionName = sections[e].name;
@@ -1118,7 +1119,7 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
       var url = '/canvasCourseManager/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + user.id + '&enrollment[enrollment_state]=active&enrollment[type]=' + thisSectionRole;
       // this will return a success or failure message
       // that we can use to display success or failure markers
-      $scope.bulkAddUserToSection(url, sectionName, sectNumber, user);
+      $scope.bulkAddUserToSection(url, sectionName, sectNumber, user, thisSectionRole);
     }
   };
 
@@ -1134,25 +1135,26 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
   };
 
   // function that adds user to section
-  $scope.bulkAddUserToSection = function(url, sectionName, sectNumber, user ){
+  $scope.bulkAddUserToSection = function(url, sectionName, sectNumber, user, thisSectionRole ){
     $log.info('POST: adding user to section');
     $log.info(url + '\n' + sectionName + '\n' +   sectNumber);
 
-    Friend.addFriendToSection(url, sectionName, sectNumber).then(function (resultAddFriendToSection) {
+    Friend.addFriendToSection(url, sectionName, sectNumber, user, thisSectionRole).then(function (resultAddFriendToSection) {
+      console.log(thisSectionRole);
       if(resultAddFriendToSection.data[1].message){
         $scope.addErrorGeneric = resultAddFriendToSection.data[1].message;
       }
       else {
         if (resultAddFriendToSection.data.errors) {
           // failed to process this add
-          $scope.errors.push({user:user.name, section:sectionName});
+          $scope.errors.push({user:user.last_name + ', ' + user.first_name, section:sectionName,user_role:thisSectionRole});
         } else {
           if(resultAddFriendToSection.data[1].course_id) {
             // was able to process this add
-            $scope.success.push({user:user.name, section:sectionName});
+            $scope.success.push({user:user.last_name + ', ' + user.first_name, section:sectionName,user_role:thisSectionRole});
           }
           else {
-            $scope.errors.push({user:user.name, section:sectionName});
+            $scope.errors.push({user:user.last_name + ', ' + user.first_name, section:sectionName,user_role:thisSectionRole});
           }
         }
       }

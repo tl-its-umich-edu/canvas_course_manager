@@ -117,6 +117,17 @@
           </div>
           <div class="modal-body addUserInner" id="addUserInner">
             <div class="well">
+              <ul>
+                <li ng-repeat = "suc in success">
+                  {{suc.user}} added to section {{suc.section}} as {{suc.user_role}}
+                </li>
+              </ul>
+              <ul>
+                <li ng-repeat = "err in errors">
+                  {{err.user}} NOT added to section {{err.section}} as {{err.user_role}}
+                </li>
+              </ul>
+
                 <ul class="container-fluid">
                     <li data-course-id="{{coursemodal.id}}">
                       <div ng-show="newUserList || newUserList.length" class="pull-right">
@@ -216,8 +227,8 @@
                           <thead>
                             <tr>
                               <th scope="col">Id</th>
-                              <th scope="col">First name</th>
-                              <th scope="col">Last name</th>
+                              <th scope="col">First name (from file)</th>
+                              <th scope="col">Last name (from file)</th>
                             </tr>
                           </thead>
                           <tbody>
