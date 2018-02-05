@@ -956,6 +956,8 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
     first_name:$rootScope.ltiLaunch.lis_person_name_given,
     last_name:$rootScope.ltiLaunch.lis_person_name_family
   };
+  $scope.success = [];
+  $scope.errors = [];
 
   // watch for changes to the input/file
   $scope.$watch('bulkfile', function(newFileObj) {
@@ -1047,6 +1049,8 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
     $scope.newUsersExist = null;
     $scope.newUsersNotExist = null;
     $scope.newUsersExistNoName = null;
+    $scope.success = [];
+    $scope.errors = [];
     $scope.newUserList = null;
     $scope.coursemodal.rawUserList='';
     $scope.bulkfilename=null;
@@ -1114,51 +1118,45 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
       var url = '/canvasCourseManager/manager/api/v1/sections/' + sectionId + '/enrollments?enrollment[user_id]=' + user.id + '&enrollment[enrollment_state]=active&enrollment[type]=' + thisSectionRole;
       // this will return a success or failure message
       // that we can use to display success or failure markers
-      $scope.bulkAddUserToSection(url);
+      $scope.bulkAddUserToSection(url, sectionName, sectNumber, user);
     }
   };
 
   // function that does the user name update
-  // TODO: factory needs created
   $scope.bulkUpdateUser = function(url){
     $log.info('PUT: updating user name');
-    //PUT into user to update names
-    // will need a new regex
     $log.info(url);
+    Friend.updateFriend(url).then(function (resultUpdateFriend) {
+      $log.warn(resultUpdateFriend.data);
+      // error check, modify scope with new name? Add to success/error list!
+    });
+
   };
 
   // function that adds user to section
-  $scope.bulkAddUserToSection = function(url){
+  $scope.bulkAddUserToSection = function(url, sectionName, sectNumber, user ){
     $log.info('POST: adding user to section');
-    $log.info(url);
-    //TODO: will need to return a success or a failure
-    // Friend.addFriendToSection(url, sectionName, sectNumber).then(function (resultAddFriendToSection) {
-    //   if(resultAddFriendToSection.data[1].message){
-    //     $scope.addErrorGeneric = resultAddFriendToSection.data[1].message;
-    //   }
-    //   else {
-    //     if (resultAddFriendToSection.data.errors) {
-    //       // failed to process this add
-    //       errors.push(sectionName);
-    //       $scope.addError = true;
-    //     } else {
-    //       if(resultAddFriendToSection.data[1].course_id) {
-    //         // was able to process this add
-    //         successes.push(resultAddFriendToSection.data[0].section_name);
-    //         if (checkedSections === resultAddFriendToSection.data[0].section_number){
-    //           // the last request, clean up the scope
-    //           $scope.newUser = false;
-    //           $scope.none = false;
-    //           $scope.userAvailable  = false;
-    //           $scope.coursemodal.resetable = true;
-    //         }
-    //       }
-    //       else {
-    //         errors.push(sectionName);
-    //       }
-    //     }
-    //   }
-    // });
+    $log.info(url + '\n' + sectionName + '\n' +   sectNumber);
+
+    Friend.addFriendToSection(url, sectionName, sectNumber).then(function (resultAddFriendToSection) {
+      if(resultAddFriendToSection.data[1].message){
+        $scope.addErrorGeneric = resultAddFriendToSection.data[1].message;
+      }
+      else {
+        if (resultAddFriendToSection.data.errors) {
+          // failed to process this add
+          $scope.errors.push({user:user.name, section:sectionName});
+        } else {
+          if(resultAddFriendToSection.data[1].course_id) {
+            // was able to process this add
+            $scope.success.push({user:user.name, section:sectionName});
+          }
+          else {
+            $scope.errors.push({user:user.name, section:sectionName});
+          }
+        }
+      }
+    });
   };
 
 
