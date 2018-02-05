@@ -951,11 +951,13 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
   $scope.$on('courseSetChanged', function(event, sectionSet) {
       $scope.coursemodal = sectionSet[0];
   });
+  //requestor object will be used by Fiends request to compose email.
   $scope.requestor={email:$rootScope.ltiLaunch.lis_person_contact_email_primary,
     first_name:$rootScope.ltiLaunch.lis_person_name_given,
     last_name:$rootScope.ltiLaunch.lis_person_name_family
   };
 
+  // watch for changes to the input/file
   $scope.$watch('bulkfile', function(newFileObj) {
     $scope.headers=[];
     $scope.content = false;
@@ -967,7 +969,9 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
       reader.readAsText(newFileObj);
       //when file is read
       reader.onload = function(e) {
+        //add the text to the scope
         $scope.coursemodal.rawUserList=reader.result;
+        // parse the text
         $scope.parseUserList();
       };
       ///put file name into scope
@@ -986,12 +990,15 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
     $scope.newUsersNotExist = [];
     $scope.failedValidationList =[]
     // TODO: need to add some format validation here
+    //split text into lines
     var firstSplit = _.rest($scope.coursemodal.rawUserList.split('\n'),1);
+    // get the header
     var headers = $scope.coursemodal.rawUserList.split('\n')[0].split(',');
     _.each(firstSplit, function(user){
       var userArray = user.split(',');
       var newUser = {};
-      //validate good non umich email
+      //validate good non umich email and construct an array of user objects with the
+      // lines that had a valid email
       if(validateEmailAddress(userArray[2])) {
         newUser[headers[0]] = userArray[0];
         newUser[headers[1]] = userArray[1];
@@ -1002,28 +1009,31 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
         $scope.failedValidationList.push(userArray[2]);
       }
     });
+    // make sure that list is not more than 50
     if($scope.newUserList.length > 50) {
       $scope.newUserListTooLong = true;
     }
     $scope.newUserListLength = $scope.newUserList.length;
     $scope.newUserListLookedUpCount = 0;
 
+    //we are going split the user list into 3
     _.each($scope.newUserList, function(user){
       Friend.lookUpCanvasFriend($.trim(user.email)).then(function (resultLookUpCanvasFriend) {
         $scope.newUserListLookedUpCount = $scope.newUserListLookedUpCount + 1;
         if(resultLookUpCanvasFriend.data.length===0 ){
-          //if not in Canvas, add to list to create friend, create user in Canvas and add to site
-          // the list will render a table with inputs to enter first name and last name
+          // user does not have a Canvas identity, add to that list
           $scope.newUsersNotExist.push({email:$.trim(user.email),first_name:user.first_name,last_name:user.last_name});
         } else {
           if (resultLookUpCanvasFriend.data[0].sortable_name ==='') {
+            // user has a Canvas identity, but no name, add to that list
             $scope.newUsersExistNoName.push({id:resultLookUpCanvasFriend.data[0].id, email:$.trim(user.email),first_name:user.first_name ,last_name:user.last_name});
           }
           else {
-            //user exists in Canvas and has a name
+            //user exists in Canvas and has a name, add to that list
             $scope.newUsersExist.push({id:resultLookUpCanvasFriend.data[0].id, email:$.trim(user.email),first_name:resultLookUpCanvasFriend.data[0].sortable_name.split(',')[1] ,last_name:resultLookUpCanvasFriend.data[0].sortable_name.split(',')[0]});
           }
         }
+        // we have processed the last user, stop the spinner
         if($scope.newUserListLookedUpCount === $scope.newUserListLength){
           $scope.lookingUpUsersWait = false;
         }
@@ -1031,6 +1041,8 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
     });
   };
 
+  // user has clicked on the "Restart"
+  //button - void all scope variables
   $scope.redoBulkUsers = function(){
     $scope.newUsersExist = null;
     $scope.newUsersNotExist = null;
@@ -1045,32 +1057,34 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
     $scope.coursemodal.sectionSelected = false;
   };
 
-
-  //in all cases add to success and failure lists for feedback
-  //Note: maybe also hide all the paraphernalia used
-  // to get input and process it
+  // user has clicked on the "Process users"
+  // button - we now use the three lists to do different things
   $scope.processUserLists = function(){
-
+    // users that have a Canvas account - just add them to the section
     _.each($scope.newUsersExist, function(user){
       $scope.parseSections(user, _.where($scope.coursemodal.sections,{selected:true}));
     });
-
+    // users that have a Canvas identity but no name - do a PUT that
+    // will update them with the supplied names
     _.each($scope.newUsersExistNoName, function(user){
       var url ='/canvasCourseManager/manager/api/v1/users/'+ user.id + '?user[name]=' + user.first_name + ' ' + user.last_name + '&user[short_name]=' + user.first_name +'&user[sortable_name]=' + user.last_name + ', ' + user.first_name;
       $scope.bulkUpdateUser(url);
+      // and add them to the section
+      // these two calls PUT and POST are asynchronous, but independent from each other
       $scope.parseSections(user, _.where($scope.coursemodal.sections,{selected:true}));
     });
 
+    // users who do not have a Canvas identity. We will first ping the Friend
+    // service to create if they do not exist
     _.each($scope.newUsersNotExist, function(user){
       //this will be nested promises
       $log.info('POST: Friend.doFriendAccount > ' + user.email +',' +$scope.requestor.email+','+ 'false' + ',' + $scope.requestor.first_name+','+ $scope.requestor.last_name);
-
       Friend.doFriendAccount(user.email, $scope.requestor.email, 'false', $scope.requestor.first_name, $scope.requestor.last_name).then(function (resultDoFriendAccount) {
         if (resultDoFriendAccount.data.message === 'created' || resultDoFriendAccount.data.message === 'exists') {
           $log.warn(resultDoFriendAccount.data);
           $log.info(user.email + ' ' + user.first_name + ' '+ user.last_name + ' will now be added to Canvas');
           $log.info('POST: Friend.createCanvasFriend > ' + user.email + ',' + user.first_name+','+ user.last_name);
-
+          // add the new or existing Friend to Canvas
           Friend.createCanvasFriend(user.email,user.first_name , user.last_name).then(function (resultCreateCanvasFriend) {
             //TODO:some error checking here needed
             var createdUser = resultCreateCanvasFriend.data[0];
@@ -1087,7 +1101,8 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
     });
   };
 
-  // call external function with user and selected sections as params
+  // associate user with section for each selected
+  // section call a function that will do the add to section with a url as param
   $scope.parseSections = function(user, sections) {
     var sectNumber = 0;
     for(var e in sections) {
@@ -1103,6 +1118,8 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
     }
   };
 
+  // function that does the user name update
+  // TODO: factory needs created
   $scope.bulkUpdateUser = function(url){
     $log.info('PUT: updating user name');
     //PUT into user to update names
@@ -1110,6 +1127,7 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
     $log.info(url);
   };
 
+  // function that adds user to section
   $scope.bulkAddUserToSection = function(url){
     $log.info('POST: adding user to section');
     $log.info(url);

@@ -158,7 +158,7 @@
                       <div  ng-if="newUsersNotExist.length" class="panel panel-default">
                         <div class="panel-heading"><h4>New users <br><small>UM-Friend account will be created (if it does not exist), Canvas account will be created and it will be added to section.</small></h4></div>
                         <div class="panel-body">
-                          <table class="table">
+                          <table class="table" style="margin-bottom:0">
                           <thead>
                             <tr>
                               <th scope="col">Email</th>
@@ -185,7 +185,7 @@
                       <div  ng-if="newUsersExist.length" class="panel panel-default">
                         <div class="panel-heading"><h4>Existing users <br><small>Will be added to selected section.</small></h4></div>
                         <div class="panel-body">
-                          <table class="table">
+                          <table class="table" style="margin-bottom:0">
                           <thead>
                             <tr>
                               <th scope="col">Id</th>
@@ -212,7 +212,7 @@
                       <div ng-if="newUsersExistNoName.length"  class="panel panel-default">
                         <div class="panel-heading"><h4>Existing users that had no name in Canvas <br><small>Will be added to selected section after updating their names.</small></h4></div>
                         <div class="panel-body">
-                          <table class="table">
+                          <table class="table"  style="margin-bottom:0">
                           <thead>
                             <tr>
                               <th scope="col">Id</th>
