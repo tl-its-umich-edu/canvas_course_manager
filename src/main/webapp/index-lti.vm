@@ -146,24 +146,30 @@
                           Start over
                         </button><br>
                       </div>
-
-                      <h4>Provide  the data.<br><small>Format: 3 columns, first name, last name, email address. Header first row: first_name, last_name, email.<br> <span ng-show="!showTextArea && !newUserList" >  <a href="" ng-click="showTextArea = !showTextArea">Or paste in text with the same format.</a></span> <span ng-show="showTextArea && !newUserList"> <a href="" ng-click="showTextArea = !showTextArea">Or upload a CSV with same format.</a></span></small> <br> </h4>
+                      <h4>Provide  the data.
+                        <br>
+                        <small>Format: 3 columns, first name, last name, email address. Header first row: first_name, last_name, email.
+                          <br>
+                            <a  ng-show="!showTextArea" href="" ng-click="showTextArea = !showTextArea">Or paste in text with the same format.</a>
+                            <a  ng-show="showTextArea" href="" ng-click="showTextArea = !showTextArea">Or upload a CSV with the same format.</a>
+                        </small> <br>
+                       </h4>
                       <div class="input-group" ng-show="!showTextArea">
                         <label class="input-group-btn">
-                          <span class="btn"  ng-class="bulkfilename? 'btn-success': 'btn-primary'">
+                          <div class="{{inputClass}}">
                             Browse...
-                            <i class="glyphicon glyphicon-upload" ng-show="!bulkfilename"></i> <i class="glyphicon glyphicon-ok" ng-show="bulkfilename"></i>
+                            <i class="glyphicon glyphicon-upload" ng-show="!bulkfilename && !formatProblems"></i>
+                            <i class="glyphicon glyphicon-ok" ng-show="bulkfilename && !formatProblems"></i>
+                            <i class="glyphicon glyphicon-exclamation-sign" ng-show="bulkfilename"></i>
                             <input class="sr-only" id="trim-file" type="file" name="files" style="display:inline" file-model="bulkfile">
-                          </span>
+                          </div>
                         </label>
                         <input type="text" class="form-control" readonly="" value="{{bulkfilename}}">
                       </div>
-
-
-                      <div ng-show="!newUserList && showTextArea">
+                      <div ng-show="showTextArea">
                         <div class="form-group">
                           <label for="userList" class="sr-only">
-                            Add users, one per line. Upload a CSV file. <a href="" ng-click="showTextArea = !showTextArea">Or upload a CSV with the same format.</a>
+                            Add users, one per line.
                           </label>
                           <textarea placeholder="Paste header and user rows, one per line in the specified format" ng-model="coursemodal.rawUserList" class="form-control" name="users" id="userList" rows="8"></textarea>
                         </div>
@@ -175,124 +181,124 @@
                       <div class="alert alert-danger" ng-show="formatProblems">
                         Header format problem detected. Does your CSV file start with a line like <em>first_name,last_name,email</em>?
                       </div>
-                      <div class="alert alert-warning" ng-if="newUserListTooLong">
+                      <div class="alert alert-warning" ng-show="newUserListTooLong">
                         More than 50 user names detected.
                       </div>
-                      <div class="alert alert-warning" ng-if="failedValidationList.length">
-                        Following email addresses are not valid and are not included in the lists below: <br> <strong>{{failedValidationList.join(', ')}}</strong>
-                      </div>
-                      <div class="alert alert-info" ng-if="newUsersNotExist.length || newUsersExist.length || newUsersExistNoName.length">
-                        File contained <strong>{{newUsersNotExist.length}}</strong> new users, <strong>{{newUsersExist.length}}</strong> existing users, and <strong>{{newUsersExistNoName.length}}</strong> users with no name in Canvas.
-                      </div>
-
-                      <div class="alert alert-info" ng-if="lookingUpUsersWait">Looking up users - this may take a while.</div>
-                      <div  ng-if="newUsersNotExist.length" class="panel panel-default">
-                        <div class="panel-heading"><h4>New users <br><small>UM-Friend account will be created (if it does not exist), Canvas account will be created and it will be added to section.</small></h4></div>
-                        <div class="panel-body">
-                          <table class="table" style="margin-bottom:0">
-                          <thead>
-                            <tr>
-                              <th scope="col">Email</th>
-                              <th scope="col">First name</th>
-                              <th scope="col">Last name</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr ng-repeat="newUser in newUsersNotExist track by $index">
-                              <th scope="row">
-                                {{newUser.email}}
-                              </th>
-                              <td>
-                                {{newUser.first_name}}
-                              </td>
-                              <td>
-                                {{newUser.last_name}}
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
+                      <div class="" ng-show="!formatProblems">
+                        <div class="alert alert-warning" ng-show="failedValidationList.length">
+                          Following email addresses are not valid and are not included in the lists below: <br> <strong>{{failedValidationList.join(', ')}}</strong>
                         </div>
-                      </div>
-                      <div  ng-if="newUsersExist.length" class="panel panel-default">
-                        <div class="panel-heading"><h4>Existing users <br><small>Will be added to selected section.</small></h4></div>
-                        <div class="panel-body">
-                          <table class="table" style="margin-bottom:0">
-                          <thead>
-                            <tr>
-                              <th scope="col">Id</th>
-                              <th scope="col">First name</th>
-                              <th scope="col">Last name</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr ng-repeat="newUser in newUsersExist track by $index">
-                              <th scope="row">
-                                {{newUser.email}}
-                              </th>
-                              <td>
-                                {{newUser.first_name}}
-                              </td>
-                              <td>
-                                {{newUser.last_name}}
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
+                        <div class="alert alert-info" ng-show="newUsersNotExist.length || newUsersExist.length || newUsersExistNoName.length">
+                          File contained <strong>{{newUsersNotExist.length}}</strong> new users, <strong>{{newUsersExist.length}}</strong> existing users, and <strong>{{newUsersExistNoName.length}}</strong> users with no name in Canvas.
                         </div>
-                      </div>
-                      <div ng-if="newUsersExistNoName.length"  class="panel panel-default">
-                        <div class="panel-heading"><h4>Existing users that had no name in Canvas <br><small>Will be added to selected section after updating their names.</small></h4></div>
-                        <div class="panel-body">
-                          <table class="table"  style="margin-bottom:0">
-                          <thead>
-                            <tr>
-                              <th scope="col">Id</th>
-                              <th scope="col">First name (from file)</th>
-                              <th scope="col">Last name (from file)</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr ng-repeat="newUser in newUsersExistNoName track by $index">
-                              <th scope="row">
-                                {{newUser.email}}
-                              </th>
-                              <td>
-                                {{newUser.first_name}}
-                              </td>
-                              <td>
-                                {{newUser.last_name}}
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
+                        <div class="alert alert-info" ng-show="lookingUpUsersWait">Looking up users - this may take a while.</div>
+                        <div  ng-show="newUsersNotExist.length" class="panel panel-default">
+                          <div class="panel-heading"><h4>New users <br><small>UM-Friend account will be created (if it does not exist), Canvas account will be created and it will be added to section.</small></h4></div>
+                          <div class="panel-body">
+                            <table class="table" style="margin-bottom:0">
+                            <thead>
+                              <tr>
+                                <th scope="col">Email</th>
+                                <th scope="col">First name</th>
+                                <th scope="col">Last name</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr ng-repeat="newUser in newUsersNotExist track by $index">
+                                <th scope="row">
+                                  {{newUser.email}}
+                                </th>
+                                <td>
+                                  {{newUser.first_name}}
+                                </td>
+                                <td>
+                                  {{newUser.last_name}}
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          </div>
                         </div>
-                      </div>
-                      <div ng-show="newUserList.length">
-                        <h4>Select a section to add these users to</h4>
-                        <ul class="coursePanel sectionListAddFriend" id="course{{coursemodal.id}}" ng-hide="userExists || newUser || addSuccess">
-                              <li ng-repeat="section in coursemodal.sections | orderBy:'name'" class="row section" id="sect{{section.id}}">
-                                  <div class="col-md-5 sectionName">
-                                      <input type="checkbox" id="c{{section.id}}"
-                                        ng-model="section.selected" ng-change="sectionSelectedQuery()">
-                                      <label for="c{{section.id}}">{{section.name}}</label>
-                                  </div>
-                                  <div class="col-md-7">
-                                    <div class="btn-group pull-right">
-                                      <div>
-                                        <label for="s{{section.id}}" class="sr-only">Select role for user in section {{section.name}}</label>
-                                        <select id="s{{section.id}}" class="form-control">
-                                          <option value="StudentEnrollment">Student</option>
-                                          <option ng-if="section.courseRole === 'TeacherEnrollment'" value="TeacherEnrollment">Teacher</option>
-                                          <option ng-if="section.courseRole === 'TeacherEnrollment'"  value="TaEnrollment">TA</option>
-                                          <option value="ObserverEnrollment">Observer</option>
-                                          <option ng-if="section.courseRole === 'TeacherEnrollment'" value="DesignerEnrollment">Designer</option>
-                                        </select>
-                                      </div>
+                        <div  ng-show="newUsersExist.length" class="panel panel-default">
+                          <div class="panel-heading"><h4>Existing users <br><small>Will be added to selected section.</small></h4></div>
+                          <div class="panel-body">
+                            <table class="table" style="margin-bottom:0">
+                            <thead>
+                              <tr>
+                                <th scope="col">Id</th>
+                                <th scope="col">First name</th>
+                                <th scope="col">Last name</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr ng-repeat="newUser in newUsersExist track by $index">
+                                <th scope="row">
+                                  {{newUser.email}}
+                                </th>
+                                <td>
+                                  {{newUser.first_name}}
+                                </td>
+                                <td>
+                                  {{newUser.last_name}}
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          </div>
+                        </div>
+                        <div ng-show="newUsersExistNoName.length"  class="panel panel-default">
+                          <div class="panel-heading"><h4>Existing users that had no name in Canvas <br><small>Will be added to selected section after updating their names.</small></h4></div>
+                          <div class="panel-body">
+                            <table class="table"  style="margin-bottom:0">
+                            <thead>
+                              <tr>
+                                <th scope="col">Id</th>
+                                <th scope="col">First name (from file)</th>
+                                <th scope="col">Last name (from file)</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr ng-repeat="newUser in newUsersExistNoName track by $index">
+                                <th scope="row">
+                                  {{newUser.email}}
+                                </th>
+                                <td>
+                                  {{newUser.first_name}}
+                                </td>
+                                <td>
+                                  {{newUser.last_name}}
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          </div>
+                        </div>
+                        <div ng-show="newUserList.length">
+                          <h4>Select a section to add these users to</h4>
+                          <ul class="coursePanel sectionListAddFriend" id="course{{coursemodal.id}}" ng-hide="userExists || newUser || addSuccess">
+                                <li ng-repeat="section in coursemodal.sections | orderBy:'name'" class="row section" id="sect{{section.id}}">
+                                    <div class="col-md-5 sectionName">
+                                        <input type="checkbox" id="c{{section.id}}"
+                                          ng-model="section.selected" ng-change="sectionSelectedQuery()">
+                                        <label for="c{{section.id}}">{{section.name}}</label>
                                     </div>
-                              </li>
-                          </ul>
+                                    <div class="col-md-7">
+                                      <div class="btn-group pull-right">
+                                        <div>
+                                          <label for="s{{section.id}}" class="sr-only">Select role for user in section {{section.name}}</label>
+                                          <select id="s{{section.id}}" class="form-control">
+                                            <option value="StudentEnrollment">Student</option>
+                                            <option ng-if="section.courseRole === 'TeacherEnrollment'" value="TeacherEnrollment">Teacher</option>
+                                            <option ng-if="section.courseRole === 'TeacherEnrollment'"  value="TaEnrollment">TA</option>
+                                            <option value="ObserverEnrollment">Observer</option>
+                                            <option ng-if="section.courseRole === 'TeacherEnrollment'" value="DesignerEnrollment">Designer</option>
+                                          </select>
+                                        </div>
+                                      </div>
+                                </li>
+                            </ul>
+                        </div>
                       </div>
-
                     </li>
                 </ul>
             </div>
@@ -302,7 +308,7 @@
               <span ng-hide="newUserList.length">Provide some users above. </span>
               <span ng-hide="coursemodal.sectionSelected || !newUserList.length">Select at least one section.</span>
               <button class="btn btn-primary"
-                ng-disabled = "!coursemodal.sectionSelected || !newUserList.length"
+                ng-disabled = "!coursemodal.sectionSelected || !newUserList.length || formatProblems"
                 ng-click="processUserLists()">Process users</button>
             </div>
           </div>
