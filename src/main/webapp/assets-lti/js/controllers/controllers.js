@@ -958,7 +958,7 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
   };
   $scope.success = [];
   $scope.errors = [];
-
+  $scope.inputClass = "btn btn-primary";
   // watch for changes to the input/file
   $scope.$watch('bulkfile', function(newFileObj) {
     $scope.content = false;
@@ -972,18 +972,17 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
       reader.onload = function(e) {
         //add the text to the scope
         $scope.coursemodal.rawUserList=reader.result;
-        // parse the text
         $scope.parseUserList();
-      };
+        };
       ///put file name into scope
       $scope.bulkfilename = newFileObj.name;
-
     }
   });
 
 
   //setting some initial values
   $scope.parseUserList = function(){
+    $scope.inputClass="btn btn-success";
     $scope.newUserList =[];
     $scope.newUsersExist = [];
     $scope.newUsersExistNoName = [];
@@ -991,11 +990,22 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
     $scope.failedValidationList =[];
     // TODO: need to add some format validation here
     //split text into lines
-    var firstSplit = _.rest($scope.coursemodal.rawUserList.split('\n'),1);
-    // get the header
-    var headers = $scope.coursemodal.rawUserList.split('\n')[0].split(',').map(function(item) {
-      return item.trim();
-    });
+      var firstSplit = _.rest($scope.coursemodal.rawUserList.split('\n'),1);
+      $scope.headers = $scope.coursemodal.rawUserList.split('\n')[0].split(',').map(function(item) {
+        return item.trim();
+      });
+      if(!_($scope.headers).isEqual(['first_name','last_name','email'])){
+        $scope.formatProblems = true;
+        $scope.inputClass="btn btn-danger";
+      }
+      else {
+        $scope.formatProblems = false;
+      }
+      if($scope.coursemodal.rawUserList.split('\n').length > 50) {
+        $scope.newUserListTooLong = true;
+      }
+
+
     _.each(firstSplit, function(user){
       var userArray = user.split(',').map(function(item) {
         return item.trim();
@@ -1004,9 +1014,9 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
       //validate good non umich email and construct an array of user objects with the
       // lines that had a valid email
       if(validateEmailAddress(userArray[2])) {
-        newUser[headers[0]] = userArray[0];
-        newUser[headers[1]] = userArray[1];
-        newUser[headers[2]] = userArray[2];
+        newUser[$scope.headers[0]] = userArray[0];
+        newUser[$scope.headers[1]] = userArray[1];
+        newUser[$scope.headers[2]] = userArray[2];
         $scope.newUserList.push(newUser);
       } else {
         // add to the list of failed emails
@@ -1014,19 +1024,14 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
       }
     });
     // make sure that list is not more than 50
-    if($scope.newUserList.length > 50) {
-      $scope.newUserListTooLong = true;
-    }
-    if(!_(headers).isEqual(['first_name','last_name','email'])){
-      $scope.formatProblems = true;
-    }
 
     $scope.newUserListLength = $scope.newUserList.length;
     $scope.newUserListLookedUpCount = 0;
 
     $scope.lookingUpUsersWait = true;
     //we are going split the user list into 3
-    _.each($scope.newUserList, function(user){
+    //if($scope.formatProblems !==true && $scope.newUserListTooLong !==true){
+      _.each($scope.newUserList, function(user){
       Friend.lookUpCanvasFriend($.trim(user.email)).then(function (resultLookUpCanvasFriend) {
         $scope.newUserListLookedUpCount = $scope.newUserListLookedUpCount + 1;
         if(resultLookUpCanvasFriend.data.length===0 ){
@@ -1048,7 +1053,9 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
         }
       });
     });
+    //}
   };
+
 
   // user has clicked on the "Restart"
   //button - void all scope variables
