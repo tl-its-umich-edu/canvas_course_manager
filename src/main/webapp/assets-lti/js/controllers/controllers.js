@@ -961,7 +961,6 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
 
   // watch for changes to the input/file
   $scope.$watch('bulkfile', function(newFileObj) {
-    $scope.headers=[];
     $scope.content = false;
     //there is a new file
     if (newFileObj) {
@@ -986,18 +985,21 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
   //setting some initial values
   $scope.parseUserList = function(){
     $scope.newUserList =[];
-    $scope.lookingUpUsersWait = true;
     $scope.newUsersExist = [];
     $scope.newUsersExistNoName = [];
     $scope.newUsersNotExist = [];
-    $scope.failedValidationList =[]
+    $scope.failedValidationList =[];
     // TODO: need to add some format validation here
     //split text into lines
     var firstSplit = _.rest($scope.coursemodal.rawUserList.split('\n'),1);
     // get the header
-    var headers = $scope.coursemodal.rawUserList.split('\n')[0].split(',');
+    var headers = $scope.coursemodal.rawUserList.split('\n')[0].split(',').map(function(item) {
+      return item.trim();
+    });
     _.each(firstSplit, function(user){
-      var userArray = user.split(',');
+      var userArray = user.split(',').map(function(item) {
+        return item.trim();
+      });
       var newUser = {};
       //validate good non umich email and construct an array of user objects with the
       // lines that had a valid email
@@ -1015,9 +1017,14 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
     if($scope.newUserList.length > 50) {
       $scope.newUserListTooLong = true;
     }
+    if(!_(headers).isEqual(['first_name','last_name','email'])){
+      $scope.formatProblems = true;
+    }
+
     $scope.newUserListLength = $scope.newUserList.length;
     $scope.newUserListLookedUpCount = 0;
 
+    $scope.lookingUpUsersWait = true;
     //we are going split the user list into 3
     _.each($scope.newUserList, function(user){
       Friend.lookUpCanvasFriend($.trim(user.email)).then(function (resultLookUpCanvasFriend) {
@@ -1047,6 +1054,8 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
   //button - void all scope variables
   $scope.redoBulkUsers = function(){
     $scope.newUsersExist = null;
+    $scope.formatProblems = null;
+    $scope.lookingUpUsersWait = null;
     $scope.newUsersNotExist = null;
     $scope.newUsersExistNoName = null;
     $scope.success = [];

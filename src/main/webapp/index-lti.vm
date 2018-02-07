@@ -158,7 +158,8 @@
                         </label>
                         <input type="text" class="form-control" readonly="" value="{{bulkfilename}}">
                       </div>
-                      <br>
+
+
                       <div ng-show="!newUserList && showTextArea">
                         <div class="form-group">
                           <label for="userList" class="sr-only">
@@ -170,12 +171,20 @@
                           <button class="btn btn-primary" ng-click="parseUserList()">Lookup users</button>
                         </div>
                       </div>
+                      <br>
+                      <div class="alert alert-danger" ng-show="formatProblems">
+                        Header format problem detected. Does your CSV file start with a line like <em>first_name,last_name,email</em>?
+                      </div>
                       <div class="alert alert-warning" ng-if="newUserListTooLong">
                         More than 50 user names detected.
                       </div>
                       <div class="alert alert-warning" ng-if="failedValidationList.length">
                         Following email addresses are not valid and are not included in the lists below: <br> <strong>{{failedValidationList.join(', ')}}</strong>
                       </div>
+                      <div class="alert alert-info" ng-if="newUsersNotExist.length || newUsersExist.length || newUsersExistNoName.length">
+                        File contained <strong>{{newUsersNotExist.length}}</strong> new users, <strong>{{newUsersExist.length}}</strong> existing users, and <strong>{{newUsersExistNoName.length}}</strong> users with no name in Canvas.
+                      </div>
+
                       <div class="alert alert-info" ng-if="lookingUpUsersWait">Looking up users - this may take a while.</div>
                       <div  ng-if="newUsersNotExist.length" class="panel panel-default">
                         <div class="panel-heading"><h4>New users <br><small>UM-Friend account will be created (if it does not exist), Canvas account will be created and it will be added to section.</small></h4></div>
