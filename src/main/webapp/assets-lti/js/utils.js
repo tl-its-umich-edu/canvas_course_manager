@@ -316,5 +316,10 @@ $(document).on('hidden.bs.modal', '#addBulkUserModal', function(){
     $scope.failedValidationList = null;
     $scope.success = [];
     $scope.errors = [];
+    $scope.bulkfilename=null;
+    $scope.failedValidationList = null;
+    $scope.inputClass = 'btn btn-primary';
+    $scope.formatProblems =null;
+
   });
 });
