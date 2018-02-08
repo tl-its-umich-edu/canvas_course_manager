@@ -160,7 +160,7 @@
                             Browse...
                             <i class="glyphicon glyphicon-upload" ng-show="!bulkfilename && !formatProblems"></i>
                             <i class="glyphicon glyphicon-ok" ng-show="bulkfilename && !formatProblems"></i>
-                            <i class="glyphicon glyphicon-exclamation-sign" ng-show="bulkfilename"></i>
+                            <i class="glyphicon glyphicon-exclamation-sign" ng-show="formatProblems"></i>
                             <input class="sr-only" id="trim-file" type="file" name="files" style="display:inline" file-model="bulkfile">
                           </div>
                         </label>
