@@ -951,11 +951,12 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
   $scope.$on('courseSetChanged', function(event, sectionSet) {
       $scope.coursemodal = sectionSet[0];
   });
-  //requestor object will be used by Fiends request to compose email.
+  //requestor object will be used by Friends request to compose email.
   $scope.requestor={email:$rootScope.ltiLaunch.lis_person_contact_email_primary,
     first_name:$rootScope.ltiLaunch.lis_person_name_given,
     last_name:$rootScope.ltiLaunch.lis_person_name_family
   };
+  //setting some initial values
   $scope.success = [];
   $scope.errors = [];
   $scope.inputClass = "btn btn-primary";
@@ -979,9 +980,9 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
     }
   });
 
-
-  //setting some initial values
+  //read the list, so some validation, turn into structured data
   $scope.parseUserList = function(){
+    //setting some initial values
     $scope.inputClass="btn btn-success";
     $scope.newUserList =[];
     $scope.newUsersExist = [];
@@ -1032,15 +1033,13 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
       }
     });
 
-    //$log.warn($scope.newUserList)
-
     $scope.newUserListLength = $scope.newUserList.length;
     $scope.newUserListLookedUpCount = 0;
-
     $scope.lookingUpUsersWait = true;
+
     //we are going split the user list into 3
     //if($scope.formatProblems !==true && $scope.newUserListTooLong !==true){
-      _.each($scope.newUserList, function(user){
+    _.each($scope.newUserList, function(user){
       Friend.lookUpCanvasFriend($.trim(user.email)).then(function (resultLookUpCanvasFriend) {
         $scope.newUserListLookedUpCount = $scope.newUserListLookedUpCount + 1;
         if(resultLookUpCanvasFriend.data.length===0 ){
@@ -1063,9 +1062,7 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
         }
       });
     });
-    //}
   };
-
 
   // user has clicked on the "Restart"
   // button - void all scope variables
@@ -1110,28 +1107,18 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
     // service to create if they do not exist
     _.each($scope.newUsersNotExist, function(user){
       //this will be nested promises
-      //$log.info('POST: Friend.doFriendAccount > ' + user.email +',' +$scope.requestor.email+','+ 'false' + ',' + $scope.requestor.first_name+','+ $scope.requestor.last_name);
       Friend.doFriendAccount(user.email, $scope.requestor.email, 'false', $scope.requestor.first_name, $scope.requestor.last_name).then(function (resultDoFriendAccount) {
         if (resultDoFriendAccount.data.message === 'created' || resultDoFriendAccount.data.message === 'exists') {
-          //console.log(user.email + ' created in Friends');
-          // $log.warn(resultDoFriendAccount.data);
-          // $log.info(user.email + ' ' + user.first_name + ' '+ user.last_name + ' will now be added to Canvas');
-          // $log.info('POST: Friend.createCanvasFriend > ' + user.email + ',' + user.first_name+','+ user.last_name);
           // add the new or existing Friend to Canvas
           Friend.createCanvasFriend(user.email,user.first_name , user.last_name).then(function (resultCreateCanvasFriend) {
             //TODO:some error checking here needed
-            //console.log(resultCreateCanvasFriend.data);
             var createdUser = resultCreateCanvasFriend.data;
-            //$log.warn('user in Canvas')
-            //$log.warn(createdUser);
             //then add to sections
             // the createdUser below is the response from the POST above
-            //console.log(createdUser);
             $scope.parseSections(createdUser, _.where($scope.coursemodal.sections,{selected:true}));
           });
         } else {
           // $log.info('adding user Friend service failed');
-          // $log.warn(resultDoFriendAccount.data);
         }
       });
     });
@@ -1140,10 +1127,8 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
   // associate user with section for each selected
   // section call a function that will do the add to section with a url as param
   $scope.parseSections = function(user, sections) {
-    console.log(user);
     var sectNumber = 0;
     for(var e in sections) {
-      console.log(sections[e]);
       sectNumber = sectNumber + 1;
       var sectionId = sections[e].id;
       var sectionName = sections[e].name;
@@ -1158,10 +1143,7 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
 
   // function that does the user name update
   $scope.bulkUpdateUser = function(url){
-    //$log.info('PUT: updating user name');
-    //$log.info(url);
     Friend.updateFriend(url).then(function (resultUpdateFriend) {
-      //$log.warn(resultUpdateFriend.data);
       // error check, modify scope with new name? Add to success/error list!
     });
 
@@ -1169,12 +1151,7 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
 
   // function that adds user to section
   $scope.bulkAddUserToSection = function(url, sectionName, sectNumber, user, thisSectionRole ){
-    // $log.info('POST: adding user to section');
-    // $log.info(url + '\n' + sectionName + '\n' +   sectNumber);
-
     Friend.addFriendToSection(url, sectionName, sectNumber, user, thisSectionRole).then(function (resultAddFriendToSection) {
-      //console.log(user);
-
       if(resultAddFriendToSection.data[1].message){
         $scope.addErrorGeneric = resultAddFriendToSection.data[1].message;
       }
@@ -1185,6 +1162,9 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
         } else {
           if(resultAddFriendToSection.data[1].course_id) {
             // was able to process this add
+            // below we either have the user as input or the user after creating it, first has a last_name, second not
+            // TODO: really need to normalize all users to what Canvas returns
+            // PRO: normal, CON: fat
             if(user.last_name) {
               $scope.success.push({user:user.last_name + ', ' + user.first_name, section:sectionName,user_role:thisSectionRole});
             }
@@ -1200,9 +1180,8 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
     });
   };
 
-
   //change handler for section checkboxes - calculates if any checkbox is checked and updates
-  // a variable used to enable the 'Add Friend' button
+  // a variable used to enable the 'Process users' button
   $scope.sectionSelectedQuery = function () {
     if(_.where($scope.coursemodal.sections,{selected: true}).length > 0){
       $scope.coursemodal.sectionSelected = true;
