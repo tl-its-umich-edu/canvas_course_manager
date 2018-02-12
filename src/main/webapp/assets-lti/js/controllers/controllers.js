@@ -863,7 +863,7 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
         _.each($scope.toTrim, function(toTrimEl){
           if(toTrimEl[$scope.pluckPos]){
             // is this item's sis_login_id in the section enrollments user object array?
-            var match =_.findWhere($scope.sectionEnrollment, {sis_login_id: toTrimEl[$scope.pluckPos].toString()});
+            var match =_.findWhere($scope.sectionEnrollment, {login_id: toTrimEl[$scope.pluckPos].toString()});
             if(match){
               // in case the export from the external tool is lacking
               // some values - use the corresponding enrollment to populate it
@@ -876,7 +876,7 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
               toTrimEl[0] = match.sortable_name;
               toTrimEl[1] = match.id;
               toTrimEl[2] = match.sis_user_id;
-              toTrimEl[3] = match.sis_login_id;
+              toTrimEl[3] = match.login_id;
               toTrimEl[4] = grade;
               //push the row to the sectionResults array
               sectionResults.push(toTrimEl);
