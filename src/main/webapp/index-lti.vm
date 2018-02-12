@@ -117,28 +117,6 @@
           </div>
           <div class="modal-body addUserInner" id="addUserInner">
             <div class="well">
-              <table class="table" ng-if="success.length">
-                <thead>
-                  <tr>
-                    <th scope="col">Person</th>
-                    <th scope="col">Added to section</th>
-                    <th scope="col">With role</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr ng-repeat = "suc in success |  orderBy:['user','section']">
-                    <td>{{suc.user}}</td>
-                    <td>{{suc.section}}</td>
-                    <td>{{suc.user_role}}</td>
-                  </tr>
-                </tbody>
-              </table>
-              <ul>
-                <li ng-repeat = "err in errors">
-                  {{err.user}} NOT added to section {{err.section}} as {{err.user_role}}
-                </li>
-              </ul>
-
                 <ul class="container-fluid">
                     <li data-course-id="{{coursemodal.id}}">
                       <div ng-show="newUserList || newUserList.length" class="pull-right">
@@ -192,7 +170,47 @@
                           File contained <strong>{{newUsersNotExist.length}}</strong> new users, <strong>{{newUsersExist.length}}</strong> existing users, and <strong>{{newUsersExistNoName.length}}</strong> users with no name in Canvas.
                         </div>
                         <div class="alert alert-info" ng-show="lookingUpUsersWait">Looking up users - this may take a while.</div>
-                        <div  ng-show="newUsersNotExist.length" class="panel panel-default">
+                        <table class="table" ng-show="newUserList.length">
+                          <thead>
+                            <tr>
+                              <th scope="col">
+                                Email
+                              </th>
+                              <th scope="col">
+                                First name
+                              </th>
+                              <th scope="col">
+                                Last Name
+                              </th>
+                              <th scope="col">
+                                Notes
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr ng-repeat="user in newUserList">
+                              <td>
+                                {{user.email}}
+                              </td>
+                              <td>
+                                {{user.first_name}}
+                              </td>
+                              <td>
+                                {{user.last_name}}
+                              </td>
+                              <td>
+                                <span ng-show="user.create_friend && !user.friend_created">Friend account will be created <br> </span>
+                                <span ng-show="user.create_canvas_account  &&  !user.canvas_created">Canvas account will be created <br> </span>
+                                <span ng-show="user.update_canvas_account && !user.canvas_updated">Canvas names will be updated <br> </span>
+                                <span ng-show="user.friend_created">Friend account was created <br> </span>
+                                <span ng-show="user.canvas_created">Canvas account was created <br> </span>
+                                <span ng-show="user.canvas_updated">Canvas names were updated <br> </span>
+                                <span ng-show="user.added_to_section">Added to section {{user.sections_added.join(', ')}}<br> </span>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <!-- <div  ng-show="newUsersNotExist.length" class="panel panel-default">
                           <div class="panel-heading"><h4>New users <br><small>UM-Friend account will be created (if it does not exist), Canvas account will be created and it will be added to section.</small></h4></div>
                           <div class="panel-body">
                             <table class="table" style="margin-bottom:0">
@@ -272,7 +290,8 @@
                             </tbody>
                           </table>
                           </div>
-                        </div>
+                        </div> -->
+
                         <div ng-show="newUserList.length">
                           <h4>Select a section to add these users to</h4>
                           <ul class="coursePanel sectionListAddFriend" id="course{{coursemodal.id}}" ng-hide="userExists || newUser || addSuccess">
@@ -309,7 +328,7 @@
               <span ng-hide="coursemodal.sectionSelected || !newUserList.length">Select at least one section.</span>
               <button class="btn btn-primary"
                 ng-disabled = "!coursemodal.sectionSelected || !newUserList.length || formatProblems"
-                ng-click="processUserLists()">Process users</button>
+                ng-click="processUserList()">Process users</button>
             </div>
           </div>
         </div>
