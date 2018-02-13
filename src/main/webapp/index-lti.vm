@@ -170,46 +170,50 @@
                           File contained <strong>{{newUsersNotExist.length}}</strong> new users, <strong>{{newUsersExist.length}}</strong> existing users, and <strong>{{newUsersExistNoName.length}}</strong> users with no name in Canvas.
                         </div>
                         <div class="alert alert-info" ng-show="lookingUpUsersWait">Looking up users - this may take a while.</div>
-                        <table class="table" ng-show="newUserList.length">
-                          <thead>
-                            <tr>
-                              <th scope="col">
-                                Email
-                              </th>
-                              <th scope="col">
-                                First name
-                              </th>
-                              <th scope="col">
-                                Last Name
-                              </th>
-                              <th scope="col">
-                                Notes
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr ng-repeat="user in newUserList">
-                              <td>
-                                {{user.email}}
-                              </td>
-                              <td>
-                                {{user.first_name}}
-                              </td>
-                              <td>
-                                {{user.last_name}}
-                              </td>
-                              <td>
-                                <span ng-show="user.create_friend && !user.friend_created">Friend account will be created <br> </span>
-                                <span ng-show="user.create_canvas_account  &&  !user.canvas_created">Canvas account will be created <br> </span>
-                                <span ng-show="user.update_canvas_account && !user.canvas_updated">Canvas names will be updated <br> </span>
-                                <span ng-show="user.friend_created">Friend account was created <br> </span>
-                                <span ng-show="user.canvas_created">Canvas account was created <br> </span>
-                                <span ng-show="user.canvas_updated">Canvas names were updated <br> </span>
-                                <span ng-show="user.added_to_section">Added to section {{user.sections_added.join(', ')}}<br> </span>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
+                          <div class="panel panel-default" ng-show="newUserList.length">
+                            <div class="panel-body">
+                              <table class="table table-striped table-hover">
+                                <thead>
+                                  <tr>
+                                    <th scope="col">
+                                      Email
+                                    </th>
+                                    <th scope="col">
+                                      First name
+                                    </th>
+                                    <th scope="col">
+                                      Last Name
+                                    </th>
+                                    <th scope="col">
+                                      Notes
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr ng-repeat="user in newUserList">
+                                    <td>
+                                      {{user.email}}
+                                    </td>
+                                    <td>
+                                      {{user.first_name}}
+                                    </td>
+                                    <td>
+                                      {{user.last_name}}
+                                    </td>
+                                    <td>
+                                      <span ng-show="user.create_friend && !user.friend_created">Friend account will be created <br> </span>
+                                      <span ng-show="user.create_canvas_account  &&  !user.canvas_created">Canvas account will be created <br> </span>
+                                      <span ng-show="user.update_canvas_account && !user.canvas_updated">Canvas names will be updated <br> </span>
+                                      <span ng-show="user.friend_created">Friend account was created <br> </span>
+                                      <span ng-show="user.canvas_created">Canvas account was created <br> </span>
+                                      <span ng-show="user.canvas_updated">Canvas names were updated <br> </span>
+                                      <span ng-show="user.added_to_section">Added to section {{user.sections_added.join(', ')}}<br> </span>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                        </div>
                         <!-- <div  ng-show="newUsersNotExist.length" class="panel panel-default">
                           <div class="panel-heading"><h4>New users <br><small>UM-Friend account will be created (if it does not exist), Canvas account will be created and it will be added to section.</small></h4></div>
                           <div class="panel-body">
