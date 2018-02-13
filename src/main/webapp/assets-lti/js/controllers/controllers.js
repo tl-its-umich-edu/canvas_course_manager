@@ -807,11 +807,11 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
             $timeout(function(){
               //remove any trailing cells and get name and pp as the last element
               var assigName = _.last(_.compact(results.data[0]));
-              var pointsPossible = _.last(_.compact(results.data[1]));
+              $scope.pointsPossible = _.last(_.compact(results.data[1]));
               //we are constructing the headers from scratch, since there is so much
               //variability on the format, and all we are going to inherit
               //from the input is the login id, points possible, and grades
-              $scope.headers = [['Student','ID','SIS User ID','SIS Login ID','Section', assigName],['Points Possible','','','','',pointsPossible]];
+              $scope.headers = [['Student','ID','SIS User ID','SIS Login ID','Section', assigName],['Points Possible','','','','',$scope.pointsPossible]];
 
               $scope.pluckPos = _.indexOf(_.compact(results.data[0]), valueToPluck);
               // $scope.toTrim =  the data rows
