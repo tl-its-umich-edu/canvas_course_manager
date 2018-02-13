@@ -846,9 +846,8 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
       var url = 'manager/api/v1/sections/'+ section.id + '/enrollments?type[]=StudentEnrollment&per_page=100';
       section_name = section_name + '_' + section.name;
 
-      Things.getThings(url, section).then(function (resultSectionEnrollment) {
+      Things.getThings(url).then(function (resultSectionEnrollment) {
         _.each(resultSectionEnrollment.data, function(user){
-          user.user['section'] = section.name;
           $scope.sectionEnrollment.push(user.user);
         });
         // done with this section - set how many remain to be fetched
@@ -878,7 +877,7 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
               toTrimEl[1] = match.id;
               toTrimEl[2] = match.sis_user_id;
               toTrimEl[3] = match.login_id;
-              toTrimEl[4] = match.section;
+              toTrimEl[4] = '';
               toTrimEl[5] = grade;
               //push the row to the sectionResults array
               sectionResults.push(toTrimEl);
