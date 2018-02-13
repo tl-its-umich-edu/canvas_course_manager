@@ -811,7 +811,7 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
               //we are constructing the headers from scratch, since there is so much
               //variability on the format, and all we are going to inherit
               //from the input is the login id, points possible, and grades
-              $scope.headers = [['Student','ID','SIS User ID','SIS Login ID',assigName],['Points Possible','','','',pointsPossible]];
+              $scope.headers = [['Student','ID','SIS User ID','SIS Login ID','Section', assigName],['Points Possible','','','','',pointsPossible]];
 
               $scope.pluckPos = _.indexOf(_.compact(results.data[0]), valueToPluck);
               // $scope.toTrim =  the data rows
@@ -845,9 +845,10 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
       //1. get the section enrollment (only students)
       var url = 'manager/api/v1/sections/'+ section.id + '/enrollments?type[]=StudentEnrollment&per_page=100';
       section_name = section_name + '_' + section.name;
-      Things.getThings(url).then(function (resultSectionEnrollment) {
-        //2. pluck the comparator (the user object)
+
+      Things.getThings(url, section).then(function (resultSectionEnrollment) {
         _.each(resultSectionEnrollment.data, function(user){
+          user.user['section'] = section.name;
           $scope.sectionEnrollment.push(user.user);
         });
         // done with this section - set how many remain to be fetched
@@ -877,7 +878,8 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
               toTrimEl[1] = match.id;
               toTrimEl[2] = match.sis_user_id;
               toTrimEl[3] = match.login_id;
-              toTrimEl[4] = grade;
+              toTrimEl[4] = match.section;
+              toTrimEl[5] = grade;
               //push the row to the sectionResults array
               sectionResults.push(toTrimEl);
             }
@@ -885,7 +887,7 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
         });
         // has instructor opted to change the points possible: if so change the value to it in the second header
         if($scope.changePointsPossible){
-          $scope.headers[1][4] = $scope.changePointsPossible;
+          $scope.headers[1][5] = $scope.changePointsPossible;
         }
         var sectionResultsSorted = _.sortBy(sectionResults, function(result) {
             return result[0];
