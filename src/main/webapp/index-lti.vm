@@ -185,6 +185,9 @@
                                       Last Name
                                     </th>
                                     <th scope="col">
+                                      Status
+                                    </th>
+                                    <th scope="col">
                                       Notes
                                     </th>
                                   </tr>
@@ -201,13 +204,18 @@
                                       {{user.last_name}}
                                     </td>
                                     <td>
-                                      <span ng-show="user.create_friend && !user.friend_created">Friend account will be created <br> </span>
-                                      <span ng-show="user.create_canvas_account  &&  !user.canvas_created">Canvas account will be created <br> </span>
-                                      <span ng-show="user.update_canvas_account && !user.canvas_updated">Canvas names will be updated <br> </span>
-                                      <span ng-show="user.friend_created">Friend account was created <br> </span>
-                                      <span ng-show="user.canvas_created">Canvas account was created <br> </span>
-                                      <span ng-show="user.canvas_updated">Canvas names were updated <br> </span>
-                                      <span ng-show="user.added_to_section">Added to section {{user.sections_added.join(', ')}}<br> </span>
+                                      <span ng-show="!user.added_to_section">
+                                        <i style="color:{{user.status}}" class="glyphicon glyphicon-user"></i>
+                                      </span>
+                                      <i style="color:green" class="glyphicon glyphicon-user" ng-show="user.added_to_section"></i>
+                                    </td>
+                                    <td>
+                                      <small  ng-show="!user.added_to_section">Will be added to section(s) <br> </small>
+                                      <small ng-show="user.create_friend && !user.friend_created">Accounts will be created <br> </small>
+                                      <small ng-show="user.update_canvas_account && !user.canvas_updated">Canvas names will be updated <br> </small>
+                                      <small ng-show="user.friend_created && user.canvas_created">Accounts created <br> </small>
+                                      <small ng-show="user.canvas_updated">Canvas names updated <br> </small>
+                                      <small ng-show="user.added_to_section">Added to section {{user.sections_added.join(', ')}}<br> </small>
                                     </td>
                                   </tr>
                                 </tbody>

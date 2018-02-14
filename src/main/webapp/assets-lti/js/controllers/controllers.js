@@ -1046,20 +1046,20 @@ canvasSupportApp.controller('addBulkUserController', ['Friend', '$scope', '$root
           // user does not have a Canvas identity, add to that list
           //console.log(user.email + ' does not exist in Canvas');
           //$scope.newUsersNotExist.push({email:$.trim(user.email),first_name:user.first_name,last_name:user.last_name});
-          $scope.newUserList[i] = {email:$.trim(user.email),first_name:user.first_name,last_name:user.last_name,sections_added:[]};
+          $scope.newUserList[i] = {email:$.trim(user.email),first_name:user.first_name,last_name:user.last_name,sections_added:[], status:'#dc143c'};
           $scope.newUserList[i].create_friend = true;
           $scope.newUserList[i].create_canvas_account = true;
         } else {
           if (resultLookUpCanvasFriend.data[0].sortable_name ==='') {
             // user has a Canvas identity, but no name, add to that list
             //$scope.newUsersExistNoName.push({id:resultLookUpCanvasFriend.data[0].id, email:$.trim(user.email),first_name:user.first_name ,last_name:user.last_name});
-            $scope.newUserList[i] = {id:resultLookUpCanvasFriend.data[0].id, email:$.trim(user.email),first_name:user.first_name ,last_name:user.last_name,sections_added:[]};
+            $scope.newUserList[i] = {id:resultLookUpCanvasFriend.data[0].id, email:$.trim(user.email),first_name:user.first_name ,last_name:user.last_name,sections_added:[], status:'orange'};
             $scope.newUserList[i].update_canvas_account = true;
           }
           else {
             //user exists in Canvas and has a name, add to that list
             //$scope.newUsersExist.push({id:resultLookUpCanvasFriend.data[0].id, email:$.trim(user.email),first_name:resultLookUpCanvasFriend.data[0].sortable_name.split(',')[1] ,last_name:resultLookUpCanvasFriend.data[0].sortable_name.split(',')[0]});
-            $scope.newUserList[i] = {id:resultLookUpCanvasFriend.data[0].id, email:$.trim(user.email),first_name:resultLookUpCanvasFriend.data[0].sortable_name.split(',')[1] ,last_name:resultLookUpCanvasFriend.data[0].sortable_name.split(',')[0], sections_added:[]};
+            $scope.newUserList[i] = {id:resultLookUpCanvasFriend.data[0].id, email:$.trim(user.email),first_name:resultLookUpCanvasFriend.data[0].sortable_name.split(',')[1] ,last_name:resultLookUpCanvasFriend.data[0].sortable_name.split(',')[0], sections_added:[], status:'black'};
           }
         }
         // we have processed the last user, stop the spinner
