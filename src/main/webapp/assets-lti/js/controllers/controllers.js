@@ -1,5 +1,5 @@
 'use strict';
-/* global $, canvasSupportApp, _, generateCurrentTimestamp, angular, validateEmailAddress, FileReader, document, setTimeout, Papa, teacherPrivileges */
+/* global $, canvasSupportApp, _, generateCurrentTimestamp, angular, validateEmailAddress, FileReader, document, setTimeout, Papa, teacherPrivileges, navigator, Blob, window  */
 
 /* SINGLE COURSE CONTROLLER */
 canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, $scope, $rootScope, $filter, $location, $log) {
@@ -921,17 +921,18 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
             });
             // reset file upload input
             angular.element('#trim-file').val(null);
-            // delay to give impression of processing file
-            setTimeout(function() {
-              link.click();
-            }, 800);
+            if (navigator.msSaveBlob) { // IE10+ : (has Blob, but not a[download] or URL)
+                var blob = new Blob([csvContent], {type:  "data:text/csv;charset=utf-8"});
+                window.navigator.msSaveOrOpenBlob(blob,  user + '-' + section_name + '.csv');
+            } else {
+              setTimeout(function() {
+                // delay to give impression of processing file
+                link.click();
+              }, 800);
+            }
           }
         };
-
-
     });
-
-
   };
 
 
