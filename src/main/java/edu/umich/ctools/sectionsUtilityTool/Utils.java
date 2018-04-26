@@ -61,6 +61,7 @@ public class Utils {
 	protected static final String MAIL_SMTP_STARTTLS = "mail.smtp.starttls.enable";
 	protected static final String MAIL_DEBUG = "mail.debug";
 	protected static final String MAIL_HOST = "umich.friend.mailhost";
+	protected static final String FRIEND_BATCH_ALLOWANCE = "umich.friend.batch.allowance";
 	protected static final String FRIEND_CONTACT_EMAIL = "umich.friend.contactemail";
 	protected static final String SIS_REPORT_CCM_SUPPORT_ADDRESS = "sis.report.ccm.support.address";
 	public static final String IS_TOOL_ACCESS_ALLOWED = "isAllowed";
