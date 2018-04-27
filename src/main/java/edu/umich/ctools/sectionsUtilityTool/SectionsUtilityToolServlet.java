@@ -23,6 +23,7 @@ import edu.umich.its.lti.utils.OauthCredentials;
 import edu.umich.its.lti.utils.OauthCredentialsFactory;
 import edu.umich.its.lti.utils.RequestSignatureUtils;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
@@ -252,7 +253,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			M_log.info(String.format("The user \"%s\" is granted access to the tool in the course %s",
 					request.getParameter(Utils.LTI_PARAM_UNIQNAME), request.getParameter(Utils.LTI_PARAM_CANVAS_COURSE_ID)));
 		}
-
+		String friendBatchAllowanceProps = appExtPropertiesFile.getProperty(Utils.FRIEND_BATCH_ALLOWANCE);
+		String friendBatchAllowance = (!StringUtils.isEmpty(friendBatchAllowanceProps))?friendBatchAllowanceProps:"10";
+		M_log.info("The Friend Batch Allowance: "+friendBatchAllowance);
 		HashMap<String, Object> customValuesMap = new HashMap<>();
 
 		customValuesMap.put(Utils.LTI_PARAM_CANVAS_COURSE_ID, request.getParameter(Utils.LTI_PARAM_CANVAS_COURSE_ID));
@@ -265,6 +268,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		customValuesMap.put(Utils.SESSION_ROLES_FOR_ADDING_TEACHER, appExtPropertiesFile.getProperty(ROLE_CAN_ADD_TEACHER));
 		customValuesMap.put(Utils.IS_ACCOUNT_ADMIN, String.valueOf(admin));
 		customValuesMap.put(Utils.IS_TOOL_ACCESS_ALLOWED, String.valueOf(allowedToolAccess));
+		customValuesMap.put(Utils.FRIEND_BATCH_ALLOWANCE, friendBatchAllowance);
 
 		TcSessionData tc = (TcSessionData) session.getAttribute(Utils.TC_SESSION_DATA);
 
