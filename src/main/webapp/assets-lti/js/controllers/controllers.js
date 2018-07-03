@@ -901,7 +901,14 @@ canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootSc
         downloadCSVFile(sectionResults);
           function downloadCSVFile(sectionResults) {
             // credit: http://stackoverflow.com/questions/14964035/how-to-export-javascript-array-info-to-csv-on-client-side
-            var csvContent = "data:text/csv;charset=utf-8," + csv;
+            var csvContent ="";
+            // the mime type needs to be set differently for IE
+            // see below "new Blob([csvContent]"
+            if (navigator.msSaveBlob){
+              csvContent = csv;
+            } else {
+              csvContent = "data:text/csv;charset=utf-8," + csv;
+            }
             var encodedUri = encodeURI(csvContent);
             var link = document.createElement("a");
             link.setAttribute("href", encodedUri);
