@@ -57,8 +57,8 @@
                     <span ng-if="view ==='Sub Account Administrator Utils'" class="navbar-text">Acct Admin Tools</span>
                   </li>
                   <li>
-                    <a  ng-if="view !=='Grades'"  class="collapse-nav" ng-click="changeView('Grades')"  href="#grades">Gradebook CSV Formatter</a>
-                    <span ng-if="view ==='Grades'" class="navbar-text">Gradebook CSV Formatter</span>
+                    <a  ng-if="view !=='Grades'"  class="collapse-nav" ng-click="changeView('Grades')"  href="#grades">Gradebook Tools</a>
+                    <span ng-if="view ==='Grades'" class="navbar-text">Gradebook Tools</span>
                    </li>
                   <li>
                     <a href="" class="collapse-nav" id="helpLink" data-url="help-lti.html">Help</a>
