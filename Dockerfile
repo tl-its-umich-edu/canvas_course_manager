@@ -14,12 +14,6 @@ RUN git clone --branch v2.0  https://github.com/tl-its-umich-edu/esbUtils \
  && cd esbUtils \
  && mvn clean install
 
-# Build lti-utils, a dependency of the CCM.
-#RUN git clone --branch 1.5 https://github.com/tl-its-umich-edu/lti-utils \
-RUN git clone --branch 1.6 https://github.com/tl-its-umich-edu/lti-utils \
- && cd lti-utils \
- && mvn clean install
-
 # Copy CCM code to local directory for building
 COPY . /tmp
 
