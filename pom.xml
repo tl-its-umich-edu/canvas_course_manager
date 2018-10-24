@@ -75,9 +75,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>lti</groupId>
+			<groupId>edu.umich.it.tl</groupId>
 			<artifactId>lti-utils</artifactId>
-			<version>1.6</version>
+			<version>1.7</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
