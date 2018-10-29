@@ -59,7 +59,7 @@ RUN chown -R root:root /usr/local/tomcat/logs /var/lock /var/run/lock
 ### Modify perms for the openshift user, who is not root, but part of root group.
 #RUN chmod 777 /usr/local/tomcat/conf /usr/local/tomcat/conf/webapps
 RUN chmod g+rw /usr/local/tomcat/conf /usr/local/tomcat/logs /usr/local/tomcat/webapps \
-        /var/lock /var/run/lock
+        /usr/local/tomcat/conf/server.xml /var/lock /var/run/lock
 
 # Launch Tomcat
 #CMD cp /tmp/tomcat/* /usr/local/tomcat/conf/; cp /tmp/app/* /usr/local/tomcat/conf/; catalina.sh jpda run
