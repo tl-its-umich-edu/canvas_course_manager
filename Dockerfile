@@ -53,5 +53,18 @@ EXPOSE 5009
 ENV JPDA_ADDRESS="5009"
 ENV JPDA_TRANSPORT="dt_socket"
 
+### change directory owner, as openshift user is in root group.
+RUN chown -R root:root /usr/local/tomcat/logs /var/lock /var/run/lock
+
+### Modify perms for the openshift user, who is not root, but part of root group.
+#RUN chmod 777 /usr/local/tomcat/conf /usr/local/tomcat/conf/webapps
+RUN chmod g+rw /usr/local/tomcat/conf /usr/local/tomcat/logs /usr/local/tomcat/webapps \
+        /var/lock /var/run/lock
+
 # Launch Tomcat
-CMD cp /tmp/tomcat/* /usr/local/tomcat/conf/; cp /tmp/app/* /usr/local/tomcat/conf/; catalina.sh jpda run
+#CMD cp /tmp/tomcat/* /usr/local/tomcat/conf/; cp /tmp/app/* /usr/local/tomcat/conf/; catalina.sh jpda run
+
+### Start script incorporates config files and sends logs to stdout ###
+COPY start.sh /usr/local/bin
+RUN chmod 755 /usr/local/bin/start.sh
+CMD /usr/local/bin/start.sh
