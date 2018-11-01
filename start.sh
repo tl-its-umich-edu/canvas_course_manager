@@ -1,21 +1,21 @@
 #!/bin/bash -x
 
 # copy app/tomcat config files from secret volumes to a location that can be written to.
-if [ -e /secrets/app ];
+if [ -e /mnt/app ];
 then
-    cp /secrets/app/* /usr/local/tomcat/conf/.
+    cp /mnt/app/* /usr/local/tomcat/conf/.
 fi
 
-if [ -e /secrets/tomcat ];
+if [ -e /mnt/tomcat ];
 then
-    cp /secrets/tomcat/* /usr/local/tomcat/conf/.
+    cp /mnt/tomcat/* /usr/local/tomcat/conf/.
 fi
 
 # If it exists, include local.start.sh
 
-if [ -f /secrets/start/local.start.sh ]
+if [ -f /mnt/local/local.start.sh ]
 then
-  /bin/sh /secrets/start/local.start.sh
+  /bin/sh /mnt/local/local.start.sh
 fi
 
 # Redirect logs to stdout and stderr for docker reasons.
