@@ -7,18 +7,24 @@ RUN apt-get update \
 
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 
+
+
 WORKDIR /tmp
 
+RUN ls -la
+
 # Build esbUtils, a dependency of the CCM.
-RUN git clone --branch v2.0  https://github.com/tl-its-umich-edu/esbUtils \
+RUN git clone https://github.com/pushyami-org/esbUtils \
  && cd esbUtils \
  && mvn clean install
+
+RUN ls -la
 
 # Copy CCM code to local directory for building
 COPY . /tmp
 
 # Build CCM and place the resulting war in the tomcat dir.
-RUN mvn clean install \
+RUN mvn clean install  \
  && mv ./target/canvasCourseManager.war /usr/local/tomcat/webapps
 
 # Remove unnecessary build dependencies.
