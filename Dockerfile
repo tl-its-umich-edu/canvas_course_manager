@@ -10,7 +10,7 @@ ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 WORKDIR /tmp
 
 # Build esbUtils, a dependency of the CCM.
-RUN git clone --branch v2.0  https://github.com/tl-its-umich-edu/esbUtils \
+RUN git clone --branch v2.4  https://github.com/tl-its-umich-edu/esbUtils \
  && cd esbUtils \
  && mvn clean install
 
