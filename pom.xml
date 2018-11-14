@@ -4,7 +4,7 @@
 	<groupId>edu.umich.ctools</groupId>
 	<artifactId>canvasCourseManager</artifactId>
 	<packaging>war</packaging>
-	<version>4.0.0</version>
+	<version>4.0.2</version>
 	<name>canvasCourseManager</name>
 	<url>http://maven.apache.org</url>
 
