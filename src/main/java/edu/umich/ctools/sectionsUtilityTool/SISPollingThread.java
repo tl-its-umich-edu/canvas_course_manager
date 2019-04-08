@@ -260,6 +260,7 @@ public class SISPollingThread implements Runnable {
 		HashMap<String, String> map = new HashMap<>();
 		map.put("<sis_process_type>", data.getUploadType().getDescription());
 		map.put("<course_number>", data.getCourseId());
+		map.put("<job_id>", Integer.toString(data.getPollingId()));
 
 		String slowProcessEmailFile = appExtPropertiesFile.getProperty(Utils.SIS_SLOW_PROCESS_EMAIL_FILE_PATH);
 		String emailMessage = Utils.readEmailTemplateAndReplacePlaceHolders(map, slowProcessEmailFile);
