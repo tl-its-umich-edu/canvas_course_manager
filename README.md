@@ -7,12 +7,6 @@ The Canvas Course Manager (CCM) is an application that will be able to be used b
 ## Build Directions
 ### Dependencies:
 
-<code>git clone https://github.com/tl-its-umich-edu/lti-utils.git</code>
-
-<code>cd lti-utils</code>
-
-<code>$mvn clean install</code>
-
 <code>git clone https://github.com/tl-its-umich-edu/esbUtils.git</code>
 
 <code>cd esbUtils</code>

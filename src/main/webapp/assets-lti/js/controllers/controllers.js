@@ -1,8 +1,8 @@
 'use strict';
-/* global $, canvasSupportApp, _, generateCurrentTimestamp, angular, validateEmailAddress, FileReader, document, setTimeout */
+/* global $, canvasSupportApp, _, generateCurrentTimestamp, angular, validateEmailAddress, FileReader, document, setTimeout, Papa, teacherPrivileges, navigator, Blob, window  */
 
 /* SINGLE COURSE CONTROLLER */
-canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Friend', 'SectionSet', 'Terms', 'focus', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course, Courses, Sections, Friend, SectionSet, Terms, focus, $scope, $rootScope, $filter, $location, $log) {
+canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections', 'Things', 'Friend', 'SectionSet', 'Terms', 'focus', '$scope', '$rootScope', '$filter', '$location', '$log', function (Course, Courses, Sections, Things, Friend, SectionSet, Terms, focus, $scope, $rootScope, $filter, $location, $log) {
     $scope.userIsFriend=false;
     $scope.contextCourseId = $rootScope.ltiLaunch.custom_canvas_course_id;
     $scope.currentUserCanvasId = $rootScope.ltiLaunch.custom_canvas_user_id;
@@ -24,7 +24,9 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
         $scope.course = resultCourse.data;
         $scope.course.addingSections = false;
         $rootScope.courseAccount = $scope.course.account_id;
-        Sections.getSectionsForCourseId('', true).then(function (resultSections) {
+        // using a generic paged getter to retrieve *all* sections
+        var url = '/canvasCourseManager/manager/api/v1/courses/' + resultCourse.data.id +'/sections?per_page=100&_='+ generateCurrentTimestamp();
+        Things.getThings(url).then(function (resultSections) {
           $rootScope.sections = resultSections.data;
           $scope.loadingSections = false;
           if(!resultSections.data.errors) {
@@ -60,7 +62,11 @@ canvasSupportApp.controller('courseController', ['Course', 'Courses', 'Sections'
     var courseEnrollmentUrl ='manager/api/v1/courses/course_id/enrollments?user_id=' + $scope.canvas_user_id + '&_=' + generateCurrentTimestamp();
 
     Course.getCourse(courseEnrollmentUrl).then(function (resultCourseEnrollment) {
-      $rootScope.courseRole = teacherPrivileges(resultCourseEnrollment.data, $scope.canAddTeachers);
+      if($rootScope.ltiLaunch.role_is_account_admin){
+        $rootScope.courseRole = 'TeacherEnrollment';
+      } else {
+        $rootScope.courseRole = teacherPrivileges(resultCourseEnrollment.data, $scope.canAddTeachers);
+      }
     });
 
   $scope.getCoursesForTerm = function() {
@@ -399,13 +405,12 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
 
   // store the sections again as an array of objects - this is used by the grid (presenting the section name
   // but submitting the sis_id)
-  $scope.availableSectionsGrid = _.map(
-    $rootScope.sections,
-    function(section) {
-        return { 'name': section.name, 'id': section.sis_section_id };
+  $scope.availableSectionsGrid = [];
+  _.each($rootScope.sections, function(section){
+    if(section.sis_section_id){
+      $scope.availableSectionsGrid.push({ 'name': section.name, 'id': section.sis_section_id });
     }
-  );
-
+  });
   // get the existing groupsets, like above we store it as a flat array (to ensure CSV type is not using an existing one)
   var groupSetUrl = 'manager/api/v1/courses/' + $scope.course.id + '/group_categories';
   Course.getGroups(groupSetUrl).then(function (resultGroupsSets){
@@ -769,6 +774,175 @@ canvasSupportApp.controller('saaController', ['Course', '$scope', '$rootScope', 
   };
 }]);
 
-canvasSupportApp.controller('gradesController', ['Things', '$scope', '$location', '$rootScope', '$log', '$timeout', function (Things, $scope, $location, $rootScope, $log, $timeout) {
-  // empty controller for grades view
+canvasSupportApp.controller('gradesController', ['$scope', '$location', '$rootScope', '$log', '$timeout', 'Things', function ($scope, $location, $rootScope, $log, $timeout, Things) {
+  var user = $rootScope.ltiLaunch.custom_canvas_user_login_id;
+  var section_name = '';
+  $scope.selectedSectionNumber = 0;
+  //TODO: not sure this is needed
+  $scope.mute=true;
+  $scope.checkSelectedSections = function(){
+    $scope.selectedSectionNumber = 0;
+    _.each($rootScope.sections, function(section){
+      if(section.selected){
+        $scope.selectedSectionNumber = $scope.selectedSectionNumber + 1;
+        $scope.selectedSectionsSet = true;
+      }
+    });
+  };
+  //column to use to filter input list based on section enrollment
+  var valueToPluck = 'SIS Login ID';
+  //detects changes to the file input
+  $scope.$watch('trimfile', function(newFileObj) {
+    $scope.headers=[];
+    $scope.content = false;
+    //there is a new file
+    if (newFileObj) {
+      $scope.loading = true;
+      //read the file
+      var reader = new FileReader();
+      reader.readAsText(newFileObj);
+      //when file is read
+      reader.onload = function(e) {
+        //parse it into a json
+        Papa.parse(reader.result, {
+        	complete: function(results) {
+            $timeout(function(){
+              //remove any trailing cells and get name and pp as the last element
+              var assigName = _.last(_.compact(results.data[0]));
+              $scope.pointsPossible = _.last(_.compact(results.data[1]));
+              //we are constructing the headers from scratch, since there is so much
+              //variability on the format, and all we are going to inherit
+              //from the input is the login id, points possible, and grades
+              $scope.headers = [['Student','ID','SIS User ID','SIS Login ID','Section', assigName],['Points Possible','','','','',$scope.pointsPossible]];
+
+              $scope.pluckPos = _.indexOf(_.compact(results.data[0]), valueToPluck);
+              // $scope.toTrim =  the data rows
+              $scope.toTrim = _.rest(results.data ,2);
+            });
+        	}
+        });
+      };
+      ///put file name into scope
+      $scope.filename = newFileObj.name;
+    }
+  });
+  // function called when user clicks on "Trim" button
+  $scope.trimToSection = function(section){
+    var sectionResults = [];
+    $scope.processing=true;
+    $scope.sectionEnrollment = [];
+    $scope.selectedSections  = [];
+    // look at what sections have been selected
+    _.each($rootScope.sections, function(section){
+      if(section.selected){
+        $scope.selectedSections.push(section);
+        $scope.selectedSectionsSet = true;
+      }
+    });
+
+    // how many sections has the user selected
+    $scope.iterations = $scope.selectedSections.length;
+    // fo each selected section get enrollment
+    _.each($scope.selectedSections, function(section){
+      //1. get the section enrollment (only students)
+      var url = 'manager/api/v1/sections/'+ section.id + '/enrollments?type[]=StudentEnrollment&per_page=100';
+      section_name = section_name + '_' + section.name;
+
+      Things.getThings(url).then(function (resultSectionEnrollment) {
+        _.each(resultSectionEnrollment.data, function(user){
+          $scope.sectionEnrollment.push(user.user);
+        });
+        // done with this section - set how many remain to be fetched
+        $scope.iterations = $scope.iterations - 1;
+        // if now sections remain to be fetched, call trimming function
+        if($scope.iterations === 0) {
+          $scope.finalTrim();
+        }
+    });
+
+      $scope.finalTrim = function(){
+        //3. trim $scope.toTrim to only those lines that have the comparator
+        _.each($scope.toTrim, function(toTrimEl){
+          if(toTrimEl[$scope.pluckPos]){
+            // is this item's sis_login_id in the section enrollments user object array?
+            var match =_.findWhere($scope.sectionEnrollment, {login_id: toTrimEl[$scope.pluckPos].toString()});
+            if(match){
+              // in case the export from the external tool is lacking
+              // some values - use the corresponding enrollment to populate it
+              // this obviates the need to see if the sis_user_id has been tampered with
+              // by the external tool (leading 0s dropped, for example)
+              // below, all we keep from the original input row is the grade
+              // for everyth8ing else we use the data returned from the enrollment
+              var grade = _.last(_.compact(toTrimEl)); //remove all falsy values (some formats have trailing cells)
+              toTrimEl = [];
+              toTrimEl[0] = match.sortable_name;
+              toTrimEl[1] = match.id;
+              toTrimEl[2] = match.sis_user_id;
+              toTrimEl[3] = match.login_id;
+              toTrimEl[4] = '';
+              toTrimEl[5] = grade;
+              //push the row to the sectionResults array
+              sectionResults.push(toTrimEl);
+            }
+          }
+        });
+        // has instructor opted to change the points possible: if so change the value to it in the second header
+        if($scope.changePointsPossible){
+          $scope.headers[1][5] = $scope.changePointsPossible;
+        }
+        var sectionResultsSorted = _.sortBy(sectionResults, function(result) {
+            return result[0];
+        });
+        // prepend the headers to the results
+        sectionResults = $scope.headers.concat(sectionResultsSorted);
+        // transform sectionResults to a csv
+        var csv = Papa.unparse(sectionResults);
+
+        downloadCSVFile(sectionResults);
+          function downloadCSVFile(sectionResults) {
+            // credit: http://stackoverflow.com/questions/14964035/how-to-export-javascript-array-info-to-csv-on-client-side
+            var csvContent ="";
+            // the mime type needs to be set differently for IE
+            // see below "new Blob([csvContent]"
+            if (navigator.msSaveBlob){
+              csvContent = csv;
+            } else {
+              csvContent = "data:text/csv;charset=utf-8," + csv;
+            }
+            var encodedUri = encodeURI(csvContent);
+            var link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", user + '-' + section_name + '.csv');
+            //link.setAttribute("download", user + '-' + $scope.selectedSection.name + '.csv');
+            document.body.appendChild(link); // Required for FF
+            // reset scope vars
+            $scope.pointsPossible = null;
+            $scope.processing = false;
+            $scope.mute = true;
+            $scope.headers = null;
+            $scope.filename = null;
+            $scope.content = null;
+            $scope.changePointsPossible = null;
+            $scope.trimfile = null;
+            $scope.selectedSectionNumbers = 0;
+            _.each($rootScope.sections, function(section){
+              section.selected = false;
+            });
+            // reset file upload input
+            angular.element('#trim-file').val(null);
+            if (navigator.msSaveBlob) { // IE10+ : (has Blob, but not a[download] or URL)
+                var blob = new Blob([csvContent], {type:  "data:text/csv;charset=utf-8"});
+                window.navigator.msSaveOrOpenBlob(blob,  user + '-' + section_name + '.csv');
+            } else {
+              setTimeout(function() {
+                // delay to give impression of processing file
+                link.click();
+              }, 800);
+            }
+          }
+        };
+    });
+  };
+
+
 }]);

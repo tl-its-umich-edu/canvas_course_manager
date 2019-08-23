@@ -61,6 +61,7 @@ public class Utils {
 	protected static final String MAIL_SMTP_STARTTLS = "mail.smtp.starttls.enable";
 	protected static final String MAIL_DEBUG = "mail.debug";
 	protected static final String MAIL_HOST = "umich.friend.mailhost";
+	protected static final String FRIEND_BATCH_ALLOWANCE = "umich.friend.batch.allowance";
 	protected static final String FRIEND_CONTACT_EMAIL = "umich.friend.contactemail";
 	protected static final String SIS_REPORT_CCM_SUPPORT_ADDRESS = "sis.report.ccm.support.address";
 	public static final String IS_TOOL_ACCESS_ALLOWED = "isAllowed";
@@ -97,6 +98,12 @@ public class Utils {
 	// when a api call  fails due to unknown reason may be due to internal failures return a UI with a status code is good.
 	public final static int API_UNKNOWN_ERROR = 666;
 	public final static int API_EXCEPTION_ERROR = 667;
+	public static final String OPENSHIFT_BUILD_NAMESPACE = "OPENSHIFT_BUILD_NAMESPACE";
+ 	public static final String OPENSHIFT_BUILD_SOURCE = "OPENSHIFT_BUILD_SOURCE";
+ 	public static final String OPENSHIFT_BUILD_REFERENCE = "OPENSHIFT_BUILD_REFERENCE";
+ 	public static final String OPENSHIFT_BUILD_NAME = "OPENSHIFT_BUILD_NAME";
+ 	public static final String OPENSHIFT_BUILD_COMMIT = "OPENSHIFT_BUILD_COMMIT";
+
 
 	public static Properties loadProperties(String path){
 		String propertiesFilePath = System.getProperty(path);

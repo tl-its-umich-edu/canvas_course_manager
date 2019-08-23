@@ -49,9 +49,12 @@
     <ul>
         <li><a href="#add-non-um-users">Add non-UM external user</a>s to a Canvas course</li>
         <li><a href="#inst_adding_sections">Add sections</a> to an existing Canvas course</li>
-        <li><a href="#Gradebook_CSV_Formatter">Gradebook CSV Formatter </a>will convert a downloaded Canvas gradebook
-            CSV to an MPathways formatted version and download it to your computer.<br>
-        </li>
+        <li>Gradebook Tools</li>
+        <ul>
+            <li><a href="#Gradebook_CSV_Formatter">Gradebook CSV Formatter </a>will convert a downloaded Canvas gradebook
+                CSV to an MPathways formatted version and download it to your computer.</li>
+            <li><a href="#Gradebook_CSV_Trimmer">Trim CSV to Section </a>creates a grades CSV file that contains only the data for designated course sections. </li>
+        </ul>
     </ul>
     <li><span style="font-weight: bold;">Bulk user, section and group tools for account/sub-account admins:</span></li>
     <ul>
@@ -105,6 +108,8 @@
     </li>
     <li>When finished, click Save Sections and then Done.</li>
 </ol>
+<hr style="width: 100%; height: 2px;">
+<h2>Gradebook Tools</h2>
 <h3><a name="Gradebook_CSV_Formatter"></a>Gradebook CSV Formatter</h3>
 <ol>
     <li>Download your course gradebook in Canvas</li>
@@ -112,7 +117,101 @@
     <li>In UM-Course Manager, click the CSV Gradebook Formatter link</li>
     <li>Drag your exported CSV into the tool or click the upload button</li>
     <li>The tool will convert your file to an MPathways compatible format and download it back to your computer.</li>
+</ol><br>
+<h3><a name="Gradebook_CSV_Trimmer"></a>Trim CSV to Section</h3>
+<h4>Overview</h4>
+<p>When importing grades to Canvas course site, the grade import process will prompt you to take action on each record
+    from your file that doesn’t have a corresponding student enrollment. This can be a tedious and labor-intensive process. </p>
+<p>This utility will create a grades CSV file that contains only the data for designated course sections.
+The output file can be uploaded to the gradebook using the <a href="https://community.canvaslms.com/docs/DOC-12786-415255013">Canvas gradebook import function.</a></p>
+<h6>Example::</h6>
+<p style="text-indent: 50px">There are separate Canvas course sites, but they all use the same external tool for an assignment activity. Consequently, the student grades CSV extracted from the external tool contains records of students not listed on a particular Canvas site section roster(s).
+</p>
+<p style="text-indent: 50px">This utility will create a new Canvas grades CSV input file that contains only the data for the selected sections in the course.
+</p>
+<h4>Formatting The Source CSV File</h4>
+<p>The source CSV must be formatted as described here. This may require some editing of the grades file you want to process.</p>
+<p><b>Important:</b>The first two rows are required.</p><br>
+<table style="text-align: left; width: 500px; height: 99px;" border="1" cellpadding="2" cellspacing="2">
+    <tbody>
+    <tr>
+        <td style="vertical-align: top; font-weight: bold;"> 1 <br>
+        </td>
+        <td style="vertical-align: top; font-weight: bold;"> SIS Login ID <br>
+        </td>
+        <td style="vertical-align: top; font-weight: bold;"> Section <br>
+        </td>
+        <td style="vertical-align: top; font-weight: bold;"> [Assignment Name as it will appear in the gradebook] <br>
+        </td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top;"> 2 <br>
+        </td>
+        <td style="vertical-align: top;"> Points Possible <br>
+        </td>
+        <td style="vertical-align: top;"> <br>
+        </td>
+        <td style="vertical-align: top;"> [optional numeric value] <br>
+        </td>
+    </tr>
+    </tbody>
+</table><br>
+<p><b>Tip:</b> in the unlikely event you are processing records for an external user, their SIS Login ID is their email address, substituting “@” with “+” (e.g. someuser@somesite.com’s login ID is  someuser+somesite.com).
+</p>
+<h6>Example CSV data as viewed in Excel:</h6>
+<table style="text-align: left; width: 500px; height: 99px;" border="1" cellpadding="2" cellspacing="2">
+    <tbody>
+    <tr>
+        <td style="vertical-align: top; font-weight: bold;"> SIS LOGIN ID <br>
+        </td>
+        <td style="vertical-align: top; font-weight: bold;"> Section <br>
+        </td>
+        <td style="vertical-align: top; font-weight: bold;">
+            Lab Assignment 1
+            <br>
+        </td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top;"> Points Possible <br>
+        </td>
+        <td style="vertical-align: top;"> <br>
+        </td>
+        <td style="vertical-align: top;"> 100 <br>
+        </td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top;"> studenta <br>
+        </td>
+        <td style="vertical-align: top;"> <br>
+        </td>
+        <td style="vertical-align: top;"> 98 <br>
+        </td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top;"> studentb <br>
+        </td>
+        <td style="vertical-align: top;"> <br>
+        </td>
+        <td style="vertical-align: top;"> 75 <br>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<h4>Creating the Trimmed CSV File</h4>
+<ol>
+    <li>From the Trim CSV to Section utility, select the file to upload.
+    </li>
+    <li>Enter a Points Possible value if desired. <b>Tip: Entering a value here will override the points possible in your CSV file.</b></li>
+    <li>Click Add to Course to add a section.</li>
+    <li>Select the section(s) you want to trim the source file to.  Only records in the source file that match to the students
+        in the selected section(s) will appear in the trimmed file.
+    </li>
+    <li>To generate the new file, click the Trim button.  </li>
+    <li>The utility will generate a file for download. This file can be imported into the Canvas gradebook using the
+        <a href="https://community.canvaslms.com/docs/DOC-12786-415255013">Canvas gradebook import function.</a>
+    </li>
 </ol>
+
 <hr style="width: 100%; height: 2px;">
 <h3><a name="Account_Admins_Tools"></a>Bulk Course Tools for Account Admins<br>
 </h3>Click the Account Admin Tools link at the top of the UM Course Manager Tool.<br>

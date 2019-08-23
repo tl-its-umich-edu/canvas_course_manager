@@ -1,19 +1,119 @@
-<h2 style="font-size:130%">Grade Export File Formatter</h2>
-<p>
-Use Grade Export File Formatter to reformat the "CSV File" from "Grades" into acceptable format for upload into "Faculty Center"
-</p>
-<div class="file-input" id="drop-zone" style="height: calc(100% - 50px);padding: 5%;margin-top: 20px;border: 3px dashed #bbb;text-align:center">
+<ul class="nav nav-tabs" role="tablist">
+  <li role="presentation" class="active"><a data-target="#geff" href="" aria-controls="geff" role="tab" data-toggle="tab">Grade Export File Formatter</a></li>
+  <li role="presentation"><a data-target="#puff" href="" aria-controls="puff" role="tab" data-toggle="tab">Trim CSV to Section</a></li>
+</ul>
+<!-- Tab panes -->
+<div class="tab-content">
+  <div role="tabpanel" class="tab-pane active" id="geff">
+    <h2 style="font-size:130%">Grade Export File Formatter</h2>
+    <p>
+      Use Grade Export File Formatter to reformat the "CSV File" from "Grades" into acceptable format for upload into "Faculty Center"
+    </p>
+    <div id="currentFinalMismatch" class="alert alert-danger" style="display:none">
+      <p>
+        There are blank cells in the gradebook. Please enter <em>0</em> or <em>EX</em>  (for excused) for any blank cells in the gradebook and export a new CSV file.
+      </p>
+      <p>For more information for configuring the gradebook for upload, see:  <a href="http://documentation.its.umich.edu/node/401" target="_blank">Canvas: Preparing Final Grades for Wolverine Access.</a></p>
+      <p>
+        <a href="" id="showStudents">View <strong id="studentListCount"></strong> affected students.</a>
+      </p>
+      <p id="studentList" style="display:none"></p>
+    </div>
+    <div id="noGradingSchemaMessage"class="alert alert-danger" style="display:none">
+      Wolverine Access requires grades (A-E), but this file only includes percentages. Go to Settings and “Apply Grading Scheme”, then export a new CSV file. <a href="http://documentation.its.umich.edu/node/401" target="_blank">More Info.</a>
+    </div>
+    <div class="file-input" id="drop-zone" style="height: calc(100% - 50px);padding: 5%;margin-top: 20px;border: 3px dashed #bbb;text-align:center">
 
-<div class="text-center drop-file-instruct" style="font-size: 65px;color: rgb(187,187,187);font-weight: 200;pointer-events: none;">
-  Drag file here
+    <div class="text-center drop-file-instruct" style="font-size: 65px;color: rgb(187,187,187);font-weight: 200;pointer-events: none;">
+      Drag file here
+    </div>
+    <div class="text-center drop-file-or" style="margin-top: -10px;margin-bottom: 10px;color: rgb(187,187,187);pointer-events: none;font-size: 25px;">
+      or
+      <p>choose a grade file</p>
+    </div>
+    <input class="btn btn-primary" id="csv-file" type="file" name="files" style="display:inline">
+    </div>
+    <div class="text-center" id="upload-file-info" style="padding-top: 10px;">
+    </div>
+  </div>
+  <div role="tabpanel" class="tab-pane" id="puff">
+      <h2 style="font-size:130%">Trim CSV file to a section</h2>
+      <p>You have a CSV grade file with <strong>all the students in the course roster</strong> and want to import it into the site's gradebook.</p>
+      <div>
+        <p>This utility will provide you with a version of that file that includes <strong>only the students in specific sections of this site.</strong>
+          <a ng-hide="showWhy" ng-click="showWhy=true" href="" tabindex="0">(why?)</a>
+          <small ng-show="showWhy"><br>
+              When adding these grades to the Canvas course site the grade import process will
+              ask about every student in the file but not in the sections in the site. <strong>Tedious!</strong>
+          </small>
+        </p>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-body" style="padding:5px 15px 20px 15px">
+          <h3  style="font-size:110%">Step 1</h3>
+          <p>Provide the file you downloaded from the external app.</p>
+          <div class="input-group">
+            <label class="input-group-btn">
+              <span class="btn"  ng-class="filename? 'btn-success': 'btn-primary'">
+                Browse…
+                <i class="glyphicon glyphicon-upload" ng-show="!filename"></i> <i class="glyphicon glyphicon-ok" ng-show="filename"></i>
+                <input class="sr-only" id="trim-file" type="file" name="files" style="display:inline" file-model="trimfile">
+              </span>
+            </label>
+            <input type="text" class="form-control" readonly="" value="{{filename}}">
+          </div>
+          <!-- <div>
+            <label class="btn btn-file" ng-class="filename? 'btn-success': 'btn-primary'">
+              Browse <i class="glyphicon glyphicon-upload" ng-show="!filename"></i> <i class="glyphicon glyphicon-ok" ng-show="filename"></i>
+               <input class="btn btn-default" id="trim-file" type="file" name="files" style="display:inline" file-model="trimfile">
+            </label> <small ng-show="filename">({{filename}})</small>
+          </div> -->
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-body" style="padding:5px 15px 20px 15px">
+          <div class="form-inline">
+            <h3  style="font-size:110%">Step 2 (optional)</h3>
+            <p>Change the Points Possible value</p>
+             <div>
+              <label for="pointsPossible" style="font-weight:normal"> Change to: </label>
+              <input type="text" ng-model="changePointsPossible" id="pointsPossible" class="form-control" style="width:4em">
+              <span ng-show="pointsPossible">(currently set in spreadsheet to {{pointsPossible}})</span>
+             </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-body" style="padding:5px 15px 20px 15px">
+          <h3  style="font-size:110%">Step 3</h3>
+          <p>Indicate what section to trim it to.</p>
+          <ul style="margin-bottom:0">
+            <li ng-repeat="section in sections">
+              <input type="checkbox" name="sectionSelection" ng-value="section" ng-click="checkSelectedSections()" ng-model="section.selected" id="section{{section.id}}">
+              <label style="font-weight:normal" for="section{{section.id}}">{{section.name}}</label>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-body" style="padding:5px 15px 20px 15px">
+          <h3  style="font-size:110%">Step 4</h3>
+          <p>Trim. The trimmed file will be downloaded to your computer.</p>
+          <div> It will be named <code>&lt;your uniqname>-&lt;section name>.csv</code></div>
+          <div>
+            <span ng-show="changePointsPossible">The points possible will be changed to <strong>{{changePointsPossible}}</strong>.</span>
+          </div>
+          <div>
+            <br>
+            <!-- !selectedSection ||  -->
+            <button type="button" class="btn btn-primary" ng-click="trimToSection(selectedSection)" ng-disabled="!trimfile || selectedSectionNumber === 0">
+              Trim <i ng-show="processing" class="glyphicon glyphicon-refresh glyphicon-spin"></i>
+            </button> <span ng-show="processing"> This might take a while, depending on the size and number of sections selected</span>
+          </div>
+        </div>
+      </div>
+  </div>
 </div>
-<div class="text-center drop-file-or" style="margin-top: -10px;margin-bottom: 10px;color: rgb(187,187,187);pointer-events: none;font-size: 25px;">
-  or
-  <p>choose a grade file</p>
-</div>
-<input class="btn btn-primary" id="csv-file" type="file" name="files" style="display:inline">
-</div>
-<div class="text-center" id="upload-file-info" style="padding-top: 10px;">
-</div>
+
 <script type="text/javascript" src="vendor/utils/papaparse.min.js"></script>
 <script type="text/javascript" src="assets-lti/js/geff.js"></script>

@@ -2,7 +2,6 @@
 #set ($name_given = $ltiValues.get("lis_person_name_given").replace("'",""))
 #set ($isAllowed = $ltiValues.get("isAllowed"))
 #if($isAllowed == "true")
-
 <!DOCTYPE html>
 <html lang="en" ng-app="canvasSupportApp">
   <head>
@@ -58,8 +57,8 @@
                     <span ng-if="view ==='Sub Account Administrator Utils'" class="navbar-text">Acct Admin Tools</span>
                   </li>
                   <li>
-                    <a  ng-if="view !=='Grades'"  class="collapse-nav" ng-click="changeView('Grades')"  href="#grades">Gradebook CSV Formatter</a>
-                    <span ng-if="view ==='Grades'" class="navbar-text">Gradebook CSV Formatter</span>
+                    <a  ng-if="view !=='Grades'"  class="collapse-nav" ng-click="changeView('Grades')"  href="#grades">Gradebook Tools</a>
+                    <span ng-if="view ==='Grades'" class="navbar-text">Gradebook Tools</span>
                    </li>
                   <li>
                     <a href="" class="collapse-nav" id="helpLink" data-url="help-lti.html">Help</a>
@@ -104,11 +103,20 @@
         <div ng-include src="'assets-lti/views/friends.html'"></div>
       </div>
     </div>
-
+    <a aria-hidden="true" href="" style="position:fixed;right:0;top:60px;width:30px" ng-click="showDebug = !showDebug">&nbsp;</a>
+    <div aria-hidden="true" ng-show="showDebug" class="alert alert-info">
+        <script>
+            var openshiftBuildInfo = '$openshiftBuildValues';
+            if (openshiftBuildInfo) {
+                document.write(openshiftBuildInfo);
+            } else {
+                document.write("No build Info Available")
+            }
+        </script>
+    </div>
   </body>
 
 </html>
-
 #else
   <!DOCTYPE html>
   <html lang="en">

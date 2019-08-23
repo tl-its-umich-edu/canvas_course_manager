@@ -33,9 +33,41 @@
   }
 
   function parseCompleteHandler(results) {
-    var targetData = results.data.slice(1); // ignore first row
-    formattedData = formatData(targetData, targetColumns);
-    downloadCSVFile(formattedData);
+    //reset errors and hide message panels
+    errorCount = [];
+    $('#noGradingSchemaMessage').fadeOut('fast');
+    $('#currentFinalMismatch').fadeOut('fast');
+
+    // check to see if Final Grade is available
+
+    if(results.data[0].hasOwnProperty('Final Grade') || results.data[3].hasOwnProperty('Final Grade')){
+      var targetData = results.data.slice(1); //ignore first row
+      // see if all students have the same Current Grade and Final Grade
+      validateData(targetData, errorCount);
+      // if there are students where Current Grade !== Final Grade
+      // show a message with number and names of students affected
+      if(errorCount.length !==0){
+        $('#studentListCount').text(errorCount.length);
+        $('#studentList').text(errorCount.join(', '));
+        $('#currentFinalMismatch').fadeIn('slow');
+      } else {
+        // there were no Current Grade and Final Grade mismatches, proceed
+        formattedData = formatData(targetData, targetColumns);
+        downloadCSVFile(formattedData);
+      }
+    } else {
+      //show message about the lack of grading scheme and Final Grade
+      $('#noGradingSchemaMessage').fadeIn('slow');
+    }
+  }
+
+  function validateData(targetData, errorCount ) {
+    _.each(targetData, function(row){
+      if(row['Final Grade'] !== row['Current Grade']){
+        errorCount.push(row.Student + ' (' + row['SIS Login ID'] + ')');
+      }
+    });
+    //return(errorCount);
   }
 
   function formatData(data, targetCols) {
@@ -80,6 +112,9 @@
   function handleDragLeave(evt) {
       $('#drop-zone').css('border-color','#aaa');
   }
+  $('#showStudents').on('click', function(){
+    $('#studentList').fadeIn();
+  });
 
   $(document).ready(function() {
     // credit: https://www.html5rocks.com/en/tutorials/file/dndfiles/

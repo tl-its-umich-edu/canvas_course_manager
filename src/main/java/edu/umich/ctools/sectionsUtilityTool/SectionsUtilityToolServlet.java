@@ -23,6 +23,7 @@ import edu.umich.its.lti.utils.OauthCredentials;
 import edu.umich.its.lti.utils.OauthCredentialsFactory;
 import edu.umich.its.lti.utils.RequestSignatureUtils;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
@@ -54,6 +55,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS_MASK = "canvas.api.getcourse.by.uniqname.no.sections.mask.regex";
 	private static final String CANVAS_API_GETCOURSE_BY_UNIQNAME_NO_SECTIONS_MASK_PAGED = "canvas.api.getcourse.by.uniqname.no.sections.mask.paged.regex";
 	private static final String CANVAS_API_GETALLSECTIONS_PER_COURSE = "canvas.api.getallsections.per.course.regex";
+	private static final String CANVAS_API_GETALLSECTIONS_PER_COURSE_PAGED = "canvas.api.getallsections.per.course.paged.regex";
 	private static final String CANVAS_API_GETSECTION_PER_COURSE = "canvas.api.getsection.per.course.regex";
 	private static final String CANVAS_API_GETSECTION_INFO = "canvas.api.getsection.info.regex";
 	private static final String CANVAS_API_DECROSSLIST = "canvas.api.decrosslist.regex";
@@ -76,6 +78,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 	private static final String GET_GROUPS= "get.groups.regex";
 	private static final String GET_GROUPSET= "get.groupset.regex";
 	private static final String POST_GROUPSET= "post.groupset.regex";
+	private static final String GET_SECTION_ENROLLMENT= "get.section.enrollment.regex";
+	private static final String GET_SECTION_ENROLLMENT_PAGED= "get.section.enrollment.paged.regex";
 
 	private static final String M_PATH_DATA = "mPathData";
 	private static final String LTI_1P0_CONST = "LTI-1p0";
@@ -149,6 +153,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			put(CANVAS_API_GETSECTION_INFO, "for getting section info");
 			put(CANVAS_API_GETSECTION_PER_COURSE, "for getting section info for a given course");
 			put(CANVAS_API_GETALLSECTIONS_PER_COURSE, "for getting all sections info for a given course");
+			put(CANVAS_API_GETALLSECTIONS_PER_COURSE_PAGED, "for getting all sections info for a given course, paged");
 			put(CANVAS_API_SEARCH_COURSES, "for searching courses");
 			put(CANVAS_API_SEARCH_USER, "for searching for users");
 			put(CANVAS_API_CREATE_USER, "for creating a user");
@@ -158,7 +163,8 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			put(MPATHWAYS_API_GNERIC, "for mpathways calls");
 			put(GET_GROUPS, "for getting the groups of the current course");
 			put(GET_GROUPSET, "for getting the groupset of the current course");
-
+			put(GET_SECTION_ENROLLMENT, "for getting the enrollment for a section");
+			put(GET_SECTION_ENROLLMENT_PAGED, "for getting the enrollment for a section, with pages");
 		}
 	};
 
@@ -221,7 +227,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 
 	public void fillContext(Context context, HttpServletRequest request) {
 		M_log.debug("fillContext() called");
-
+		context.put("openshiftBuildValues",openShiftBuildEnvVariables());
 		if ( SectionUtilityToolFilter.BASIC_LTI_LAUNCH_REQUEST.equals(request.getParameter(SectionUtilityToolFilter.LTI_MESSAGE_TYPE))) {
 			storeContext(context, request);
 		}
@@ -247,7 +253,9 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			M_log.info(String.format("The user \"%s\" is granted access to the tool in the course %s",
 					request.getParameter(Utils.LTI_PARAM_UNIQNAME), request.getParameter(Utils.LTI_PARAM_CANVAS_COURSE_ID)));
 		}
-
+		String friendBatchAllowanceProps = appExtPropertiesFile.getProperty(Utils.FRIEND_BATCH_ALLOWANCE);
+		String friendBatchAllowance = (!StringUtils.isEmpty(friendBatchAllowanceProps))?friendBatchAllowanceProps:"10";
+		M_log.info("The Friend Batch Allowance: "+friendBatchAllowance);
 		HashMap<String, Object> customValuesMap = new HashMap<>();
 
 		customValuesMap.put(Utils.LTI_PARAM_CANVAS_COURSE_ID, request.getParameter(Utils.LTI_PARAM_CANVAS_COURSE_ID));
@@ -260,6 +268,7 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 		customValuesMap.put(Utils.SESSION_ROLES_FOR_ADDING_TEACHER, appExtPropertiesFile.getProperty(ROLE_CAN_ADD_TEACHER));
 		customValuesMap.put(Utils.IS_ACCOUNT_ADMIN, String.valueOf(admin));
 		customValuesMap.put(Utils.IS_TOOL_ACCESS_ALLOWED, String.valueOf(allowedToolAccess));
+		customValuesMap.put(Utils.FRIEND_BATCH_ALLOWANCE, friendBatchAllowance);
 
 		TcSessionData tc = (TcSessionData) session.getAttribute(Utils.TC_SESSION_DATA);
 
@@ -338,6 +347,20 @@ public class SectionsUtilityToolServlet extends VelocityViewServlet {
 			ltiValues.put(ltiparam,(String)customValuesMap.get(ltiparam));
 			M_log.info(String.format(ltiparam + "=" + customValuesMap.get(ltiparam)));
 		}
+	}
+
+	private String openShiftBuildEnvVariables(){
+		StringBuilder buildInfo=new StringBuilder();
+		if(System.getenv(Utils.OPENSHIFT_BUILD_NAMESPACE)!=null){
+			buildInfo.append("OPENSHIFT_BUILD_NAMESPACE: " + System.getenv(Utils.OPENSHIFT_BUILD_NAMESPACE));
+			buildInfo.append(" OPENSHIFT_BUILD_NAME: " + System.getenv(Utils.OPENSHIFT_BUILD_NAME));
+			buildInfo.append(" GIT_SOURCE: " + System.getenv(Utils.OPENSHIFT_BUILD_SOURCE));
+			String branch = (System.getenv(Utils.OPENSHIFT_BUILD_REFERENCE) == null) ? "Master" : System.getenv(Utils.OPENSHIFT_BUILD_REFERENCE);
+			buildInfo.append(" GIT_BRANCH: " + branch);
+			buildInfo.append(" GIT_COMMIT: " + System.getenv(Utils.OPENSHIFT_BUILD_COMMIT));
+		}
+		M_log.debug("Openshift build Info: "+buildInfo.toString());
+		return buildInfo.toString();
 	}
 
 

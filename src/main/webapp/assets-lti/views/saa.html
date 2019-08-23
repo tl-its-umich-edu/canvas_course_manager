@@ -18,8 +18,12 @@
       <br><br>
       <div class="panel panel-default">
         <div class="panel-body">
-          <span ng-show="availableSections.length">{{availableSections.length}} available <a href="" data-toggle="modal"  data-target="#listThingsModal" ng-click="selectedListName='Sections';selectedList = availableSectionsGrid"> section(s).</a> Not seeing all sections? Reload this page.</span>
-          <span ng-show="!availableSections.length">No available sections.</span>
+          <span ng-show="availableSectionsGrid.length">
+            {{availableSectionsGrid.length}} available
+            <a href="" data-toggle="modal"  data-target="#listThingsModal" ng-click="selectedListName='Sections';selectedList = availableSectionsGrid"> section(s).</a>
+            Not seeing all sections? Reload this page.
+          </span>
+          <span ng-show="!availableSectionsGrid.length">No available sections with <strong>sis_section_id</strong>s</span>
         </div>
       </div>
     </div>
@@ -136,8 +140,8 @@
       </table>
     </div>
   </div>
-  <div class="alert alert-danger" ng-show="selectedFunction.id==='users_to_sections_grid' && !availableSections.length">
-    No sections available in the course.
+  <div class="alert alert-danger" ng-show="selectedFunction.id==='users_to_sections_grid' && !availableSectionsGrid.length">
+    No sections with 'sis_section_id' available in the course.
  </div>
   <!-- a global user/groups parse error was thrown by validator -->
   <div class="alert alert-danger" ng-show="groupsParseError">
@@ -145,7 +149,7 @@
   </div>
   <!-- form table presentation for adding users in a grid to sections of groups
   show only of the selected function is a grid function and in the case of users to sections, if there are also sections -->
-  <div ng-show="(selectedFunction.id==='users_and_groups_grid') ||(selectedFunction.id==='users_to_sections_grid' && availableSections.length)">
+  <div ng-show="(selectedFunction.id==='users_and_groups_grid') ||(selectedFunction.id==='users_to_sections_grid' && availableSectionsGrid.length)">
     <table class="table table-striped  table-hover" style="width:auto" id="gridTable">
       <thead>
         <tr>
@@ -208,7 +212,7 @@
             Course sections (SIS_IDs)
           </td>
           <td>
-            <span ng-repeat="section in availableSections">{{section}}<span ng-if="!$last">, </span></span>
+            <span ng-repeat="section in availableSections track by $index">{{section}}<span ng-if="!$last">, </span></span>
           </td>
 
         </tr>
