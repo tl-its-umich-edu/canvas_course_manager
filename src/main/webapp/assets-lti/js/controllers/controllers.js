@@ -216,7 +216,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
     var friendId = $.trim($scope.coursemodal.friendEmailAddress);
     if(validateEmailAddress(friendId)){
       $scope.failedValidation = false;
-      Friend.lookUpCanvasFriend(friendId).then(function (resultLookUpCanvasFriend) {
+      Friend.lookUpCanvasFriend(encodeURI(friendId)).then(function (resultLookUpCanvasFriend) {
         if(resultLookUpCanvasFriend.status ===200) {
           if (resultLookUpCanvasFriend.data.length ===1 && resultLookUpCanvasFriend.data[0].sis_user_id === friendId) {
             // user exists - set data to Canvas response
@@ -250,8 +250,8 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
   $scope.createFriendClick = function () {
 
     var friendEmailAddress = $.trim($scope.coursemodal.friendEmailAddress);
-    var friendNameFirst = $.trim($scope.coursemodal.friendNameFirst);
-    var friendNameLast = $.trim($scope.coursemodal.friendNameLast);
+    var friendNameFirst = encodeURI($.trim($scope.coursemodal.friendNameFirst));
+    var friendNameLast = encodeURI($.trim($scope.coursemodal.friendNameLast));
 
     var notifyInstructor = 'false';
 
@@ -260,14 +260,15 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
       var requestorEmail = $rootScope.ltiLaunch.lis_person_contact_email_primary;
       $scope.coursemodal.loadingCreateUser = true;
 
-      Friend.doFriendAccount(friendEmailAddress, requestorEmail, notifyInstructor, $rootScope.ltiLaunch.lis_person_name_given, $rootScope.ltiLaunch.lis_person_name_family).then(function (resultDoFriendAccount) {
+      Friend.doFriendAccount(encodeURI(friendEmailAddress), friendNameFirst, friendNameLast, requestorEmail, notifyInstructor, $rootScope.ltiLaunch.lis_person_name_given,
+        $rootScope.ltiLaunch.lis_person_name_family).then(function (resultDoFriendAccount) {
         //check for success of creating a friend account (or if it is already there)
         if (resultDoFriendAccount.data.message === 'created' || resultDoFriendAccount.data.message === 'exists') {
           $scope.friend_account = resultDoFriendAccount.data;
           $scope.newUserFound=true;
           $scope.friendDone=true;
 
-          Friend.createCanvasFriend(friendEmailAddress,friendNameFirst, friendNameLast).then(function (resultCreateCanvasFriend) {
+          Friend.createCanvasFriend(encodeURI(friendEmailAddress),friendNameFirst, friendNameLast).then(function (resultCreateCanvasFriend) {
             // check for successufull creation of Canvas account
             if (resultCreateCanvasFriend.data.sis_user_id === friendEmailAddress) {
               // here we add the person to the scope and then use another function to add them to the sites
