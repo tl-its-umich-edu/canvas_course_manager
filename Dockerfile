@@ -1,11 +1,11 @@
-FROM tomcat:8-jre8
+FROM tomcat:8-jdk8
 
 MAINTAINER Teaching and Learning <its.tl.dev@umich.edu>
 
 RUN apt-get update \
- && apt-get install -y vim maven openjdk-8-jdk git
+ && apt-get install -y vim maven git
 
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+ENV JAVA_HOME=/usr/local/openjdk-8/jre
 
 WORKDIR /tmp
 
@@ -22,7 +22,7 @@ RUN mvn clean install -Dmaven.test.skip=true \
  && mv ./target/canvasCourseManager.war /usr/local/tomcat/webapps
 
 # Remove unnecessary build dependencies.
-RUN apt-get remove -y maven openjdk-8-jdk git \
+RUN apt-get remove -y maven git \
  && apt-get autoremove -y
 
 # Download the YourKit to /usr/local for profiling. This will be commented out for production.
