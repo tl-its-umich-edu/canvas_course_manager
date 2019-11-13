@@ -22,4 +22,4 @@ fi
 ln -sf /dev/stdout /usr/local/tomcat/logs/access_log
 ln -sf /dev/stderr /usr/local/tomcat/logs/error_log
 
-/usr/local/tomcat/bin/catalina.sh jpda run
+/usr/local/tomcat/bin/catalina.sh run
