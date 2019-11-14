@@ -225,7 +225,7 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
         }
       );
     },
-    doFriendAccount: function (friendEmailAddress, friendFirstName, friedLastName, requestorEmail, notifyInstructor, requestorFirst, requestorLast) {
+    doFriendAccount: function (friendEmailAddress, friendFirstName, friendLastName, requestorEmail, notifyInstructor, requestorFirst, requestorLast) {
       if(!notifyInstructor || notifyInstructor === 'true'){
         notifyInstructor = 'true';
       }
@@ -234,7 +234,7 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
       }
       var url = '/canvasCourseManager/friend/friendCreate?id=' + friendEmailAddress +
         '&frd_first_name=' + friendFirstName +
-        '&frd_last_name=' + friedLastName +
+        '&frd_last_name=' + friendLastName +
         '&inst_email=' + requestorEmail +
         '&inst_first_name=' + requestorFirst +
         '&inst_last_name=' + requestorLast +
