@@ -105,7 +105,7 @@ public class FriendServlet extends HttpServlet {
             String nonUmichEmailFirstName = URLEncoder.encode(request.getParameter(PARAMETER_FRIEND_FIRST_NAME), Utils.CONSTANT_UTF_8);
             String nonUmichEmailLastName = URLEncoder.encode(request.getParameter(PARAMETER_FRIEND_LAST_NAME), Utils.CONSTANT_UTF_8);
             String keySecretStr = String.format("%s:%s", key, secret);
-
+            M_log.info(String.format("Social login guest invitation API Request for user Email: %s Firstname: %s Lastname: %s ", nonUmichEmail, nonUmichEmailFirstName, nonUmichEmailLastName));
             String encoding = Base64.getEncoder().encodeToString((keySecretStr).getBytes());
             CloseableHttpClient httpclient = HttpClients.createDefault();
             HttpPost httpPost = new HttpPost(fullSocialLoginApiUrl);
@@ -116,8 +116,7 @@ public class FriendServlet extends HttpServlet {
             httpPost.setEntity(apiPostBodyStringEntity);
             HttpResponse res = httpclient.execute(httpPost);
             if (res == null) {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                json = buildResponseObject("error", "Non-Umich Account NOT created for due to No response", fullSocialLoginApiUrl);
+                json = errorResponseForSocialLogin(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "No response", fullSocialLoginApiUrl);
                 out.print(json.toString());
                 out.flush();
                 return;
@@ -125,23 +124,19 @@ public class FriendServlet extends HttpServlet {
 
             int statusCode = res.getStatusLine().getStatusCode();
             String apiResponse = EntityUtils.toString(res.getEntity(), Utils.CONSTANT_UTF_8);
-            response.setStatus(statusCode);
             M_log.info(String.format("Social Login API Response code %s and details %s ", statusCode, apiResponse));
             if (statusCode == HttpStatus.SC_CREATED) {
+                response.setStatus(statusCode);
                 String detailedMessage = String.format("Non-Umich Account created for %s ", nonUmichEmail);
                 buildResponseObject("created", detailedMessage, fullSocialLoginApiUrl);
                 json = buildResponseObject("created", detailedMessage, fullSocialLoginApiUrl);
             } else {
-                json = buildResponseObject("error", apiResponse, fullSocialLoginApiUrl);
+                json = errorResponseForSocialLogin(response, statusCode, apiResponse, fullSocialLoginApiUrl);
             }
         } catch (IOException e) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            json = buildResponseObject("error", "Non-Umich Account NOT created for due to " + e.getMessage(), fullSocialLoginApiUrl);
-            M_log.error(json.toString());
+            json = errorResponseForSocialLogin(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage(), fullSocialLoginApiUrl);
         } catch (Exception e){
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            json = buildResponseObject("error", "Non-Umich Account NOT created for due to " + e.getMessage(), fullSocialLoginApiUrl);
-            M_log.error(json.toString());
+            json = errorResponseForSocialLogin(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage(), fullSocialLoginApiUrl);
         }
         out.print(json.toString());
         out.flush();
@@ -149,7 +144,6 @@ public class FriendServlet extends HttpServlet {
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
         M_log.info(String.format("Social login account creation Api response took %sms", elapsedTime));
-
     }
 
     private StringEntity socialLoginApiRequestBody(String spURL, String nonUmichEmail, String friendFirstName, String friendLastName) throws UnsupportedEncodingException {
@@ -166,6 +160,13 @@ public class FriendServlet extends HttpServlet {
         apiPostBody.put(Utils.SOCIAL_LOGIN_SPONSOR_SURNAME, "Service Center");
         StringEntity stringEntity = new StringEntity(apiPostBody.toString());
         return stringEntity;
+    }
+
+    private JsonObject errorResponseForSocialLogin(HttpServletResponse res, int statusCode, String message, String url){
+        res.setStatus(statusCode);
+        JsonObject json = buildResponseObject("error", "Non-Umich Account NOT created for due to "+message, url);
+        M_log.error(json.toString());
+        return json;
     }
 
     /*
