@@ -225,7 +225,7 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
         }
       );
     },
-    doFriendAccount: function (friendEmailAddress, requestorEmail, notifyInstructor, requestorFirst, requestorLast) {
+    doFriendAccount: function (friendEmailAddress, friendFirstName, friendLastName, requestorEmail, notifyInstructor, requestorFirst, requestorLast) {
       if(!notifyInstructor || notifyInstructor === 'true'){
         notifyInstructor = 'true';
       }
@@ -233,17 +233,19 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
        notifyInstructor = 'false';
       }
       var url = '/canvasCourseManager/friend/friendCreate?id=' + friendEmailAddress +
-       '&inst_email=' + requestorEmail +
-       '&inst_first_name=' + requestorFirst +
-       '&inst_last_name='  + requestorLast +
-       '&notify_instructor='  + notifyInstructor;
+        '&frd_first_name=' + friendFirstName +
+        '&frd_last_name=' + friendLastName +
+        '&inst_email=' + requestorEmail +
+        '&inst_first_name=' + requestorFirst +
+        '&inst_last_name=' + requestorLast +
+        '&notify_instructor=' + notifyInstructor
 
       return $http.post(url, {cache: false}).then(
         function success(result) {
           return result;
         },
         function error(result) {
-          errorDisplay(url, result.status, 'Unable to create friend');
+          errorDisplay(url, result.status, 'Unable to create Non-Umich account');
           return result;
         }
       );

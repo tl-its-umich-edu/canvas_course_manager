@@ -126,7 +126,7 @@ public class SISPollingThread implements Runnable {
 
 	private void didThreadingIssuesOccur(List<SISDataHolderForEmail> pollingIds, int addedPollingIdCount, int removedPollingIdCount) {
 		if ((addedPollingIdCount - removedPollingIdCount) == pollingIds.size()) {
-			M_log.info("polling went fine");
+			M_log.debug("polling went fine");
 			return;
 		}
 		M_log.info("canvas polling has some problems as number of things added/removed count" + (addedPollingIdCount - removedPollingIdCount) +

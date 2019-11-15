@@ -184,7 +184,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
 
     if(validateEmailAddress(friendId)){
       $scope.failedValidation = false;
-      Friend.lookUpCanvasFriend(friendId).then(function (data) {
+      Friend.lookUpCanvasFriend(encodeURI(friendId)).then(function (data) {
         if (data.data.length ===1 && data.data[0].name) {
           // TODO: check Friend account correlate
           // and if there is one, call this done, if not, create it
@@ -207,8 +207,8 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
   $scope.createFriendClick = function () {
 
     var friendEmailAddress = $.trim($('#friendEmailAddress2').val());
-    var friendNameFirst = $('#friendNameFirst').val();
-    var friendNameLast = $('#friendNameLast').val();
+    var friendNameFirst = encodeURI($('#friendNameFirst').val());
+    var friendNameLast = encodeURI($('#friendNameLast').val());
 
     if(validateEmailAddress(friendEmailAddress)){
       $scope.failedValidation = false;
@@ -217,7 +217,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
       $scope.loadingCreateUser = true;
       $scope.addSuccess = false;
 
-      Friend.doFriendAccount(friendEmailAddress, requestorEmail).then(function (data) {
+      Friend.doFriendAccount(encodeURI(friendEmailAddress), friendNameFirst, friendNameLast, requestorEmail).then(function (data) {
         //TODO: at some point the servlet will return message values
         //of 'created, exists, error, invalid' with a detailedMessage with the details
         //and we will need to change the string detecting below
@@ -226,7 +226,7 @@ canvasSupportApp.controller('addUserController', ['Friend', '$scope', '$rootScop
           $scope.newUserFound=true;
           $scope.friendDone=true;
 
-          Friend.createCanvasFriend(friendEmailAddress,friendNameFirst, friendNameLast).then(function (data) {
+          Friend.createCanvasFriend(encodeURI(friendEmailAddress),friendNameFirst, friendNameLast).then(function (data) {
             if (data.data.name) {
               // here we add the person to the scope and then use another factory to add them to the sites
               $scope.newUser=false;

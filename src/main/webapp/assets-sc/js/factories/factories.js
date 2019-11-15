@@ -91,11 +91,13 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
         }
       );
     },
-    doFriendAccount: function (friendEmailAddress, requestorEmail) {
+    doFriendAccount: function (friendEmailAddress, friendFirstName, friendLastName, requestorEmail) {
       var url = '/canvasCourseManager/friend/friendCreate?id=' + friendEmailAddress +
-       '&inst_email=' + requestorEmail +
-       // need the first name and last name, right now just using the email
-       '&inst_first_name=' + requestorEmail +
+        '&frd_first_name=' + friendFirstName +
+        '&frd_last_name=' + friendLastName +
+        '&inst_email=' + requestorEmail +
+        // need the first name and last name, right now just using the email
+        '&inst_first_name=' + requestorEmail +
        '&inst_last_name= ';
       return $http.post(url, {cache: false}).then(
         function success(result) {

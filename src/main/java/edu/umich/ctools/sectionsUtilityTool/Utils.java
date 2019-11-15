@@ -63,8 +63,19 @@ public class Utils {
 	protected static final String MAIL_HOST = "umich.friend.mailhost";
 	protected static final String FRIEND_BATCH_ALLOWANCE = "umich.friend.batch.allowance";
 	protected static final String FRIEND_CONTACT_EMAIL = "umich.friend.contactemail";
+	protected static final String ENABLE_SOCIAL_LOGIN = "enable.social.login";
 	protected static final String SIS_REPORT_CCM_SUPPORT_ADDRESS = "sis.report.ccm.support.address";
 	public static final String IS_TOOL_ACCESS_ALLOWED = "isAllowed";
+	public static final String SOCIAL_LOGIN_CLIENT_REQUEST_ID = "clientRequestID";
+	public static final String SOCIAL_LOGIN_SERVICE_NAME = "serviceName";
+	public static final String SOCIAL_LOGIN_EMAIL_ADDRESS = "emailAddress";
+	public static final String SOCIAL_LOGIN_EMAIL_SUBJECT = "emailSubject";
+	public static final String SOCIAL_LOGIN_SPONSOR_EPPN = "sponsorEppn";
+	public static final String SOCIAL_LOGIN_SPONSOR_MAIL = "sponsorMail";
+	public static final String SOCIAL_LOGIN_SPONSOR_GIVENNAME = "sponsorGivenname";
+	public static final String SOCIAL_LOGIN_SPONSOR_SURNAME = "sponsorSurname";
+	public static final String SOCIAL_LOGIN_SP_ENTITY_ID = "spEntityId";
+	public static final String APPLICATION_JSON = "application/json";
 	protected static String SIS_SLOW_PROCESS_EMAIL_FILE_PATH = "umich.sis.slowprocessemail";
 	protected static final String SIS_POLLING_ATTEMPTS = "sis.polling.attempts";
 	protected static final String SIS_POLLING_SLEEPTIME = "sis.polling.sleeptime";
@@ -73,6 +84,10 @@ public class Utils {
 	protected static final String JSON_PARAM_FAILED_WITH_MESSAGES = "failed_with_messages";
 	protected static final String JSON_PARAM_IMPORTED_WITH_MESSAGES = "imported_with_messages";
 	protected static final String JSON_PARAM_IMPORTED = "imported";
+	protected static final String SOCIAL_LOGIN_API_SERVICE_PROVIDED_URL = "social.login.service.provider.url";
+	protected static final String SOCIAL_LOGIN_API_URL = "social.login.url";
+	protected static final String SOCIAL_LOGIN_API_KEY = "social.login.key";
+	protected static final String SOCIAL_LOGIN_API_SECRET = "social.login.secret";
 	public static final String URL_CHUNK_ACCOUNTS = "/accounts/";
 	public static final String URL_CHUNK_COURSES = "/courses/";
 	public static final String URL_CHUNK_COURSE_SIS_COURSE_ID = "/?course[sis_course_id]=";
@@ -103,6 +118,7 @@ public class Utils {
  	public static final String OPENSHIFT_BUILD_REFERENCE = "OPENSHIFT_BUILD_REFERENCE";
  	public static final String OPENSHIFT_BUILD_NAME = "OPENSHIFT_BUILD_NAME";
  	public static final String OPENSHIFT_BUILD_COMMIT = "OPENSHIFT_BUILD_COMMIT";
+
 
 
 	public static Properties loadProperties(String path){
@@ -211,7 +227,7 @@ public class Utils {
 		TcSessionData tc = (TcSessionData) request.getSession().getAttribute(TC_SESSION_DATA);
 		M_log.debug("TC Session Data: " + tc);
 
-		String baseString = "FRIEND API request with Uniqname \"%s\" for URL \"%s\"";
+		String baseString = "NON-UMICH ACCOUNT CREATION API request with Uniqname \"%s\" for URL \"%s\"";
 
 		if (tc != null) {
 			uniqname = (String) tc.getCustomValuesMap().get("custom_canvas_user_login_id");
