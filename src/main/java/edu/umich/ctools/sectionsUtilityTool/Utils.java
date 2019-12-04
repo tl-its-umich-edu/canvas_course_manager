@@ -85,6 +85,7 @@ public class Utils {
 	protected static final String JSON_PARAM_IMPORTED_WITH_MESSAGES = "imported_with_messages";
 	protected static final String JSON_PARAM_IMPORTED = "imported";
 	protected static final String SOCIAL_LOGIN_API_SERVICE_PROVIDED_URL = "social.login.service.provider.url";
+	protected static final String SOCIAL_LOGIN_NO_REPLY_EMAIL = "social.login.no.reply.email";
 	protected static final String SOCIAL_LOGIN_API_URL = "social.login.url";
 	protected static final String SOCIAL_LOGIN_API_KEY = "social.login.key";
 	protected static final String SOCIAL_LOGIN_API_SECRET = "social.login.secret";

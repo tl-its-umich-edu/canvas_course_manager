@@ -154,11 +154,13 @@ public class FriendServlet extends HttpServlet {
         apiPostBody.put(Utils.SOCIAL_LOGIN_SERVICE_NAME, "UMICH Invite");
         apiPostBody.put(Utils.SOCIAL_LOGIN_EMAIL_ADDRESS, nonUmichEmail);
         apiPostBody.put(Utils.SOCIAL_LOGIN_EMAIL_SUBJECT, String.format("UMICH Invitation for %s %s" ,friendFirstName, friendLastName));
-        apiPostBody.put(Utils.SOCIAL_LOGIN_SPONSOR_EPPN, Utils.FRIEND_CONTACT_EMAIL);
-        apiPostBody.put(Utils.SOCIAL_LOGIN_SPONSOR_MAIL, Utils.FRIEND_CONTACT_EMAIL);
+        apiPostBody.put(Utils.SOCIAL_LOGIN_SPONSOR_EPPN, appExtProperties.getProperty(Utils.SOCIAL_LOGIN_NO_REPLY_EMAIL));
+        apiPostBody.put(Utils.SOCIAL_LOGIN_SPONSOR_MAIL, appExtProperties.getProperty(Utils.SOCIAL_LOGIN_NO_REPLY_EMAIL));
         apiPostBody.put(Utils.SOCIAL_LOGIN_SPONSOR_GIVENNAME, "ITS");
         apiPostBody.put(Utils.SOCIAL_LOGIN_SPONSOR_SURNAME, "Service Center");
-        StringEntity stringEntity = new StringEntity(apiPostBody.toString());
+        String apiPostData = apiPostBody.toString();
+        M_log.debug(String.format("Social login form post data %s", apiPostData));
+        StringEntity stringEntity = new StringEntity(apiPostData);
         return stringEntity;
     }
 
