@@ -153,7 +153,7 @@ public class FriendServlet extends HttpServlet {
         apiPostBody.put(Utils.SOCIAL_LOGIN_CLIENT_REQUEST_ID, "request001");
         apiPostBody.put(Utils.SOCIAL_LOGIN_SERVICE_NAME, "UMICH Invite");
         apiPostBody.put(Utils.SOCIAL_LOGIN_EMAIL_ADDRESS, nonUmichEmail);
-        apiPostBody.put(Utils.SOCIAL_LOGIN_EMAIL_SUBJECT, String.format("UMICH Invitation for %s %s" ,friendFirstName, friendLastName));
+        apiPostBody.put(Utils.SOCIAL_LOGIN_EMAIL_SUBJECT, appExtProperties.getProperty(Utils.SOCIAL_LOGIN_EMAIL_SUBJECT_PROP));
         apiPostBody.put(Utils.SOCIAL_LOGIN_SPONSOR_EPPN, appExtProperties.getProperty(Utils.SOCIAL_LOGIN_NO_REPLY_EMAIL));
         apiPostBody.put(Utils.SOCIAL_LOGIN_SPONSOR_MAIL, appExtProperties.getProperty(Utils.SOCIAL_LOGIN_NO_REPLY_EMAIL));
         apiPostBody.put(Utils.SOCIAL_LOGIN_SPONSOR_GIVENNAME, "ITS");

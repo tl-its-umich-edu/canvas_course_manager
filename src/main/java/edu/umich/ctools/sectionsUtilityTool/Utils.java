@@ -70,6 +70,7 @@ public class Utils {
 	public static final String SOCIAL_LOGIN_SERVICE_NAME = "serviceName";
 	public static final String SOCIAL_LOGIN_EMAIL_ADDRESS = "emailAddress";
 	public static final String SOCIAL_LOGIN_EMAIL_SUBJECT = "emailSubject";
+	public static final String SOCIAL_LOGIN_EMAIL_SUBJECT_PROP = "social.login.subjectline";
 	public static final String SOCIAL_LOGIN_SPONSOR_EPPN = "sponsorEppn";
 	public static final String SOCIAL_LOGIN_SPONSOR_MAIL = "sponsorMail";
 	public static final String SOCIAL_LOGIN_SPONSOR_GIVENNAME = "sponsorGivenname";
