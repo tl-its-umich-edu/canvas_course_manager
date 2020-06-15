@@ -70,6 +70,8 @@ public class Utils {
 	public static final String SOCIAL_LOGIN_SERVICE_NAME = "serviceName";
 	public static final String SOCIAL_LOGIN_EMAIL_ADDRESS = "emailAddress";
 	public static final String SOCIAL_LOGIN_EMAIL_SUBJECT = "emailSubject";
+	public static final String SOCIAL_LOGIN_EMAIL_DEFAULT_SUBJECT = "University of Michigan Canvas Course Invitation";
+	public static final String SOCIAL_LOGIN_EMAIL_SUBJECT_PROP = "social.login.subjectline";
 	public static final String SOCIAL_LOGIN_SPONSOR_EPPN = "sponsorEppn";
 	public static final String SOCIAL_LOGIN_SPONSOR_MAIL = "sponsorMail";
 	public static final String SOCIAL_LOGIN_SPONSOR_GIVENNAME = "sponsorGivenname";
@@ -86,6 +88,7 @@ public class Utils {
 	protected static final String JSON_PARAM_IMPORTED = "imported";
 	protected static final String SOCIAL_LOGIN_API_SERVICE_PROVIDED_URL = "social.login.service.provider.url";
 	protected static final String SOCIAL_LOGIN_NO_REPLY_EMAIL = "social.login.no.reply.email";
+	protected static final String SOCIAL_LOGIN_DEFAULT_NO_REPLY_EMAIL = "no-reply@umich.edu";
 	protected static final String SOCIAL_LOGIN_API_URL = "social.login.url";
 	protected static final String SOCIAL_LOGIN_API_KEY = "social.login.key";
 	protected static final String SOCIAL_LOGIN_API_SECRET = "social.login.secret";
