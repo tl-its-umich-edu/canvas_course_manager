@@ -20,6 +20,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -107,12 +109,15 @@ public class FriendServlet extends HttpServlet {
             String keySecretStr = String.format("%s:%s", key, secret);
             M_log.info(String.format("Social login guest invitation API Request for user Email: %s Firstname: %s Lastname: %s ", nonUmichEmail, nonUmichEmailFirstName, nonUmichEmailLastName));
             String encoding = Base64.getEncoder().encodeToString((keySecretStr).getBytes());
-            CloseableHttpClient httpclient = HttpClients.createDefault();
+            CloseableHttpClient httpclient= HttpClients.custom()
+                    .setDefaultRequestConfig(RequestConfig.custom()
+                            .setCookieSpec(CookieSpecs.STANDARD).build())
+                    .build();
             HttpPost httpPost = new HttpPost(fullSocialLoginApiUrl);
             httpPost.setHeader("Accept", Utils.APPLICATION_JSON);
             httpPost.setHeader("Content-type", Utils.APPLICATION_JSON);
             httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
-            apiPostBodyStringEntity = socialLoginApiRequestBody(spURL, nonUmichEmail, nonUmichEmailFirstName, nonUmichEmailLastName);
+            apiPostBodyStringEntity = socialLoginApiRequestBody(spURL, nonUmichEmail);
             httpPost.setEntity(apiPostBodyStringEntity);
             HttpResponse res = httpclient.execute(httpPost);
             if (res == null) {
@@ -146,16 +151,19 @@ public class FriendServlet extends HttpServlet {
         M_log.info(String.format("Social login account creation Api response took %sms", elapsedTime));
     }
 
-    private StringEntity socialLoginApiRequestBody(String spURL, String nonUmichEmail, String friendFirstName, String friendLastName) throws UnsupportedEncodingException {
+    private StringEntity socialLoginApiRequestBody(String spURL, String nonUmichEmail) throws UnsupportedEncodingException {
         JSONObject apiPostBody = new JSONObject();
         apiPostBody.put(Utils.SOCIAL_LOGIN_SP_ENTITY_ID, spURL);
         //Legacy required parameter in cirrusAPI will be deprecated in future so need to be part of the API but can be any value
         apiPostBody.put(Utils.SOCIAL_LOGIN_CLIENT_REQUEST_ID, "request001");
         apiPostBody.put(Utils.SOCIAL_LOGIN_SERVICE_NAME, "UMICH Invite");
         apiPostBody.put(Utils.SOCIAL_LOGIN_EMAIL_ADDRESS, nonUmichEmail);
-        apiPostBody.put(Utils.SOCIAL_LOGIN_EMAIL_SUBJECT, appExtProperties.getProperty(Utils.SOCIAL_LOGIN_EMAIL_SUBJECT_PROP));
-        apiPostBody.put(Utils.SOCIAL_LOGIN_SPONSOR_EPPN, appExtProperties.getProperty(Utils.SOCIAL_LOGIN_NO_REPLY_EMAIL));
-        apiPostBody.put(Utils.SOCIAL_LOGIN_SPONSOR_MAIL, appExtProperties.getProperty(Utils.SOCIAL_LOGIN_NO_REPLY_EMAIL));
+        apiPostBody.put(Utils.SOCIAL_LOGIN_EMAIL_SUBJECT,
+                appExtProperties.getProperty(Utils.SOCIAL_LOGIN_EMAIL_SUBJECT_PROP, Utils.SOCIAL_LOGIN_EMAIL_DEFAULT_SUBJECT));
+        apiPostBody.put(Utils.SOCIAL_LOGIN_SPONSOR_EPPN,
+                appExtProperties.getProperty(Utils.SOCIAL_LOGIN_NO_REPLY_EMAIL, Utils.SOCIAL_LOGIN_DEFAULT_NO_REPLY_EMAIL));
+        apiPostBody.put(Utils.SOCIAL_LOGIN_SPONSOR_MAIL,
+                appExtProperties.getProperty(Utils.SOCIAL_LOGIN_NO_REPLY_EMAIL, Utils.SOCIAL_LOGIN_DEFAULT_NO_REPLY_EMAIL));
         apiPostBody.put(Utils.SOCIAL_LOGIN_SPONSOR_GIVENNAME, "ITS");
         apiPostBody.put(Utils.SOCIAL_LOGIN_SPONSOR_SURNAME, "Service Center");
         String apiPostData = apiPostBody.toString();
