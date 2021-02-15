@@ -250,6 +250,17 @@ canvasSupportApp.factory('Friend', function ($http, $rootScope) {
         }
       );
     },
+    updateFriend: function (url) {
+      return $http.put(url).then(
+        function success(result) {
+          return result;
+        },
+        function error(result) {
+          //errorDisplay(url, result.status, 'Unable to create friend');
+          return result;
+        }
+      );
+    },
 
     addFriendToSection: function (url, sectionName, sectionNumber) {
       return $http.post(url).then(
