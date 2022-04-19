@@ -299,3 +299,27 @@ $(document).on('hidden.bs.modal', '#addUserModal', function(){
     $scope.addErrorGeneric = false;
   });
 });
+//cleaning up scope of adding bulk friend panel
+$(document).on('hidden.bs.modal', '#addBulkUserModal', function(){
+  var appElement = $('#addBulkUserModal');
+  var $scope = angular.element(appElement).scope();
+  $scope.$apply(function() {
+    for(var e in $scope.coursemodal.sections) {
+      $scope.coursemodal.sections[e].selected = false;
+    }
+    $scope.newUsersExist = null;
+    $scope.newUsersNotExist = null;
+    $scope.newUsersExistNoName = null;
+    $scope.newUserList = null;
+    $scope.coursemodal.rawUserList='';
+    $scope.bulkfilename=null;
+    $scope.failedValidationList = null;
+    $scope.success = [];
+    $scope.errors = [];
+    $scope.bulkfilename=null;
+    $scope.failedValidationList = null;
+    $scope.inputClass = 'btn btn-primary';
+    $scope.formatProblems =null;
+
+  });
+});
